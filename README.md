@@ -27,14 +27,12 @@ Every IaC module maps to an official Azure Landing Zone design area:
 
 | CAF Design Area | Bicep Module | Terraform Module |
 |-----------------|-------------|-----------------|
-| Billing & Tenant | `billing-and-tenant/` | `billing-and-tenant/` |
-| Identity & Access | `identity-and-access/` | `identity-and-access/` |
-| Resource Organization | `resource-organization/` | `resource-organization/` |
-| Network Topology & Connectivity | `network-topology/` | `network-topology/` |
-| Security | `security/` | `security/` |
-| Management | `management/` | `management/` |
-| Governance | `governance/` | `governance/` |
-| Platform Automation & DevOps | `platform-automation/` | `platform-automation/` |
+| Billing & Tenant | `billing-and-tenant/` | — |
+| Identity & Access | `identity/` | `identity/` |
+| Network Topology & Connectivity | `connectivity/`, `networking/` | `connectivity/`, `networking/` |
+| Security | `security/`, `platform-security/` | `security/`, `platform-security/` |
+| Management | `management/`, `logging/` | `platform-management/`, `logging/` |
+| Governance | `governance/`, `policies/` | `policies/` |
 
 ## Agent Workflow (APEX-Aligned)
 
@@ -108,7 +106,7 @@ Every deployment includes budget alerts — **no budget, no merge**:
 | `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
 | `2-platform-deploy.yml` | Manual | 4 platform LZs in strict order with approval gates |
 | `3-app-deploy.yml` | Manual | Config-driven app LZs from `subscriptions.json` (parallel) |
-| `4-monitor.yml` | Cron + Manual | Compliance, drift detection, auto-remediation (24/7) |
+| `monitor.yml` | Cron + Manual | Compliance, drift detection, auto-remediation (24/7) |
 | `5-pr-validate.yml` | PR to main | Lint, security, cost, tests, what-if preview |
 | `reusable-deploy.yml` | Called by 2 & 3 | DRY: validate → plan → deploy → verify → TDD |
 
@@ -142,7 +140,7 @@ Share the checklist with your networking, security, and identity teams to gather
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.11+ (3.13 recommended)
 - Azure CLI (`az`) authenticated
 - Bicep CLI or Terraform CLI
 - Azure subscription with Owner role
@@ -199,26 +197,51 @@ python scripts/validators/validate_cost_governance.py infra/
 │   │   ├── remediation_agent.py     # 🔧 Mender (auto-fix)
 │   │   └── workflow_engine.py       # DAG workflow engine
 │   ├── tools/                 # Azure SDK integrations
+│   │   ├── bicep_deployer.py        # ARM deployment via SDK
+│   │   ├── terraform_deployer.py    # Terraform CLI wrapper
+│   │   ├── policy_checker.py        # Policy compliance checks
+│   │   ├── resource_graph.py        # Azure Resource Graph queries
+│   │   ├── drift_detector.py        # Configuration drift detection
+│   │   ├── azure_diagram_generator.py # Architecture diagrams
+│   │   └── tdd_generator.py         # Technical Design Documents
 │   └── config/                # Agent and profile configs
+│       ├── settings.py              # pydantic-settings from .env
+│       ├── profile_loader.py        # 3-tier YAML profile inheritance
+│       └── profiles/                # base → child → env overrides
 ├── infra/
 │   ├── bicep/modules/         # Bicep by CAF design area
 │   │   ├── billing-and-tenant/
-│   │   ├── identity-and-access/
-│   │   ├── network-topology/
-│   │   ├── security/
-│   │   ├── management/
+│   │   ├── connectivity/      # hub-spoke, vwan, gateways, private-dns
 │   │   ├── governance/
-│   │   └── platform-automation/
+│   │   ├── identity/
+│   │   ├── logging/
+│   │   ├── management/
+│   │   ├── networking/
+│   │   ├── platform-security/  # sentinel, defender, soar
+│   │   ├── policies/
+│   │   └── security/
 │   └── terraform/modules/     # Terraform by CAF design area
-├── mcp/                       # MCP server configurations
+│       ├── connectivity/
+│       ├── identity/
+│       ├── logging/
+│       ├── networking/
+│       ├── platform-management/
+│       ├── platform-security/
+│       ├── policies/
+│       └── security/
+├── mcp/                       # MCP servers (Python)
 │   ├── mcp-config.json
-│   └── azure-resource-graph/
+│   ├── azure-resource-graph/
+│   ├── azure-policy/
+│   ├── azure-deployment/
+│   ├── azure-monitor/
+│   └── azure-pricing/
 ├── .github/skills/            # Workflow engine DAG
 ├── scripts/validators/        # Security + cost validators
 ├── pipelines/                 # CI/CD (GitHub Actions + ADO)
 ├── docs/                      # Security baseline, cost governance, workflow
-├── agent-output/              # Workflow artifacts per project
-└── tests/                     # Unit + integration tests
+│   └── tdd/                   # Generated Technical Design Documents
+└── tests/                     # 18 tests (deployment, monitoring, remediation)
 ```
 
 ## References

@@ -804,6 +804,9 @@
     <a class="nav-item" onclick="showSection('agents')">
       🤖 Agent Roster <span class="nav-badge">10</span>
     </a>
+    <a class="nav-item" onclick="showSection('tools')">
+      🛠️ Agent Tools <span class="nav-badge">7</span>
+    </a>
 
     <div class="nav-section">Get Started</div>
     <a class="nav-item" onclick="showSection('prereqs')">
@@ -1051,35 +1054,35 @@
         <div class="caf-card">
           <div class="caf-area">Design Area B</div>
           <div class="caf-title">Identity & Access Management</div>
-          <div class="caf-module">identity-and-access/</div>
+          <div class="caf-module">identity/</div>
           <div class="caf-agent">🛡️ <strong>Agents:</strong> Warden, Forge</div>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Entra ID, Managed Identity, RBAC assignments, PIM, conditional access policies.</p>
         </div>
         <div class="caf-card">
           <div class="caf-area">Design Area C</div>
           <div class="caf-title">Resource Organization</div>
-          <div class="caf-module">resource-organization/</div>
+          <div class="caf-module">governance/, policies/</div>
           <div class="caf-agent">🏛️ <strong>Agents:</strong> Oracle, Strategist</div>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Management group hierarchy, subscription vending, resource groups, naming conventions, tagging.</p>
         </div>
         <div class="caf-card">
           <div class="caf-area">Design Area D</div>
           <div class="caf-title">Network Topology & Connectivity</div>
-          <div class="caf-module">network-topology/</div>
+          <div class="caf-module">connectivity/, networking/</div>
           <div class="caf-agent">🏛️ <strong>Agents:</strong> Oracle, Forge</div>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Hub-spoke, VNet, NSG, DDoS protection, Azure Firewall, Private DNS, ExpressRoute/VPN.</p>
         </div>
         <div class="caf-card">
           <div class="caf-area">Design Area E</div>
           <div class="caf-title">Security</div>
-          <div class="caf-module">security/</div>
+          <div class="caf-module">platform-security/, security/</div>
           <div class="caf-agent">🛡️ <strong>Agents:</strong> Warden, Sentinel</div>
-          <p style="font-size:12px;color:var(--muted);margin-top:8px">Defender for Cloud, Microsoft Sentinel, Key Vault, security baseline enforcement, CSPM.</p>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Defender for Cloud, Microsoft Sentinel, Key Vault, security baseline enforcement, SOAR playbooks.</p>
         </div>
         <div class="caf-card">
           <div class="caf-area">Design Area F</div>
           <div class="caf-title">Management</div>
-          <div class="caf-module">management/</div>
+          <div class="caf-module">management/, logging/</div>
           <div class="caf-agent">📚 <strong>Agents:</strong> Chronicler, Sentinel</div>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Log Analytics, Azure Monitor, Automation Account, Update Management, Backup, Action Groups.</p>
         </div>
@@ -1093,7 +1096,7 @@
         <div class="caf-card">
           <div class="caf-area">Design Area H</div>
           <div class="caf-title">Platform Automation & DevOps</div>
-          <div class="caf-module">platform-automation/</div>
+          <div class="caf-module">pipelines/, scripts/</div>
           <div class="caf-agent">🚀 <strong>Agents:</strong> Envoy, Forge</div>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">CI/CD pipelines, GitOps, IaC validation, deployment automation, agent-driven operations.</p>
         </div>
@@ -1195,6 +1198,28 @@
       </div>
     </div>
 
+    <!-- ═══ TOOLS ═══ -->
+    <div id="section-tools" class="section">
+      <div class="section-header">
+        <h2>Agent Tools (src/tools/)</h2>
+        <p>Azure SDK integrations and utilities that agents invoke during workflow execution.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tool</th><th>Module</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Bicep Deployer</strong></td><td><code>bicep_deployer.py</code></td><td>ARM deployment via Azure SDK — what-if analysis + deployment execution</td></tr>
+            <tr><td><strong>Terraform Deployer</strong></td><td><code>terraform_deployer.py</code></td><td>Terraform CLI wrapper — init, plan, apply, destroy with Azure backend</td></tr>
+            <tr><td><strong>Policy Checker</strong></td><td><code>policy_checker.py</code></td><td>Azure Policy compliance checks, violation scanning, effect classification</td></tr>
+            <tr><td><strong>Resource Graph</strong></td><td><code>resource_graph.py</code></td><td>Azure Resource Graph queries for inventory, topology, and drift detection</td></tr>
+            <tr><td><strong>Drift Detector</strong></td><td><code>drift_detector.py</code></td><td>Configuration drift detection by comparing desired vs actual state</td></tr>
+            <tr><td><strong>Diagram Generator</strong></td><td><code>azure_diagram_generator.py</code></td><td>Architecture diagram generation for design documents</td></tr>
+            <tr><td><strong>TDD Generator</strong></td><td><code>tdd_generator.py</code></td><td>Technical Design Document generation with as-built resource details</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ═══ PREREQUISITES ═══ -->
     <div id="section-prereqs" class="section">
       <div class="section-header">
@@ -1206,7 +1231,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px">Required</h3>
           <ul class="checklist">
-            <li><span class="check-icon check-req">✓</span><div><strong>Python 3.11+</strong><br/><span style="color:var(--muted);font-size:12px">Agent framework runs on Python 3.11 or higher</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Python 3.11+ (3.13 recommended)</strong><br/><span style="color:var(--muted);font-size:12px">Agent framework runs on Python 3.11 or higher; 3.13 recommended for full compatibility</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure CLI (az)</strong><br/><span style="color:var(--muted);font-size:12px">Authenticated via <code>az login</code> before running agents</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure Subscription</strong><br/><span style="color:var(--muted);font-size:12px">Owner or Contributor role on the target subscription</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure OpenAI</strong><br/><span style="color:var(--muted);font-size:12px">GPT-4o deployment (or compatible model) for agent intelligence</span></div></li>
@@ -2265,7 +2290,7 @@ Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
 Step 3  1-bootstrap.yml          →  Management groups + subscription placement
 Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
 Step 5  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
-Step 6  4-monitor.yml            →  Continuous compliance + drift detection (24/7)
+Step 6  monitor.yml               →  Continuous compliance + drift detection (24/7)
 Step 7  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</pre>
           <p style="font-size:11px;color:#aaa;margin:8px 0 0 0">All workflows support self-hosted runners via <code style="color:var(--ms-light-blue)">vars.RUNNER_LABEL</code> — defaults to <code style="color:var(--ms-light-blue)">ubuntu-latest</code> if not set.</p>
         </div>
@@ -2277,7 +2302,7 @@ Step 7  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
               <tr><td><strong>1-bootstrap.yml</strong></td><td>Manual (one-time)</td><td>Tenant-wide</td><td>Creates 11 management groups, moves 10 subs, registers 20 providers</td></tr>
               <tr><td><strong>2-platform-deploy.yml</strong></td><td>Manual</td><td>4 platform subs</td><td>Sequential with approval gate per LZ, <code>start_from</code> for resume</td></tr>
               <tr><td><strong>3-app-deploy.yml</strong></td><td>Manual</td><td>Config-driven</td><td>Reads app LZs from <code>subscriptions.json</code>, dynamic matrix, parallel deployment</td></tr>
-              <tr><td><strong>4-monitor.yml</strong></td><td>Cron + Manual</td><td>All 10 subs</td><td>30-min compliance, hourly drift, daily audit, Teams alerts</td></tr>
+              <tr><td><strong>monitor.yml</strong></td><td>Cron + Manual</td><td>All 10 subs</td><td>30-min compliance, hourly drift, daily audit, Teams alerts</td></tr>
               <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
               <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: validate → plan → deploy → verify → TDD; self-hosted runner via <code>runner_label</code> input</td></tr>
             </tbody>
@@ -2671,6 +2696,7 @@ const SECTION_LABELS = {
   architecture: 'Architecture',
   caf: 'CAF Design Areas',
   agents: 'Agent Roster',
+  tools: 'Agent Tools',
   prereqs: 'Prerequisites',
   install: 'Installation',
   config: 'Configuration',

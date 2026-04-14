@@ -397,7 +397,7 @@ Valid profiles: `corp`, `online`, `sandbox`, `sap`
 ├── 1-bootstrap.yml         ← One-time: MG hierarchy + subscription placement + providers
 ├── 2-platform-deploy.yml   ← Sequential: Management → Connectivity → Identity → Security
 ├── 3-app-deploy.yml        ← Parallel: all 6 app LZs (or individual)
-├── 4-monitor.yml           ← Scheduled: compliance (30 min), drift (hourly), audit (daily)
+├── monitor.yml             ← Scheduled: compliance (30 min), drift (hourly), audit (daily)
 ├── 5-pr-validate.yml       ← Automatic: lint, security, cost, tests, what-if on PRs
 └── reusable-deploy.yml     ← Shared: validate → plan → deploy → verify
 ```
@@ -475,7 +475,7 @@ GitHub secret, and run the workflow — no YAML changes required.
 
 #### Step 4: Continuous Monitoring (automatic)
 
-The `4-monitor.yml` workflow runs on schedule:
+The `monitor.yml` workflow runs on schedule:
 
 | Schedule | Scan Type |
 |---|---|

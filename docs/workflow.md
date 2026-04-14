@@ -99,3 +99,37 @@ Agents connect to Azure services via MCP servers:
 | Azure Policy | Policy discovery, compliance checking | Governance, Monitor, Challenger |
 | Azure Deployment | Bicep/Terraform deploy, what-if, status | Deploy, Remediate |
 | Azure Monitor | Secure score, recommendations, activity log | Monitor, Remediate, Chronicler |
+
+## Agent Tools (`src/tools/`)
+
+Agents invoke these Azure SDK integrations during workflow execution:
+
+| Tool | Module | Used By |
+|------|--------|---------|
+| Bicep Deployer | `bicep_deployer.py` | Envoy, Mender |
+| Terraform Deployer | `terraform_deployer.py` | Envoy, Mender |
+| Policy Checker | `policy_checker.py` | Warden, Sentinel |
+| Resource Graph | `resource_graph.py` | Sentinel, Mender, Warden |
+| Drift Detector | `drift_detector.py` | Sentinel |
+| Diagram Generator | `azure_diagram_generator.py` | Artisan, Chronicler |
+| TDD Generator | `tdd_generator.py` | Chronicler |
+
+## Profile Configuration
+
+Agent behavior is governed by a 3-tier YAML profile inheritance system:
+
+1. **Base** (`profiles/base-platform.yaml`) — shared defaults
+2. **Child** (`profiles/platform-{connectivity,identity,management,security}.yaml`) — LZ-specific
+3. **Override** (`profiles/overrides/{dev,prod}/platform-*.yaml`) — environment-specific
+
+See `src/config/profile_loader.py` for the merge logic.
+
+## Test Coverage
+
+18 tests validate agent workflows across 3 test files:
+
+| Test File | Covers |
+|-----------|--------|
+| `test_deployment_agent.py` | Profile loading, what-if, deploy, validation |
+| `test_monitoring_agent.py` | Compliance scan, drift detection, security posture |
+| `test_remediation_agent.py` | Strategies, single/multi remediation, history |
