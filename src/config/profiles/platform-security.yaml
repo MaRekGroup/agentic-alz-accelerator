@@ -1,0 +1,340 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Platform Landing Zone: Security Subscription
+# ─────────────────────────────────────────────────────────────────────────────
+# Purpose : Centralized security operations, threat detection, vulnerability
+#           management, and security posture governance for the entire Azure
+#           estate. Dedicated Security subscription — separate from Management
+#           to enforce separation of duties between Ops and SecOps teams.
+#
+# CAF Ref : https://learn.microsoft.com/azure/cloud-adoption-framework/ready/
+#           landing-zone/design-area/security
+#
+# Deploy  : After platform-management (depends on central Log Analytics).
+#           Deploys its own Sentinel workspace OR links to management workspace.
+#
+# Inherits: base-platform  (only overrides are listed below)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_meta:
+  profile_type: platform
+  inherits: base-platform
+  subscription_purpose: security
+  version: "2.0"
+  caf_design_areas:
+    - security
+    - governance
+    - identity-and-access
+    - management
+  description: >
+    Dedicated security subscription — Microsoft Sentinel (security-dedicated
+    workspace), Microsoft Defender for Cloud (all plans), vulnerability
+    management, security automation (SOAR playbooks), threat intelligence, and
+    security posture dashboards. Enforces strict separation of duties: SecOps
+    team manages this subscription independently from platform operations.
+
+# ─── Resource Organization ────────────────────────────────────────────────────
+resource_organization:
+  management_group: "Platform"
+  subscription_purpose: security
+  resource_groups:
+    - name: "{prefix}-sec-soc-{region}-rg"
+      purpose: security_operations
+      resources:
+        - sentinel_workspace
+        - sentinel_playbooks
+        - threat_intelligence
+        - watchlists
+    - name: "{prefix}-sec-posture-{region}-rg"
+      purpose: security_posture
+      resources:
+        - defender_for_cloud
+        - vulnerability_assessments
+        - regulatory_compliance
+        - secure_score_dashboards
+    - name: "{prefix}-sec-automation-{region}-rg"
+      purpose: security_automation
+      resources:
+        - logic_apps_soar
+        - automation_account
+        - key_vault
+        - managed_identity
+    - name: "{prefix}-sec-governance-{region}-rg"
+      purpose: security_governance
+      resources:
+        - policy_definitions
+        - policy_exemptions
+        - compliance_workbooks
+
+# ─── Networking ───────────────────────────────────────────────────────────────
+networking:
+  deploy_hub: false                 # Uses connectivity subscription hub
+  vnet:
+    enabled: true
+    address_space: "10.101.0.0/24" # Small — security VNet for automation runners
+    subnets:
+      - name: "security-automation"
+        address_prefix: "10.101.0.0/26"
+        nsg: true
+        service_endpoints:
+          - "Microsoft.KeyVault"
+          - "Microsoft.Storage"
+          - "Microsoft.EventHub"
+        private_endpoint_enabled: true
+      - name: "AzureBastionSubnet"
+        address_prefix: "10.101.0.64/26"
+        nsg: false                  # Bastion subnet cannot have NSG
+  ddos_protection: false            # Security subscription uses connectivity plan
+  peer_to_connectivity_hub: true
+  private_endpoints:
+    - resource: key_vault
+      subnet: security-automation
+    - resource: sentinel_workspace
+      subnet: security-automation
+
+# ─── Identity & Access (Separation of Duties) ────────────────────────────────
+identity:
+  managed_identity:
+    enabled: true
+    type: "SystemAssigned"
+  # Dedicated service principal for SOAR automation
+  soar_identity:
+    enabled: true
+    type: "UserAssigned"
+    name: "{prefix}-sec-soar-mi"
+  rbac:
+    # SecOps gets Sentinel Contributor — NOT Subscription Contributor
+    - role: "Microsoft Sentinel Contributor"
+      scope: "resource_group/{prefix}-sec-soc-{region}-rg"
+      principal_type: "group"
+      description: "SOC analysts — full Sentinel access"
+    - role: "Microsoft Sentinel Reader"
+      scope: "resource_group/{prefix}-sec-soc-{region}-rg"
+      principal_type: "group"
+      description: "Security auditors — read-only Sentinel access"
+    - role: "Security Reader"
+      scope: "subscription"
+      principal_type: "group"
+      description: "Defender for Cloud read-only across all subscriptions"
+    - role: "Security Admin"
+      scope: "resource_group/{prefix}-sec-posture-{region}-rg"
+      principal_type: "group"
+      description: "Defender for Cloud management (posture team)"
+    - role: "Logic App Contributor"
+      scope: "resource_group/{prefix}-sec-automation-{region}-rg"
+      principal_type: "group"
+      description: "SOAR playbook authors"
+  entra_id:
+    conditional_access: true
+    pim_enabled: true
+    pim_roles:
+      - role: "Security Administrator"
+        max_duration_hours: 2
+        require_mfa: true
+        require_justification: true
+      - role: "Microsoft Sentinel Contributor"
+        max_duration_hours: 4
+        require_mfa: true
+        require_justification: true
+
+# ─── Security ─────────────────────────────────────────────────────────────────
+security:
+  # Microsoft Defender for Cloud — ALL plans enabled in security subscription
+  defender_for_cloud:
+    enabled: true
+    plans:
+      - "VirtualMachines"
+      - "SqlServers"
+      - "AppServices"
+      - "Storage"
+      - "KeyVaults"
+      - "Dns"
+      - "Arm"
+      - "Containers"
+      - "OpenSourceRelationalDatabases"
+      - "SqlServerVirtualMachines"
+      - "CosmosDbs"
+      - "Api"
+    auto_provisioning: true
+    mde_integration: true           # Microsoft Defender for Endpoint (unified)
+    export_to_log_analytics: true
+    export_to_event_hub: false      # Enable if SIEM integration needed
+    security_contacts:
+      email: ""                     # Set in environment override
+      alert_notifications: true
+      alerts_to_admins: true
+      alert_severity: ["High", "Medium"]
+    vulnerability_assessment:
+      provider: "MicrosoftDefender" # or "Qualys"
+      auto_assign: true
+    regulatory_compliance:
+      standards:
+        - "Azure CIS 2.0.0"
+        - "Azure Security Benchmark v3"
+        - "NIST SP 800-53 Rev. 5"
+        - "ISO 27001:2013"
+        - "SOC 2 Type 2"
+
+  # Microsoft Sentinel — security-dedicated workspace (separate from management)
+  sentinel:
+    enabled: true
+    workspace_mode: "dedicated"     # dedicated | linked (links to management workspace)
+    workspace_name: "{prefix}-sec-sentinel-law"
+    retention_days: 730             # 2-year retention for compliance
+    data_connectors:
+      - name: "AzureActiveDirectory"
+        enabled: true
+      - name: "AzureActivity"
+        enabled: true
+      - name: "AzureSecurityCenter"
+        enabled: true
+      - name: "MicrosoftDefenderAdvancedThreatProtection"
+        enabled: true
+      - name: "Office365"
+        enabled: true
+      - name: "ThreatIntelligencePlatforms"
+        enabled: true
+      - name: "MicrosoftCloudAppSecurity"
+        enabled: true
+      - name: "AzureFirewall"
+        enabled: true
+      - name: "DNSLogs"
+        enabled: true
+      - name: "AzureKeyVault"
+        enabled: true
+    analytics_rules:
+      built_in_severity: ["High", "Medium", "Low"]
+      fusion_enabled: true          # AI-powered multi-stage attack detection
+      ml_behavior_analytics: true
+    automation_rules:
+      - name: "auto-close-false-positives"
+        trigger: "incident_created"
+        condition: "tactics == 'Discovery' AND confidence < 50"
+        action: "close_incident"
+    watchlists:
+      - name: "HighValueAssets"
+        description: "Crown jewel assets for priority alerting"
+      - name: "TrustedIPRanges"
+        description: "Corporate egress and VPN IP ranges"
+      - name: "ServiceAccounts"
+        description: "Non-human identities for anomaly baselining"
+    threat_intelligence:
+      enabled: true
+      feed: "MicrosoftDefender"     # Built-in Microsoft TI feed
+      stix_taxii: false             # Set to true + configure for external feeds
+
+  # SOAR — automated response playbooks
+  soar:
+    enabled: true
+    playbooks:
+      - name: "Block-SuspiciousIP"
+        trigger: "sentinel_incident"
+        actions:
+          - "add_ip_to_firewall_deny_list"
+          - "notify_soc_team"
+        requires_approval: false
+      - name: "Isolate-CompromisedVM"
+        trigger: "sentinel_incident"
+        actions:
+          - "apply_isolate_nsg_to_vm"
+          - "capture_vm_disk_snapshot"
+          - "notify_soc_team"
+          - "create_servicenow_ticket"
+        requires_approval: true     # Human-in-the-loop for VM isolation
+      - name: "Revoke-EntraIDSession"
+        trigger: "sentinel_incident"
+        actions:
+          - "revoke_user_sessions"
+          - "force_mfa_registration"
+          - "notify_user_manager"
+        requires_approval: false
+      - name: "Enrich-IncidentWithThreatIntel"
+        trigger: "sentinel_incident"
+        actions:
+          - "query_threat_intelligence"
+          - "update_incident_entities"
+        requires_approval: false
+
+  # Key Vault — dedicated for security secrets (separate from identity KV)
+  key_vault:
+    enabled: true
+    name: "{prefix}-sec-kv"
+    soft_delete_retention_days: 90
+    purge_protection: true
+    public_network_access: false
+    rbac_authorization: true
+    secrets:
+      - "sentinel-workspace-key"
+      - "soar-service-principal-secret"
+      - "threat-intel-api-key"
+
+# ─── Management / Logging ─────────────────────────────────────────────────────
+management:
+  log_analytics:
+    enabled: true
+    name: "{prefix}-sec-sentinel-law"
+    sku: "PerGB2018"
+    retention_days: 730             # 2 years — security compliance requirement
+    daily_quota_gb: null            # No cap on security workspace
+    solutions:
+      - "SecurityInsights"          # Microsoft Sentinel
+      - "Security"                  # Defender for Cloud
+      - "AzureActivity"
+      - "NetworkMonitoring"
+
+  # Forward all security alerts and audit logs to management workspace too
+  cross_workspace_forwarding:
+    enabled: true
+    destination: "management_log_analytics_workspace"  # Resolved at deploy time
+    tables_to_forward:
+      - "SecurityAlert"
+      - "SecurityEvent"
+      - "AuditLogs"
+      - "SigninLogs"
+
+  automation_account:
+    enabled: true
+    name: "{prefix}-sec-automation"
+    sku: "Basic"
+    linked_to_log_analytics: true
+    runbooks:
+      - name: "Invoke-SecurityBaseline-Check"
+        type: "PowerShell"
+        description: "Validate 6-rule security baseline across all subscriptions"
+      - name: "Export-SecurityPosture-Report"
+        type: "PowerShell"
+        description: "Weekly Defender for Cloud secure score export"
+
+  diagnostic_settings:
+    activity_log: true
+    resource_logs: true
+    metrics: true
+    aad_audit_logs: true
+    aad_signin_logs: true           # Critical for SecOps visibility
+
+# ─── Governance ───────────────────────────────────────────────────────────────
+governance:
+  policy_initiatives:
+    - "Azure Security Benchmark v3"
+    - "NIST SP 800-53 Rev. 5"
+    - "ISO 27001:2013"
+    - "CIS Microsoft Azure Foundations Benchmark 2.0"
+  custom_policies:
+    - "require-sentinel-data-connector"
+    - "enforce-mde-onboarding"
+    - "deny-public-network-access-security-resources"
+    - "require-diagnostic-settings-security"
+    - "enforce-key-vault-private-endpoint"
+    - "require-managed-identity-soar"
+  # Security-specific deny policies (strict)
+  deny_policies:
+    - name: "deny-public-ip-in-security-subscription"
+      description: "No public IPs allowed in the security subscription"
+      effect: "Deny"
+    - name: "deny-non-approved-vm-images"
+      description: "Only hardened images allowed for security automation VMs"
+      effect: "Deny"
+    - name: "require-encryption-in-transit"
+      description: "All services must use TLS 1.2 or higher"
+      effect: "Deny"
+  budget:
+    amount_usd: null                # REQUIRED — set in environment override

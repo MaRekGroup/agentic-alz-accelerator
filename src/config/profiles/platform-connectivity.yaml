@@ -1,0 +1,202 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Platform Landing Zone: Connectivity Subscription
+# ─────────────────────────────────────────────────────────────────────────────
+# Purpose : Hub networking — Azure Firewall (or vWAN), ExpressRoute/VPN Gateway,
+#           Private DNS Zones, DDoS protection, and spoke peering.
+#           All application landing zones peer to this hub.
+#
+# CAF Ref : https://learn.microsoft.com/azure/cloud-adoption-framework/ready/
+#           landing-zone/design-area/network-topology-and-connectivity
+#
+# Topology : Selectable — "hub-spoke" or "vwan"
+#   hub-spoke : Azure Firewall Premium in a hub VNet, forced tunnelling to spokes
+#   vwan      : Azure Virtual WAN hub(s) per region, integrated Firewall + Gateway
+#
+# Inherits: base-platform
+# ─────────────────────────────────────────────────────────────────────────────
+
+_meta:
+  profile_type: platform
+  inherits: base-platform
+  subscription_purpose: connectivity
+  description: >
+    Hub networking subscription — Azure Firewall, ExpressRoute/VPN Gateway,
+    Private DNS Zones, DDoS protection plan, and spoke peering management.
+    Supports hub-spoke and Azure Virtual WAN topologies.
+
+# ─── Resource Organization ────────────────────────────────────────────────────
+resource_organization:
+  management_group: "Platform"
+  subscription_purpose: connectivity
+  resource_groups:
+    - name: "{prefix}-conn-hub-{region}-rg"
+      purpose: hub_networking
+      resources: [vnet_hub, azure_firewall, firewall_policy, bastion]
+    - name: "{prefix}-conn-gateways-{region}-rg"
+      purpose: gateways
+      resources: [expressroute_gateway, vpn_gateway, local_network_gateways]
+    - name: "{prefix}-conn-dns-{region}-rg"
+      purpose: private_dns
+      resources: [private_dns_zones, dns_resolver]
+    - name: "{prefix}-conn-ddos-rg"
+      purpose: ddos
+      resources: [ddos_protection_plan]      # Region-agnostic, one per tenant
+
+# ─── Hub Topology ─────────────────────────────────────────────────────────────
+# Set hub_topology: "hub-spoke" or "vwan"
+# Both options are fully supported. Use environment overrides to select per region.
+# ─────────────────────────────────────────────────────────────────────────────
+networking:
+  hub_topology: "hub-spoke"        # OVERRIDE: "hub-spoke" | "vwan"
+  deploy_hub: true
+
+  # ── Hub-Spoke configuration (active when hub_topology = "hub-spoke") ───────
+  hub_spoke:
+    hub_vnet:
+      address_space: "10.0.0.0/16"   # Override with your address plan
+      subnets:
+        - name: "AzureFirewallSubnet"
+          address_prefix: "10.0.0.0/26"    # /26 minimum for Azure Firewall
+        - name: "AzureFirewallManagementSubnet"
+          address_prefix: "10.0.0.64/26"   # Required for forced tunnelling
+        - name: "GatewaySubnet"
+          address_prefix: "10.0.1.0/27"    # /27 minimum for Gateway
+        - name: "AzureBastionSubnet"
+          address_prefix: "10.0.2.0/26"    # /26 minimum for Bastion
+        - name: "dns-resolver-inbound"
+          address_prefix: "10.0.3.0/28"
+          delegations: ["Microsoft.Network/dnsResolvers"]
+        - name: "dns-resolver-outbound"
+          address_prefix: "10.0.3.16/28"
+          delegations: ["Microsoft.Network/dnsResolvers"]
+
+    azure_firewall:
+      enabled: true
+      sku_tier: "Premium"           # OVERRIDE: "Standard" | "Premium"
+      threat_intel_mode: "Deny"
+      dns_proxy: true
+      forced_tunnelling: false      # Set true if you have on-prem default route
+      availability_zones: ["1", "2", "3"]
+      firewall_policy:
+        intrusion_detection: "Deny" # Premium only
+        tls_inspection: true        # Premium only
+        rule_collections:
+          - name: "allow-azure-services"
+            priority: 100
+            action: "Allow"
+
+    expressroute_gateway:
+      enabled: false               # OVERRIDE: true if you have ExpressRoute
+      sku: "ErGw1AZ"               # ErGw1AZ | ErGw2AZ | ErGw3AZ (AZ = zone-redundant)
+      circuits: []                 # Add circuit resource IDs
+
+    vpn_gateway:
+      enabled: false               # OVERRIDE: true if you have site-to-site VPN
+      sku: "VpnGw2AZ"              # VpnGw1AZ | VpnGw2AZ | VpnGw3AZ
+      generation: "Generation2"
+      active_active: true
+      bgp: true
+      local_network_gateways: []   # Add on-prem gateway configs
+
+    bastion:
+      enabled: true
+      sku: "Standard"              # Basic | Standard
+      scale_units: 2
+
+  # ── Azure Virtual WAN configuration (active when hub_topology = "vwan") ────
+  vwan:
+    type: "Standard"               # Basic | Standard
+    hubs:                          # One entry per region
+      - location: "eastus2"
+        hub_address_prefix: "10.200.0.0/23"
+        sku: "Standard"
+        expressroute_gateway:
+          enabled: false
+          scale_units: 1
+        vpn_gateway:
+          enabled: false
+          scale_units: 1
+        azure_firewall:
+          enabled: true
+          sku_tier: "Premium"
+          firewall_policy_id: null  # Set to existing policy ID or leave null
+      # Add more hubs for additional regions:
+      # - location: "westeurope"
+      #   hub_address_prefix: "10.201.0.0/23"
+      #   ...
+
+  # ── Shared networking (both topologies) ────────────────────────────────────
+  ddos_protection:
+    enabled: true
+    plan_name: "{prefix}-ddos-plan"
+
+  private_dns_zones:
+    enabled: true
+    auto_registration: false
+    zones:
+      # Core Azure services
+      - "privatelink.database.windows.net"
+      - "privatelink.sql.database.windows.net"
+      - "privatelink.blob.core.windows.net"
+      - "privatelink.file.core.windows.net"
+      - "privatelink.queue.core.windows.net"
+      - "privatelink.table.core.windows.net"
+      - "privatelink.dfs.core.windows.net"
+      - "privatelink.vaultcore.azure.net"
+      - "privatelink.azurewebsites.net"
+      - "privatelink.azuresynapse.net"
+      - "privatelink.azurecr.io"
+      - "privatelink.servicebus.windows.net"
+      - "privatelink.eventgrid.azure.net"
+      - "privatelink.azure-api.net"
+      - "privatelink.search.windows.net"
+      - "privatelink.cognitiveservices.azure.com"
+      - "privatelink.openai.azure.com"
+      - "privatelink.monitor.azure.com"
+      - "privatelink.ods.opinsights.azure.com"
+      - "privatelink.oms.opinsights.azure.com"
+    link_to_spokes: true           # Auto-link new spoke VNets
+
+  dns_resolver:
+    enabled: true                  # Azure Private DNS Resolver
+    inbound_endpoint: true
+    outbound_endpoint: true
+    forwarding_rules:
+      - domain: "corp.contoso.com"   # Override with your on-prem domain
+        dns_servers: []              # Set to on-prem DNS server IPs
+
+# ─── Security ────────────────────────────────────────────────────────────────
+security:
+  defender_for_cloud:
+    enabled: true
+    plans:
+      - "Dns"
+      - "Arm"
+      - "VirtualMachines"
+    export_to_log_analytics: true
+    workspace_id: null             # Set to management subscription workspace ID
+  sentinel: false                  # Sentinel runs in management subscription
+
+# ─── Management / Logging ─────────────────────────────────────────────────────
+management:
+  log_analytics:
+    enabled: false                 # Connectivity uses management subscription workspace
+    workspace_id: null             # Set to management subscription workspace ID
+  diagnostic_settings:
+    activity_log: true
+    resource_logs: true
+    metrics: true
+    firewall_logs: true
+    gateway_logs: true
+
+# ─── Governance ───────────────────────────────────────────────────────────────
+governance:
+  policy_initiatives:
+    - "Azure Security Benchmark"
+  custom_policies:
+    - "deny-vnet-peering-to-non-hub"     # Prevent spoke-to-spoke peering bypass
+    - "enforce-azure-firewall-policy"    # Require Firewall Policy (not classic rules)
+    - "deny-public-ip-in-connectivity"   # No public IPs except Bastion/Firewall/Gateway
+    - "require-nsg-on-subnets"
+  budget:
+    amount_usd: null               # Set in environment override

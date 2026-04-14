@@ -1,0 +1,39 @@
+# Environment Override: platform-connectivity — Development
+# Minimal configuration — no ExpressRoute, no DDoS, smaller firewall SKU.
+
+naming:
+  prefix: "contoso-dev"
+
+networking:
+  hub_topology: "hub-spoke"
+  hub_spoke:
+    hub_vnet:
+      address_space: "10.10.0.0/16"   # Non-overlapping with prod
+    azure_firewall:
+      sku_tier: "Standard"             # Standard is cheaper for dev
+      availability_zones: []           # No zone redundancy needed in dev
+    expressroute_gateway:
+      enabled: false
+    vpn_gateway:
+      enabled: false
+    bastion:
+      sku: "Basic"
+  ddos_protection:
+    enabled: false                     # DDoS costs ~$2.5k/month — skip in dev
+
+governance:
+  budget:
+    amount_usd: 2000
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production Override — Platform Security Landing Zone
+# ─────────────────────────────────────────────────────────────────────────────
+# Deep-merged over platform-security.yaml for production deployments.
+# Only specify what differs from the base profile.
+# ─────────────────────────────────────────────────────────────────────────────
+
+naming:
+  prefix: "contoso"
+
+security:
+  defender_for_cloud:
+    security_contacts:
+      email: "secops@contoso.com"
+      alert_severity: ["High", "Medium", "Low"]
+    regulatory_compliance:
+      standards:
+        - "Azure CIS 2.0.0"
+        - "Azure Security Benchmark v3"
+        - "NIST SP 800-53 Rev. 5"
+        - "ISO 27001:2013"
+        - "SOC 2 Type 2"
+        - "PCI DSS 4.0"            # Add PCI DSS for production
+
+  sentinel:
+    retention_days: 730            # 2-year retention enforced in prod
+    workspace_mode: "dedicated"    # Security subscription has its own workspace
+    threat_intelligence:
+      enabled: true
+      stix_taxii: true             # Enable external STIX/TAXII feeds in prod
+      taxii_servers:
+        - name: "MSTIC"
+          url: "https://cti.microsoft.com/taxii/"
+
+  soar:
+    playbooks:
+      - name: "Block-SuspiciousIP"
+        requires_approval: false
+      - name: "Isolate-CompromisedVM"
+        requires_approval: true    # Always require human approval in prod
+      - name: "Revoke-EntraIDSession"
+        requires_approval: true    # Require approval in prod (user impact)
+      - name: "Enrich-IncidentWithThreatIntel"
+        requires_approval: false
+
+management:
+  log_analytics:
+    retention_days: 730
+    daily_quota_gb: null           # Uncapped in production
+
+governance:
+  budget:
+    enabled: true
+    amount_usd: 8000               # Security subscription: $8,000/month in prod
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["secops@contoso.com", "platform-team@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["secops@contoso.com", "platform-team@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["secops@contoso.com", "platform-team@contoso.com", "cto@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"          # Or "terraform" — set per org preference
+  what_if_required: true
+  post_deploy_validation: true

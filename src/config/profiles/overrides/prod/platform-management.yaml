@@ -1,0 +1,48 @@
+# Environment Override: platform-management — Production
+
+naming:
+  prefix: "contoso"
+
+management:
+  log_analytics:
+    retention_days: 730            # 2-year retention for prod compliance
+    daily_quota_gb: null
+  update_management:
+    schedules:
+      - name: "weekly-critical-updates"
+        frequency: "Week"
+        day_of_week: "Saturday"
+        start_time: "01:00"
+        patch_classifications: ["Critical", "Security"]
+      - name: "monthly-all-updates"
+        frequency: "Month"
+        day_of_month: 15
+        start_time: "02:00"
+        patch_classifications: ["Critical", "Security", "UpdateRollup", "Definition"]
+
+security:
+  defender_for_cloud:
+    security_contacts:
+      email: "soc@contoso.com"
+      alert_notifications: true
+      alerts_to_admins: true
+  sentinel:
+    analytics_rules:
+      built_in_severity: ["High", "Medium", "Low"]
+
+governance:
+  budget:
+    amount_usd: 8000
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com", "finops@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com", "finops@contoso.com", "cto@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

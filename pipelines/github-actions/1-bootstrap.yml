@@ -1,0 +1,80 @@
+name: "1 - Bootstrap: Management Groups & Subscriptions"
+
+on:
+  workflow_dispatch:
+    inputs:
+      prefix:
+        description: "Management group prefix (e.g., alz)"
+        required: true
+        type: string
+        default: "alz"
+      parent_management_group_id:
+        description: "Parent management group ID (leave empty for Tenant Root)"
+        required: false
+        type: string
+        default: ""
+      action:
+        description: "Deployment Action"
+        required: true
+        type: choice
+        options:
+          - plan
+          - deploy
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MANAGEMENT_SUBSCRIPTION_ID }}
+
+jobs:
+  bootstrap:
+    name: Bootstrap Management Group Hierarchy
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: platform-management
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MANAGEMENT_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Validate Template
+        run: |
+          az bicep build --file infra/bicep/modules/billing-and-tenant/main.bicep
+
+      - name: What-If Analysis
+        if: inputs.action == 'plan'
+        run: |
+          az deployment mg what-if \
+            --management-group-id "${{ inputs.parent_management_group_id || tenant().tenantId }}" \
+            --location eastus2 \
+            --template-file infra/bicep/modules/billing-and-tenant/main.bicep \
+            --parameters prefix=${{ inputs.prefix }} \
+            --parameters parentManagementGroupId="${{ inputs.parent_management_group_id }}"
+
+      - name: Deploy Management Group Hierarchy
+        if: inputs.action == 'deploy'
+        run: |
+          az deployment mg create \
+            --management-group-id "${{ inputs.parent_management_group_id || tenant().tenantId }}" \
+            --location eastus2 \
+            --template-file infra/bicep/modules/billing-and-tenant/main.bicep \
+            --parameters prefix=${{ inputs.prefix }} \
+            --parameters parentManagementGroupId="${{ inputs.parent_management_group_id }}" \
+            --name "bootstrap-$(date +%Y%m%d%H%M%S)"
+
+      - name: Verify Hierarchy
+        if: inputs.action == 'deploy'
+        run: |
+          echo "Verifying management group hierarchy..."
+          az account management-group list --query "[?starts_with(name, '${{ inputs.prefix }}')]" -o table

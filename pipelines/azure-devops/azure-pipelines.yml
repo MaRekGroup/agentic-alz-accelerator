@@ -1,0 +1,219 @@
+# Azure Landing Zone Accelerator - Azure DevOps Pipeline
+
+trigger: none
+
+parameters:
+  - name: profile
+    displayName: 'Landing Zone Profile'
+    type: string
+    default: 'corp'
+    values: ['online', 'corp', 'sandbox', 'sap']
+
+  - name: framework
+    displayName: 'IaC Framework'
+    type: string
+    default: 'bicep'
+    values: ['bicep', 'terraform']
+
+  - name: environment
+    displayName: 'Target Environment'
+    type: string
+    default: 'dev'
+    values: ['dev', 'prod']
+
+  - name: action
+    displayName: 'Deployment Action'
+    type: string
+    default: 'plan'
+    values: ['plan', 'deploy']
+
+variables:
+  - group: alz-accelerator-${{ parameters.environment }}
+  - name: azureServiceConnection
+    value: 'alz-service-connection'
+
+stages:
+  # ===========================================================================
+  # Stage 1: Validate
+  # ===========================================================================
+  - stage: Validate
+    displayName: 'Validate Configuration'
+    jobs:
+      - job: ValidateConfig
+        displayName: 'Validate Profile & Templates'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+
+          - script: |
+              python -c "
+              import yaml
+              with open('src/config/landing_zone_profiles.yaml') as f:
+                  profiles = yaml.safe_load(f)
+              assert '${{ parameters.profile }}' in profiles['profiles']
+              print('✅ Profile validated: ${{ parameters.profile }}')
+              "
+            displayName: 'Validate Profile'
+
+          - ${{ if eq(parameters.framework, 'bicep') }}:
+            - task: AzureCLI@2
+              displayName: 'Validate Bicep'
+              inputs:
+                azureSubscription: $(azureServiceConnection)
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az bicep build --file infra/bicep/main.bicep
+                  echo "✅ Bicep validated"
+
+          - ${{ if eq(parameters.framework, 'terraform') }}:
+            - script: |
+                cd infra/terraform
+                terraform init -backend=false
+                terraform validate
+                echo "✅ Terraform validated"
+              displayName: 'Validate Terraform'
+
+  # ===========================================================================
+  # Stage 2: Plan / What-If
+  # ===========================================================================
+  - stage: Plan
+    displayName: 'Preview Changes'
+    dependsOn: Validate
+    jobs:
+      - job: PlanChanges
+        displayName: 'Generate Execution Plan'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Azure Login'
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: echo "Logged in successfully"
+
+          - ${{ if eq(parameters.framework, 'bicep') }}:
+            - task: AzureCLI@2
+              displayName: 'Bicep What-If'
+              inputs:
+                azureSubscription: $(azureServiceConnection)
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az deployment sub what-if \
+                    --location eastus2 \
+                    --template-file infra/bicep/main.bicep \
+                    --parameters profileName=${{ parameters.profile }}
+
+          - ${{ if eq(parameters.framework, 'terraform') }}:
+            - script: |
+                cd infra/terraform
+                terraform init \
+                  -backend-config="storage_account_name=$(tfStateStorageAccount)" \
+                  -backend-config="container_name=tfstate" \
+                  -backend-config="key=${{ parameters.environment }}.terraform.tfstate"
+                terraform plan \
+                  -var-file="environments/${{ parameters.environment }}/terraform.tfvars" \
+                  -var="subscription_id=$(AZURE_SUBSCRIPTION_ID)" \
+                  -out=tfplan
+              displayName: 'Terraform Plan'
+
+  # ===========================================================================
+  # Stage 3: Deploy
+  # ===========================================================================
+  - stage: Deploy
+    displayName: 'Deploy Landing Zone'
+    dependsOn: Plan
+    condition: and(succeeded(), eq('${{ parameters.action }}', 'deploy'))
+    jobs:
+      - deployment: DeployLandingZone
+        displayName: 'Deploy ${{ parameters.profile }} Landing Zone'
+        environment: '${{ parameters.environment }}'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - ${{ if eq(parameters.framework, 'bicep') }}:
+                  - task: AzureCLI@2
+                    displayName: 'Deploy with Bicep'
+                    inputs:
+                      azureSubscription: $(azureServiceConnection)
+                      scriptType: 'bash'
+                      scriptLocation: 'inlineScript'
+                      inlineScript: |
+                        az deployment sub create \
+                          --location eastus2 \
+                          --template-file infra/bicep/main.bicep \
+                          --parameters profileName=${{ parameters.profile }} \
+                          --name "alz-${{ parameters.profile }}-$(Build.BuildId)"
+
+                - ${{ if eq(parameters.framework, 'terraform') }}:
+                  - script: |
+                      cd infra/terraform
+                      terraform init \
+                        -backend-config="storage_account_name=$(tfStateStorageAccount)" \
+                        -backend-config="container_name=tfstate" \
+                        -backend-config="key=${{ parameters.environment }}.terraform.tfstate"
+                      terraform apply -auto-approve \
+                        -var-file="environments/${{ parameters.environment }}/terraform.tfvars" \
+                        -var="subscription_id=$(AZURE_SUBSCRIPTION_ID)"
+                    displayName: 'Deploy with Terraform'
+
+  # ===========================================================================
+  # Stage 4: Post-Deployment Validation
+  # ===========================================================================
+  - stage: Validate_Deployment
+    displayName: 'Validate Deployment'
+    dependsOn: Deploy
+    condition: succeeded()
+    jobs:
+      - job: PostValidation
+        displayName: 'Run Post-Deployment Checks'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+
+          - script: pip install -r requirements.txt
+            displayName: 'Install Dependencies'
+
+          - task: AzureCLI@2
+            displayName: 'Validate Landing Zone'
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                python -c "
+                import asyncio, json
+                from src.agents.monitoring_agent import MonitoringAgent
+                from src.config.settings import Settings
+                from azure.identity import DefaultAzureCredential
+                from semantic_kernel import Kernel
+
+                async def main():
+                    settings = Settings()
+                    kernel = Kernel()
+                    agent = MonitoringAgent(kernel, DefaultAzureCredential(), settings)
+                    result = await agent.run_compliance_scan()
+                    print(json.dumps(result['summary'], indent=2))
+
+                    pct = result['summary']['compliance_percentage']
+                    if pct < 80:
+                        print(f'⚠️ Compliance below threshold: {pct:.1f}%')
+                        exit(1)
+                    print(f'✅ Compliance: {pct:.1f}%')
+
+                asyncio.run(main())
+                "

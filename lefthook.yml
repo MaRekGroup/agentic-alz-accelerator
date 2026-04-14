@@ -1,0 +1,59 @@
+# Lefthook hooks — enforce quality gates at commit time
+# Based on APEX validation architecture pattern
+
+pre-commit:
+  parallel: true
+  commands:
+    security-baseline:
+      glob: "*.{bicep,tf}"
+      run: python scripts/validators/validate_security_baseline.py {staged_files}
+      fail_text: "Security baseline violations detected — fix before committing"
+
+    cost-governance:
+      glob: "*.{bicep,tf}"
+      run: python scripts/validators/validate_cost_governance.py {staged_files}
+      fail_text: "Cost governance violations detected — budget alerts required"
+
+    terraform-fmt:
+      glob: "*.tf"
+      run: terraform fmt -check -diff {staged_files}
+      fail_text: "Terraform files not formatted — run 'terraform fmt'"
+
+    terraform-validate:
+      glob: "*.tf"
+      run: |
+        for dir in $(find infra/terraform -name "*.tf" -exec dirname {} \; | sort -u); do
+          cd "$dir" && terraform validate && cd -
+        done
+      fail_text: "Terraform validation failed"
+
+    python-lint:
+      glob: "*.py"
+      run: ruff check {staged_files}
+      fail_text: "Python lint errors — run 'ruff check --fix'"
+
+    yaml-lint:
+      glob: "*.{yml,yaml}"
+      run: yamllint -c .yamllint.yml {staged_files}
+      fail_text: "YAML lint errors"
+
+commit-msg:
+  commands:
+    conventional-commit:
+      run: npx commitlint --edit {1}
+      fail_text: "Commit message must follow Conventional Commits format"
+
+pre-push:
+  parallel: true
+  commands:
+    full-security-scan:
+      run: python scripts/validators/validate_security_baseline.py infra/
+      fail_text: "Security baseline violations in infra/"
+
+    full-cost-scan:
+      run: python scripts/validators/validate_cost_governance.py infra/
+      fail_text: "Cost governance violations in infra/"
+
+    unit-tests:
+      run: pytest tests/ -v --tb=short
+      fail_text: "Unit tests failed"

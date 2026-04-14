@@ -1,0 +1,226 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Platform Landing Zone: Identity Subscription
+# ─────────────────────────────────────────────────────────────────────────────
+# Purpose : Active Directory Domain Services (AD DS) domain controllers,
+#           Azure AD Domain Services (AAD DS), or identity proxy VMs.
+#           Required when workloads need domain join or Kerberos/NTLM auth.
+#
+# CAF Ref : https://learn.microsoft.com/azure/cloud-adoption-framework/ready/
+#           landing-zone/design-area/identity-access-management
+#
+# Modes   : "adds" — Windows Server AD DS domain controllers in Azure VMs
+#           "aadds" — Azure Active Directory Domain Services (managed)
+#           "hybrid" — Replica domain controllers from on-prem AD (recommended)
+#
+# Inherits: base-platform
+# ─────────────────────────────────────────────────────────────────────────────
+
+_meta:
+  profile_type: platform
+  inherits: base-platform
+  subscription_purpose: identity
+  description: >
+    Identity subscription — Active Directory Domain Services domain controllers,
+    privileged access workstations, and identity management tooling.
+    Supports pure cloud AD DS, Azure AD DS (managed), and hybrid replica mode.
+
+# ─── Resource Organization ────────────────────────────────────────────────────
+resource_organization:
+  management_group: "Platform"
+  subscription_purpose: identity
+  resource_groups:
+    - name: "{prefix}-id-adds-{region}-rg"
+      purpose: domain_controllers
+      resources: [domain_controller_vms, availability_set, proximity_placement_group]
+    - name: "{prefix}-id-network-{region}-rg"
+      purpose: networking
+      resources: [vnet, nsg, route_table]
+    - name: "{prefix}-id-paw-{region}-rg"
+      purpose: privileged_access
+      resources: [paw_vms, bastion]
+    - name: "{prefix}-id-keyvault-{region}-rg"
+      purpose: secrets
+      resources: [key_vault]
+
+# ─── Identity Mode ────────────────────────────────────────────────────────────
+identity:
+  mode: "hybrid"                    # OVERRIDE: "adds" | "aadds" | "hybrid"
+  domain_name: "corp.contoso.com"   # OVERRIDE: your AD domain name
+  netbios_name: "CORP"              # OVERRIDE: NetBIOS name (≤15 chars)
+
+  # ── AD DS (Windows Server domain controllers) ─────────────────────────────
+  adds:
+    domain_controllers:
+      count: 2                      # Minimum 2 for HA
+      vm_size: "Standard_D4s_v5"
+      os_disk_type: "Premium_LRS"
+      data_disk_size_gb: 32
+      availability_zones: ["1", "2"]
+      static_private_ips:           # Required for DNS
+        - "10.101.0.4"
+        - "10.101.0.5"
+    restore_mode_password_secret: "ad-dsrm-password"  # Key Vault secret name
+    safe_mode_admin_secret: "ad-safe-mode-password"
+
+  # ── Azure AD Domain Services (managed) ───────────────────────────────────
+  aadds:
+    sku: "Enterprise"               # Standard | Enterprise | Premium
+    domain_config_type: "FullySynced"
+    notifications:
+      notify_global_admins: true
+      notify_dc_admins: true
+      additional_recipients: []
+
+  # ── Hybrid — replica DCs from on-prem ────────────────────────────────────
+  hybrid:
+    replication_from: "on-premises"
+    site_name: "Azure-Primary"
+    domain_controllers:
+      count: 2
+      vm_size: "Standard_D2s_v5"
+      os_disk_type: "Premium_LRS"
+      data_disk_size_gb: 32
+      availability_zones: ["1", "2"]
+      static_private_ips:
+        - "10.101.0.4"
+        - "10.101.0.5"
+
+  # ── PIM (Privileged Identity Management) ─────────────────────────────────
+  pim:
+    enabled: true
+    eligible_roles:
+      - role: "Global Administrator"
+        max_duration_hours: 4
+        require_justification: true
+        require_mfa: true
+        approver_group: "Identity-Admins"
+      - role: "Privileged Role Administrator"
+        max_duration_hours: 2
+        require_justification: true
+        require_mfa: true
+        approver_group: "Identity-Admins"
+      - role: "User Access Administrator"
+        max_duration_hours: 8
+        require_justification: true
+        require_mfa: true
+        approver_group: "Identity-Admins"
+
+  managed_identity:
+    enabled: true
+    type: "SystemAssigned"
+
+  rbac:
+    - role: "Contributor"
+      scope: "subscription"
+      principal_type: "group"
+      description: "Identity team operators"
+    - role: "Key Vault Administrator"
+      scope: "resource_group/id-keyvault"
+      principal_type: "group"
+
+# ─── Networking ───────────────────────────────────────────────────────────────
+networking:
+  deploy_hub: false
+  vnet:
+    enabled: true
+    address_space: "10.101.0.0/24"    # Dedicated identity VNet — isolated
+    subnets:
+      - name: "identity"
+        address_prefix: "10.101.0.0/26"
+        nsg: true
+        nsg_rules:
+          # Allow AD DS replication from on-prem
+          - name: "Allow-AD-Replication-Inbound"
+            priority: 100
+            direction: "Inbound"
+            access: "Allow"
+            protocol: "*"
+            destination_port_ranges: ["389", "636", "3268", "3269", "88", "464", "445", "135", "49152-65535"]
+          # Block all other inbound
+          - name: "Deny-All-Inbound"
+            priority: 4096
+            direction: "Inbound"
+            access: "Deny"
+            protocol: "*"
+            destination_port_ranges: ["*"]
+      - name: "paw"
+        address_prefix: "10.101.0.64/27"
+        nsg: true
+      - name: "AzureBastionSubnet"
+        address_prefix: "10.101.0.128/26"
+    dns_servers:
+      - "10.101.0.4"               # Primary DC
+      - "10.101.0.5"               # Secondary DC
+    peer_to_connectivity_hub: true
+    route_table:
+      enabled: true
+      routes:
+        - name: "to-hub-firewall"
+          address_prefix: "0.0.0.0/0"
+          next_hop_type: "VirtualAppliance"
+          next_hop_ip: null         # Set to Azure Firewall private IP in env override
+  ddos_protection: false
+
+# ─── Security ────────────────────────────────────────────────────────────────
+security:
+  defender_for_cloud:
+    enabled: true
+    plans:
+      - "VirtualMachines"
+      - "SqlServers"
+      - "Storage"
+      - "KeyVaults"
+      - "Dns"
+    auto_provisioning: true
+    export_to_log_analytics: true
+  sentinel: false
+  key_vault:
+    enabled: true
+    soft_delete_retention_days: 90
+    purge_protection: true
+    public_network_access: false
+    rbac_authorization: true
+    secrets:                       # Seeded during deployment
+      - "ad-dsrm-password"
+      - "ad-safe-mode-password"
+      - "domain-join-password"
+  privileged_access_workstations:
+    enabled: true
+    count: 2
+    vm_size: "Standard_D4s_v5"
+    image: "Windows Server 2022"
+    local_admin_secret: "paw-local-admin"
+
+# ─── Management / Logging ─────────────────────────────────────────────────────
+management:
+  log_analytics:
+    enabled: false                 # Uses management subscription workspace
+    workspace_id: null
+  diagnostic_settings:
+    activity_log: true
+    resource_logs: true
+    metrics: true
+    ad_audit_logs: true
+    sign_in_logs: true
+  update_management:
+    enabled: true                  # DCs must be patched carefully
+    schedules:
+      - name: "dc-patching-window"
+        frequency: "Month"
+        day_of_month: 15
+        start_time: "22:00"
+        patch_classifications: ["Critical", "Security", "UpdateRollup"]
+
+# ─── Governance ───────────────────────────────────────────────────────────────
+governance:
+  policy_initiatives:
+    - "Azure Security Benchmark"
+    - "NIST SP 800-53 Rev. 5"
+  custom_policies:
+    - "deny-public-ip"
+    - "require-managed-disks"
+    - "allowed-vm-skus-identity"    # Restrict to approved sizes for DCs
+    - "enforce-dc-backup"
+    - "require-availability-zones"
+  budget:
+    amount_usd: null               # Set in environment override

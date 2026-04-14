@@ -1,0 +1,212 @@
+# ============================================================================
+# Application Landing Zone Deployment (Config-Driven)
+# Reads app LZ definitions from environments/subscriptions.json.
+# To add, rename, or remove an app LZ — edit the JSON, no workflow changes needed.
+# ============================================================================
+name: "3 · Deploy Application Landing Zones"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Which application LZ to deploy (use key from subscriptions.json, or "all")'
+        required: true
+        default: 'all'
+        type: string
+      framework:
+        description: 'IaC framework'
+        required: true
+        type: choice
+        options:
+          - bicep
+          - terraform
+      action:
+        description: 'Plan (preview) or Deploy (apply)'
+        required: true
+        type: choice
+        options:
+          - plan
+          - deploy
+      location:
+        description: 'Primary Azure region (overrides per-LZ config if set)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # =========================================================================
+  # Build the deployment matrix from subscriptions.json
+  # =========================================================================
+  build-matrix:
+    name: "Build App LZ Matrix"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
+      target_list: ${{ steps.matrix.outputs.target_list }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse subscriptions.json and build matrix
+        id: matrix
+        run: |
+          set -euo pipefail
+          TARGET="${{ inputs.target }}"
+          CONFIG="environments/subscriptions.json"
+
+          if [ ! -f "$CONFIG" ]; then
+            echo "ERROR: $CONFIG not found"
+            exit 1
+          fi
+
+          # Extract all app LZ keys (skip _readme)
+          ALL_KEYS=$(jq -r '.application | keys[] | select(startswith("_") | not)' "$CONFIG")
+
+          echo "=== Available Application Landing Zones ==="
+          echo "$ALL_KEYS"
+          echo ""
+
+          # Determine which LZs to deploy
+          if [ "$TARGET" = "all" ]; then
+            SELECTED="$ALL_KEYS"
+          else
+            # Support comma-separated targets: "corp-erp,web-portal"
+            SELECTED=""
+            IFS=',' read -ra TARGETS <<< "$TARGET"
+            for t in "${TARGETS[@]}"; do
+              t=$(echo "$t" | xargs)  # trim whitespace
+              if echo "$ALL_KEYS" | grep -q "^${t}$"; then
+                SELECTED="$SELECTED $t"
+              else
+                echo "ERROR: Unknown app LZ target: '$t'"
+                echo "Available targets: $ALL_KEYS"
+                exit 1
+              fi
+            done
+          fi
+
+          echo "=== Selected for deployment ==="
+          echo "$SELECTED"
+
+          # Build JSON matrix
+          MATRIX=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | while read -r key; do
+            jq --arg key "$key" \
+              --arg loc "${{ inputs.location }}" \
+              '{
+                name: $key,
+                display_name: .application[$key].display_name,
+                profile: .application[$key].profile,
+                environment: .application[$key].environment,
+                github_environment: .application[$key].github_environment,
+                github_secret: .application[$key].github_secret,
+                location: (if $loc != "" then $loc else .application[$key].location end),
+                description: .application[$key].description
+              }' "$CONFIG"
+          done | jq -s '{include: .}')
+
+          echo "result<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          # Also output a simple list for the summary job
+          TARGET_LIST=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | jq -R . | jq -s .)
+          echo "target_list=$TARGET_LIST" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "=== Matrix ==="
+          echo "$MATRIX" | jq .
+
+  # =========================================================================
+  # Pre-flight: verify platform LZs are deployed
+  # =========================================================================
+  preflight:
+    name: "Pre-flight Check"
+    needs: build-matrix
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Verify platform landing zones exist
+        run: |
+          echo "Checking platform LZ resources..."
+
+          # Check management LAW exists
+          az monitor log-analytics workspace list \
+            --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
+            --query "[].{Name:name, State:provisioningState}" -o table
+
+          # Check connectivity hub exists
+          az network vnet list \
+            --subscription "${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}" \
+            --query "[].{Name:name, Location:location}" -o table
+
+          echo "Platform LZ pre-flight checks passed"
+          echo "Proceeding with application LZ deployment..."
+
+  # =========================================================================
+  # Deploy each app LZ (dynamic matrix from subscriptions.json)
+  # =========================================================================
+  deploy-app:
+    name: "${{ matrix.display_name }}"
+    needs: [build-matrix, preflight]
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 6
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: ${{ matrix.profile }}
+      project_name: ${{ matrix.name }}
+      subscription_id_secret: ${{ matrix.github_secret }}
+      environment: ${{ matrix.environment }}
+      github_environment: ${{ matrix.github_environment }}
+      framework: ${{ inputs.framework }}
+      location: ${{ matrix.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets: inherit
+
+  # =========================================================================
+  # Summary
+  # =========================================================================
+  summary:
+    name: "Application LZ Deployment Summary"
+    needs: [build-matrix, deploy-app]
+    if: always()
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate summary
+        env:
+          DEPLOY_RESULT: ${{ needs.deploy-app.result }}
+          TARGET_LIST: ${{ needs.build-matrix.outputs.target_list }}
+        run: |
+          echo "============================================="
+          echo "  Application Landing Zone Deployment Report"
+          echo "============================================="
+          echo ""
+          echo "Targets:   $TARGET_LIST"
+          echo "Framework: ${{ inputs.framework }}"
+          echo "Action:    ${{ inputs.action }}"
+          echo "Result:    $DEPLOY_RESULT"
+          echo ""
+
+          if [ "$DEPLOY_RESULT" = "failure" ]; then
+            echo "WARNING: One or more application deployments failed."
+            echo "Check individual job logs for details."
+            exit 1
+          fi
+
+          echo "All selected application landing zones completed successfully."
+          echo "Next step: Run '4 · Landing Zone Monitoring' to enable continuous monitoring."

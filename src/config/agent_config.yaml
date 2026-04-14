@@ -1,0 +1,109 @@
+# Agentic ALZ Accelerator - Agent Configuration
+
+orchestrator:
+  name: "ALZ Orchestrator"
+  description: "Coordinates landing zone deployment, monitoring, and remediation agents"
+  max_concurrent_agents: 3
+  escalation_policy: "notify_and_pause"  # notify_and_pause | auto_remediate | manual_only
+  state_store: "azure_table"  # azure_table | cosmos_db | local_file
+
+agents:
+  deployment:
+    name: "Landing Zone Deployment Agent"
+    description: >
+      Gathers requirements through conversation, selects appropriate landing zone
+      profile, generates parameters, and orchestrates IaC deployment.
+    model: "gpt-4o"
+    temperature: 0.1
+    max_tokens: 4096
+    tools:
+      - bicep_deployer
+      - terraform_deployer
+      - resource_graph
+      - policy_checker
+    approval_required_for:
+      - deploy_landing_zone
+      - modify_management_groups
+      - update_policies
+    retry_policy:
+      max_retries: 3
+      backoff_multiplier: 2
+      initial_delay_seconds: 5
+
+  monitoring:
+    name: "Compliance Monitoring Agent"
+    description: >
+      Continuously monitors Azure Landing Zone for policy violations,
+      configuration drift, and compliance gaps.
+    model: "gpt-4o"
+    temperature: 0.0
+    max_tokens: 4096
+    tools:
+      - policy_checker
+      - resource_graph
+      - drift_detector
+    schedule:
+      compliance_scan: "*/30 * * * *"   # Every 30 minutes
+      drift_detection: "0 * * * *"       # Every hour
+      full_audit: "0 6 * * *"            # Daily at 6 AM
+    alert_thresholds:
+      critical_violations: 1   # Alert immediately
+      high_violations: 5       # Alert within 15 minutes
+      medium_violations: 20    # Include in daily report
+
+  remediation:
+    name: "Auto-Remediation Agent"
+    description: >
+      Automatically remediates detected policy violations and drift
+      by deploying corrective IaC with rollback capabilities.
+    model: "gpt-4o"
+    temperature: 0.0
+    max_tokens: 4096
+    tools:
+      - bicep_deployer
+      - terraform_deployer
+      - resource_graph
+      - policy_checker
+    auto_remediate_severities:
+      - critical
+      - high
+    require_approval_for:
+      - medium
+      - low
+    rollback:
+      enabled: true
+      max_rollback_attempts: 2
+      snapshot_before_remediation: true
+
+azure:
+  resource_graph:
+    batch_size: 100
+    max_pages: 10
+  policy:
+    assignment_scope: "/providers/Microsoft.Management/managementGroups/{prefix}"
+  deployment:
+    location: "eastus2"
+    timeout_minutes: 60
+    what_if_before_deploy: true
+
+notifications:
+  channels:
+    - type: teams_webhook
+      url: "${NOTIFICATION_WEBHOOK_URL}"
+      events: [critical, deployment_complete, remediation_complete]
+    - type: email
+      address: "${NOTIFICATION_EMAIL}"
+      events: [daily_report, deployment_complete]
+  templates:
+    critical_alert: |
+      🚨 **Critical Policy Violation Detected**
+      Resource: {resource_id}
+      Policy: {policy_name}
+      Details: {details}
+      Action: {recommended_action}
+    deployment_complete: |
+      ✅ **Landing Zone Deployment Complete**
+      Profile: {profile_name}
+      Subscription: {subscription_id}
+      Duration: {duration}
+      Resources Created: {resource_count}

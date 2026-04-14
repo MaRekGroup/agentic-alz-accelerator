@@ -1,0 +1,171 @@
+# ============================================================================
+# Pull Request Validation
+# Runs on every PR that touches IaC or config. Validates templates,
+# security baseline, cost governance, and runs tests.
+# ============================================================================
+name: "5 · PR Validation"
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'src/config/**'
+      - 'src/agents/**'
+      - 'tests/**'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  # =========================================================================
+  # Lint & Format
+  # =========================================================================
+  lint:
+    name: Lint & Format
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Python lint (ruff)
+        run: ruff check src/ tests/ --output-format=github
+
+      - name: YAML lint
+        run: yamllint -c .yamllint.yml src/config/ .github/workflows/
+
+      - name: Bicep lint
+        if: hashFiles('infra/bicep/**/*.bicep') != ''
+        run: |
+          az bicep install
+          find infra/bicep -name "*.bicep" -exec az bicep build --file {} \;
+
+      - name: Terraform format check
+        if: hashFiles('infra/terraform/**/*.tf') != ''
+        run: terraform fmt -check -recursive infra/terraform/
+
+  # =========================================================================
+  # Security & Cost Validation
+  # =========================================================================
+  security:
+    name: Security & Cost Checks
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Security baseline validation
+        run: python scripts/validators/validate_security_baseline.py infra/
+
+      - name: Cost governance validation
+        run: python scripts/validators/validate_cost_governance.py infra/
+
+  # =========================================================================
+  # Unit Tests
+  # =========================================================================
+  test:
+    name: Unit Tests
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
+
+  # =========================================================================
+  # IaC Plan (what-if preview on PR)
+  # =========================================================================
+  plan-preview:
+    name: IaC Plan Preview
+    needs: [lint, security, test]
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Detect changed profiles
+        id: changes
+        run: |
+          # Find which profiles were changed
+          CHANGED=$(git diff --name-only origin/main...HEAD | \
+            grep -oP '(platform-management|platform-connectivity|platform-identity|platform-security|corp|online|sandbox|sap)' | \
+            sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "profiles=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
+          echo "Changed profiles: ${CHANGED:-none}"
+
+      - name: Bicep what-if for changed profiles
+        if: steps.changes.outputs.profiles != 'none'
+        run: |
+          az bicep install
+          IFS=',' read -ra PROFILES <<< "${{ steps.changes.outputs.profiles }}"
+          for profile in "${PROFILES[@]}"; do
+            echo "=== What-If: $profile ==="
+            az deployment sub what-if \
+              --location eastus2 \
+              --template-file infra/bicep/main.bicep \
+              --parameters profileName="$profile" \
+              --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
+              2>&1 | head -100 || echo "(preview only — some params may be missing)"
+            echo ""
+          done
+
+      - name: Post plan summary to PR
+        if: steps.changes.outputs.profiles != 'none'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const profiles = '${{ steps.changes.outputs.profiles }}'.split(',');
+            const body = `### IaC Plan Preview
+
+            **Changed profiles:** ${profiles.join(', ')}
+
+            What-if analysis completed. Review the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+            > Merge to \`main\` and run the appropriate deploy workflow to apply changes.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

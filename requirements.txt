@@ -1,0 +1,33 @@
+# Azure AI & Semantic Kernel
+semantic-kernel>=1.15.0
+azure-ai-projects>=1.0.0b5
+azure-identity>=1.19.0
+
+# Azure Management SDKs
+azure-mgmt-resource>=23.2.0
+azure-mgmt-managementgroups>=1.0.0
+azure-mgmt-network>=27.0.0
+azure-mgmt-monitor>=6.0.0
+azure-mgmt-policyinsights>=1.0.0,<=1.1.0b5
+azure-mgmt-authorization>=4.0.0
+azure-mgmt-subscription>=3.1.1
+
+# Azure Resource Graph
+azure-mgmt-resourcegraph>=8.0.0
+
+# Configuration & Utilities
+pyyaml>=6.0.2
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+python-dotenv>=1.0.1
+rich>=13.9.0
+typer>=0.15.0
+
+# Async support
+aiohttp>=3.11.0
+asyncio-throttle>=1.0.2
+
+# Testing
+pytest>=8.3.0
+pytest-asyncio>=0.25.0
+pytest-cov>=6.0.0

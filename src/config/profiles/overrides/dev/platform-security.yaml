@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev Override — Platform Security Landing Zone
+# ─────────────────────────────────────────────────────────────────────────────
+# Reduced footprint for dev/test. Sentinel enabled but with fewer connectors,
+# SOAR playbooks in simulation mode, shorter retention, lower budget.
+# ─────────────────────────────────────────────────────────────────────────────
+
+naming:
+  prefix: "contosodev"
+
+security:
+  defender_for_cloud:
+    plans:
+      - "VirtualMachines"          # Reduce to essential plans in dev
+      - "Storage"
+      - "KeyVaults"
+      - "Arm"
+    security_contacts:
+      email: "platform-dev@contoso.com"
+      alert_severity: ["High"]     # Only high alerts in dev to reduce noise
+
+  sentinel:
+    retention_days: 90             # 90 days sufficient for dev
+    workspace_mode: "dedicated"
+    data_connectors:
+      - name: "AzureActiveDirectory"
+        enabled: true
+      - name: "AzureActivity"
+        enabled: true
+      - name: "AzureSecurityCenter"
+        enabled: true
+    analytics_rules:
+      built_in_severity: ["High"]  # High severity only in dev
+      fusion_enabled: false        # Disable Fusion ML in dev (cost)
+      ml_behavior_analytics: false
+    threat_intelligence:
+      enabled: false               # No external TI feeds in dev
+
+  soar:
+    playbooks:
+      - name: "Block-SuspiciousIP"
+        simulation_mode: true      # Log only — no actual firewall changes in dev
+        requires_approval: true
+      - name: "Isolate-CompromisedVM"
+        simulation_mode: true
+        requires_approval: true
+      - name: "Revoke-EntraIDSession"
+        simulation_mode: true
+        requires_approval: true
+      - name: "Enrich-IncidentWithThreatIntel"
+        simulation_mode: false
+        requires_approval: false
+
+management:
+  log_analytics:
+    retention_days: 90
+    daily_quota_gb: 5              # Cap at 5 GB/day to control dev costs
+
+governance:
+  budget:
+    enabled: true
+    amount_usd: 1500               # Dev security subscription: $1,500/month
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"
+  what_if_required: true
+  post_deploy_validation: false   # Skip full post-deploy validation in dev

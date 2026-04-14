@@ -1,0 +1,51 @@
+# Environment Override: platform-identity — Production
+# Full RBAC, PIM-enabled, conditional access enforced.
+
+naming:
+  prefix: "contoso"
+
+identity:
+  managed_identities:
+    workload_identity:
+      enabled: true
+    agent_identity:
+      enabled: true
+      rbac_roles:
+        - "Reader"
+        - "Resource Policy Contributor"
+  rbac:
+    custom_roles:
+      - name: "ALZ Platform Operator"
+        description: "Limited operator role for platform team"
+        actions:
+          - "Microsoft.Resources/deployments/*"
+          - "Microsoft.Authorization/policyAssignments/read"
+          - "Microsoft.Insights/diagnosticSettings/*"
+        not_actions:
+          - "Microsoft.Authorization/roleAssignments/write"
+    pim:
+      enabled: true
+      require_justification: true
+      max_activation_hours: 8
+  conditional_access:
+    enabled: true
+    require_mfa: true
+    allowed_locations:
+      - "Trusted Corporate Network"
+
+governance:
+  budget:
+    amount_usd: 2000
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-ops@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-ops@contoso.com", "finance@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-ops@contoso.com", "finance@contoso.com", "cto@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

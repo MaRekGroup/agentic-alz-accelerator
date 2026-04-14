@@ -1,0 +1,137 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Base Platform Landing Zone Profile
+# ─────────────────────────────────────────────────────────────────────────────
+# All Platform LZ profiles inherit from this base.
+# Child profiles only need to specify what differs.
+#
+# Inheritance resolution order (highest priority first):
+#   environment override  >  child profile  >  base-platform
+#
+# CAF Reference:
+#   https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-areas
+# ─────────────────────────────────────────────────────────────────────────────
+
+_meta:
+  profile_type: platform           # platform | application
+  inherits: null                   # null for base; child profiles set to "base-platform"
+  version: "2.0"
+  caf_design_areas:
+    - billing-and-tenant
+    - identity-and-access
+    - resource-organization
+    - network-topology
+    - security
+    - management
+    - governance
+    - platform-automation
+
+# ─── Resource Organization ────────────────────────────────────────────────────
+resource_organization:
+  management_group: "Platform"     # Overridden by child profiles
+  subscription_purpose: null       # management | connectivity | identity
+  resource_group_naming: "{prefix}-{purpose}-{region}-rg"
+  tags:
+    environment: "platform"
+    managed_by: "agentic-alz-accelerator"
+    cost_center: "platform"        # Override per deployment
+
+# ─── Naming Convention ────────────────────────────────────────────────────────
+naming:
+  prefix: "alz"                    # Override with your org abbreviation
+  separator: "-"
+  max_length:
+    resource_group: 90
+    storage_account: 24
+    key_vault: 24
+    vnet: 64
+  use_region_shortcode: true       # eastus2 → eus2, westeurope → weu
+
+# ─── Networking (base defaults — overridden by connectivity profile) ───────────
+networking:
+  hub_topology: "hub-spoke"        # hub-spoke | vwan
+  deploy_hub: false                # True only in connectivity profile
+  vnet:
+    address_space: null            # Required in child
+    dns_servers: []
+  ddos_protection: true
+  bastion: false
+
+# ─── Identity & Access ────────────────────────────────────────────────────────
+identity:
+  managed_identity:
+    enabled: true
+    type: "SystemAssigned"
+  rbac:
+    - role: "Reader"
+      scope: "subscription"
+      principal_type: "group"
+  entra_id:
+    conditional_access: false
+    pim_enabled: false
+
+# ─── Security ────────────────────────────────────────────────────────────────
+security:
+  defender_for_cloud:
+    enabled: true
+    plans: []                      # Specified by child profiles
+    auto_provisioning: true
+    security_contacts:
+      email: ""                    # Override per deployment
+      alert_notifications: true
+      alerts_to_admins: true
+  key_vault:
+    enabled: true
+    soft_delete_retention_days: 90
+    purge_protection: true
+    public_network_access: false
+    rbac_authorization: true
+  sentinel: false                  # Enabled in connectivity/identity profiles
+
+# ─── Management / Logging ─────────────────────────────────────────────────────
+management:
+  log_analytics:
+    enabled: true
+    sku: "PerGB2018"
+    retention_days: 90             # Override per child
+    solutions: []                  # Override per child
+  automation_account: false
+  update_management: false
+  change_tracking: false
+  diagnostic_settings:
+    activity_log: true
+    resource_logs: true
+    metrics: false
+  backup:
+    enabled: false
+
+# ─── Governance ───────────────────────────────────────────────────────────────
+governance:
+  policy_initiatives: []           # Specified by child profiles
+  custom_policies: []              # Specified by child profiles
+  budget:
+    enabled: true
+    amount_usd: null               # REQUIRED — set in environment override
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: []
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: []
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: []
+  cost_allocation_tags:
+    - "environment"
+    - "cost_center"
+    - "managed_by"
+
+# ─── Platform Automation ──────────────────────────────────────────────────────
+platform_automation:
+  iac_framework: "bicep"           # bicep | terraform — set in environment override
+  ci_cd:
+    github_actions: true
+    azure_devops: false
+  deployment_identity: "managed_identity"   # managed_identity | service_principal
+  what_if_required: true
+  post_deploy_validation: true

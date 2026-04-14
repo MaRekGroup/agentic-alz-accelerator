@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Environment Override: platform-connectivity — Production
+# ─────────────────────────────────────────────────────────────────────────────
+# Merged on top of platform-connectivity.yaml at deploy time.
+# Only specify what differs from the base profile.
+# ─────────────────────────────────────────────────────────────────────────────
+
+resource_organization:
+  tags:
+    environment: "production"
+    cost_center: "platform-prod"
+
+naming:
+  prefix: "contoso"               # Your org prefix
+
+networking:
+  hub_topology: "hub-spoke"       # or "vwan" for multi-region
+  hub_spoke:
+    hub_vnet:
+      address_space: "10.0.0.0/16"
+    azure_firewall:
+      sku_tier: "Premium"
+    expressroute_gateway:
+      enabled: true
+      sku: "ErGw2AZ"
+    vpn_gateway:
+      enabled: false
+  ddos_protection:
+    enabled: true
+  dns_resolver:
+    forwarding_rules:
+      - domain: "corp.contoso.com"
+        dns_servers:
+          - "192.168.1.10"         # On-prem DNS server IP
+          - "192.168.1.11"
+
+governance:
+  budget:
+    amount_usd: 15000             # $15k/month for connectivity in prod
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com", "ciso@contoso.com"]
+      - threshold: 120
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-team@contoso.com", "ciso@contoso.com", "cto@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

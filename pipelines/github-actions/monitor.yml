@@ -1,0 +1,248 @@
+name: Landing Zone Monitoring
+
+on:
+  schedule:
+    # Run compliance scan every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan to run'
+        required: true
+        type: choice
+        options:
+          - compliance
+          - drift
+          - full
+          - report
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  # =========================================================================
+  # Compliance Scan
+  # =========================================================================
+  compliance-scan:
+    name: Run Compliance Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type != 'drift'
+    outputs:
+      violations_count: ${{ steps.scan.outputs.violations }}
+      compliance_pct: ${{ steps.scan.outputs.compliance_pct }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Compliance Scan
+        id: scan
+        run: |
+          python -c "
+          import asyncio, json
+          from src.agents.monitoring_agent import MonitoringAgent
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+
+          async def main():
+              settings = Settings()
+              kernel = Kernel()
+              agent = MonitoringAgent(kernel, DefaultAzureCredential(), settings)
+              result = await agent.run_compliance_scan()
+
+              violations = len(result.get('violations', []))
+              compliance_pct = result['summary']['compliance_percentage']
+
+              print(f'Violations: {violations}')
+              print(f'Compliance: {compliance_pct:.1f}%')
+
+              with open('compliance-report.json', 'w') as f:
+                  json.dump(result, f, indent=2, default=str)
+
+              # Set outputs
+              import os
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f'violations={violations}\n')
+                  f.write(f'compliance_pct={compliance_pct:.1f}\n')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.json
+
+  # =========================================================================
+  # Drift Detection
+  # =========================================================================
+  drift-detection:
+    name: Run Drift Detection
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type != 'compliance'
+    outputs:
+      drifted_count: ${{ steps.drift.outputs.drifted }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Drift Detection
+        id: drift
+        run: |
+          python -c "
+          import asyncio, json
+          from src.agents.monitoring_agent import MonitoringAgent
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+
+          async def main():
+              settings = Settings()
+              kernel = Kernel()
+              agent = MonitoringAgent(kernel, DefaultAzureCredential(), settings)
+              result = await agent.detect_drift()
+
+              drifted = result.get('total_drifted', 0)
+              print(f'Drifted resources: {drifted}')
+
+              with open('drift-report.json', 'w') as f:
+                  json.dump(result, f, indent=2, default=str)
+
+              import os
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f'drifted={drifted}\n')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: drift-report.json
+
+  # =========================================================================
+  # Auto-Remediation
+  # =========================================================================
+  auto-remediate:
+    name: Auto-Remediate Violations
+    needs: [compliance-scan, drift-detection]
+    if: |
+      always() &&
+      (needs.compliance-scan.outputs.violations_count > 0 || needs.drift-detection.outputs.drifted_count > 0)
+    runs-on: ubuntu-latest
+    environment: remediation  # Requires approval in GitHub
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Auto-Remediation
+        run: |
+          python -c "
+          import asyncio
+          from src.agents.orchestrator import AgentOrchestrator
+          from src.config.settings import Settings
+
+          async def main():
+              settings = Settings()
+              settings.monitor.auto_remediate = True
+              orchestrator = AgentOrchestrator(settings)
+
+              # Run single scan + remediation cycle
+              results = await orchestrator.monitoring_agent.run_compliance_scan()
+              if results.get('violations'):
+                  remediation = await orchestrator.remediation_agent.remediate(results['violations'])
+                  print(f'Remediation results: {remediation}')
+              else:
+                  print('No violations to remediate')
+
+          asyncio.run(main())
+          "
+
+  # =========================================================================
+  # Notify
+  # =========================================================================
+  notify:
+    name: Send Notifications
+    needs: [compliance-scan, drift-detection]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Teams Notification
+        if: env.TEAMS_WEBHOOK_URL != ''
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "type": "message",
+              "attachments": [{
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "body": [{
+                    "type": "TextBlock",
+                    "text": "ALZ Monitoring Report",
+                    "weight": "bolder",
+                    "size": "large"
+                  }, {
+                    "type": "FactSet",
+                    "facts": [
+                      {"title": "Compliance", "value": "${{ needs.compliance-scan.outputs.compliance_pct }}%"},
+                      {"title": "Violations", "value": "${{ needs.compliance-scan.outputs.violations_count }}"},
+                      {"title": "Drifted Resources", "value": "${{ needs.drift-detection.outputs.drifted_count }}"}
+                    ]
+                  }]
+                }
+              }]
+            }' \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}"
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}

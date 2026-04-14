@@ -1,0 +1,129 @@
+name: Reusable Deploy Workflow
+
+on:
+  workflow_call:
+    inputs:
+      template_file:
+        description: "Path to Bicep template or Terraform module directory"
+        required: true
+        type: string
+      framework:
+        description: "IaC framework: bicep or terraform"
+        required: true
+        type: string
+      environment:
+        description: "Target environment"
+        required: true
+        type: string
+      action:
+        description: "plan or deploy"
+        required: true
+        type: string
+      location:
+        description: "Azure region"
+        required: false
+        type: string
+        default: "eastus2"
+      deployment_name:
+        description: "Custom deployment name prefix"
+        required: false
+        type: string
+        default: "alz"
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      TF_STATE_STORAGE_ACCOUNT:
+        required: false
+    outputs:
+      deployment_status:
+        description: "Deployment outcome"
+        value: ${{ jobs.deploy.outputs.status }}
+
+jobs:
+  deploy:
+    name: "Deploy (${{ inputs.framework }})"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── Bicep Path ──────────────────────────────────────────────────────
+      - name: Install Bicep CLI
+        if: inputs.framework == 'bicep'
+        run: az bicep install
+
+      - name: Bicep What-If
+        if: inputs.framework == 'bicep' && inputs.action == 'plan'
+        run: |
+          az deployment sub what-if \
+            --location ${{ inputs.location }} \
+            --template-file ${{ inputs.template_file }}
+
+      - name: Bicep Deploy
+        if: inputs.framework == 'bicep' && inputs.action == 'deploy'
+        run: |
+          az deployment sub create \
+            --location ${{ inputs.location }} \
+            --template-file ${{ inputs.template_file }} \
+            --name "${{ inputs.deployment_name }}-$(date +%Y%m%d%H%M%S)"
+
+      # ── Terraform Path ──────────────────────────────────────────────────
+      - name: Setup Terraform
+        if: inputs.framework == 'terraform'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        if: inputs.framework == 'terraform'
+        working-directory: ${{ inputs.template_file }}
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ inputs.deployment_name }}-${{ inputs.environment }}.terraform.tfstate"
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Plan
+        if: inputs.framework == 'terraform'
+        working-directory: ${{ inputs.template_file }}
+        run: terraform plan -out=tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Apply
+        if: inputs.framework == 'terraform' && inputs.action == 'deploy'
+        working-directory: ${{ inputs.template_file }}
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── Result ──────────────────────────────────────────────────────────
+      - name: Set Result
+        id: result
+        if: always()
+        run: |
+          echo "status=${{ job.status }}" >> "$GITHUB_OUTPUT"

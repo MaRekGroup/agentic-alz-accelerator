@@ -1,0 +1,32 @@
+# Environment Override: platform-management — Development
+# Reduced retention, no backup vault, lower budget for dev/test.
+
+naming:
+  prefix: "contoso-dev"
+
+management:
+  log_analytics:
+    retention_days: 30               # Short retention for dev
+    sku: "PerGB2018"
+  sentinel:
+    enabled: false                   # Sentinel on security sub in dev
+  automation_account:
+    enabled: true
+  action_group:
+    email_receivers: ["platform-dev@contoso.com"]
+  backup:
+    enabled: false                   # No backup vault in dev
+
+governance:
+  budget:
+    amount_usd: 1500
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

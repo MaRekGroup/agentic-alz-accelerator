@@ -1,0 +1,222 @@
+# ============================================================================
+# Platform Landing Zone Deployment — Strict Sequential Order
+# Deploys the 4 CAF enterprise-scale platform subscriptions:
+#   1. Management → 2. Connectivity → 3. Identity → 4. Security
+# Each depends on the previous. Each has its own approval gate.
+# ============================================================================
+name: "2 · Deploy Platform Landing Zones"
+
+on:
+  workflow_dispatch:
+    inputs:
+      framework:
+        description: 'IaC framework'
+        required: true
+        type: choice
+        options:
+          - bicep
+          - terraform
+      action:
+        description: 'Plan (preview) or Deploy (apply)'
+        required: true
+        type: choice
+        options:
+          - plan
+          - deploy
+      start_from:
+        description: 'Start from this platform LZ (skip earlier ones)'
+        required: true
+        type: choice
+        options:
+          - management     # Start from the beginning
+          - connectivity   # Skip management
+          - identity       # Skip management + connectivity
+          - security       # Deploy security only
+      location:
+        description: 'Primary Azure region'
+        required: true
+        default: 'eastus2'
+        type: choice
+        options:
+          - eastus2
+          - eastus
+          - westus2
+          - centralus
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # =========================================================================
+  # 1. Management — centralized logging (everything depends on this)
+  # =========================================================================
+  platform-management:
+    name: "1 · Platform Management"
+    if: inputs.start_from == 'management'
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-management
+      project_name: platform-management
+      subscription_id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      environment: prod
+      github_environment: platform-management
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 2. Connectivity — hub networking (requires management for logging)
+  # =========================================================================
+  platform-connectivity:
+    name: "2 · Platform Connectivity"
+    needs: platform-management
+    if: |
+      always() &&
+      (inputs.start_from == 'management' || inputs.start_from == 'connectivity') &&
+      (needs.platform-management.result == 'success' || needs.platform-management.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-connectivity
+      project_name: platform-connectivity
+      subscription_id: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
+      environment: prod
+      github_environment: platform-connectivity
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 3. Identity — domain services (requires connectivity for networking)
+  # =========================================================================
+  platform-identity:
+    name: "3 · Platform Identity"
+    needs: platform-connectivity
+    if: |
+      always() &&
+      (inputs.start_from != 'security') &&
+      (needs.platform-connectivity.result == 'success' || needs.platform-connectivity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-identity
+      project_name: platform-identity
+      subscription_id: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
+      environment: prod
+      github_environment: platform-identity
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 4. Security — dedicated SecOps (requires all 3 above)
+  # =========================================================================
+  platform-security:
+    name: "4 · Platform Security"
+    needs: platform-identity
+    if: |
+      always() &&
+      (needs.platform-identity.result == 'success' || needs.platform-identity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-security
+      project_name: platform-security
+      subscription_id: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+      environment: prod
+      github_environment: platform-security
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # Summary — report on all 4 platform deployments
+  # =========================================================================
+  summary:
+    name: "Platform Deployment Summary"
+    needs: [platform-management, platform-connectivity, platform-identity, platform-security]
+    if: always()
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - name: Generate summary
+        run: |
+          echo "=========================================="
+          echo "  Platform Landing Zone Deployment Report"
+          echo "=========================================="
+          echo ""
+          echo "  1. Management:    ${{ needs.platform-management.result }}"
+          echo "  2. Connectivity:  ${{ needs.platform-connectivity.result }}"
+          echo "  3. Identity:      ${{ needs.platform-identity.result }}"
+          echo "  4. Security:      ${{ needs.platform-security.result }}"
+          echo ""
+          echo "Framework: ${{ inputs.framework }}"
+          echo "Action:    ${{ inputs.action }}"
+          echo "Location:  ${{ inputs.location }}"
+          echo ""
+
+          # Check for failures
+          FAILED=0
+          for result in "${{ needs.platform-management.result }}" \
+                        "${{ needs.platform-connectivity.result }}" \
+                        "${{ needs.platform-identity.result }}" \
+                        "${{ needs.platform-security.result }}"; do
+            if [ "$result" = "failure" ]; then
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          if [ $FAILED -gt 0 ]; then
+            echo "WARNING: $FAILED platform deployment(s) failed."
+            echo "Fix failures before deploying application landing zones."
+            exit 1
+          fi
+
+          echo "All platform landing zones deployed successfully."
+          echo "Next step: Run '3 · Deploy Application Landing Zones'"
+
+      - name: Notify Teams
+        if: always() && env.TEAMS_WEBHOOK_URL != ''
+        run: |
+          curl -s -H "Content-Type: application/json" -d '{
+            "type": "message",
+            "attachments": [{
+              "contentType": "application/vnd.microsoft.card.adaptive",
+              "content": {
+                "type": "AdaptiveCard", "version": "1.4",
+                "body": [
+                  {"type": "TextBlock", "text": "Platform LZ Deployment Complete", "weight": "bolder", "size": "large"},
+                  {"type": "FactSet", "facts": [
+                    {"title": "Management",   "value": "${{ needs.platform-management.result }}"},
+                    {"title": "Connectivity",  "value": "${{ needs.platform-connectivity.result }}"},
+                    {"title": "Identity",     "value": "${{ needs.platform-identity.result }}"},
+                    {"title": "Security",     "value": "${{ needs.platform-security.result }}"},
+                    {"title": "Framework",    "value": "${{ inputs.framework }}"}
+                  ]}
+                ]
+              }
+            }]
+          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}

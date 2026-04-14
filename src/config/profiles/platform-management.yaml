@@ -1,0 +1,158 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Platform Landing Zone: Management Subscription
+# ─────────────────────────────────────────────────────────────────────────────
+# Purpose : Centralized observability, monitoring, automation, and update
+#           management for the entire Azure estate.
+#
+# CAF Ref : https://learn.microsoft.com/azure/cloud-adoption-framework/ready/
+#           landing-zone/design-area/management
+#
+# Inherits: base-platform  (only overrides are listed below)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_meta:
+  profile_type: platform
+  inherits: base-platform
+  subscription_purpose: management
+  description: >
+    Centralized management subscription — Log Analytics workspace, Azure Monitor,
+    Automation Account, Update Manager, Change Tracking, and Microsoft Sentinel.
+    All workload subscriptions send diagnostic logs to this workspace.
+
+# ─── Resource Organization ────────────────────────────────────────────────────
+resource_organization:
+  management_group: "Platform"
+  subscription_purpose: management
+  resource_groups:
+    - name: "{prefix}-mgmt-monitoring-{region}-rg"
+      purpose: monitoring
+      resources: [log_analytics, automation_account, data_collection_rules]
+    - name: "{prefix}-mgmt-security-{region}-rg"
+      purpose: security
+      resources: [sentinel, defender_workspace, security_center]
+    - name: "{prefix}-mgmt-governance-{region}-rg"
+      purpose: governance
+      resources: [policy_definitions, blueprints, managed_identity]
+
+# ─── Networking ───────────────────────────────────────────────────────────────
+networking:
+  deploy_hub: false             # Management has no hub — uses connectivity subscription
+  vnet:
+    enabled: true
+    address_space: "10.100.0.0/24"    # Small — management VNet is minimal
+    subnets:
+      - name: "management"
+        address_prefix: "10.100.0.0/26"
+        nsg: true
+        service_endpoints:
+          - "Microsoft.KeyVault"
+          - "Microsoft.Storage"
+      - name: "AzureBastionSubnet"
+        address_prefix: "10.100.0.64/26"
+  ddos_protection: false        # Not required for management subscription
+  peer_to_connectivity_hub: true
+
+# ─── Security ────────────────────────────────────────────────────────────────
+security:
+  defender_for_cloud:
+    enabled: true
+    plans:
+      - "VirtualMachines"
+      - "SqlServers"
+      - "Storage"
+      - "KeyVaults"
+      - "Dns"
+      - "Arm"
+      - "Containers"
+    auto_provisioning: true
+    export_to_log_analytics: true
+  sentinel:
+    enabled: true
+    data_connectors:
+      - "AzureActiveDirectory"
+      - "AzureActivity"
+      - "AzureSecurityCenter"
+      - "MicrosoftDefenderAdvancedThreatProtection"
+      - "Office365"
+    analytics_rules:
+      built_in_severity: ["High", "Medium"]
+    workspace_link: "centralized"   # Uses the management Log Analytics workspace
+
+# ─── Management / Logging ─────────────────────────────────────────────────────
+management:
+  log_analytics:
+    enabled: true
+    sku: "PerGB2018"
+    retention_days: 365             # Platform requires 1-year retention
+    daily_quota_gb: null            # No cap — platform workspace is unbounded
+    solutions:
+      - "SecurityInsights"          # Microsoft Sentinel
+      - "Security"                  # Microsoft Defender for Cloud
+      - "Updates"                   # Update Manager
+      - "ChangeTracking"
+      - "VMInsights"
+      - "ContainerInsights"
+      - "AzureActivity"
+    data_sources:
+      - windows_events: ["System", "Application", "Security"]
+      - syslog: ["kern", "auth", "daemon"]
+      - performance_counters: true
+
+  automation_account:
+    enabled: true
+    sku: "Basic"
+    runbooks:
+      - name: "Start-AzureVMs"
+        type: "PowerShell"
+      - name: "Stop-AzureVMs"
+        type: "PowerShell"
+    linked_to_log_analytics: true
+
+  update_management:
+    enabled: true
+    schedules:
+      - name: "weekly-critical-updates"
+        frequency: "Week"
+        day_of_week: "Saturday"
+        start_time: "02:00"
+        patch_classifications: ["Critical", "Security"]
+
+  change_tracking:
+    enabled: true
+    tracked_files:
+      linux: ["/etc/passwd", "/etc/sudoers", "/etc/hosts"]
+      windows: ["C:\\Windows\\System32\\drivers\\etc\\hosts"]
+
+  backup:
+    enabled: true
+    recovery_services_vault: true
+    policies:
+      - name: "daily-backup"
+        frequency: "Daily"
+        time: "03:00"
+        retention_days: 30
+      - name: "weekly-backup"
+        frequency: "Weekly"
+        day: "Sunday"
+        retention_weeks: 52
+
+  diagnostic_settings:
+    activity_log: true
+    resource_logs: true
+    metrics: true
+    aad_audit_logs: true
+
+# ─── Governance ───────────────────────────────────────────────────────────────
+governance:
+  policy_initiatives:
+    - "Azure Security Benchmark"
+    - "NIST SP 800-53 Rev. 5"
+    - "ISO 27001:2013"
+  custom_policies:
+    - "require-log-analytics-agent"
+    - "enforce-diagnostic-settings"
+    - "deny-public-ip"
+    - "require-tag-environment"
+    - "require-tag-cost-center"
+  budget:
+    amount_usd: null              # Set in environment override

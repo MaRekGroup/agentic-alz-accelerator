@@ -1,0 +1,182 @@
+{
+  "$schema": "workflow-graph/v1",
+  "description": "Agentic ALZ Accelerator — DAG-based workflow engine",
+  "nodes": [
+    {
+      "id": "step-1-requirements",
+      "type": "agent-step",
+      "agent": "requirements",
+      "codename": "Scribe",
+      "artifact": "01-requirements.md",
+      "description": "Gather landing zone requirements through interactive conversation"
+    },
+    {
+      "id": "gate-1",
+      "type": "gate",
+      "description": "Confirm requirements complete",
+      "approval_required": true
+    },
+    {
+      "id": "step-2-architect",
+      "type": "agent-step",
+      "agent": "architect",
+      "codename": "Oracle",
+      "artifact": "02-architecture-assessment.md",
+      "description": "WAF assessment, CAF design area mapping, cost estimation"
+    },
+    {
+      "id": "gate-2",
+      "type": "gate",
+      "description": "Approve WAF/CAF assessment",
+      "approval_required": true
+    },
+    {
+      "id": "step-3-design",
+      "type": "agent-step",
+      "agent": "design",
+      "codename": "Artisan",
+      "artifact": "03-design-*.md",
+      "description": "Architecture diagrams and ADRs",
+      "optional": true
+    },
+    {
+      "id": "step-3.5-governance",
+      "type": "agent-step",
+      "agent": "governance",
+      "codename": "Warden",
+      "artifact": "04-governance-constraints.json",
+      "description": "Policy discovery, compliance constraints, security baseline"
+    },
+    {
+      "id": "gate-3",
+      "type": "gate",
+      "description": "Approve governance constraints",
+      "approval_required": true
+    },
+    {
+      "id": "step-4-plan",
+      "type": "agent-step",
+      "agent": "iac-planner",
+      "codename": "Strategist",
+      "artifact": "04-implementation-plan.md",
+      "description": "Implementation planning with AVM module selection",
+      "iac_variants": {
+        "bicep": "iac-planner-bicep",
+        "terraform": "iac-planner-terraform"
+      }
+    },
+    {
+      "id": "gate-4",
+      "type": "gate",
+      "description": "Approve implementation plan",
+      "approval_required": true
+    },
+    {
+      "id": "step-5-code",
+      "type": "agent-step",
+      "agent": "iac-code",
+      "codename": "Forge",
+      "description": "Generate IaC templates (AVM-first)",
+      "iac_variants": {
+        "bicep": {
+          "agent": "bicep-code",
+          "artifact_path": "infra/bicep/{project}/",
+          "subagents": ["bicep-validate-subagent", "bicep-whatif-subagent"]
+        },
+        "terraform": {
+          "agent": "terraform-code",
+          "artifact_path": "infra/terraform/{project}/",
+          "subagents": ["terraform-validate-subagent", "iac-planner-subagent"]
+        }
+      }
+    },
+    {
+      "id": "gate-5",
+      "type": "gate",
+      "description": "Approve lint/review/what-if results",
+      "approval_required": true
+    },
+    {
+      "id": "step-6-deploy",
+      "type": "agent-step",
+      "agent": "deploy",
+      "codename": "Envoy",
+      "artifact": "06-deployment-summary.md",
+      "description": "Deployment with what-if/plan preview",
+      "iac_variants": {
+        "bicep": "bicep-deploy",
+        "terraform": "terraform-deploy"
+      }
+    },
+    {
+      "id": "gate-6",
+      "type": "gate",
+      "description": "Verify deployed resources",
+      "approval_required": true
+    },
+    {
+      "id": "step-7-docs",
+      "type": "agent-step",
+      "agent": "documentation",
+      "codename": "Chronicler",
+      "artifact": "07-*.md",
+      "description": "Post-deployment documentation suite",
+      "subagents": ["cost-estimate-subagent", "runbook-subagent", "inventory-subagent"],
+      "fan_out": true
+    },
+    {
+      "id": "step-8-monitor",
+      "type": "agent-step",
+      "agent": "monitor",
+      "codename": "Sentinel",
+      "artifact": "08-compliance-report.md",
+      "description": "Continuous compliance monitoring and drift detection",
+      "continuous": true,
+      "schedule": {
+        "compliance_scan": "*/30 * * * *",
+        "drift_detection": "0 * * * *",
+        "full_audit": "0 6 * * *"
+      }
+    },
+    {
+      "id": "step-9-remediate",
+      "type": "agent-step",
+      "agent": "remediate",
+      "codename": "Mender",
+      "artifact": "09-remediation-log.md",
+      "description": "Auto-remediation with snapshot/rollback",
+      "triggered_by": "step-8-monitor"
+    }
+  ],
+  "edges": [
+    { "from": "step-1-requirements", "to": "gate-1", "condition": "on_complete" },
+    { "from": "gate-1", "to": "step-2-architect", "condition": "on_approve" },
+    { "from": "step-2-architect", "to": "gate-2", "condition": "on_complete" },
+    { "from": "gate-2", "to": "step-3-design", "condition": "on_approve" },
+    { "from": "gate-2", "to": "step-3.5-governance", "condition": "on_approve" },
+    { "from": "step-3.5-governance", "to": "gate-3", "condition": "on_complete" },
+    { "from": "gate-3", "to": "step-4-plan", "condition": "on_approve" },
+    { "from": "step-4-plan", "to": "gate-4", "condition": "on_complete" },
+    { "from": "gate-4", "to": "step-5-code", "condition": "on_approve" },
+    { "from": "step-5-code", "to": "gate-5", "condition": "on_complete" },
+    { "from": "gate-5", "to": "step-6-deploy", "condition": "on_approve" },
+    { "from": "step-6-deploy", "to": "gate-6", "condition": "on_complete" },
+    { "from": "gate-6", "to": "step-7-docs", "condition": "on_approve" },
+    { "from": "step-7-docs", "to": "step-8-monitor", "condition": "on_complete" },
+    { "from": "step-8-monitor", "to": "step-9-remediate", "condition": "on_violation" }
+  ],
+  "challenger_review": {
+    "gates": ["gate-1", "gate-2", "gate-4", "gate-5"],
+    "complexity_matrix": {
+      "simple":   { "requirements": 1, "architecture": 1, "plan": 1, "code": 1 },
+      "standard": { "requirements": 1, "architecture": 2, "plan": 2, "code": 2 },
+      "complex":  { "requirements": 1, "architecture": 3, "plan": 2, "code": 3 }
+    }
+  },
+  "iac_routing": {
+    "field": "decisions.iac_tool",
+    "options": ["bicep", "terraform"],
+    "shared_steps": ["step-1-requirements", "step-2-architect", "step-3-design", "step-3.5-governance", "step-7-docs", "step-8-monitor", "step-9-remediate"],
+    "divergent_steps": ["step-4-plan", "step-5-code", "step-6-deploy"]
+  }
+}

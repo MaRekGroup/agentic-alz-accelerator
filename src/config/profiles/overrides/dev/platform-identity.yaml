@@ -1,0 +1,34 @@
+# Environment Override: platform-identity — Development
+# Minimal RBAC roles, single managed identity, lower budget.
+
+naming:
+  prefix: "contoso-dev"
+
+identity:
+  managed_identities:
+    workload_identity:
+      enabled: true
+    agent_identity:
+      enabled: true
+      rbac_roles:
+        - "Reader"                    # Read-only for agent in dev
+  rbac:
+    custom_roles: []                  # No custom roles in dev
+    pim:
+      enabled: false                  # No PIM in dev
+  conditional_access:
+    enabled: false                    # Simplified access in dev
+
+governance:
+  budget:
+    amount_usd: 500
+    alert_thresholds:
+      - threshold: 80
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+      - threshold: 100
+        threshold_type: "Forecasted"
+        contact_emails: ["platform-dev@contoso.com"]
+
+platform_automation:
+  iac_framework: "bicep"

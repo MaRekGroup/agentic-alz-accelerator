@@ -1,0 +1,373 @@
+# Azure Landing Zone Profiles
+# ─────────────────────────────────────────────────────────────────────────────
+# Two categories of profiles:
+#
+#  PLATFORM Landing Zones — the shared foundation every other LZ depends on
+#    platform-management  : Centralized logging, monitoring, Sentinel, Automation
+#    platform-connectivity: Hub networking (hub-spoke or vWAN), Firewall, DNS, DDoS
+#    platform-identity    : AD DS domain controllers, PIM, PAWs
+#    platform-security    : Dedicated SecOps — Sentinel, Defender for Cloud (all plans), SOAR
+#
+#  APPLICATION Landing Zones — workload subscriptions that peer to the platform
+#    online  : Internet-facing apps (WAF, DDoS, public endpoints)
+#    corp    : Internal corporate apps (private endpoints, ExpressRoute/VPN)
+#    sandbox : Dev/test (relaxed policies, budget cap)
+#    sap     : SAP workloads (ANF, proximity placement, accelerated networking)
+#
+# Full profile definitions with inheritance support live in:
+#   src/config/profiles/         — base and child profiles
+#   src/config/profiles/overrides/ — per-environment overrides (dev/staging/prod)
+#
+# This file provides the summary registry used by the Scribe and Strategist agents.
+# ─────────────────────────────────────────────────────────────────────────────
+
+platform_profiles:
+  platform-management:
+    name: "Platform Management Landing Zone"
+    type: platform
+    subscription_purpose: management
+    profile_file: "profiles/platform-management.yaml"
+    description: >
+      Centralized management subscription. Deploys Log Analytics workspace,
+      Microsoft Sentinel, Automation Account, Update Manager, Change Tracking,
+      Azure Monitor, and centralized backup. All workload subscriptions send
+      diagnostic logs here. Deploy this first.
+    deploy_order: 1
+    depends_on: []
+    caf_design_areas: [management, security, governance]
+    key_resources:
+      - Log Analytics Workspace (centralized)
+      - Microsoft Sentinel
+      - Automation Account
+      - Azure Monitor Action Groups
+      - Recovery Services Vault
+    environments_supported: [dev, staging, prod]
+    customization_notes: >
+      Override log retention (default 365 days), Sentinel data connectors,
+      update schedules, and backup policies in
+      src/config/profiles/overrides/{env}/platform-management.yaml
+
+  platform-connectivity:
+    name: "Platform Connectivity Landing Zone"
+    type: platform
+    subscription_purpose: connectivity
+    profile_file: "profiles/platform-connectivity.yaml"
+    description: >
+      Hub networking subscription. Supports hub-spoke (Azure Firewall Premium)
+      and Azure Virtual WAN topologies — selectable per environment via
+      hub_topology parameter. Includes DDoS Protection Plan, Private DNS Zones
+      (20+ zones pre-configured), DNS Resolver, and ExpressRoute/VPN Gateway.
+    deploy_order: 2
+    depends_on: [platform-management]
+    caf_design_areas: [network-topology, security, governance]
+    hub_topologies:
+      hub-spoke:
+        description: "Azure Firewall Premium in a hub VNet with forced tunnelling to spokes"
+        resources: [hub_vnet, azure_firewall, expressroute_gateway, vpn_gateway, bastion, ddos_plan, dns_resolver]
+      vwan:
+        description: "Azure Virtual WAN with per-region hubs, integrated Firewall and Gateway"
+        resources: [virtual_wan, virtual_hub, azure_firewall, vwan_gateways]
+    key_resources:
+      - Azure Firewall Premium (hub-spoke) or vWAN Hub Firewall
+      - DDoS Protection Plan
+      - 20+ Private DNS Zones (pre-configured)
+      - Azure Private DNS Resolver
+      - ExpressRoute / VPN Gateway (optional)
+      - Azure Bastion
+    environments_supported: [dev, staging, prod]
+    customization_notes: >
+      Key overrides: hub_topology (hub-spoke/vwan), hub address space,
+      firewall SKU (Standard/Premium), gateway types, on-prem DNS forwarding rules,
+      additional private DNS zones. Set in
+      src/config/profiles/overrides/{env}/platform-connectivity.yaml
+
+  platform-identity:
+    name: "Platform Identity Landing Zone"
+    type: platform
+    subscription_purpose: identity
+    profile_file: "profiles/platform-identity.yaml"
+    description: >
+      Identity subscription for Active Directory Domain Services. Three modes:
+      adds (new AD DS in Azure), aadds (Azure AD Domain Services managed),
+      hybrid (replica DCs from on-prem — recommended). Includes PIM,
+      Privileged Access Workstations, and a dedicated Key Vault for AD secrets.
+    deploy_order: 3
+    depends_on: [platform-management, platform-connectivity]
+    caf_design_areas: [identity-and-access, security, governance]
+    identity_modes:
+      adds:
+        description: "New Windows Server AD DS domain controllers deployed as Azure VMs"
+      aadds:
+        description: "Azure Active Directory Domain Services — Microsoft-managed"
+      hybrid:
+        description: "Replica domain controllers extending existing on-premises AD (recommended)"
+    key_resources:
+      - Domain Controller VMs (HA across 2 AZs)
+      - Privileged Access Workstations
+      - Azure Bastion (dedicated)
+      - Key Vault (AD secrets)
+      - PIM eligible role assignments
+    environments_supported: [dev, staging, prod]
+    customization_notes: >
+      Key overrides: identity.mode (adds/aadds/hybrid), domain_name, netbios_name,
+      DC VM sizes, PIM roles and durations, PAW count.
+      Set in src/config/profiles/overrides/{env}/platform-identity.yaml
+
+  platform-security:
+    name: "Platform Security Landing Zone"
+    type: platform
+    subscription_purpose: security
+    profile_file: "profiles/platform-security.yaml"
+    description: >
+      Dedicated security operations subscription. Deploys a security-dedicated
+      Microsoft Sentinel workspace, Microsoft Defender for Cloud (all plans),
+      SOAR playbooks (Logic Apps), threat intelligence feeds, vulnerability
+      management, and security posture dashboards. Enforces separation of duties
+      between SecOps and platform operations teams.
+    deploy_order: 4
+    depends_on: [platform-management, platform-connectivity, platform-identity]
+    caf_design_areas: [security, governance, identity-and-access, management]
+    sentinel_modes:
+      dedicated:
+        description: "Security-dedicated Log Analytics workspace with Sentinel (recommended)"
+        resources: [sentinel_workspace, data_connectors, analytics_rules, watchlists, threat_intel]
+      linked:
+        description: "Links Sentinel to the management subscription Log Analytics workspace"
+        resources: [sentinel_onboarding, data_connectors, analytics_rules]
+    key_resources:
+      - Microsoft Sentinel (dedicated workspace, 730-day retention)
+      - Microsoft Defender for Cloud (all 12 plans)
+      - SOAR Playbooks (Logic Apps — Block IP, Isolate VM, Revoke Session, Enrich TI)
+      - Threat Intelligence feeds (Microsoft + STIX/TAXII)
+      - Key Vault (security secrets, private endpoint only)
+      - Security Automation Account (baseline checks, posture reports)
+    environments_supported: [dev, staging, prod]
+    customization_notes: >
+      Key overrides: sentinel.workspace_mode (dedicated/linked), sentinel.retention_days,
+      defender plans enabled, SOAR playbook approval gates, threat intelligence feeds,
+      budget amount. Set in src/config/profiles/overrides/{env}/platform-security.yaml
+
+profiles:
+  online:
+    name: "Online Landing Zone"
+    description: "Internet-facing workloads with public endpoints and WAF protection"
+    management_group: "Online"
+    networking:
+      type: "hub_spoke"
+      vnet_address_space: "10.1.0.0/16"
+      subnets:
+        - name: "web"
+          address_prefix: "10.1.1.0/24"
+          nsg: true
+          service_endpoints: ["Microsoft.Web", "Microsoft.KeyVault"]
+        - name: "app"
+          address_prefix: "10.1.2.0/24"
+          nsg: true
+          service_endpoints: ["Microsoft.Sql", "Microsoft.KeyVault"]
+        - name: "data"
+          address_prefix: "10.1.3.0/24"
+          nsg: true
+          service_endpoints: ["Microsoft.Sql", "Microsoft.Storage"]
+        - name: "AzureBastionSubnet"
+          address_prefix: "10.1.255.0/26"
+      dns_servers: []  # Uses Azure DNS
+      ddos_protection: true
+      waf_enabled: true
+    identity:
+      type: "managed_identity"
+      rbac_assignments:
+        - role: "Contributor"
+          scope: "subscription"
+          principal_type: "group"
+    policies:
+      initiatives:
+        - "Azure Security Benchmark"
+        - "CIS Microsoft Azure Foundations Benchmark"
+      custom_policies:
+        - "deny-public-ip-on-nic"
+        - "enforce-https-ingress"
+        - "require-tls-1-2"
+    logging:
+      log_analytics: true
+      retention_days: 90
+      diagnostic_settings:
+        - "activity_logs"
+        - "resource_logs"
+        - "metrics"
+    security:
+      defender_for_cloud: true
+      defender_plans:
+        - "VirtualMachines"
+        - "AppServices"
+        - "SqlServers"
+        - "Storage"
+        - "KeyVaults"
+      key_vault: true
+
+  corp:
+    name: "Corporate Landing Zone"
+    description: "Internal corporate workloads with private connectivity to on-premises"
+    management_group: "Corp"
+    networking:
+      type: "hub_spoke"
+      vnet_address_space: "10.2.0.0/16"
+      subnets:
+        - name: "app"
+          address_prefix: "10.2.1.0/24"
+          nsg: true
+          private_endpoint_policies: true
+        - name: "data"
+          address_prefix: "10.2.2.0/24"
+          nsg: true
+          private_endpoint_policies: true
+        - name: "shared-services"
+          address_prefix: "10.2.3.0/24"
+          nsg: true
+        - name: "AzureBastionSubnet"
+          address_prefix: "10.2.255.0/26"
+      dns_servers: ["10.0.0.4", "10.0.0.5"]  # On-prem DNS
+      private_dns_zones:
+        - "privatelink.database.windows.net"
+        - "privatelink.blob.core.windows.net"
+        - "privatelink.vaultcore.azure.net"
+      express_route_peering: true
+      ddos_protection: true
+    identity:
+      type: "managed_identity"
+      rbac_assignments:
+        - role: "Contributor"
+          scope: "subscription"
+          principal_type: "group"
+        - role: "Network Contributor"
+          scope: "resource_group/networking"
+          principal_type: "group"
+    policies:
+      initiatives:
+        - "Azure Security Benchmark"
+        - "ISO 27001:2013"
+        - "NIST SP 800-53 Rev. 5"
+      custom_policies:
+        - "deny-public-ip"
+        - "enforce-private-endpoints"
+        - "require-encryption-at-rest"
+        - "deny-public-storage-access"
+    logging:
+      log_analytics: true
+      retention_days: 365
+      diagnostic_settings:
+        - "activity_logs"
+        - "resource_logs"
+        - "metrics"
+        - "aad_audit_logs"
+    security:
+      defender_for_cloud: true
+      defender_plans:
+        - "VirtualMachines"
+        - "SqlServers"
+        - "Storage"
+        - "KeyVaults"
+        - "Dns"
+        - "Arm"
+      key_vault: true
+      sentinel: true
+
+  sandbox:
+    name: "Sandbox Landing Zone"
+    description: "Development and testing workloads with relaxed policies"
+    management_group: "Sandbox"
+    networking:
+      type: "standalone"
+      vnet_address_space: "10.10.0.0/16"
+      subnets:
+        - name: "default"
+          address_prefix: "10.10.0.0/24"
+          nsg: true
+      dns_servers: []
+      ddos_protection: false
+    identity:
+      type: "managed_identity"
+      rbac_assignments:
+        - role: "Contributor"
+          scope: "subscription"
+          principal_type: "group"
+    policies:
+      initiatives:
+        - "Azure Security Benchmark"
+      custom_policies:
+        - "allowed-vm-skus"
+        - "budget-enforcement"
+    logging:
+      log_analytics: true
+      retention_days: 30
+      diagnostic_settings:
+        - "activity_logs"
+    security:
+      defender_for_cloud: true
+      defender_plans:
+        - "VirtualMachines"
+      key_vault: false
+
+  sap:
+    name: "SAP Landing Zone"
+    description: "SAP-optimized landing zone with specific networking and compute requirements"
+    management_group: "Corp"
+    networking:
+      type: "hub_spoke"
+      vnet_address_space: "10.5.0.0/16"
+      subnets:
+        - name: "sap-app"
+          address_prefix: "10.5.1.0/24"
+          nsg: true
+          accelerated_networking: true
+        - name: "sap-db"
+          address_prefix: "10.5.2.0/24"
+          nsg: true
+          accelerated_networking: true
+        - name: "sap-web"
+          address_prefix: "10.5.3.0/24"
+          nsg: true
+        - name: "anf-subnet"
+          address_prefix: "10.5.4.0/24"
+          delegations: ["Microsoft.NetApp/volumes"]
+        - name: "AzureBastionSubnet"
+          address_prefix: "10.5.255.0/26"
+      dns_servers: ["10.0.0.4", "10.0.0.5"]
+      proximity_placement_groups: true
+      express_route_peering: true
+      ddos_protection: true
+    identity:
+      type: "managed_identity"
+      rbac_assignments:
+        - role: "Contributor"
+          scope: "subscription"
+          principal_type: "group"
+        - role: "SAP System Administrator"
+          scope: "resource_group/sap"
+          principal_type: "group"
+    policies:
+      initiatives:
+        - "Azure Security Benchmark"
+        - "SAP on Azure Best Practices"
+      custom_policies:
+        - "enforce-private-endpoints"
+        - "require-encryption-at-rest"
+        - "allowed-sap-vm-skus"
+        - "require-availability-zones"
+    logging:
+      log_analytics: true
+      retention_days: 365
+      diagnostic_settings:
+        - "activity_logs"
+        - "resource_logs"
+        - "metrics"
+        - "sap_hana_logs"
+    security:
+      defender_for_cloud: true
+      defender_plans:
+        - "VirtualMachines"
+        - "SqlServers"
+        - "Storage"
+        - "KeyVaults"
+        - "Dns"
+      key_vault: true
+      sentinel: true

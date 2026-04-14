@@ -1,0 +1,189 @@
+{
+  "$schema": "mcp-config/v1",
+  "description": "MCP server configuration for the Agentic ALZ Accelerator",
+  "servers": {
+    "azure-pricing": {
+      "name": "Azure Pricing MCP Server",
+      "description": "Real-time Azure SKU pricing, cost estimation, and region comparison",
+      "command": "python",
+      "args": ["mcp/azure-pricing/server.py"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}"
+      },
+      "tools": [
+        {
+          "name": "azure_cost_estimate",
+          "description": "Estimate costs based on resource types and usage patterns"
+        },
+        {
+          "name": "azure_bulk_estimate",
+          "description": "Multi-resource cost estimate in one call"
+        },
+        {
+          "name": "azure_price_compare",
+          "description": "Compare prices across regions and SKUs"
+        },
+        {
+          "name": "azure_ri_pricing",
+          "description": "Reserved Instance pricing and savings analysis"
+        },
+        {
+          "name": "azure_region_recommend",
+          "description": "Find cheapest regions for a given service"
+        }
+      ],
+      "used_by_agents": ["architect", "iac-planner", "documentation"]
+    },
+    "azure-resource-graph": {
+      "name": "Azure Resource Graph MCP Server",
+      "description": "Query Azure resources, compliance state, and configuration drift",
+      "command": "python",
+      "args": ["mcp/azure-resource-graph/server.py"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}",
+        "AZURE_MANAGEMENT_GROUP_PREFIX": "${AZURE_MANAGEMENT_GROUP_PREFIX}"
+      },
+      "tools": [
+        {
+          "name": "query_resources",
+          "description": "Execute an Azure Resource Graph query"
+        },
+        {
+          "name": "get_resource_inventory",
+          "description": "Get resource inventory summary for a scope"
+        },
+        {
+          "name": "get_resource_details",
+          "description": "Get detailed properties of a specific resource"
+        },
+        {
+          "name": "validate_landing_zone",
+          "description": "Validate that key landing zone resources exist"
+        },
+        {
+          "name": "find_public_resources",
+          "description": "Find resources with public endpoints"
+        },
+        {
+          "name": "detect_drift",
+          "description": "Detect configuration drift from baseline"
+        }
+      ],
+      "used_by_agents": ["monitor", "remediate", "governance", "deploy"]
+    },
+    "azure-policy": {
+      "name": "Azure Policy MCP Server",
+      "description": "Policy assignment discovery, compliance checking, and constraint generation",
+      "command": "python",
+      "args": ["mcp/azure-policy/server.py"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}"
+      },
+      "tools": [
+        {
+          "name": "discover_policies",
+          "description": "Discover Azure Policy assignments at a scope"
+        },
+        {
+          "name": "get_compliance_state",
+          "description": "Get compliance summary for a scope"
+        },
+        {
+          "name": "get_violations",
+          "description": "Get non-compliant resources with details"
+        },
+        {
+          "name": "classify_policy_effects",
+          "description": "Classify policies by effect (Deny, Audit, Modify, DINE)"
+        },
+        {
+          "name": "generate_governance_constraints",
+          "description": "Produce governance constraints JSON for IaC planning"
+        }
+      ],
+      "used_by_agents": ["governance", "monitor", "challenger"]
+    },
+    "azure-deployment": {
+      "name": "Azure Deployment MCP Server",
+      "description": "Bicep/Terraform deployment execution, what-if analysis, and status tracking",
+      "command": "python",
+      "args": ["mcp/azure-deployment/server.py"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}",
+        "IAC_FRAMEWORK": "${IAC_FRAMEWORK}"
+      },
+      "tools": [
+        {
+          "name": "bicep_what_if",
+          "description": "Run Bicep what-if analysis"
+        },
+        {
+          "name": "bicep_deploy",
+          "description": "Deploy Bicep templates"
+        },
+        {
+          "name": "terraform_plan",
+          "description": "Run Terraform plan"
+        },
+        {
+          "name": "terraform_apply",
+          "description": "Apply Terraform configuration"
+        },
+        {
+          "name": "get_deployment_status",
+          "description": "Get deployment status and outputs"
+        },
+        {
+          "name": "validate_deployment",
+          "description": "Post-deployment resource validation"
+        }
+      ],
+      "used_by_agents": ["deploy", "remediate"]
+    },
+    "azure-monitor": {
+      "name": "Azure Monitor MCP Server",
+      "description": "Metrics, alerts, diagnostic settings, and activity log queries",
+      "command": "python",
+      "args": ["mcp/azure-monitor/server.py"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}"
+      },
+      "tools": [
+        {
+          "name": "get_secure_score",
+          "description": "Get Defender for Cloud secure score"
+        },
+        {
+          "name": "get_recommendations",
+          "description": "Get security recommendations"
+        },
+        {
+          "name": "query_activity_log",
+          "description": "Query activity log for manual changes"
+        },
+        {
+          "name": "get_alert_rules",
+          "description": "List configured alert rules"
+        },
+        {
+          "name": "check_diagnostic_settings",
+          "description": "Verify diagnostic settings are configured"
+        }
+      ],
+      "used_by_agents": ["monitor", "remediate", "documentation"]
+    }
+  },
+  "agent_tool_mapping": {
+    "requirements": [],
+    "architect": ["azure-pricing"],
+    "governance": ["azure-policy", "azure-resource-graph"],
+    "iac-planner": ["azure-pricing"],
+    "bicep-code": ["azure-deployment"],
+    "terraform-code": ["azure-deployment"],
+    "deploy": ["azure-deployment", "azure-resource-graph"],
+    "documentation": ["azure-pricing", "azure-monitor", "azure-resource-graph"],
+    "monitor": ["azure-resource-graph", "azure-policy", "azure-monitor"],
+    "remediate": ["azure-deployment", "azure-resource-graph", "azure-policy"],
+    "challenger": ["azure-policy", "azure-resource-graph"]
+  }
+}

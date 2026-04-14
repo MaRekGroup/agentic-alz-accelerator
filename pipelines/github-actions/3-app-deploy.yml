@@ -1,0 +1,238 @@
+name: "3 - Deploy Application Landing Zone"
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Landing Zone Profile"
+        required: true
+        type: choice
+        options:
+          - online
+          - corp
+          - sandbox
+          - sap
+      framework:
+        description: "IaC Framework"
+        required: true
+        type: choice
+        options:
+          - bicep
+          - terraform
+      environment:
+        description: "Target Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      action:
+        description: "Deployment Action"
+        required: true
+        type: choice
+        options:
+          - plan
+          - deploy
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # =========================================================================
+  # Pre-flight Validation
+  # =========================================================================
+  preflight:
+    name: Pre-flight Checks
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      subscription_id: ${{ steps.resolve.outputs.subscription_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve Subscription from Matrix
+        id: resolve
+        run: |
+          python -c "
+          import json, os
+          with open('environments/subscriptions.json') as f:
+              subs = json.load(f)
+          app_subs = subs.get('application_subscriptions', {})
+          sub_id = app_subs.get('${{ inputs.profile }}', {}).get('subscription_id', '')
+          print(f'Resolved subscription for ${{ inputs.profile }}: {sub_id}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'subscription_id={sub_id}\n')
+          "
+
+      - name: Validate Profile Configuration
+        run: |
+          python -c "
+          import yaml
+          with open('src/config/landing_zone_profiles.yaml') as f:
+              profiles = yaml.safe_load(f)
+          profile = profiles['profiles'].get('${{ inputs.profile }}')
+          assert profile, 'Profile ${{ inputs.profile }} not found'
+          print('Profile validated: ${{ inputs.profile }}')
+          print(f'  Parent: {profile.get(\"parent\", \"N/A\")}')
+          "
+
+      - name: Security Baseline Validation
+        run: python scripts/validators/validate_security_baseline.py
+
+      - name: Cost Governance Validation
+        run: python scripts/validators/validate_cost_governance.py
+
+  # =========================================================================
+  # Deploy (Bicep)
+  # =========================================================================
+  deploy-bicep:
+    name: "Deploy ${{ inputs.profile }} LZ (Bicep)"
+    needs: preflight
+    if: inputs.framework == 'bicep'
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Set Subscription
+        run: az account set --subscription "${{ needs.preflight.outputs.subscription_id }}"
+
+      - name: What-If Analysis
+        if: inputs.action == 'plan'
+        run: |
+          az deployment sub what-if \
+            --location eastus2 \
+            --template-file infra/bicep/main.bicep \
+            --parameters profileName=${{ inputs.profile }} \
+            --parameters managementGroupName=${{ inputs.profile }}
+
+      - name: Deploy Landing Zone
+        if: inputs.action == 'deploy'
+        run: |
+          az deployment sub create \
+            --location eastus2 \
+            --template-file infra/bicep/main.bicep \
+            --parameters profileName=${{ inputs.profile }} \
+            --parameters managementGroupName=${{ inputs.profile }} \
+            --name "alz-${{ inputs.profile }}-$(date +%Y%m%d%H%M%S)"
+
+  # =========================================================================
+  # Deploy (Terraform)
+  # =========================================================================
+  deploy-terraform:
+    name: "Deploy ${{ inputs.profile }} LZ (Terraform)"
+    needs: preflight
+    if: inputs.framework == 'terraform'
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ inputs.profile }}-${{ inputs.environment }}.terraform.tfstate"
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan \
+            -var-file="environments/${{ inputs.environment }}/terraform.tfvars" \
+            -var="subscription_id=${{ needs.preflight.outputs.subscription_id }}" \
+            -out=tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
+
+      - name: Terraform Apply
+        if: inputs.action == 'deploy'
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
+
+  # =========================================================================
+  # Post-Deployment Validation
+  # =========================================================================
+  validate:
+    name: Post-Deployment Validation
+    needs: [preflight, deploy-bicep, deploy-terraform]
+    if: |
+      always() && inputs.action == 'deploy' &&
+      (needs.deploy-bicep.result == 'success' || needs.deploy-terraform.result == 'success')
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Landing Zone Validation
+        run: |
+          python -c "
+          import asyncio, json
+          from src.tools.resource_graph import ResourceGraphClient
+
+          async def main():
+              client = ResourceGraphClient()
+              result = await client.validate_landing_zone('${{ needs.preflight.outputs.subscription_id }}')
+              print(json.dumps(result, indent=2, default=str))
+              if not result.get('validation_passed'):
+                  print('::warning::Landing zone validation found missing resources')
+          asyncio.run(main())
+          "

@@ -1,0 +1,196 @@
+name: "5 - PR Validation"
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - "src/**"
+      - "environments/**"
+      - "scripts/**"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  # =========================================================================
+  # Lint & Format
+  # =========================================================================
+  lint:
+    name: Lint & Format
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Python Lint
+        run: |
+          pip install ruff
+          ruff check src/ scripts/ tests/
+
+      - name: YAML Lint
+        run: |
+          pip install yamllint
+          yamllint -d relaxed src/config/ environments/
+
+  # =========================================================================
+  # Security Baseline Check
+  # =========================================================================
+  security-baseline:
+    name: Security Baseline
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate Security Baseline
+        run: python scripts/validators/validate_security_baseline.py
+
+  # =========================================================================
+  # Cost Governance Check
+  # =========================================================================
+  cost-governance:
+    name: Cost Governance
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate Cost Governance
+        run: python scripts/validators/validate_cost_governance.py
+
+  # =========================================================================
+  # Bicep Validation
+  # =========================================================================
+  bicep-validate:
+    name: Bicep Build & Lint
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Bicep Build (validates all templates)
+        run: |
+          for f in $(find infra/bicep -name "*.bicep"); do
+            echo "Validating: $f"
+            az bicep build --file "$f" --stdout > /dev/null
+          done
+
+  # =========================================================================
+  # Terraform Validation
+  # =========================================================================
+  terraform-validate:
+    name: Terraform Validate & Format
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Format Check
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate (modules)
+        run: |
+          for dir in infra/terraform/modules/*/; do
+            echo "Validating: $dir"
+            cd "$dir"
+            terraform init -backend=false
+            terraform validate
+            cd -
+          done
+
+  # =========================================================================
+  # Unit Tests
+  # =========================================================================
+  tests:
+    name: Unit Tests
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Tests
+        run: pytest tests/ -v --tb=short
+
+  # =========================================================================
+  # Challenger Agent Review (for complex PRs)
+  # =========================================================================
+  challenger-review:
+    name: Challenger Agent Review
+    needs: [lint, security-baseline, cost-governance, bicep-validate, terraform-validate, tests]
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Classify PR Complexity
+        id: classify
+        run: |
+          python -c "
+          import subprocess, os
+          diff = subprocess.run(['git', 'diff', '--stat', 'origin/main...HEAD'], capture_output=True, text=True).stdout
+          lines = diff.strip().split('\n')
+          file_count = len(lines) - 1 if lines else 0
+
+          if file_count > 20:
+              complexity = 'high'
+          elif file_count > 5:
+              complexity = 'medium'
+          else:
+              complexity = 'low'
+
+          print(f'Changed files: {file_count}, Complexity: {complexity}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'complexity={complexity}\n')
+          "
+
+      - name: Run Challenger Review
+        if: steps.classify.outputs.complexity != 'low'
+        run: |
+          echo "Complexity: ${{ steps.classify.outputs.complexity }}"
+          echo "Challenger review would run for medium/high complexity PRs"
+          echo "Requires AZURE_AI_PROJECT_CONNECTION_STRING to be configured"

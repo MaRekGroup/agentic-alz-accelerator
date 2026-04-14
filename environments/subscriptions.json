@@ -1,0 +1,141 @@
+{
+  "$schema": "subscriptions/v2",
+  "description": "Azure Landing Zone subscription mapping — 1 tenant, 10 subscriptions. Application LZ names are fully configurable: rename, add, or remove entries under 'application' to match your workloads.",
+  "tenant_id": "<YOUR-TENANT-ID>",
+  "management_group_prefix": "alz",
+  "primary_location": "eastus2",
+  "secondary_location": "centralus",
+
+  "platform": {
+    "management": {
+      "subscription_id": "<SUB-1-ID>",
+      "subscription_name": "alz-platform-management",
+      "location": "eastus2",
+      "deploy_order": 1,
+      "profile": "platform-management",
+      "environment": "prod",
+      "github_environment": "platform-management",
+      "github_secret": "PLATFORM_MGMT_SUBSCRIPTION_ID",
+      "description": "Centralized logging, Sentinel, Automation, backup"
+    },
+    "connectivity": {
+      "subscription_id": "<SUB-2-ID>",
+      "subscription_name": "alz-platform-connectivity",
+      "location": "eastus2",
+      "deploy_order": 2,
+      "profile": "platform-connectivity",
+      "environment": "prod",
+      "github_environment": "platform-connectivity",
+      "github_secret": "PLATFORM_CONN_SUBSCRIPTION_ID",
+      "description": "Hub networking, Firewall, DNS, DDoS, ExpressRoute/VPN"
+    },
+    "identity": {
+      "subscription_id": "<SUB-3-ID>",
+      "subscription_name": "alz-platform-identity",
+      "location": "eastus2",
+      "deploy_order": 3,
+      "profile": "platform-identity",
+      "environment": "prod",
+      "github_environment": "platform-identity",
+      "github_secret": "PLATFORM_IDTY_SUBSCRIPTION_ID",
+      "description": "AD DS domain controllers, PIM, PAWs"
+    },
+    "security": {
+      "subscription_id": "<SUB-4-ID>",
+      "subscription_name": "alz-platform-security",
+      "location": "eastus2",
+      "deploy_order": 4,
+      "profile": "platform-security",
+      "environment": "prod",
+      "github_environment": "platform-security",
+      "github_secret": "PLATFORM_SEC_SUBSCRIPTION_ID",
+      "description": "Dedicated SecOps — Sentinel, Defender, SOAR"
+    }
+  },
+
+  "application": {
+    "_readme": "CONFIGURABLE: Rename keys, change profiles, add or remove entries. The workflow reads this file dynamically — no code changes needed. Each key becomes a deployment target name. Valid profiles: corp, online, sandbox, sap. Valid management_groups: landingzones-corp, landingzones-online, landingzones-sap, sandbox.",
+
+    "corp-erp": {
+      "display_name": "Corp ERP",
+      "subscription_id": "<SUB-5-ID>",
+      "subscription_name": "alz-lz-corp-erp",
+      "location": "eastus2",
+      "profile": "corp",
+      "management_group": "landingzones-corp",
+      "environment": "prod",
+      "github_environment": "app-prod",
+      "github_secret": "APP_CORP_ERP_SUBSCRIPTION_ID",
+      "description": "Internal ERP system (private connectivity)"
+    },
+    "corp-crm": {
+      "display_name": "Corp CRM",
+      "subscription_id": "<SUB-6-ID>",
+      "subscription_name": "alz-lz-corp-crm",
+      "location": "eastus2",
+      "profile": "corp",
+      "management_group": "landingzones-corp",
+      "environment": "prod",
+      "github_environment": "app-prod",
+      "github_secret": "APP_CORP_CRM_SUBSCRIPTION_ID",
+      "description": "Internal CRM system (private connectivity)"
+    },
+    "web-portal": {
+      "display_name": "Online Web Portal",
+      "subscription_id": "<SUB-7-ID>",
+      "subscription_name": "alz-lz-online-web",
+      "location": "eastus2",
+      "profile": "online",
+      "management_group": "landingzones-online",
+      "environment": "prod",
+      "github_environment": "app-prod",
+      "github_secret": "APP_ONLINE_WEB_SUBSCRIPTION_ID",
+      "description": "Public-facing web portal"
+    },
+    "api-gateway": {
+      "display_name": "Online API Gateway",
+      "subscription_id": "<SUB-8-ID>",
+      "subscription_name": "alz-lz-online-api",
+      "location": "eastus2",
+      "profile": "online",
+      "management_group": "landingzones-online",
+      "environment": "prod",
+      "github_environment": "app-prod",
+      "github_secret": "APP_ONLINE_API_SUBSCRIPTION_ID",
+      "description": "Public-facing API gateway"
+    },
+    "sap-s4hana": {
+      "display_name": "SAP S/4HANA",
+      "subscription_id": "<SUB-9-ID>",
+      "subscription_name": "alz-lz-sap",
+      "location": "eastus2",
+      "profile": "sap",
+      "management_group": "landingzones-sap",
+      "environment": "prod",
+      "github_environment": "app-prod",
+      "github_secret": "APP_SAP_SUBSCRIPTION_ID",
+      "description": "SAP S/4HANA workloads"
+    },
+    "dev-sandbox": {
+      "display_name": "Dev Sandbox",
+      "subscription_id": "<SUB-10-ID>",
+      "subscription_name": "alz-lz-sandbox",
+      "location": "eastus2",
+      "profile": "sandbox",
+      "management_group": "sandbox",
+      "environment": "dev",
+      "github_environment": "app-dev",
+      "github_secret": "APP_SANDBOX_SUBSCRIPTION_ID",
+      "description": "Dev/test sandbox ($500/mo cap)"
+    }
+  },
+
+  "github_environments": {
+    "platform-management":  { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "platform-connectivity": { "requires_approval": true,  "reviewers": ["platform-team", "network-team"] },
+    "platform-identity":    { "requires_approval": true,  "reviewers": ["platform-team", "identity-team"] },
+    "platform-security":    { "requires_approval": true,  "reviewers": ["platform-team", "security-team"] },
+    "app-prod":             { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-dev":              { "requires_approval": false, "reviewers": [] }
+  }
+}

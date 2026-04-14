@@ -1,0 +1,397 @@
+# ============================================================================
+# Continuous Landing Zone Monitoring
+# Scheduled compliance scans, drift detection, auto-remediation, and alerts.
+# Runs every 30 minutes on schedule, or manually with scan type selection.
+# ============================================================================
+name: "4 · Landing Zone Monitoring"
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # Compliance scan every 30 min
+    - cron: '0 * * * *'      # Drift detection every hour (on the hour)
+    - cron: '0 6 * * *'      # Full audit daily at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan'
+        required: true
+        type: choice
+        options:
+          - full           # Compliance + drift + report
+          - compliance     # Policy compliance only
+          - drift          # Drift detection only
+          - report         # Generate audit report only
+      scope:
+        description: 'Scope of scan'
+        required: true
+        type: choice
+        options:
+          - all-subscriptions  # Scan all 10
+          - platform-only      # Scan 4 platform subs
+          - app-only           # Scan 6 app subs
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  # =========================================================================
+  # Determine scan parameters
+  # =========================================================================
+  setup:
+    name: Configure Scan
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      scan_type: ${{ steps.params.outputs.scan_type }}
+      subscriptions: ${{ steps.params.outputs.subscriptions }}
+    steps:
+      - name: Determine scan parameters
+        id: params
+        run: |
+          # Determine scan type from schedule or manual input
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            CRON="${{ github.event.schedule }}"
+            case "$CRON" in
+              "*/30 * * * *") SCAN_TYPE="compliance" ;;
+              "0 * * * *")    SCAN_TYPE="drift" ;;
+              "0 6 * * *")    SCAN_TYPE="full" ;;
+              *)              SCAN_TYPE="compliance" ;;
+            esac
+            SCOPE="all-subscriptions"
+          else
+            SCAN_TYPE="${{ inputs.scan_type }}"
+            SCOPE="${{ inputs.scope }}"
+          fi
+
+          # Build subscription list based on scope
+          PLATFORM='["${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}"]'
+          APP='["${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}","${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}","${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}","${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}","${{ secrets.APP_SAP_SUBSCRIPTION_ID }}","${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}"]'
+
+          case "$SCOPE" in
+            platform-only)     SUBS="$PLATFORM" ;;
+            app-only)          SUBS="$APP" ;;
+            *)                 SUBS=$(echo "$PLATFORM $APP" | python3 -c "import sys,json; a=json.loads(sys.stdin.read().split()[0]); b=json.loads(sys.stdin.read().split()[0]) if False else []; print(json.dumps(a+b))" 2>/dev/null || echo "$PLATFORM") ;;
+          esac
+
+          echo "scan_type=$SCAN_TYPE" >> "$GITHUB_OUTPUT"
+          echo "subscriptions=$SUBS" >> "$GITHUB_OUTPUT"
+          echo "Scan: $SCAN_TYPE | Scope: $SCOPE"
+
+  # =========================================================================
+  # Compliance Scan
+  # =========================================================================
+  compliance:
+    name: Compliance Scan
+    needs: setup
+    if: needs.setup.outputs.scan_type != 'drift'
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      violations: ${{ steps.scan.outputs.violations }}
+      compliance_pct: ${{ steps.scan.outputs.compliance_pct }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Run compliance scan across subscriptions
+        id: scan
+        run: |
+          python -c "
+          import asyncio, json, os
+          from src.agents.monitoring_agent import MonitoringAgent
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+
+          async def main():
+              settings = Settings()
+              kernel = Kernel()
+              cred = DefaultAzureCredential()
+              agent = MonitoringAgent(kernel, cred, settings)
+
+              # Scan all subscriptions
+              all_violations = []
+              total_resources = 0
+              compliant_resources = 0
+
+              subscriptions = json.loads('${{ needs.setup.outputs.subscriptions }}' or '[]')
+              for sub_id in subscriptions:
+                  if not sub_id:
+                      continue
+                  try:
+                      settings.azure.subscription_id = sub_id
+                      result = await agent.run_compliance_scan()
+                      violations = result.get('violations', [])
+                      all_violations.extend(violations)
+                      summary = result.get('summary', {})
+                      total_resources += summary.get('total_resources', 0)
+                      compliant_resources += summary.get('compliant_resources', 0)
+                      print(f'Sub {sub_id[:8]}...: {len(violations)} violations')
+                  except Exception as e:
+                      print(f'Sub {sub_id[:8]}...: ERROR - {e}')
+
+              pct = (compliant_resources / max(total_resources, 1)) * 100
+              print(f'')
+              print(f'Total violations: {len(all_violations)}')
+              print(f'Compliance: {pct:.1f}%')
+
+              # Save report
+              report = {
+                  'scan_type': 'compliance',
+                  'subscriptions_scanned': len(subscriptions),
+                  'total_violations': len(all_violations),
+                  'compliance_percentage': round(pct, 1),
+                  'violations': all_violations[:50]  # Limit for artifact size
+              }
+              with open('compliance-report.json', 'w') as f:
+                  json.dump(report, f, indent=2, default=str)
+
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f'violations={len(all_violations)}\n')
+                  f.write(f'compliance_pct={pct:.1f}\n')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report-${{ github.run_number }}
+          path: compliance-report.json
+          retention-days: 90
+
+  # =========================================================================
+  # Drift Detection
+  # =========================================================================
+  drift:
+    name: Drift Detection
+    needs: setup
+    if: needs.setup.outputs.scan_type != 'compliance' && needs.setup.outputs.scan_type != 'report'
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      drifted: ${{ steps.detect.outputs.drifted }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Run drift detection
+        id: detect
+        run: |
+          python -c "
+          import asyncio, json, os
+          from src.agents.monitoring_agent import MonitoringAgent
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+
+          async def main():
+              settings = Settings()
+              kernel = Kernel()
+              cred = DefaultAzureCredential()
+              agent = MonitoringAgent(kernel, cred, settings)
+
+              total_drifted = 0
+              all_drift = []
+
+              subscriptions = json.loads('${{ needs.setup.outputs.subscriptions }}' or '[]')
+              for sub_id in subscriptions:
+                  if not sub_id:
+                      continue
+                  try:
+                      settings.azure.subscription_id = sub_id
+                      result = await agent.detect_drift()
+                      drifted = result.get('total_drifted', 0)
+                      total_drifted += drifted
+                      if drifted > 0:
+                          all_drift.append({'subscription': sub_id, 'drifted': drifted, 'details': result.get('details', [])[:10]})
+                      print(f'Sub {sub_id[:8]}...: {drifted} drifted resources')
+                  except Exception as e:
+                      print(f'Sub {sub_id[:8]}...: ERROR - {e}')
+
+              print(f'Total drifted: {total_drifted}')
+
+              with open('drift-report.json', 'w') as f:
+                  json.dump({'total_drifted': total_drifted, 'details': all_drift}, f, indent=2, default=str)
+
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f'drifted={total_drifted}\n')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report-${{ github.run_number }}
+          path: drift-report.json
+          retention-days: 90
+
+  # =========================================================================
+  # Auto-Remediation (requires approval)
+  # =========================================================================
+  remediate:
+    name: Auto-Remediate
+    needs: [compliance, drift]
+    if: |
+      always() &&
+      (needs.compliance.outputs.violations > 0 || needs.drift.outputs.drifted > 0)
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: remediation
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Download reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-report-${{ github.run_number }}'
+          merge-multiple: true
+
+      - name: Run auto-remediation
+        run: |
+          python -c "
+          import asyncio, json
+          from src.agents.orchestrator import AgentOrchestrator
+          from src.config.settings import Settings
+
+          async def main():
+              settings = Settings()
+              settings.monitor.auto_remediate = True
+              orchestrator = AgentOrchestrator(settings)
+
+              # Load violations from compliance report
+              try:
+                  with open('compliance-report.json') as f:
+                      compliance = json.load(f)
+                  violations = compliance.get('violations', [])
+              except FileNotFoundError:
+                  violations = []
+
+              if violations:
+                  print(f'Remediating {len(violations)} violations...')
+                  result = await orchestrator.remediation_agent.remediate(violations)
+                  print(f'Remediation complete: {json.dumps(result, indent=2, default=str)[:1000]}')
+              else:
+                  print('No violations to remediate')
+
+              # Handle drift
+              try:
+                  with open('drift-report.json') as f:
+                      drift = json.load(f)
+                  drifted = drift.get('total_drifted', 0)
+              except FileNotFoundError:
+                  drifted = 0
+
+              if drifted > 0:
+                  print(f'Correcting {drifted} drifted resources...')
+                  result = await orchestrator.remediation_agent.correct_drift(drift.get('details', []))
+                  print(f'Drift correction complete')
+
+          asyncio.run(main())
+          "
+
+  # =========================================================================
+  # Notify
+  # =========================================================================
+  notify:
+    name: Send Alerts
+    needs: [compliance, drift]
+    if: always()
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - name: Send Teams notification
+        if: secrets.TEAMS_WEBHOOK_URL != ''
+        run: |
+          VIOLATIONS="${{ needs.compliance.outputs.violations || '0' }}"
+          COMPLIANCE="${{ needs.compliance.outputs.compliance_pct || 'N/A' }}"
+          DRIFTED="${{ needs.drift.outputs.drifted || '0' }}"
+
+          # Only notify if there are issues or this is a full audit
+          if [ "$VIOLATIONS" = "0" ] && [ "$DRIFTED" = "0" ]; then
+            echo "No issues found — skipping notification"
+            exit 0
+          fi
+
+          curl -s -H "Content-Type: application/json" -d '{
+            "type": "message",
+            "attachments": [{
+              "contentType": "application/vnd.microsoft.card.adaptive",
+              "content": {
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [
+                  {"type": "TextBlock", "text": "⚠️ ALZ Monitoring Alert", "weight": "bolder", "size": "large"},
+                  {"type": "FactSet", "facts": [
+                    {"title": "Compliance",       "value": "'"$COMPLIANCE"'%"},
+                    {"title": "Violations",       "value": "'"$VIOLATIONS"'"},
+                    {"title": "Drifted Resources", "value": "'"$DRIFTED"'"},
+                    {"title": "Scan Time",        "value": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}
+                  ]},
+                  {"type": "TextBlock", "text": "Review the monitoring workflow run for details.", "wrap": true, "isSubtle": true}
+                ]
+              }
+            }]
+          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+      - name: Create GitHub issue for critical violations
+        if: needs.compliance.outputs.violations > 10
+        run: |
+          gh issue create \
+            --title "ALZ Monitoring: ${{ needs.compliance.outputs.violations }} compliance violations detected" \
+            --body "**Compliance:** ${{ needs.compliance.outputs.compliance_pct }}%
+          **Violations:** ${{ needs.compliance.outputs.violations }}
+          **Drifted Resources:** ${{ needs.drift.outputs.drifted || '0' }}
+
+          Review the [monitoring workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+          Auto-remediation has been triggered and requires approval in the \`remediation\` environment." \
+            --label "alz-monitoring,compliance"
+        env:
+          GH_TOKEN: ${{ github.token }}

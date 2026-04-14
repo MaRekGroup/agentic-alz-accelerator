@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agentic ALZ Accelerator — Interactive Guide</title>
+<style>
+  :root {
+    --ms-blue: #0078D4;
+    --ms-dark: #0B1A33;
+    --ms-navy: #1B2A4A;
+    --ms-light-blue: #50E6FF;
+    --ms-cyan: #00BCF2;
+    --ms-green: #107C10;
+    --ms-orange: #D83B01;
+    --ms-yellow: #FFB900;
+    --ms-purple: #5C2D91;
+    --ms-red: #A4262C;
+    --bg: #F3F5F9;
+    --card: #FFFFFF;
+    --border: #E1E6EF;
+    --text: #1B2A4A;
+    --muted: #5C6B7A;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--ms-dark);
+    color: #fff;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-logo .icon {
+    width: 36px; height: 36px;
+    background: var(--ms-blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .sidebar-logo span {
+    font-size: 13px; font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .sidebar-tagline {
+    font-size: 10px;
+    color: var(--ms-light-blue);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .sidebar nav { flex: 1; padding: 12px 0; }
+
+  .nav-section {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    color: rgba(255,255,255,.75);
+    cursor: pointer;
+    transition: all .15s;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .nav-item.active {
+    background: rgba(0,120,212,.25);
+    color: #fff;
+    border-left-color: var(--ms-blue);
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--ms-blue);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  .sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    font-size: 11px;
+    color: rgba(255,255,255,.35);
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-breadcrumb {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .topbar-breadcrumb span { color: var(--ms-blue); font-weight: 600; }
+
+  .topbar-pills { display: flex; gap: 8px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .pill-green  { background: #E6F4EA; color: var(--ms-green); }
+  .pill-blue   { background: #E3F2FD; color: var(--ms-blue); }
+  .pill-orange { background: #FFF3E0; color: var(--ms-orange); }
+
+  .content { padding: 32px; max-width: 1100px; }
+
+  /* ── Sections ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, var(--ms-dark) 0%, var(--ms-navy) 60%, #1a3a6b 100%);
+    border-radius: 16px;
+    padding: 40px 44px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(0,120,212,.18);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: 80px; bottom: -80px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(80,230,255,.1);
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(0,120,212,.35);
+    color: var(--ms-light-blue);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 { font-size: 30px; font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,.75); max-width: 580px; line-height: 1.6; margin-bottom: 24px; }
+
+  .hero-tagline {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ms-light-blue);
+    margin-bottom: 24px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 26px; font-weight: 800; color: var(--ms-light-blue); }
+  .hero-stat .lbl { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 2px; }
+
+  /* ── Grid ── */
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+    transition: box-shadow .2s;
+  }
+
+  .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+
+  .card-accent {
+    border-top: 3px solid var(--ms-blue);
+  }
+
+  .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+
+  .bg-blue   { background: #E3F2FD; }
+  .bg-green  { background: #E6F4EA; }
+  .bg-orange { background: #FFF3E0; }
+  .bg-purple { background: #F3E5F5; }
+  .bg-red    { background: #FFEBEE; }
+  .bg-cyan   { background: #E0F7FA; }
+
+  /* ── Section header ── */
+  .section-header { margin-bottom: 22px; }
+  .section-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .section-header p  { font-size: 14px; color: var(--muted); }
+
+  /* ── Tables ── */
+  .table-wrap {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--ms-dark);
+    color: #fff;
+    text-align: left;
+    padding: 11px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #FAFBFD; }
+  tr:hover td { background: #EFF4FB; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-blue   { background: #E3F2FD; color: var(--ms-blue); }
+  .badge-green  { background: #E6F4EA; color: var(--ms-green); }
+  .badge-orange { background: #FFF3E0; color: var(--ms-orange); }
+  .badge-red    { background: #FFEBEE; color: var(--ms-red); }
+  .badge-purple { background: #F3E5F5; color: var(--ms-purple); }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--ms-dark);
+    color: #D4E6F1;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  .code-block .comment { color: #6A9955; }
+  .code-block .cmd     { color: var(--ms-light-blue); }
+  .code-block .flag    { color: #CE9178; }
+  .code-block .str     { color: #4EC9B0; }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(255,255,255,.1);
+    border: none;
+    color: rgba(255,255,255,.7);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .copy-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+  /* ── Steps / Workflow ── */
+  .step-container { position: relative; }
+
+  .step-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+
+  .step-left { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+
+  .step-number {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--ms-blue);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-number.gate { background: var(--ms-orange); }
+  .step-number.done { background: var(--ms-green); }
+  .step-number.continuous { background: var(--ms-purple); }
+
+  .step-line {
+    width: 2px;
+    background: var(--border);
+    flex: 1;
+    min-height: 30px;
+    margin-top: 2px;
+  }
+
+  .step-body {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    flex: 1;
+    margin-bottom: 14px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .step-body:hover { border-color: var(--ms-blue); box-shadow: 0 2px 12px rgba(0,120,212,.1); }
+  .step-body.expanded { border-color: var(--ms-blue); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .step-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-agent { font-size: 11px; color: var(--ms-blue); font-weight: 600; }
+  .step-name  { font-size: 15px; font-weight: 700; }
+  .step-emoji { font-size: 20px; }
+
+  .step-chevron {
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform .2s;
+  }
+
+  .step-body.expanded .step-chevron { transform: rotate(180deg); }
+
+  .step-detail {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .step-body.expanded .step-detail { display: block; }
+
+  .step-meta {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .step-detail ul { list-style: none; padding: 0; }
+  .step-detail ul li {
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--muted);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .step-detail ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--ms-blue);
+    font-weight: 700;
+  }
+
+  .gate-banner {
+    background: linear-gradient(90deg, #FFF3E0, #FFF9F0);
+    border: 1px solid #FFD180;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: -6px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ms-orange);
+  }
+
+  /* ── Architecture diagram ── */
+  .arch-diagram {
+    background: var(--ms-dark);
+    border-radius: 12px;
+    padding: 28px;
+    color: #fff;
+    margin-bottom: 22px;
+    font-family: 'Cascadia Code', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+
+  .arch-layer {
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+  }
+
+  .arch-layer-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ms-light-blue);
+    width: 160px;
+    flex-shrink: 0;
+  }
+
+  .arch-layer-items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .arch-chip {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .arch-chip.blue   { border-color: rgba(0,120,212,.5); background: rgba(0,120,212,.15); }
+  .arch-chip.cyan   { border-color: rgba(80,230,255,.4); background: rgba(80,230,255,.1); }
+  .arch-chip.green  { border-color: rgba(16,124,16,.5); background: rgba(16,124,16,.15); }
+  .arch-chip.orange { border-color: rgba(216,59,1,.5); background: rgba(216,59,1,.15); }
+  .arch-chip.purple { border-color: rgba(92,45,145,.5); background: rgba(92,45,145,.15); }
+
+  .arch-arrow {
+    text-align: center;
+    color: rgba(255,255,255,.25);
+    font-size: 16px;
+    margin: -4px 0;
+  }
+
+  /* ── Prereq checklist ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .check-req  { background: #E6F4EA; color: var(--ms-green); }
+  .check-opt  { background: #E3F2FD; color: var(--ms-blue); }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 2px solid var(--border); }
+
+  .tab-btn {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all .15s;
+  }
+
+  .tab-btn:hover { color: var(--ms-blue); }
+  .tab-btn.active { color: var(--ms-blue); border-bottom-color: var(--ms-blue); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Security baseline card ── */
+  .baseline-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+  .baseline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    border-left: 4px solid var(--ms-red);
+  }
+
+  .baseline-item.warn { border-left-color: var(--ms-orange); }
+
+  .baseline-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ms-red);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .baseline-num.warn { background: var(--ms-orange); }
+
+  .baseline-content h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .baseline-content p  { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+  .baseline-codes { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .code-tag {
+    font-family: 'Cascadia Code', monospace;
+    font-size: 11px;
+    background: var(--ms-dark);
+    color: var(--ms-light-blue);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ── CAF Design Areas ── */
+  .caf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 22px; }
+
+  .caf-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    border-top: 3px solid var(--ms-blue);
+  }
+
+  .caf-card:nth-child(2)  { border-top-color: #5C2D91; }
+  .caf-card:nth-child(3)  { border-top-color: #107C10; }
+  .caf-card:nth-child(4)  { border-top-color: #D83B01; }
+  .caf-card:nth-child(5)  { border-top-color: #A4262C; }
+  .caf-card:nth-child(6)  { border-top-color: #00BCF2; }
+  .caf-card:nth-child(7)  { border-top-color: #FFB900; }
+  .caf-card:nth-child(8)  { border-top-color: #0B1A33; }
+
+  .caf-area { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .caf-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .caf-module { font-family: monospace; font-size: 11px; background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--ms-blue); margin-bottom: 8px; display: inline-block; }
+  .caf-agent  { font-size: 12px; color: var(--muted); }
+
+  /* ── Progress tracker ── */
+  .progress-tracker {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+  }
+
+  .progress-tracker h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+
+  .progress-steps {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .prog-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .prog-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+    border: 2px solid transparent;
+  }
+
+  .prog-dot:hover, .prog-dot.current { background: var(--ms-blue); color: #fff; }
+  .prog-dot.done { background: var(--ms-green); color: #fff; }
+
+  .prog-label { font-size: 10px; color: var(--muted); max-width: 56px; text-align: center; line-height: 1.3; }
+
+  .prog-arrow { color: var(--border); font-size: 16px; margin-top: -12px; }
+  .prog-gate  { font-size: 18px; margin-top: -10px; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .caf-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 680px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .content { padding: 18px; }
+    .hero { padding: 24px; }
+  }
+
+  /* ── Tooltip ── */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ms-dark);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 999;
+  }
+
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* ── Notification toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--ms-dark);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.3);
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ─── Search ─── */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 220px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="icon">🏗️</div>
+      <span>ALZ<br/>Accelerator</span>
+    </div>
+    <div class="sidebar-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
+  </div>
+
+  <nav>
+    <div class="nav-section">Navigation</div>
+    <a class="nav-item active" onclick="showSection('overview')">
+      🏠 Overview
+    </a>
+    <a class="nav-item" onclick="showSection('architecture')">
+      🏛️ Architecture
+    </a>
+    <a class="nav-item" onclick="showSection('caf')">
+      📐 CAF Design Areas <span class="nav-badge">8</span>
+    </a>
+    <a class="nav-item" onclick="showSection('agents')">
+      🤖 Agent Roster <span class="nav-badge">10</span>
+    </a>
+
+    <div class="nav-section">Get Started</div>
+    <a class="nav-item" onclick="showSection('prereqs')">
+      ✅ Prerequisites
+    </a>
+    <a class="nav-item" onclick="showSection('install')">
+      ⚙️ Installation
+    </a>
+    <a class="nav-item" onclick="showSection('config')">
+      🔧 Configuration
+    </a>
+
+    <div class="nav-section">Workflow Guide</div>
+    <a class="nav-item" onclick="showSection('workflow')">
+      🔄 9-Step Workflow
+    </a>
+    <a class="nav-item" onclick="showSection('security')">
+      🛡️ Security Baseline
+    </a>
+    <a class="nav-item" onclick="showSection('cost')">
+      💰 Cost Governance
+    </a>
+    <a class="nav-item" onclick="showSection('profiles')">
+      📋 LZ Profiles (4+4)
+    </a>
+
+    <div class="nav-section">Operations</div>
+    <a class="nav-item" onclick="showSection('monitor')">
+      🔭 Monitoring
+    </a>
+    <a class="nav-item" onclick="showSection('remediate')">
+      🔧 Remediation
+    </a>
+    <a class="nav-item" onclick="showSection('cicd')">
+      🚀 CI/CD Pipelines <span class="nav-badge">6</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    APEX-Aligned · CAF-Compliant · v2.0
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════ MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      Agentic ALZ Accelerator &rsaquo; <span id="breadcrumb">Overview</span>
+    </div>
+    <div class="topbar-pills">
+      <span class="pill pill-green">✓ APEX-Aligned</span>
+      <span class="pill pill-blue">CAF 8/8 Areas</span>
+      <span class="pill pill-orange">v2.0</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div id="section-overview" class="section active">
+      <div class="hero">
+        <div class="hero-tag">🏗️ Agentic Azure Landing Zone Accelerator</div>
+        <h1>AI-Powered Enterprise Landing Zone Lifecycle</h1>
+        <p>A multi-agent workflow that transforms Azure Landing Zone requirements into deployed, governed, and continuously monitored infrastructure — aligned with the Cloud Adoption Framework and APEX agentic infrastructure patterns.</p>
+        <div class="hero-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">10</div><div class="lbl">Specialized Agents</div></div>
+          <div class="hero-stat"><div class="num">8</div><div class="lbl">CAF Design Areas</div></div>
+          <div class="hero-stat"><div class="num">6</div><div class="lbl">Approval Gates</div></div>
+          <div class="hero-stat"><div class="num">2</div><div class="lbl">IaC Frameworks</div></div>
+          <div class="hero-stat"><div class="num">5</div><div class="lbl">MCP Servers</div></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>What This Accelerator Does</h2>
+        <p>End-to-end automation from requirements to continuous monitoring.</p>
+      </div>
+
+      <div class="grid grid-3" style="margin-bottom:28px">
+        <div class="card card-accent">
+          <div class="card-icon bg-blue">🚀</div>
+          <h3>Deploy</h3>
+          <p>Conversational agents gather requirements, run adversarial review, and deploy Bicep or Terraform IaC with what-if preview and human approval at every gate.</p>
+        </div>
+        <div class="card card-accent" style="border-top-color:#107C10">
+          <div class="card-icon bg-green">🔭</div>
+          <h3>Monitor</h3>
+          <p>Continuous compliance scans every 30 minutes, hourly drift detection via Resource Graph change tracking, and real-time security posture from Defender for Cloud.</p>
+        </div>
+        <div class="card card-accent" style="border-top-color:#5C2D91">
+          <div class="card-icon bg-purple">🔧</div>
+          <h3>Remediate</h3>
+          <p>8 built-in auto-remediation strategies with pre-action snapshots for rollback. Critical and high violations auto-fixed; medium/low escalated for human approval.</p>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Key Design Principles</h2>
+        <p>Built on APEX patterns and Azure Cloud Adoption Framework guidance.</p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>🏛️ CAF-Aligned</h3>
+          <p>Every IaC module and agent maps to one of the 8 official Azure Landing Zone design areas: Billing & Tenant, Identity, Resource Org, Networking, Security, Management, Governance, Platform Automation.</p>
+        </div>
+        <div class="card">
+          <h3>⚔️ Adversarial Review</h3>
+          <p>The Challenger agent reviews outputs at gates 1, 2, 4, and 5 with depth proportional to complexity: 1× for Simple, 2× for Standard, 3× for Complex deployments.</p>
+        </div>
+        <div class="card">
+          <h3>🛡️ Security-First</h3>
+          <p>6 non-negotiable baseline rules + 7 extended anti-pattern checks enforced at code generation, deploy preflight, pre-commit hooks, CI, and continuous monitoring.</p>
+        </div>
+        <div class="card">
+          <h3>💰 Cost Governance Built-In</h3>
+          <p>Budget alerts at 80/100/120% forecast are mandatory in every deployment. "No budget, no merge" — enforced by validators at commit time and in CI.</p>
+        </div>
+        <div class="card">
+          <h3>🔌 MCP Server Integration</h3>
+          <p>5 MCP servers connect agents to live Azure data: Pricing, Resource Graph, Policy, Deployment, and Monitor. Real-time cost estimates, drift detection, and compliance queries.</p>
+        </div>
+        <div class="card">
+          <h3>🤝 Human-in-the-Loop</h3>
+          <p>6 approval gates ensure humans decide at every critical juncture. Agents orchestrate and prepare — humans validate before anything runs against production Azure.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ARCHITECTURE ═══ -->
+    <div id="section-architecture" class="section">
+      <div class="section-header">
+        <h2>Architecture Overview</h2>
+        <p>6 layers from user interface to Azure resources.</p>
+      </div>
+
+      <div class="arch-diagram">
+        <div class="arch-layer">
+          <div class="arch-layer-label">🖥️ Presentation</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip cyan">Copilot Studio</div>
+            <div class="arch-chip cyan">Teams</div>
+            <div class="arch-chip cyan">CLI</div>
+            <div class="arch-chip cyan">Azure Portal</div>
+          </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+          <div class="arch-layer-label">🧠 Orchestrator</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip blue">Conductor (DAG Workflow)</div>
+            <div class="arch-chip blue">Approval Gates</div>
+            <div class="arch-chip blue">Session State</div>
+            <div class="arch-chip blue">Artifact Handoffs</div>
+          </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+          <div class="arch-layer-label">🤖 Agent Layer</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip">📜 Scribe</div>
+            <div class="arch-chip">🏛️ Oracle</div>
+            <div class="arch-chip">🛡️ Warden</div>
+            <div class="arch-chip">📐 Strategist</div>
+            <div class="arch-chip">⚒️ Forge</div>
+            <div class="arch-chip">🚀 Envoy</div>
+            <div class="arch-chip">📚 Chronicler</div>
+            <div class="arch-chip">🔭 Sentinel</div>
+            <div class="arch-chip">🔧 Mender</div>
+            <div class="arch-chip orange">⚔️ Challenger</div>
+          </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+          <div class="arch-layer-label">🔌 MCP Servers</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip purple">Azure Pricing</div>
+            <div class="arch-chip purple">Resource Graph</div>
+            <div class="arch-chip purple">Azure Policy</div>
+            <div class="arch-chip purple">Deployment</div>
+            <div class="arch-chip purple">Azure Monitor</div>
+          </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+          <div class="arch-layer-label">📦 IaC Modules</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip green">Bicep (AVM)</div>
+            <div class="arch-chip green">Terraform (AVM-TF)</div>
+            <div class="arch-chip green">8 CAF Design Areas</div>
+            <div class="arch-chip green">4 Platform + 4 App LZs</div>
+          </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+          <div class="arch-layer-label">☁️ Azure</div>
+          <div class="arch-layer-items">
+            <div class="arch-chip">Management Groups</div>
+            <div class="arch-chip">Subscriptions</div>
+            <div class="arch-chip">Networking</div>
+            <div class="arch-chip">Identity</div>
+            <div class="arch-chip">Security</div>
+            <div class="arch-chip">Governance</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>MCP Server Details</h2>
+        <p>Agents connect to live Azure data through 5 Model Context Protocol servers.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>MCP Server</th><th>Key Tools</th><th>Used By</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Azure Pricing</strong></td><td>Cost estimation, region comparison, RI pricing, budget calculation</td><td>Oracle, Strategist, Chronicler</td></tr>
+            <tr><td><strong>Azure Resource Graph</strong></td><td>Resource queries, inventory, drift detection, public resource scan</td><td>Sentinel, Mender, Warden</td></tr>
+            <tr><td><strong>Azure Policy</strong></td><td>Policy discovery, compliance checking, assignment classification</td><td>Warden, Sentinel, Challenger</td></tr>
+            <tr><td><strong>Azure Deployment</strong></td><td>Bicep/TF deploy, what-if preview, deployment status</td><td>Envoy, Mender</td></tr>
+            <tr><td><strong>Azure Monitor</strong></td><td>Secure score, Defender recommendations, activity log</td><td>Sentinel, Chronicler</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ CAF DESIGN AREAS ═══ -->
+    <div id="section-caf" class="section">
+      <div class="section-header">
+        <h2>CAF Design Area Alignment</h2>
+        <p>Every IaC module and agent maps to an official Azure Landing Zone design area from the Cloud Adoption Framework.</p>
+      </div>
+
+      <div class="caf-grid">
+        <div class="caf-card">
+          <div class="caf-area">Design Area A</div>
+          <div class="caf-title">Billing & Active Directory Tenant</div>
+          <div class="caf-module">billing-and-tenant/</div>
+          <div class="caf-agent">👤 <strong>Agents:</strong> Scribe, Oracle</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Enterprise enrollment, management group root, tenant setup. Foundation of the entire hierarchy.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area B</div>
+          <div class="caf-title">Identity & Access Management</div>
+          <div class="caf-module">identity-and-access/</div>
+          <div class="caf-agent">🛡️ <strong>Agents:</strong> Warden, Forge</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Entra ID, Managed Identity, RBAC assignments, PIM, conditional access policies.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area C</div>
+          <div class="caf-title">Resource Organization</div>
+          <div class="caf-module">resource-organization/</div>
+          <div class="caf-agent">🏛️ <strong>Agents:</strong> Oracle, Strategist</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Management group hierarchy, subscription vending, resource groups, naming conventions, tagging.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area D</div>
+          <div class="caf-title">Network Topology & Connectivity</div>
+          <div class="caf-module">network-topology/</div>
+          <div class="caf-agent">🏛️ <strong>Agents:</strong> Oracle, Forge</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Hub-spoke, VNet, NSG, DDoS protection, Azure Firewall, Private DNS, ExpressRoute/VPN.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area E</div>
+          <div class="caf-title">Security</div>
+          <div class="caf-module">security/</div>
+          <div class="caf-agent">🛡️ <strong>Agents:</strong> Warden, Sentinel</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Defender for Cloud, Microsoft Sentinel, Key Vault, security baseline enforcement, CSPM.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area F</div>
+          <div class="caf-title">Management</div>
+          <div class="caf-module">management/</div>
+          <div class="caf-agent">📚 <strong>Agents:</strong> Chronicler, Sentinel</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Log Analytics, Azure Monitor, Automation Account, Update Management, Backup, Action Groups.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area G</div>
+          <div class="caf-title">Governance</div>
+          <div class="caf-module">governance/</div>
+          <div class="caf-agent">🛡️ <strong>Agents:</strong> Warden, Sentinel</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Azure Policy (custom + built-in), budget alerts, Cost Management, compliance reporting, RBAC governance.</p>
+        </div>
+        <div class="caf-card">
+          <div class="caf-area">Design Area H</div>
+          <div class="caf-title">Platform Automation & DevOps</div>
+          <div class="caf-module">platform-automation/</div>
+          <div class="caf-agent">🚀 <strong>Agents:</strong> Envoy, Forge</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">CI/CD pipelines, GitOps, IaC validation, deployment automation, agent-driven operations.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ AGENTS ═══ -->
+    <div id="section-agents" class="section">
+      <div class="section-header">
+        <h2>Agent Roster</h2>
+        <p>10 specialized agents coordinated by the Conductor orchestrator.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Agent</th><th>Codename</th><th>Step</th><th>Purpose</th><th>Artifact</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Orchestrator</strong></td>
+              <td>🧠 Conductor</td>
+              <td><span class="badge badge-blue">—</span></td>
+              <td>DAG workflow orchestration, approval gates, session state, artifact handoffs</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Requirements</strong></td>
+              <td>📜 Scribe</td>
+              <td><span class="badge badge-blue">1</span></td>
+              <td>Gathers LZ requirements mapped to all 8 CAF areas, classifies complexity</td>
+              <td><code>01-requirements.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Architect</strong></td>
+              <td>🏛️ Oracle</td>
+              <td><span class="badge badge-blue">2</span></td>
+              <td>WAF assessment, CAF design area mapping, real-time cost estimate via MCP</td>
+              <td><code>02-architecture-assessment.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Governance</strong></td>
+              <td>🛡️ Warden</td>
+              <td><span class="badge badge-blue">3.5</span></td>
+              <td>Discovers Azure Policy, classifies Deny/Audit/DINE effects, enforces security baseline</td>
+              <td><code>04-governance-constraints.json</code></td>
+            </tr>
+            <tr>
+              <td><strong>IaC Planner</strong></td>
+              <td>📐 Strategist</td>
+              <td><span class="badge badge-blue">4</span></td>
+              <td>Implementation plan with AVM module selection, CAF naming, dependency mapping</td>
+              <td><code>04-implementation-plan.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Code Generator</strong></td>
+              <td>⚒️ Forge</td>
+              <td><span class="badge badge-blue">5</span></td>
+              <td>Generates Bicep (AVM) or Terraform with security baseline enforced at generation time</td>
+              <td><code>infra/{bicep,terraform}/{project}/</code></td>
+            </tr>
+            <tr>
+              <td><strong>Deployer</strong></td>
+              <td>🚀 Envoy</td>
+              <td><span class="badge badge-blue">6</span></td>
+              <td>Runs what-if/plan preview, deploys after human gate approval, post-deploy validation</td>
+              <td><code>06-deployment-summary.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Documentation</strong></td>
+              <td>📚 Chronicler</td>
+              <td><span class="badge badge-blue">7</span></td>
+              <td>As-built design doc, ops runbook, resource inventory, compliance matrix</td>
+              <td><code>07-*.md suite</code></td>
+            </tr>
+            <tr>
+              <td><strong>Monitor</strong></td>
+              <td>🔭 Sentinel</td>
+              <td><span class="badge badge-purple">8 ∞</span></td>
+              <td>Compliance scans (30 min), drift detection (1 hr), security posture, daily audit</td>
+              <td><code>08-compliance-report.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Remediation</strong></td>
+              <td>🔧 Mender</td>
+              <td><span class="badge badge-purple">9 ∞</span></td>
+              <td>Auto-remediates critical/high violations with snapshot rollback, escalates medium/low</td>
+              <td><code>09-remediation-log.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Challenger</strong></td>
+              <td>⚔️ Challenger</td>
+              <td><span class="badge badge-orange">Gates</span></td>
+              <td>Adversarial review at gates 1, 2, 4, 5 — checks CAF, WAF, security, cost, AVM, naming</td>
+              <td>Review annotations</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ PREREQUISITES ═══ -->
+    <div id="section-prereqs" class="section">
+      <div class="section-header">
+        <h2>Prerequisites</h2>
+        <p>Required and optional tooling before you begin.</p>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:22px">
+        <div class="card">
+          <h3 style="margin-bottom:14px">Required</h3>
+          <ul class="checklist">
+            <li><span class="check-icon check-req">✓</span><div><strong>Python 3.11+</strong><br/><span style="color:var(--muted);font-size:12px">Agent framework runs on Python 3.11 or higher</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Azure CLI (az)</strong><br/><span style="color:var(--muted);font-size:12px">Authenticated via <code>az login</code> before running agents</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Azure Subscription</strong><br/><span style="color:var(--muted);font-size:12px">Owner or Contributor role on the target subscription</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Azure OpenAI</strong><br/><span style="color:var(--muted);font-size:12px">GPT-4o deployment (or compatible model) for agent intelligence</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Bicep CLI <em>or</em> Terraform CLI</strong><br/><span style="color:var(--muted);font-size:12px">At least one IaC framework — or both for dual-track</span></div></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px">Optional</h3>
+          <ul class="checklist">
+            <li><span class="check-icon check-opt">i</span><div><strong>Node.js 20+ (LTS)</strong><br/><span style="color:var(--muted);font-size:12px">For running validation scripts via npm</span></div></li>
+            <li><span class="check-icon check-opt">i</span><div><strong>Lefthook</strong><br/><span style="color:var(--muted);font-size:12px">Pre-commit hooks for security baseline enforcement</span></div></li>
+            <li><span class="check-icon check-opt">i</span><div><strong>Docker</strong><br/><span style="color:var(--muted);font-size:12px">For dev container support (.devcontainer)</span></div></li>
+            <li><span class="check-icon check-opt">i</span><div><strong>GitHub CLI (gh)</strong><br/><span style="color:var(--muted);font-size:12px">For managing CI/CD pipeline triggers</span></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Azure Role Requirements</h2>
+        <p>Minimum roles needed at each scope.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scope</th><th>Role</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Management Group</td><td><span class="badge badge-red">Owner</span></td><td>Policy assignments, RBAC, management group operations</td></tr>
+            <tr><td>Subscription</td><td><span class="badge badge-orange">Contributor</span></td><td>Resource deployment, Bicep/Terraform apply</td></tr>
+            <tr><td>Subscription</td><td><span class="badge badge-blue">Security Admin</span></td><td>Defender for Cloud, security assessments</td></tr>
+            <tr><td>Resource Group</td><td><span class="badge badge-green">Reader</span></td><td>Resource Graph queries, monitoring reads</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card card-accent" style="border-top-color:#107C10;margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div class="card-icon bg-green" style="margin-bottom:0;width:36px;height:36px;font-size:18px">📋</div>
+          <h3 style="margin-bottom:0;font-size:16px">Bootstrap Settings Checklist</h3>
+        </div>
+        <p style="margin-bottom:12px">Before starting, complete the Bootstrap Settings Checklist (<code>docs/ALZ_Bootstrap_Settings_Checklist.xlsx</code>) to gather all required values. The checklist has three tabs:</p>
+        <div class="table-wrap" style="margin-bottom:12px">
+          <table>
+            <thead><tr><th>Tab</th><th>Covers</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Accelerator - Bootstrap</strong></td><td>Subscriptions, OIDC configuration, GitHub environments</td></tr>
+              <tr><td><strong>Accelerator - Bicep</strong></td><td>Topology, IP addressing, policies, budgets</td></tr>
+              <tr><td><strong>Accelerator - Terraform</strong></td><td>Same as Bicep + state management</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:12px;color:var(--muted)"><strong>Tip:</strong> Share this checklist with your networking, security, and identity teams to gather inputs in parallel.</p>
+      </div>
+    </div>
+
+    <!-- ═══ INSTALLATION ═══ -->
+    <div id="section-install" class="section">
+      <div class="section-header">
+        <h2>Installation</h2>
+        <p>Get the accelerator running in under 10 minutes.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3 style="margin-bottom:12px">Step 1 — Clone and set up environment</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Clone the repository</span>
+git clone https://github.com/your-org/agentic-alz-accelerator.git
+cd agentic-alz-accelerator
+
+<span class="comment"># Create virtual environment</span>
+python -m venv .venv
+<span class="cmd">source .venv/bin/activate</span>  <span class="comment"># Linux/Mac</span>
+<span class="comment"># .venv\Scripts\activate   # Windows</span>
+
+<span class="comment"># Install Python dependencies</span>
+pip install -r requirements.txt</div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3 style="margin-bottom:12px">Step 2 — Configure environment variables</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Copy the example config</span>
+cp .env.example .env
+
+<span class="comment"># Edit with your values</span>
+<span class="flag">AZURE_AI_PROJECT_CONNECTION_STRING</span>=<span class="str">your-connection-string</span>
+<span class="flag">AZURE_OPENAI_ENDPOINT</span>=<span class="str">https://your-resource.openai.azure.com/</span>
+<span class="flag">AZURE_OPENAI_DEPLOYMENT</span>=<span class="str">gpt-4o</span>
+<span class="flag">AZURE_SUBSCRIPTION_ID</span>=<span class="str">your-subscription-id</span>
+<span class="flag">IAC_FRAMEWORK</span>=<span class="str">bicep</span>  <span class="comment"># or terraform</span></div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3 style="margin-bottom:12px">Step 3 — Authenticate to Azure</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Interactive login (recommended for dev)</span>
+az login
+
+<span class="comment"># Or use a service principal (recommended for CI/CD)</span>
+az login --service-principal \
+  <span class="flag">--username</span> $AZURE_CLIENT_ID \
+  <span class="flag">--password</span> $AZURE_CLIENT_SECRET \
+  <span class="flag">--tenant</span> $AZURE_TENANT_ID</div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3 style="margin-bottom:12px">Step 4 — Install pre-commit hooks (optional but recommended)</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Install Lefthook</span>
+npm install
+
+<span class="comment"># Install the hooks into git</span>
+npx lefthook install
+
+<span class="comment"># Verify hooks are installed</span>
+npx lefthook run pre-commit --all-files</div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px">Step 5 — Run your first workflow</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Full APEX workflow with approval gates (recommended)</span>
+python -m src.agents.orchestrator \
+  <span class="flag">--mode</span> workflow \
+  <span class="flag">--project</span> my-first-landing-zone \
+  <span class="flag">--iac-tool</span> bicep
+
+<span class="comment"># Or deploy directly with a profile</span>
+python -m src.agents.orchestrator \
+  <span class="flag">--mode</span> deploy \
+  <span class="flag">--profile</span> corp
+
+<span class="comment"># Continuous monitoring only</span>
+python -m src.agents.orchestrator <span class="flag">--mode</span> monitor</div>
+      </div>
+    </div>
+
+    <!-- ═══ CONFIG ═══ -->
+    <div id="section-config" class="section">
+      <div class="section-header">
+        <h2>Configuration</h2>
+        <p>Key settings that control agent behavior and IaC deployment.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'cfg','env')">Environment (.env)</button>
+        <button class="tab-btn" onclick="showTab(this,'cfg','agent')">Agent Config</button>
+        <button class="tab-btn" onclick="showTab(this,'cfg','profiles')">Profile Selection</button>
+      </div>
+
+      <div id="cfg-env" class="tab-panel active">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>AZURE_AI_PROJECT_CONNECTION_STRING</code></td><td><span class="badge badge-red">Yes</span></td><td>Azure AI Agent Service connection string</td></tr>
+              <tr><td><code>AZURE_OPENAI_ENDPOINT</code></td><td><span class="badge badge-red">Yes</span></td><td>Azure OpenAI resource endpoint</td></tr>
+              <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td><span class="badge badge-red">Yes</span></td><td>Model deployment name (e.g., gpt-4o)</td></tr>
+              <tr><td><code>AZURE_SUBSCRIPTION_ID</code></td><td><span class="badge badge-red">Yes</span></td><td>Target subscription for LZ deployment</td></tr>
+              <tr><td><code>IAC_FRAMEWORK</code></td><td><span class="badge badge-orange">Default: bicep</span></td><td>bicep or terraform</td></tr>
+              <tr><td><code>MONITOR_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Compliance scan interval (default: 30)</td></tr>
+              <tr><td><code>DRIFT_CHECK_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Drift detection interval (default: 60)</td></tr>
+              <tr><td><code>AUTO_REMEDIATE</code></td><td><span class="badge badge-green">Optional</span></td><td>Auto-remediate violations (default: false)</td></tr>
+              <tr><td><code>AZURE_MANAGEMENT_GROUP_PREFIX</code></td><td><span class="badge badge-green">Optional</span></td><td>Root management group prefix (default: alz)</td></tr>
+              <tr><td><code>TERRAFORM_STATE_STORAGE_ACCOUNT</code></td><td><span class="badge badge-green">TF only</span></td><td>Storage account for Terraform state</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cfg-agent" class="tab-panel">
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># src/config/agent_config.yaml</span>
+
+agents:
+  monitoring:
+    scan_interval_minutes: <span class="str">30</span>
+    drift_interval_minutes: <span class="str">60</span>
+    alert_thresholds:
+      critical: <span class="str">immediate</span>
+      high:     <span class="str">15_minutes</span>
+      medium:   <span class="str">daily_report</span>
+
+  remediation:
+    auto_remediate_severities: [<span class="str">"critical"</span>, <span class="str">"high"</span>]
+    max_concurrent_actions: <span class="str">3</span>
+    snapshot_before_remediate: <span class="str">true</span>
+    notification_webhook_url: <span class="str">"${NOTIFICATION_WEBHOOK_URL}"</span>
+
+  governance:
+    security_baseline_enabled: <span class="str">true</span>
+    challenger_min_passes:
+      simple:   <span class="str">1</span>
+      standard: <span class="str">2</span>
+      complex:  <span class="str">3</span>
+
+  deployment:
+    require_what_if: <span class="str">true</span>
+    require_gate_approval: <span class="str">true</span>
+    post_deploy_validation: <span class="str">true</span></div>
+      </div>
+
+      <div id="cfg-profiles" class="tab-panel">
+        <h3 style="margin-bottom:12px;color:var(--ms-blue)">Platform Landing Zones (CAF Enterprise-Scale)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Profile</th><th>Deploy Order</th><th>Purpose</th><th>Key Resources</th><th>Sentinel</th></tr></thead>
+            <tbody>
+              <tr><td><strong>platform-management</strong></td><td>1</td><td>Centralized logging, monitoring, automation</td><td>Log Analytics, Sentinel, Automation Account, Recovery Vault</td><td>✅ (centralized)</td></tr>
+              <tr><td><strong>platform-connectivity</strong></td><td>2</td><td>Hub networking (hub-spoke / vWAN)</td><td>Azure Firewall Premium, DDoS Plan, 20+ DNS Zones, ER/VPN GW</td><td>❌</td></tr>
+              <tr><td><strong>platform-identity</strong></td><td>3</td><td>AD DS domain controllers, PIM</td><td>DC VMs (2 AZs), PAWs, Key Vault, PIM roles</td><td>❌</td></tr>
+              <tr><td><strong>platform-security</strong></td><td>4</td><td>Dedicated SecOps — threat detection &amp; response</td><td>Sentinel (dedicated), Defender (12 plans), SOAR, TI, Key Vault</td><td>✅ (dedicated)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 style="margin:18px 0 12px;color:var(--ms-blue)">Application Landing Zones</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Profile</th><th>Use Case</th><th>Networking</th><th>DDoS</th><th>Log Retention</th><th>Sentinel</th></tr></thead>
+            <tbody>
+              <tr><td><strong>online</strong></td><td>Internet-facing apps, WAF-protected</td><td>Hub-spoke + WAF</td><td>✅</td><td>90 days</td><td>❌</td></tr>
+              <tr><td><strong>corp</strong></td><td>Internal corporate, private connectivity</td><td>Hub-spoke + ER/VPN</td><td>✅</td><td>365 days</td><td>✅</td></tr>
+              <tr><td><strong>sandbox</strong></td><td>Dev/test, relaxed policies</td><td>Standalone VNet</td><td>❌</td><td>30 days</td><td>❌</td></tr>
+              <tr><td><strong>sap</strong></td><td>SAP workloads, ANF, proximity groups</td><td>Hub-spoke + ER + ANF</td><td>✅</td><td>365 days</td><td>✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ WORKFLOW ═══ -->
+    <div id="section-workflow" class="section">
+      <div class="section-header">
+        <h2>9-Step APEX Workflow</h2>
+        <p>Click any step to see details. Gates require human approval before proceeding.</p>
+      </div>
+
+      <div class="progress-tracker">
+        <h3>Workflow Progress</h3>
+        <div class="progress-steps">
+          <div class="prog-step"><div class="prog-dot current" data-tip="Requirements">1</div><div class="prog-label">Requirements</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 1">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Architecture">2</div><div class="prog-label">Architecture</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 2">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Governance">3.5</div><div class="prog-label">Governance</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 3">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Plan">4</div><div class="prog-label">Plan</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 4">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Code Gen">5</div><div class="prog-label">Code Gen</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 5">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Deploy">6</div><div class="prog-label">Deploy</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-gate" data-tip="Approval Gate 6">🛑</div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Docs">7</div><div class="prog-label">Docs</div></div>
+          <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Monitor">8∞</div><div class="prog-label">Monitor</div></div>
+          <div class="prog-arrow">↔</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Remediate">9∞</div><div class="prog-label">Remediate</div></div>
+        </div>
+      </div>
+
+      <div class="step-container">
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">📜</span>
+                <div>
+                  <div class="step-agent">📜 SCRIBE</div>
+                  <div class="step-name">Requirements Gathering</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifact: 01-requirements.md</span>
+                <span class="badge badge-green">CAF: All 8 Design Areas</span>
+              </div>
+              <ul>
+                <li>Conversational gathering of landing zone requirements</li>
+                <li>Maps responses to all 8 CAF design areas systematically</li>
+                <li>Validates completeness (missing areas flagged before Gate 1)</li>
+                <li>Classifies complexity: Simple / Standard / Complex</li>
+                <li>Complexity drives Challenger review depth at subsequent gates</li>
+                <li>Outputs structured requirements document for Oracle handoff</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 1 — Confirm requirements are complete before continuing</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🏛️</span>
+                <div>
+                  <div class="step-agent">🏛️ ORACLE + ⚔️ CHALLENGER</div>
+                  <div class="step-name">Architecture Assessment</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifact: 02-architecture-assessment.md</span>
+                <span class="badge badge-orange">Challenger Reviews</span>
+              </div>
+              <ul>
+                <li>WAF pillar assessment: Reliability, Security, Cost, Ops, Performance</li>
+                <li>CAF design area mapping and recommendations per area</li>
+                <li>Real-time cost estimation via Azure Pricing MCP server</li>
+                <li>Challenger performs adversarial review (depth per complexity tier)</li>
+                <li>Challenger checks: CAF coverage, WAF trade-offs, security posture, cost reasonableness</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 2 — Approve WAF/CAF architecture assessment</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number" style="font-size:11px">3.5</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🛡️</span>
+                <div>
+                  <div class="step-agent">🛡️ WARDEN</div>
+                  <div class="step-name">Governance Discovery</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifact: 04-governance-constraints.json</span>
+                <span class="badge badge-red">Security Baseline</span>
+              </div>
+              <ul>
+                <li>Discovers all Azure Policy assignments at target scope via Policy MCP</li>
+                <li>Classifies effects: Deny, Audit, Modify, DeployIfNotExists</li>
+                <li>Produces governance constraints file for Strategist handoff</li>
+                <li>Enforces 6 non-negotiable security baseline rules</li>
+                <li>Runs 7 extended anti-pattern checks</li>
+                <li>IaC planner must satisfy all Deny policies or flag for exception</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 3 — Approve governance constraints before planning</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">4</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">📐</span>
+                <div>
+                  <div class="step-agent">📐 STRATEGIST + ⚔️ CHALLENGER</div>
+                  <div class="step-name">Implementation Planning</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifact: 04-implementation-plan.md</span>
+                <span class="badge badge-blue">IaC Track: Bicep or Terraform</span>
+              </div>
+              <ul>
+                <li>Takes requirements + governance constraints as input</li>
+                <li>Selects AVM (Azure Verified Modules) for each resource type</li>
+                <li>Maps resources to CAF design area modules</li>
+                <li>Validates CAF naming conventions and required tags</li>
+                <li>Builds resource dependency graph</li>
+                <li>Challenger adversarial review: AVM compliance, naming, cost, security</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 4 — Approve implementation plan</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">5</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">⚒️</span>
+                <div>
+                  <div class="step-agent">⚒️ FORGE + ⚔️ CHALLENGER</div>
+                  <div class="step-name">IaC Code Generation</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Output: infra/{bicep,terraform}/{project}/</span>
+                <span class="badge badge-red">Baseline Enforced</span>
+              </div>
+              <ul>
+                <li>Generates Bicep or Terraform from the implementation plan</li>
+                <li>AVM-first: uses Azure Verified Modules where available</li>
+                <li>Security baseline enforced at generation time (not as a patch)</li>
+                <li>Cost governance: budget alert resources included in every template</li>
+                <li>Subagent runs lint + what-if/plan before Gate 5</li>
+                <li>Challenger reviews: security baseline compliance, anti-patterns, policy alignment</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 5 — Approve code, lint results, and what-if/plan output</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">6</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🚀</span>
+                <div>
+                  <div class="step-agent">🚀 ENVOY</div>
+                  <div class="step-name">Deployment</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifact: 06-deployment-summary.md</span>
+                <span class="badge badge-green">Via Deployment MCP</span>
+              </div>
+              <ul>
+                <li>Pre-deploy security review (Challenger + security baseline validator)</li>
+                <li>Runs what-if/plan preview for human review at Gate 6</li>
+                <li>Executes deployment via Azure Deployment MCP server</li>
+                <li>Post-deployment validation: resource existence, policy compliance check</li>
+                <li>Generates deployment summary with resource IDs and next steps</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gate-banner">🛑 Gate 6 — Verify deployed resources before handing to Chronicler</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number done">7</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">📚</span>
+                <div>
+                  <div class="step-agent">📚 CHRONICLER</div>
+                  <div class="step-name">As-Built Documentation</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifacts: 07-*.md suite</span>
+              </div>
+              <ul>
+                <li>As-built design document</li>
+                <li>Operations runbook</li>
+                <li>Resource inventory from Resource Graph</li>
+                <li>Actual cost estimate from Azure Pricing MCP</li>
+                <li>Compliance matrix (policies vs. resources)</li>
+                <li>Backup and DR plan</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number continuous">8∞</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🔭</span>
+                <div>
+                  <div class="step-agent">🔭 SENTINEL (Continuous)</div>
+                  <div class="step-name">Compliance Monitoring</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-purple">Continuous Loop</span>
+                <span class="badge badge-blue">Every 30 min</span>
+              </div>
+              <ul>
+                <li>Compliance scan every 30 minutes via Azure Policy + Resource Graph MCP</li>
+                <li>Drift detection every hour via Resource Graph change tracking</li>
+                <li>Security posture from Defender for Cloud via Monitor MCP</li>
+                <li>Full audit daily at 6 AM — generates 08-compliance-report.md</li>
+                <li>Critical violations → Mender immediately</li>
+                <li>High violations → Mender after 15 min grace</li>
+                <li>Medium/Low → daily report for human review</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number continuous">9∞</div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🔧</span>
+                <div>
+                  <div class="step-agent">🔧 MENDER (Event-Driven)</div>
+                  <div class="step-name">Auto-Remediation</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-purple">Event-Driven</span>
+                <span class="badge badge-orange">8 Strategies</span>
+              </div>
+              <ul>
+                <li>Triggered by Sentinel on violation detection</li>
+                <li>Snapshots current resource state before any action</li>
+                <li>8 built-in strategies: deny-public-ip, enforce-https, TLS 1.2, disable-public-storage, private-endpoints, encryption-at-rest, NSG deploy, diagnostic settings</li>
+                <li>Rolls back automatically if post-remediation compliance check fails</li>
+                <li>Appends action to 09-remediation-log.md with full audit trail</li>
+                <li>Escalates non-automatable violations to Teams/email</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ SECURITY ═══ -->
+    <div id="section-security" class="section">
+      <div class="section-header">
+        <h2>Security Baseline</h2>
+        <p>Non-negotiable rules enforced at every stage. Zero tolerance — violations block deployment.</p>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:22px">
+        <div class="card" style="background:#FFF3E0;border:1px solid #FFD180">
+          <h3>🔴 Blocking Violations</h3>
+          <p style="margin-top:6px">Any of the 6 baseline rules missing from your IaC code will <strong>block the pipeline</strong>. The validator returns a non-zero exit code that fails the CI job.</p>
+        </div>
+        <div class="card" style="background:#FFF9F0;border:1px solid #FFE0B2">
+          <h3>⚠️ Extended Anti-Patterns</h3>
+          <p style="margin-top:6px">7 extended checks are warnings by default but escalate to blocking in production environments. Configured via <code>agent_config.yaml</code>.</p>
+        </div>
+      </div>
+
+      <div class="baseline-grid">
+        <div class="baseline-item">
+          <div class="baseline-num">1</div>
+          <div class="baseline-content">
+            <h4>TLS 1.2 Minimum</h4>
+            <p>All storage accounts, SQL servers, and App Services must enforce TLS 1.2 or higher. No negotiation to lower versions.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">minimumTlsVersion: 'TLS1_2'</span>
+              <span class="code-tag">min_tls_version = "1.2"</span>
+            </div>
+          </div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">2</div>
+          <div class="baseline-content">
+            <h4>HTTPS-Only Traffic</h4>
+            <p>Storage accounts and web apps must reject HTTP. No mixed-mode traffic.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">supportsHttpsTrafficOnly: true</span>
+              <span class="code-tag">https_traffic_only_enabled = true</span>
+            </div>
+          </div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">3</div>
+          <div class="baseline-content">
+            <h4>No Public Blob Access</h4>
+            <p>Public blob access must be explicitly disabled on all storage accounts. Containers cannot be set to anonymous read.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">allowBlobPublicAccess: false</span>
+              <span class="code-tag">allow_nested_items_to_be_public = false</span>
+            </div>
+          </div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">4</div>
+          <div class="baseline-content">
+            <h4>Managed Identity Preferred</h4>
+            <p>Resources must use System-Assigned Managed Identity wherever supported. Connection strings with credentials are not allowed.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">identity: &#123; type: 'SystemAssigned' &#125;</span>
+              <span class="code-tag">identity &#123; type = "SystemAssigned" &#125;</span>
+            </div>
+          </div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">5</div>
+          <div class="baseline-content">
+            <h4>Azure AD-Only SQL Authentication</h4>
+            <p>SQL servers must disable local SQL authentication. Azure AD is the only allowed authentication method.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">azureADOnlyAuthentication: true</span>
+              <span class="code-tag">azuread_authentication_only = true</span>
+            </div>
+          </div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">6</div>
+          <div class="baseline-content">
+            <h4>Public Network Disabled (Prod)</h4>
+            <p>Production deployments must disable public network access on all PaaS services. Traffic routes through private endpoints.</p>
+            <div class="baseline-codes">
+              <span class="code-tag">publicNetworkAccess: 'Disabled'</span>
+              <span class="code-tag">public_network_access_enabled = false</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-top:28px">
+        <h2>Enforcement Points</h2>
+        <p>The security baseline is enforced at 5 distinct stages.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Stage</th><th>Mechanism</th><th>Blocking?</th></tr></thead>
+          <tbody>
+            <tr><td>Pre-commit</td><td>Lefthook hook → <code>validate_security_baseline.py</code></td><td><span class="badge badge-red">Yes</span></td></tr>
+            <tr><td>Code Generation</td><td>Forge agent enforces baseline at generation time</td><td><span class="badge badge-red">Yes</span></td></tr>
+            <tr><td>Gate 5 / Challenger</td><td>Adversarial review scans generated IaC</td><td><span class="badge badge-red">Yes</span></td></tr>
+            <tr><td>CI Pipeline</td><td>GitHub Actions / ADO pipeline step</td><td><span class="badge badge-red">Yes</span></td></tr>
+            <tr><td>Continuous Monitoring</td><td>Sentinel scans deployed resources via Resource Graph</td><td><span class="badge badge-orange">Triggers Remediation</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ COST ═══ -->
+    <div id="section-cost" class="section">
+      <div class="section-header">
+        <h2>Cost Governance</h2>
+        <p>Budget alerts are mandatory in every deployment. No budget, no merge.</p>
+      </div>
+
+      <div class="grid grid-3" style="margin-bottom:22px">
+        <div class="card card-accent" style="border-top-color:#107C10">
+          <h3>80% Forecast</h3>
+          <p style="margin-top:8px">Informational alert. Email notification to platform team and workload owner.</p>
+          <div style="margin-top:12px;font-size:24px;font-weight:800;color:#107C10">📧</div>
+        </div>
+        <div class="card card-accent" style="border-top-color:#FFB900">
+          <h3>100% Forecast</h3>
+          <p style="margin-top:8px">Action required. Email notification + Azure Action Group triggers runbook.</p>
+          <div style="margin-top:12px;font-size:24px;font-weight:800;color:#FFB900">⚡</div>
+        </div>
+        <div class="card card-accent" style="border-top-color:#A4262C">
+          <h3>120% Forecast</h3>
+          <p style="margin-top:8px">Critical escalation. Email + Action Group + Teams notification to manager.</p>
+          <div style="margin-top:12px;font-size:24px;font-weight:800;color:#A4262C">🚨</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3 style="margin-bottom:12px">Example Bicep Budget Resource</h3>
+        <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+resource budget <span class="str">'Microsoft.Consumption/budgets@2023-05-01'</span> = {
+  name: <span class="str">'${prefix}-monthly-budget'</span>
+  properties: {
+    category: <span class="str">'Cost'</span>
+    amount: budgetAmountUSD   <span class="comment">// Parameterized — never hardcoded</span>
+    timeGrain: <span class="str">'Monthly'</span>
+    timePeriod: { startDate: <span class="str">'2025-01-01'</span> }
+    notifications: {
+      forecast80: {
+        enabled: true
+        operator: <span class="str">'GreaterThan'</span>
+        threshold: <span class="str">80</span>
+        thresholdType: <span class="str">'Forecasted'</span>
+        contactEmails: contactEmails
+      }
+      forecast100: { threshold: <span class="str">100</span>, thresholdType: <span class="str">'Forecasted'</span> ... }
+      forecast120: { threshold: <span class="str">120</span>, thresholdType: <span class="str">'Forecasted'</span> ... }
+    }
+  }
+}</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Environment</th><th>Budget (USD/month)</th><th>Configured In</th></tr></thead>
+          <tbody>
+            <tr><td>Sandbox</td><td>$500</td><td><code>environments/dev/terraform.tfvars</code></td></tr>
+            <tr><td>Dev / Non-prod</td><td>$2,000</td><td><code>environments/dev/terraform.tfvars</code></td></tr>
+            <tr><td>Production</td><td>As specified in requirements</td><td><code>environments/prod/terraform.tfvars</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ PROFILES ═══ -->
+    <div id="section-profiles" class="section">
+      <div class="section-header">
+        <h2>Landing Zone Profiles</h2>
+        <p>4 Platform LZs (CAF enterprise-scale) + 4 Application LZs. Select via <code>--profile</code>.</p>
+      </div>
+
+      <h3 style="margin-bottom:12px;color:var(--ms-blue)">Platform Landing Zones</h3>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'plat','management')">📊 Management</button>
+        <button class="tab-btn" onclick="showTab(this,'plat','connectivity')">🌐 Connectivity</button>
+        <button class="tab-btn" onclick="showTab(this,'plat','identity')">🔑 Identity</button>
+        <button class="tab-btn" onclick="showTab(this,'plat','security')">🛡️ Security</button>
+      </div>
+
+      <div id="plat-management" class="tab-panel active">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy Order</td><td><strong>1</strong> — deploy first</td></tr>
+            <tr><td>Management Group</td><td>Platform</td></tr>
+            <tr><td>Subscription Purpose</td><td>Centralized logging, monitoring, automation</td></tr>
+            <tr><td>Key Resources</td><td>Log Analytics (365-day), Sentinel, Automation Account, Recovery Vault</td></tr>
+            <tr><td>Policy Initiatives</td><td>Azure Security Benchmark, NIST SP 800-53, ISO 27001</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>✅ Centralized workspace</td></tr>
+            <tr><td>Profile</td><td><code>platform-management</code></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="plat-connectivity" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy Order</td><td><strong>2</strong> — after management</td></tr>
+            <tr><td>Management Group</td><td>Platform</td></tr>
+            <tr><td>Hub Topology</td><td>Hub-spoke (default) or Azure Virtual WAN — selectable</td></tr>
+            <tr><td>Key Resources</td><td>Azure Firewall Premium, DDoS Plan, 20+ Private DNS Zones, ER/VPN GW, Bastion</td></tr>
+            <tr><td>DNS Resolver</td><td>Azure Private DNS Resolver with on-prem forwarding rules</td></tr>
+            <tr><td>Profile</td><td><code>platform-connectivity</code></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="plat-identity" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy Order</td><td><strong>3</strong> — after connectivity</td></tr>
+            <tr><td>Management Group</td><td>Platform</td></tr>
+            <tr><td>Identity Modes</td><td><code>adds</code> | <code>aadds</code> | <code>hybrid</code> (recommended)</td></tr>
+            <tr><td>Key Resources</td><td>DC VMs (HA across 2 AZs), PAWs, Key Vault (AD secrets), PIM</td></tr>
+            <tr><td>NSG Rules</td><td>AD DS ports (389, 636, 88, 445, 3268, 3269)</td></tr>
+            <tr><td>Profile</td><td><code>platform-identity</code></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="plat-security" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy Order</td><td><strong>4</strong> — after identity</td></tr>
+            <tr><td>Management Group</td><td>Platform</td></tr>
+            <tr><td>Subscription Purpose</td><td>Dedicated security operations (separation of duties from Ops)</td></tr>
+            <tr><td>Sentinel</td><td>✅ Dedicated workspace, 730-day retention, 10 data connectors, Fusion ML</td></tr>
+            <tr><td>Defender for Cloud</td><td>All 12 plans enabled, auto-provisioning, MDE integration</td></tr>
+            <tr><td>SOAR Playbooks</td><td>Block-IP, Isolate-VM, Revoke-Session, Enrich-ThreatIntel</td></tr>
+            <tr><td>Threat Intelligence</td><td>Microsoft TI + STIX/TAXII (prod), 3 watchlists</td></tr>
+            <tr><td>Key Vault</td><td>Private endpoint only, purge protection, RBAC</td></tr>
+            <tr><td>Compliance</td><td>CIS 2.0, ASB v3, NIST 800-53, ISO 27001, SOC 2, PCI DSS (prod)</td></tr>
+            <tr><td>Profile</td><td><code>platform-security</code></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <h3 style="margin:24px 0 12px;color:var(--ms-blue)">Application Landing Zones</h3>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'prof','online')">🌐 Online</button>
+        <button class="tab-btn" onclick="showTab(this,'prof','corp')">🏢 Corp</button>
+        <button class="tab-btn" onclick="showTab(this,'prof','sandbox')">🧪 Sandbox</button>
+        <button class="tab-btn" onclick="showTab(this,'prof','sap')">⚙️ SAP</button>
+      </div>
+
+      <div id="prof-online" class="tab-panel active">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Management Group</td><td>Online</td></tr>
+            <tr><td>Networking</td><td>Hub-spoke with WAF (Application Gateway)</td></tr>
+            <tr><td>DDoS Protection</td><td>✅ Enabled</td></tr>
+            <tr><td>Private DNS Zones</td><td>Not required (public endpoints)</td></tr>
+            <tr><td>Policy Initiatives</td><td>Azure Security Benchmark, CIS Azure Foundations</td></tr>
+            <tr><td>Defender Plans</td><td>VMs, App Services, SQL, Storage, Key Vaults</td></tr>
+            <tr><td>Log Retention</td><td>90 days</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>❌ Not required</td></tr>
+            <tr><td>Key Vault</td><td>✅ Required</td></tr>
+            <tr><td>Use Case</td><td>Internet-facing web apps, APIs, e-commerce</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="prof-corp" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Management Group</td><td>Corp</td></tr>
+            <tr><td>Networking</td><td>Hub-spoke with ExpressRoute/VPN peering</td></tr>
+            <tr><td>DDoS Protection</td><td>✅ Enabled</td></tr>
+            <tr><td>DNS Servers</td><td>On-premises DNS (10.0.0.4, 10.0.0.5)</td></tr>
+            <tr><td>Private DNS Zones</td><td>SQL, Blob, Key Vault, and more</td></tr>
+            <tr><td>Policy Initiatives</td><td>Azure Security Benchmark, ISO 27001, NIST SP 800-53</td></tr>
+            <tr><td>Custom Policies</td><td>deny-public-ip, enforce-private-endpoints, deny-public-storage, require-encryption</td></tr>
+            <tr><td>Defender Plans</td><td>VMs, SQL, Storage, Key Vaults, DNS, ARM</td></tr>
+            <tr><td>Log Retention</td><td>365 days</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>✅ Required</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="prof-sandbox" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Management Group</td><td>Sandbox</td></tr>
+            <tr><td>Networking</td><td>Standalone VNet (no hub peering)</td></tr>
+            <tr><td>DDoS Protection</td><td>❌ Not required</td></tr>
+            <tr><td>Policy Initiatives</td><td>Azure Security Benchmark (audit only)</td></tr>
+            <tr><td>Custom Policies</td><td>allowed-vm-skus, budget-enforcement</td></tr>
+            <tr><td>Defender Plans</td><td>VMs only</td></tr>
+            <tr><td>Log Retention</td><td>30 days</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>❌ Not required</td></tr>
+            <tr><td>Budget</td><td>$500/month (hard cap via policy)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div id="prof-sap" class="tab-panel">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Management Group</td><td>Corp</td></tr>
+            <tr><td>Networking</td><td>Hub-spoke + ExpressRoute + ANF subnet</td></tr>
+            <tr><td>DDoS Protection</td><td>✅ Enabled</td></tr>
+            <tr><td>Proximity Placement Groups</td><td>✅ Required for HANA performance</td></tr>
+            <tr><td>ANF Delegation</td><td>Microsoft.NetApp/volumes</td></tr>
+            <tr><td>Policy Initiatives</td><td>Azure Security Benchmark, SAP on Azure Best Practices</td></tr>
+            <tr><td>Accelerated Networking</td><td>✅ Required on SAP app + DB subnets</td></tr>
+            <tr><td>Defender Plans</td><td>VMs, SQL, Storage, Key Vaults, DNS</td></tr>
+            <tr><td>Log Retention</td><td>365 days</td></tr>
+            <tr><td>Microsoft Sentinel</td><td>✅ Required</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══ MONITOR ═══ -->
+    <div id="section-monitor" class="section">
+      <div class="section-header">
+        <h2>Monitoring (🔭 Sentinel)</h2>
+        <p>Continuous compliance scanning, drift detection, and security posture — running 24/7.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Check Type</th><th>Frequency</th><th>Source</th><th>On Violation</th></tr></thead>
+          <tbody>
+            <tr><td>Compliance scan</td><td>Every 30 min</td><td>Azure Policy via Resource Graph MCP</td><td>Route to Mender by severity</td></tr>
+            <tr><td>Drift detection</td><td>Every hour</td><td>Resource Graph change tracking</td><td>Alert + Mender for critical</td></tr>
+            <tr><td>Security posture</td><td>Every 30 min</td><td>Defender for Cloud via Monitor MCP</td><td>Recommendations → Mender</td></tr>
+            <tr><td>Full audit</td><td>Daily 6 AM</td><td>All sources combined</td><td>08-compliance-report.md generated</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-header" style="margin-top:8px">
+        <h2>Alert Thresholds</h2>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="card" style="border-top:3px solid #A4262C">
+          <h3 style="color:#A4262C">🔴 Critical</h3>
+          <p style="margin-top:6px">Immediately routed to Mender for auto-remediation. Teams + email alert sent.</p>
+        </div>
+        <div class="card" style="border-top:3px solid #D83B01">
+          <h3 style="color:#D83B01">🟠 High</h3>
+          <p style="margin-top:6px">15-minute grace period then routed to Mender. Teams alert sent.</p>
+        </div>
+        <div class="card" style="border-top:3px solid #FFB900">
+          <h3 style="color:#B8860B">🟡 Medium</h3>
+          <p style="margin-top:6px">Aggregated in daily compliance report. Requires human approval for remediation.</p>
+        </div>
+        <div class="card" style="border-top:3px solid #107C10">
+          <h3 style="color:#107C10">🟢 Low</h3>
+          <p style="margin-top:6px">Logged in compliance report only. Reviewed in weekly platform review.</p>
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-top:22px">
+        <h2>Run Monitoring</h2>
+      </div>
+
+      <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Start continuous monitoring</span>
+python -m src.agents.orchestrator <span class="flag">--mode</span> monitor
+
+<span class="comment"># Run a single compliance scan and exit</span>
+python -c <span class="str">"
+import asyncio
+from src.agents.monitoring_agent import MonitoringAgent
+from src.config.settings import Settings
+from azure.identity import DefaultAzureCredential
+from semantic_kernel import Kernel
+
+async def main():
+    agent = MonitoringAgent(Kernel(), DefaultAzureCredential(), Settings())
+    result = await agent.run_compliance_scan()
+    print(result['summary'])
+
+asyncio.run(main())
+"</span></div>
+    </div>
+
+    <!-- ═══ REMEDIATE ═══ -->
+    <div id="section-remediate" class="section">
+      <div class="section-header">
+        <h2>Remediation (🔧 Mender)</h2>
+        <p>8 built-in strategies with snapshot-before-action and rollback support.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Strategy</th><th>Violation</th><th>Action</th><th>Rollback</th></tr></thead>
+          <tbody>
+            <tr><td><code>deny-public-ip</code></td><td>Public IP on NIC</td><td>Detach and delete public IP</td><td>✅ Snapshot</td></tr>
+            <tr><td><code>enforce-https-ingress</code></td><td>HTTP allowed</td><td>Enable HTTPS-only flag</td><td>✅ Snapshot</td></tr>
+            <tr><td><code>require-tls-1-2</code></td><td>TLS below 1.2</td><td>Set minimumTlsVersion to TLS1_2</td><td>✅ Snapshot</td></tr>
+            <tr><td><code>deny-public-storage-access</code></td><td>Public blob enabled</td><td>Set allowBlobPublicAccess: false</td><td>✅ Snapshot</td></tr>
+            <tr><td><code>enforce-private-endpoints</code></td><td>Missing private endpoint</td><td>Deploy private endpoint + DNS record</td><td>✅ Delete on rollback</td></tr>
+            <tr><td><code>require-encryption-at-rest</code></td><td>Encryption disabled</td><td>Enable CMK or platform-managed encryption</td><td>✅ Snapshot</td></tr>
+            <tr><td><code>nsg-missing</code></td><td>Subnet without NSG</td><td>Deploy default-deny NSG and attach</td><td>✅ Delete on rollback</td></tr>
+            <tr><td><code>diagnostic-settings-missing</code></td><td>No diagnostic settings</td><td>Deploy diagnostic settings → Log Analytics</td><td>✅ Delete on rollback</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-block" style="margin-top:18px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Enable auto-remediation in .env</span>
+<span class="flag">AUTO_REMEDIATE</span>=<span class="str">true</span>
+
+<span class="comment"># Or trigger remediation manually</span>
+python -c <span class="str">"
+import asyncio, json
+from src.agents.remediation_agent import RemediationAgent
+from src.config.settings import Settings
+from azure.identity import DefaultAzureCredential
+from semantic_kernel import Kernel
+
+async def main():
+    agent = RemediationAgent(Kernel(), DefaultAzureCredential(), Settings())
+    result = await agent.remediate_single({
+        'resource_id': '/subscriptions/.../storageAccounts/mystorage',
+        'policy_name': 'deny-public-storage-access',
+        'severity': 'critical',
+    })
+    print(json.dumps(result, indent=2))
+
+asyncio.run(main())
+"</span></div>
+    </div>
+
+    <!-- ═══ CI/CD ═══ -->
+    <div id="section-cicd" class="section">
+      <div class="section-header">
+        <h2>CI/CD Pipelines</h2>
+        <p>6 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 Platform + configurable Application Landing Zones. App LZ names, profiles, and subscriptions are defined in <code>environments/subscriptions.json</code> — no workflow YAML changes needed.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'pipe','overview')">Pipeline Overview</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','setup')">OIDC &amp; Secrets Setup</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','bootstrap')">1 · Bootstrap</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','platform')">2 · Platform Deploy</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','app')">3 · App Deploy</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','monitor')">4 · Monitor</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','pr')">5 · PR Validation</button>
+      </div>
+
+      <!-- ── Pipeline Overview ── -->
+      <div id="pipe-overview" class="tab-panel active">
+        <div class="card" style="margin-bottom:18px;padding:20px;background:linear-gradient(135deg,#0B1A33 0%,#1B2A4A 100%);color:#fff">
+          <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Full Deployment Sequence</h3>
+          <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
+Step 0  Complete Bootstrap Settings Checklist (docs/ALZ_Bootstrap_Settings_Checklist.xlsx)
+Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
+Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
+Step 3  1-bootstrap.yml          →  Management groups + subscription placement
+Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
+Step 5  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
+Step 6  4-monitor.yml            →  Continuous compliance + drift detection (24/7)
+Step 7  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</pre>
+          <p style="font-size:11px;color:#aaa;margin:8px 0 0 0">All workflows support self-hosted runners via <code style="color:var(--ms-light-blue)">vars.RUNNER_LABEL</code> — defaults to <code style="color:var(--ms-light-blue)">ubuntu-latest</code> if not set.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Workflow</th><th>Trigger</th><th>Scope</th><th>Key Feature</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1-bootstrap.yml</strong></td><td>Manual (one-time)</td><td>Tenant-wide</td><td>Creates 11 management groups, moves 10 subs, registers 20 providers</td></tr>
+              <tr><td><strong>2-platform-deploy.yml</strong></td><td>Manual</td><td>4 platform subs</td><td>Sequential with approval gate per LZ, <code>start_from</code> for resume</td></tr>
+              <tr><td><strong>3-app-deploy.yml</strong></td><td>Manual</td><td>Config-driven</td><td>Reads app LZs from <code>subscriptions.json</code>, dynamic matrix, parallel deployment</td></tr>
+              <tr><td><strong>4-monitor.yml</strong></td><td>Cron + Manual</td><td>All 10 subs</td><td>30-min compliance, hourly drift, daily audit, Teams alerts</td></tr>
+              <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
+              <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: validate → plan → deploy → verify → TDD; self-hosted runner via <code>runner_label</code> input</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:18px">Reusable Deploy Pipeline (4 stages)</h3>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Stage</th><th>What Happens</th><th>Gate</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Validate</strong></td><td>Profile config, security baseline, cost governance, IaC lint</td><td>Fails pipeline on violation</td></tr>
+              <tr><td><strong>Plan</strong></td><td>Bicep what-if or Terraform plan (saved as artifact)</td><td>Output saved for review</td></tr>
+              <tr><td><strong>Deploy</strong></td><td>GitHub Environment approval gate → apply changes</td><td>Requires reviewer approval</td></tr>
+              <tr><td><strong>Verify</strong></td><td>Drift baseline capture, compliance scan, generate As-Built TDD, Teams notification</td><td>Fails if compliance &lt; 80%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── OIDC & Secrets Setup ── -->
+      <div id="pipe-setup" class="tab-panel">
+        <h3>Step 1: Run the OIDC Setup Script</h3>
+        <p style="margin:8px 0">Creates Entra ID app registration with federated credentials — no client secrets stored.</p>
+        <div class="code-block" style="font-size:11px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+chmod +x scripts/setup-oidc.sh
+./scripts/setup-oidc.sh &lt;your-org&gt; agentic-alz-accelerator alz</div>
+
+        <h3 style="margin-top:18px">Step 2: Configure App Landing Zones</h3>
+        <p style="margin:8px 0;font-size:13px"><strong>App LZ names are fully configurable.</strong> Edit <code>environments/subscriptions.json</code> to rename, add, or remove app LZs. The workflow reads this file dynamically — no YAML changes needed.</p>
+        <div class="code-block" style="font-size:11px;margin-top:8px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment">// environments/subscriptions.json → "application" section</span>
+<span class="comment">// Rename keys, change profiles, add or remove entries to match YOUR workloads.</span>
+{
+  <span class="str">"application"</span>: {
+    <span class="str">"corp-erp"</span>: {                                   <span class="comment">// ← your name (any kebab-case key)</span>
+      <span class="str">"display_name"</span>: <span class="str">"Corp ERP"</span>,                   <span class="comment">// ← shown in workflow UI</span>
+      <span class="str">"subscription_id"</span>: <span class="str">"&lt;SUB-5-ID&gt;"</span>,
+      <span class="str">"profile"</span>: <span class="str">"corp"</span>,                            <span class="comment">// ← corp | online | sandbox | sap</span>
+      <span class="str">"management_group"</span>: <span class="str">"landingzones-corp"</span>,
+      <span class="str">"github_secret"</span>: <span class="str">"APP_CORP_ERP_SUBSCRIPTION_ID"</span> <span class="comment">// ← secret name in GitHub</span>
+    }
+  }
+}</div>
+
+        <h3 style="margin-top:18px">Step 3: Set Subscription Secrets</h3>
+        <p style="margin:8px 0;font-size:13px">Platform secrets (always required) + one secret per app LZ matching the <code>github_secret</code> field in your config.</p>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Secret Name</th><th>Subscription</th><th>Profile</th></tr></thead>
+            <tbody>
+              <tr style="border-bottom:2px solid var(--border)"><td colspan="3" style="font-weight:bold;color:var(--ms-blue);background:#f0f6ff">Platform (fixed)</td></tr>
+              <tr><td><code>PLATFORM_MGMT_SUBSCRIPTION_ID</code></td><td>Sub 1</td><td>platform-management</td></tr>
+              <tr><td><code>PLATFORM_CONN_SUBSCRIPTION_ID</code></td><td>Sub 2</td><td>platform-connectivity</td></tr>
+              <tr><td><code>PLATFORM_IDTY_SUBSCRIPTION_ID</code></td><td>Sub 3</td><td>platform-identity</td></tr>
+              <tr><td><code>PLATFORM_SEC_SUBSCRIPTION_ID</code></td><td>Sub 4</td><td>platform-security</td></tr>
+              <tr style="border-bottom:2px solid var(--border)"><td colspan="3" style="font-weight:bold;color:var(--ms-blue);background:#f0f6ff">Application (from subscriptions.json — add/rename as needed)</td></tr>
+              <tr><td><code>APP_CORP_ERP_SUBSCRIPTION_ID</code></td><td>Sub 5</td><td>corp</td></tr>
+              <tr><td><code>APP_CORP_CRM_SUBSCRIPTION_ID</code></td><td>Sub 6</td><td>corp</td></tr>
+              <tr><td><code>APP_ONLINE_WEB_SUBSCRIPTION_ID</code></td><td>Sub 7</td><td>online</td></tr>
+              <tr><td><code>APP_ONLINE_API_SUBSCRIPTION_ID</code></td><td>Sub 8</td><td>online</td></tr>
+              <tr><td><code>APP_SAP_SUBSCRIPTION_ID</code></td><td>Sub 9</td><td>sap</td></tr>
+              <tr><td><code>APP_SANDBOX_SUBSCRIPTION_ID</code></td><td>Sub 10</td><td>sandbox</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block" style="font-size:11px;margin-top:12px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Platform secrets (always required)</span>
+gh secret set PLATFORM_MGMT_SUBSCRIPTION_ID <span class="flag">--body</span> <span class="str">"&lt;Sub-1-ID&gt;"</span>
+gh secret set PLATFORM_CONN_SUBSCRIPTION_ID <span class="flag">--body</span> <span class="str">"&lt;Sub-2-ID&gt;"</span>
+gh secret set PLATFORM_IDTY_SUBSCRIPTION_ID <span class="flag">--body</span> <span class="str">"&lt;Sub-3-ID&gt;"</span>
+gh secret set PLATFORM_SEC_SUBSCRIPTION_ID  <span class="flag">--body</span> <span class="str">"&lt;Sub-4-ID&gt;"</span>
+
+<span class="comment"># App secrets (one per entry in subscriptions.json)</span>
+gh secret set APP_CORP_ERP_SUBSCRIPTION_ID   <span class="flag">--body</span> <span class="str">"&lt;Sub-5-ID&gt;"</span>
+gh secret set APP_CORP_CRM_SUBSCRIPTION_ID   <span class="flag">--body</span> <span class="str">"&lt;Sub-6-ID&gt;"</span>
+gh secret set APP_ONLINE_WEB_SUBSCRIPTION_ID <span class="flag">--body</span> <span class="str">"&lt;Sub-7-ID&gt;"</span>
+gh secret set APP_ONLINE_API_SUBSCRIPTION_ID <span class="flag">--body</span> <span class="str">"&lt;Sub-8-ID&gt;"</span>
+gh secret set APP_SAP_SUBSCRIPTION_ID        <span class="flag">--body</span> <span class="str">"&lt;Sub-9-ID&gt;"</span>
+gh secret set APP_SANDBOX_SUBSCRIPTION_ID    <span class="flag">--body</span> <span class="str">"&lt;Sub-10-ID&gt;"</span>
+
+<span class="comment"># Optional</span>
+gh secret set TF_STATE_STORAGE_ACCOUNT <span class="flag">--body</span> <span class="str">"&lt;storage-account&gt;"</span>
+gh secret set TEAMS_WEBHOOK_URL <span class="flag">--body</span> <span class="str">"&lt;webhook-url&gt;"</span></div>
+
+        <h3 style="margin-top:18px">Step 3: Configure Environment Protection Rules</h3>
+        <p style="margin:8px 0">In GitHub repo Settings &gt; Environments, create these 7 environments:</p>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Environment</th><th>Required Reviewers</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>platform-management</code></td><td>platform-team</td><td>Centralized logging &amp; monitoring</td></tr>
+              <tr><td><code>platform-connectivity</code></td><td>platform-team, network-team</td><td>Hub networking, Firewall, DNS</td></tr>
+              <tr><td><code>platform-identity</code></td><td>platform-team, identity-team</td><td>AD DS, PIM, PAWs</td></tr>
+              <tr><td><code>platform-security</code></td><td>platform-team, security-team</td><td>SecOps — Sentinel, Defender, SOAR</td></tr>
+              <tr><td><code>app-prod</code></td><td>platform-team</td><td>Production app landing zones</td></tr>
+              <tr><td><code>app-dev</code></td><td><em>(none — auto-approve)</em></td><td>Sandbox / dev environments</td></tr>
+              <tr><td><code>remediation</code></td><td>platform-team, security-team</td><td>Auto-remediation approval gate</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:18px">Step 4: Self-Hosted Runner (Optional)</h3>
+        <p style="margin:8px 0;font-size:13px">All 6 workflows use <code>vars.RUNNER_LABEL</code> to determine the runner. By default, workflows run on <strong>GitHub-hosted runners</strong> (<code>ubuntu-latest</code>). To use a <strong>private self-hosted runner</strong>:</p>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Step</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1</strong></td><td><a href="https://docs.github.com/en/actions/hosting-your-own-runners" style="color:var(--ms-blue)">Register a self-hosted runner</a> on your GitHub repo or organization</td></tr>
+              <tr><td><strong>2</strong></td><td>Go to <strong>Settings → Secrets and variables → Actions → Variables</strong></td></tr>
+              <tr><td><strong>3</strong></td><td>Create variable: <strong>Name</strong> = <code>RUNNER_LABEL</code>, <strong>Value</strong> = <code>self-hosted</code> (or your custom label, e.g., <code>alz-runner</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block" style="font-size:11px;margin-top:10px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Set via GitHub CLI</span>
+gh variable set RUNNER_LABEL <span class="flag">--body</span> <span class="str">"self-hosted"</span></div>
+        <div class="card card-accent" style="margin-top:12px;padding:14px;border-top-color:#107C10">
+          <p style="font-size:12px;margin:0"><strong>How it works:</strong> The reusable deploy workflow receives the runner label as an input from the calling workflow. All other workflows read <code>vars.RUNNER_LABEL</code> directly, falling back to <code>ubuntu-latest</code> if not set. No YAML changes needed — one variable controls all 23 jobs across all 6 workflows.</p>
+        </div>
+      </div>
+
+      <!-- ── 1 · Bootstrap ── -->
+      <div id="pipe-bootstrap" class="tab-panel">
+        <h3>1 · Bootstrap Landing Zone Foundation</h3>
+        <p style="margin:8px 0">Run <strong>once</strong> before any deployment. Creates the CAF management group hierarchy, moves all 10 subscriptions, and registers resource providers.</p>
+        <div class="card card-accent" style="margin:10px 0;padding:12px;border-top-color:#D83B01">
+          <p style="font-size:12px;margin:0"><strong>Pre-requisite:</strong> Complete the <strong>Bootstrap Settings Checklist</strong> (<code>docs/ALZ_Bootstrap_Settings_Checklist.xlsx</code>) and the <strong>OIDC &amp; Secrets Setup</strong> tab before running this workflow. If using a self-hosted runner, set <code>vars.RUNNER_LABEL</code> first.</p>
+        </div>
+        <div class="code-block" style="font-size:11px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+gh workflow run <span class="str">"1 · Bootstrap Landing Zone Foundation"</span> \
+  <span class="flag">-f</span> mg_prefix=alz \
+  <span class="flag">-f</span> primary_location=eastus2 \
+  <span class="flag">-f</span> action=all</div>
+
+        <div class="card" style="margin-top:14px;padding:16px;background:#f8f9fb">
+          <h4 style="margin-bottom:8px">Management Group Hierarchy</h4>
+          <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
+alz (Azure Landing Zones)
+├── Platform
+│   ├── Management      ← Sub 1
+│   ├── Connectivity    ← Sub 2
+│   ├── Identity        ← Sub 3
+│   └── Security        ← Sub 4
+├── Landing Zones
+│   ├── Corp            ← Sub 5, Sub 6
+│   ├── Online          ← Sub 7, Sub 8
+│   └── SAP             ← Sub 9
+├── Sandbox             ← Sub 10
+└── Decommissioned</pre>
+        </div>
+
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <thead><tr><th>Job</th><th>What It Does</th></tr></thead>
+            <tbody>
+              <tr><td>Verify Access</td><td>Confirms OIDC login, lists available subscriptions, checks MG access</td></tr>
+              <tr><td>Create MG Hierarchy</td><td>Creates 11 management groups in CAF enterprise-scale structure</td></tr>
+              <tr><td>Move Subscriptions</td><td>Places all 10 subscriptions into their assigned management groups</td></tr>
+              <tr><td>Register Providers</td><td>Registers 20 resource providers across all 10 subscriptions</td></tr>
+              <tr><td>Verify</td><td>Generates bootstrap verification report</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin-top:14px;font-size:12px;color:var(--muted)">Use <code>action: verify-only</code> to check the current state without making changes. Use <code>action: move-subscriptions-only</code> to re-run just the subscription placement step.</p>
+      </div>
+
+      <!-- ── 2 · Platform Deploy ── -->
+      <div id="pipe-platform" class="tab-panel">
+        <h3>2 · Deploy Platform Landing Zones</h3>
+        <p style="margin:8px 0">Deploys the 4 CAF platform subscriptions in strict dependency order with an approval gate at each step.</p>
+
+        <div class="card" style="margin:14px 0;padding:16px;background:#f8f9fb">
+          <h4 style="margin-bottom:8px">Pipeline Flow</h4>
+          <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
+Management ──[approve]──→ Connectivity ──[approve]──→ Identity ──[approve]──→ Security
+   (Sub 1)                   (Sub 2)                   (Sub 3)                (Sub 4)
+    ↓                          ↓                          ↓                      ↓
+ validate                   validate                   validate              validate
+ plan                       plan                       plan                  plan
+ deploy                     deploy                     deploy                deploy
+ verify                     verify                     verify                verify</pre>
+        </div>
+
+        <div class="code-block" style="font-size:11px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Plan first (preview what-if output)</span>
+gh workflow run <span class="str">"2 · Deploy Platform Landing Zones"</span> \
+  <span class="flag">-f</span> framework=bicep <span class="flag">-f</span> action=plan \
+  <span class="flag">-f</span> start_from=management <span class="flag">-f</span> location=eastus2
+
+<span class="comment"># Deploy (each LZ gets its own approval gate)</span>
+gh workflow run <span class="str">"2 · Deploy Platform Landing Zones"</span> \
+  <span class="flag">-f</span> framework=bicep <span class="flag">-f</span> action=deploy \
+  <span class="flag">-f</span> start_from=management <span class="flag">-f</span> location=eastus2
+
+<span class="comment"># Resume from a specific LZ (skip earlier ones)</span>
+gh workflow run <span class="str">"2 · Deploy Platform Landing Zones"</span> \
+  <span class="flag">-f</span> framework=bicep <span class="flag">-f</span> action=deploy \
+  <span class="flag">-f</span> start_from=security <span class="flag">-f</span> location=eastus2</div>
+
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <thead><tr><th>Order</th><th>LZ</th><th>GitHub Environment</th><th>Reviewers</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Management</td><td><code>platform-management</code></td><td>platform-team</td></tr>
+              <tr><td>2</td><td>Connectivity</td><td><code>platform-connectivity</code></td><td>platform-team, network-team</td></tr>
+              <tr><td>3</td><td>Identity</td><td><code>platform-identity</code></td><td>platform-team, identity-team</td></tr>
+              <tr><td>4</td><td>Security</td><td><code>platform-security</code></td><td>platform-team, security-team</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:10px;font-size:12px;color:var(--muted)">The <code>start_from</code> input allows resuming from any point. If Connectivity fails, fix it and re-run with <code>start_from=connectivity</code> — Management won't re-deploy.</p>
+      </div>
+
+      <!-- ── 3 · App Deploy ── -->
+      <div id="pipe-app" class="tab-panel">
+        <h3>3 · Deploy Application Landing Zones <span style="font-size:12px;color:var(--ms-blue);font-weight:normal">(config-driven)</span></h3>
+        <p style="margin:8px 0">Reads app LZ definitions from <code>environments/subscriptions.json</code> and builds a <strong>dynamic deployment matrix</strong>. Add, rename, or remove app LZs by editing the JSON — no workflow YAML changes needed.</p>
+
+        <div class="card" style="margin:14px 0;padding:16px;background:#f0f6ff;border-left:4px solid var(--ms-blue)">
+          <h4 style="margin-bottom:8px;color:var(--ms-blue)">How It Works</h4>
+          <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
+subscriptions.json  →  build-matrix job  →  dynamic GitHub Actions matrix
+                                              │
+Pre-flight check (verify platform LZs exist)  │
+     │                                        │
+     ├── [app-lz-1]  ──→ approve ──→ deploy   │  ← names come from your config
+     ├── [app-lz-2]  ──→ approve ──→ deploy   │
+     ├── ...                                   │
+     └── [app-lz-N]  ──→ auto or approve      │</pre>
+        </div>
+
+        <div class="code-block" style="font-size:11px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Deploy ALL app LZs defined in subscriptions.json</span>
+gh workflow run <span class="str">"3 · Deploy Application Landing Zones"</span> \
+  <span class="flag">-f</span> target=all <span class="flag">-f</span> framework=bicep \
+  <span class="flag">-f</span> action=deploy <span class="flag">-f</span> location=eastus2
+
+<span class="comment"># Deploy a single app LZ by its config key</span>
+gh workflow run <span class="str">"3 · Deploy Application Landing Zones"</span> \
+  <span class="flag">-f</span> target=corp-erp <span class="flag">-f</span> framework=bicep \
+  <span class="flag">-f</span> action=deploy <span class="flag">-f</span> location=eastus2
+
+<span class="comment"># Deploy multiple (comma-separated)</span>
+gh workflow run <span class="str">"3 · Deploy Application Landing Zones"</span> \
+  <span class="flag">-f</span> target=corp-erp,web-portal <span class="flag">-f</span> framework=bicep \
+  <span class="flag">-f</span> action=deploy</div>
+
+        <h4 style="margin:18px 0 8px">Default App LZs (customizable)</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Config Key</th><th>Display Name</th><th>Profile</th><th>MG Placement</th><th>Environment</th></tr></thead>
+            <tbody>
+              <tr><td><code>corp-erp</code></td><td>Corp ERP</td><td>corp</td><td>landingzones-corp</td><td>app-prod (approval)</td></tr>
+              <tr><td><code>corp-crm</code></td><td>Corp CRM</td><td>corp</td><td>landingzones-corp</td><td>app-prod (approval)</td></tr>
+              <tr><td><code>web-portal</code></td><td>Online Web Portal</td><td>online</td><td>landingzones-online</td><td>app-prod (approval)</td></tr>
+              <tr><td><code>api-gateway</code></td><td>Online API Gateway</td><td>online</td><td>landingzones-online</td><td>app-prod (approval)</td></tr>
+              <tr><td><code>sap-s4hana</code></td><td>SAP S/4HANA</td><td>sap</td><td>landingzones-sap</td><td>app-prod (approval)</td></tr>
+              <tr><td><code>dev-sandbox</code></td><td>Dev Sandbox</td><td>sandbox</td><td>sandbox</td><td>app-dev (auto)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:14px;padding:14px;background:#f0fff4;border-left:4px solid #28a745">
+          <strong>Adding a new App LZ:</strong> Add an entry to <code>subscriptions.json</code>, create a matching GitHub secret, and run the workflow. That's it.
+        </div>
+      </div>
+
+      <!-- ── 4 · Monitor ── -->
+      <div id="pipe-monitor" class="tab-panel">
+        <h3>4 · Landing Zone Monitoring</h3>
+        <p style="margin:8px 0">Continuous compliance scanning, drift detection, and auto-remediation across all 10 subscriptions.</p>
+
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>Schedule</th><th>Scan Type</th><th>Scope</th></tr></thead>
+            <tbody>
+              <tr><td>Every 30 minutes</td><td>Compliance scan (Azure Policy)</td><td>All 10 subscriptions</td></tr>
+              <tr><td>Every hour</td><td>Drift detection (Resource Graph)</td><td>All 10 subscriptions</td></tr>
+              <tr><td>Daily 6 AM UTC</td><td>Full audit report</td><td>All 10 subscriptions</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-block" style="font-size:11px;margin-top:14px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Trigger a manual scan</span>
+gh workflow run <span class="str">"4 · Landing Zone Monitoring"</span> \
+  <span class="flag">-f</span> scan_type=full \
+  <span class="flag">-f</span> scope=all-subscriptions
+
+<span class="comment"># Scan platform subs only</span>
+gh workflow run <span class="str">"4 · Landing Zone Monitoring"</span> \
+  <span class="flag">-f</span> scan_type=compliance \
+  <span class="flag">-f</span> scope=platform-only</div>
+
+        <h4 style="margin-top:14px">Alert &amp; Remediation Flow</h4>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Trigger</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Violations detected</td><td>Teams adaptive card notification with compliance %, violation count</td></tr>
+              <tr><td>&gt; 10 violations</td><td>GitHub issue created automatically with <code>alz-monitoring</code> label</td></tr>
+              <tr><td>Violations or drift</td><td>Auto-remediation triggered → requires <code>remediation</code> environment approval</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── 5 · PR Validation ── -->
+      <div id="pipe-pr" class="tab-panel">
+        <h3>5 · PR Validation</h3>
+        <p style="margin:8px 0">Runs automatically on every pull request that touches IaC, config, or test files. All checks must pass before merge.</p>
+
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>Check</th><th>What It Validates</th><th>On Failure</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Lint &amp; Format</strong></td><td>Python (ruff), YAML (yamllint), Bicep (az bicep build), Terraform (fmt -check)</td><td>PR blocked</td></tr>
+              <tr><td><strong>Security Baseline</strong></td><td><code>validate_security_baseline.py</code> — checks all IaC modules</td><td>PR blocked</td></tr>
+              <tr><td><strong>Cost Governance</strong></td><td><code>validate_cost_governance.py</code> — ensures budget alerts present</td><td>PR blocked</td></tr>
+              <tr><td><strong>Unit Tests</strong></td><td><code>pytest tests/ -v</code> — full test suite with JUnit output</td><td>PR blocked</td></tr>
+              <tr><td><strong>What-If Preview</strong></td><td>Bicep what-if on changed profiles → summary posted as PR comment</td><td>Informational only</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin-top:12px;font-size:12px;color:var(--muted)">Triggered by changes to: <code>infra/**</code>, <code>src/config/**</code>, <code>src/agents/**</code>, <code>tests/**</code></p>
+      </div>
+
+<div style="margin-top:28px;border-top:2px solid var(--ms-blue);padding-top:18px">
+  <h3 style="color:var(--ms-blue)">As-Built Technical Design Document (TDD)</h3>
+  <p style="margin:8px 0">After every successful deployment, the pipeline automatically generates an as-built TDD Word document for the deployed landing zone. TDDs are uploaded as pipeline artifacts (90-day retention).</p>
+
+  <div class="table-wrap" style="margin-top:12px">
+    <table>
+      <thead><tr><th>TDD Section</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cover Page</strong></td><td>Deployment metadata — subscription, profile, timestamp, deployment ID</td></tr>
+        <tr><td><strong>Architecture Diagram</strong></td><td>SVG diagram with official Azure icons, converted to PNG (profile-specific)</td></tr>
+        <tr><td><strong>Resource Inventory</strong></td><td>Complete resource listing from Azure Resource Graph</td></tr>
+        <tr><td><strong>Network Topology</strong></td><td>VNet CIDRs, subnets, peering status, DNS configuration</td></tr>
+        <tr><td><strong>Security Posture</strong></td><td>6 non-negotiable rules, Defender plans, Azure Policy assignments</td></tr>
+        <tr><td><strong>Compliance Status</strong></td><td>Live compliance scan results from post-deployment verification</td></tr>
+        <tr><td><strong>Cost Governance</strong></td><td>Budgets, alert thresholds, tag requirements</td></tr>
+        <tr><td><strong>Operational Model</strong></td><td>Monitoring schedules, change management, disaster recovery</td></tr>
+        <tr><td><strong>Full Estate Diagram</strong></td><td>Overview showing all platform + application landing zones</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block" style="font-size:11px;margin-top:14px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Generate TDDs for ALL landing zones</span>
+python -m src.tools.tdd_generator --all \
+  --config environments/subscriptions.json \
+  --output-dir docs/tdd --framework bicep
+
+<span class="comment"># Generate TDD for a single landing zone</span>
+python -m src.tools.tdd_generator \
+  --project platform-management \
+  --profile platform-management \
+  --subscription-id &lt;SUB-1-ID&gt; \
+  --subscription-name alz-platform-management</div>
+
+  <div class="card" style="margin-top:14px;padding:14px;background:#f0fff4;border-left:4px solid #28a745">
+    <strong>Automatic in CI/CD:</strong> TDDs are generated in the <em>Verify</em> stage of every deployment and uploaded as pipeline artifacts. No manual steps needed.
+  </div>
+</div>
+
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Copied to clipboard!</div>
+
+<script>
+// ── Navigation ──────────────────────────────────────────────────
+const SECTION_LABELS = {
+  overview: 'Overview',
+  architecture: 'Architecture',
+  caf: 'CAF Design Areas',
+  agents: 'Agent Roster',
+  prereqs: 'Prerequisites',
+  install: 'Installation',
+  config: 'Configuration',
+  workflow: '9-Step Workflow',
+  security: 'Security Baseline',
+  cost: 'Cost Governance',
+  profiles: 'Landing Zone Profiles',
+  monitor: 'Monitoring',
+  remediate: 'Remediation',
+  cicd: 'CI/CD Pipelines',
+};
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const target = document.getElementById('section-' + name);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+
+  document.getElementById('breadcrumb').textContent = SECTION_LABELS[name] || name;
+  window.scrollTo(0, 0);
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────
+function showTab(btn, group, panel) {
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(group + '-' + panel);
+  if (target) target.classList.add('active');
+}
+
+// ── Step accordion ───────────────────────────────────────────────
+function toggleStep(el) {
+  el.classList.toggle('expanded');
+}
+
+// ── Copy code ────────────────────────────────────────────────────
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const text = block.innerText.replace('Copy\n', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// ── Keyboard nav ─────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.step-body.expanded').forEach(s => s.classList.remove('expanded'));
+  }
+});
+
+// ── Init ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto-expand first step if on workflow page
+  const hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('section-' + hash)) showSection(hash);
+});
+</script>
+</body>
+</html>

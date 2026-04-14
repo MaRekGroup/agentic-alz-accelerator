@@ -1,0 +1,214 @@
+name: Deploy Azure Landing Zone
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Landing Zone Profile'
+        required: true
+        type: choice
+        options:
+          - online
+          - corp
+          - sandbox
+          - sap
+      framework:
+        description: 'IaC Framework'
+        required: true
+        type: choice
+        options:
+          - bicep
+          - terraform
+      environment:
+        description: 'Target Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      action:
+        description: 'Deployment Action'
+        required: true
+        type: choice
+        options:
+          - plan    # Preview changes only
+          - deploy  # Apply changes
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+
+jobs:
+  # =========================================================================
+  # Validate
+  # =========================================================================
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Profile Config
+        run: |
+          python -c "
+          import yaml
+          with open('src/config/landing_zone_profiles.yaml') as f:
+              profiles = yaml.safe_load(f)
+          assert '${{ inputs.profile }}' in profiles['profiles'], 'Invalid profile'
+          print('Profile validated: ${{ inputs.profile }}')
+          "
+
+  # =========================================================================
+  # Deploy with Bicep
+  # =========================================================================
+  deploy-bicep:
+    name: Deploy (Bicep)
+    needs: validate
+    if: inputs.framework == 'bicep'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep CLI
+        run: az bicep install
+
+      - name: Bicep Build (Validate)
+        run: az bicep build --file infra/bicep/main.bicep
+
+      - name: What-If Analysis
+        if: inputs.action == 'plan'
+        run: |
+          az deployment sub what-if \
+            --location eastus2 \
+            --template-file infra/bicep/main.bicep \
+            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
+            --parameters profileName=${{ inputs.profile }}
+
+      - name: Deploy Landing Zone
+        if: inputs.action == 'deploy'
+        run: |
+          az deployment sub create \
+            --location eastus2 \
+            --template-file infra/bicep/main.bicep \
+            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
+            --parameters profileName=${{ inputs.profile }} \
+            --name "alz-${{ inputs.profile }}-$(date +%Y%m%d%H%M%S)"
+
+      - name: Post-Deployment Validation
+        if: inputs.action == 'deploy'
+        run: |
+          python -m src.tools.resource_graph validate \
+            --subscription-id ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  # =========================================================================
+  # Deploy with Terraform
+  # =========================================================================
+  deploy-terraform:
+    name: Deploy (Terraform)
+    needs: validate
+    if: inputs.framework == 'terraform'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ inputs.environment }}.terraform.tfstate"
+        env:
+          ARM_USE_OIDC: true
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan \
+            -var-file="environments/${{ inputs.environment }}/terraform.tfvars" \
+            -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -out=tfplan
+        env:
+          ARM_USE_OIDC: true
+
+      - name: Terraform Apply
+        if: inputs.action == 'deploy'
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_USE_OIDC: true
+
+  # =========================================================================
+  # Post-Deployment Monitoring Setup
+  # =========================================================================
+  setup-monitoring:
+    name: Configure Monitoring Agent
+    needs: [deploy-bicep, deploy-terraform]
+    if: |
+      always() &&
+      inputs.action == 'deploy' &&
+      (needs.deploy-bicep.result == 'success' || needs.deploy-terraform.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Capture Monitoring Baseline
+        run: |
+          python -c "
+          import asyncio
+          from src.tools.drift_detector import DriftDetector
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+
+          async def main():
+              settings = Settings()
+              detector = DriftDetector(DefaultAzureCredential(), settings)
+              scope = f'/subscriptions/{settings.azure.subscription_id}'
+              result = await detector.capture_baseline(scope)
+              print(f'Baseline captured: {result}')
+
+          asyncio.run(main())
+          "
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
