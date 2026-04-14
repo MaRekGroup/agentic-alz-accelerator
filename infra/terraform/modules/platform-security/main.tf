@@ -21,7 +21,7 @@ terraform {
 # ─── Variables ──────────────────────────────────────────────────────────────
 
 variable "subscription_id"              { type = string }
-variable "location"                     { type = string, default = "eastus2" }
+variable "location"                     { type = string, default = "southcentralus" }
 variable "prefix"                       { type = string }
 variable "environment"                  { type = string }
 variable "sentinel_workspace_mode"      { type = string, default = "dedicated", description = "dedicated or linked" }
@@ -54,6 +54,7 @@ locals {
     westeurope = "weu"
     uksouth    = "uks"
     centralus  = "cus"
+    southcentralus = "scus"
   }
   region_code = lookup(local.region_shortcodes, var.location, var.location)
 

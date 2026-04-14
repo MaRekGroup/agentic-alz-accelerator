@@ -28,7 +28,7 @@ TOOLS = [
             "properties": {
                 "service_name": {"type": "string", "description": "Azure service (e.g., 'Virtual Machines')"},
                 "sku_name": {"type": "string", "description": "SKU name (e.g., 'Standard_D2s_v5')"},
-                "region": {"type": "string", "default": "eastus2"},
+                "region": {"type": "string", "default": "southcentralus"},
                 "hours_per_month": {"type": "number", "default": 730},
             },
             "required": ["service_name"],
@@ -82,7 +82,7 @@ TOOLS = [
             "properties": {
                 "service_name": {"type": "string"},
                 "sku_name": {"type": "string"},
-                "region": {"type": "string", "default": "eastus2"},
+                "region": {"type": "string", "default": "southcentralus"},
             },
             "required": ["service_name"],
         },
@@ -137,7 +137,7 @@ class AzurePricingServer:
         """Estimate cost for a single resource."""
         service = arguments["service_name"]
         sku = arguments.get("sku_name", "")
-        region = arguments.get("region", "eastus2")
+        region = arguments.get("region", "southcentralus")
         hours = arguments.get("hours_per_month", 730)
 
         filter_parts = [
@@ -175,7 +175,7 @@ class AzurePricingServer:
             est = self._cost_estimate({
                 "service_name": res.get("service_name", ""),
                 "sku_name": res.get("sku_name", ""),
-                "region": res.get("region", "eastus2"),
+                "region": res.get("region", "southcentralus"),
                 "hours_per_month": res.get("quantity", 730),
             })
             estimates.append(est)
@@ -191,7 +191,7 @@ class AzurePricingServer:
         """Compare prices across regions."""
         service = arguments["service_name"]
         sku = arguments.get("sku_name", "")
-        regions = arguments.get("regions", ["eastus2", "westus2", "westeurope"])
+        regions = arguments.get("regions", ["southcentralus", "westus2", "westeurope"])
 
         comparisons = []
         for region in regions:
@@ -220,7 +220,7 @@ class AzurePricingServer:
         """Get reserved instance pricing and calculate savings."""
         service = arguments["service_name"]
         sku = arguments.get("sku_name", "")
-        region = arguments.get("region", "eastus2")
+        region = arguments.get("region", "southcentralus")
 
         # Get pay-as-you-go price
         payg = self._cost_estimate({"service_name": service, "sku_name": sku, "region": region})

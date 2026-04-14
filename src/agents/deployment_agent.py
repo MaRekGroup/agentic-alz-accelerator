@@ -113,7 +113,7 @@ class DeploymentAgent:
         self,
         profile_name: Annotated[str, "Landing zone profile to deploy"],
         subscription_id: Annotated[str, "Target Azure subscription ID"],
-        location: Annotated[str, "Azure region for deployment"] = "eastus2",
+        location: Annotated[str, "Azure region for deployment"] = "southcentralus",
         what_if: Annotated[bool, "Run what-if analysis before deploying"] = True,
     ) -> str:
         """Deploy landing zone using Bicep."""
@@ -150,7 +150,7 @@ class DeploymentAgent:
         self,
         profile_name: Annotated[str, "Landing zone profile to deploy"],
         subscription_id: Annotated[str, "Target Azure subscription ID"],
-        location: Annotated[str, "Azure region for deployment"] = "eastus2",
+        location: Annotated[str, "Azure region for deployment"] = "southcentralus",
         plan_only: Annotated[bool, "Run plan before applying"] = True,
     ) -> str:
         """Deploy landing zone using Terraform."""
@@ -242,7 +242,7 @@ class DeploymentAgent:
 
         framework = self.settings.iac.framework
         subscription_id = self.settings.azure.subscription_id
-        location = "eastus2"
+        location = self.settings.azure.deployment_region
 
         if framework == "bicep":
             result = await self.deploy_with_bicep(

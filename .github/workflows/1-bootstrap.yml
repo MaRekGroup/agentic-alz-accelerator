@@ -15,9 +15,10 @@ on:
       primary_location:
         description: 'Primary Azure region'
         required: true
-        default: 'eastus2'
+        default: 'southcentralus'
         type: choice
         options:
+          - southcentralus
           - eastus2
           - eastus
           - westus2

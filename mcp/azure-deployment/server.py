@@ -27,7 +27,7 @@ TOOLS = [
             "properties": {
                 "template_file": {"type": "string", "description": "Path to Bicep template"},
                 "parameters": {"type": "object", "description": "Template parameters"},
-                "location": {"type": "string", "default": "eastus2"},
+                "location": {"type": "string", "default": "southcentralus"},
                 "subscription_id": {"type": "string"},
             },
             "required": ["template_file"],
@@ -42,7 +42,7 @@ TOOLS = [
                 "template_file": {"type": "string", "description": "Path to Bicep template"},
                 "parameters": {"type": "object", "description": "Template parameters"},
                 "deployment_name": {"type": "string"},
-                "location": {"type": "string", "default": "eastus2"},
+                "location": {"type": "string", "default": "southcentralus"},
                 "subscription_id": {"type": "string"},
             },
             "required": ["template_file", "deployment_name"],
@@ -136,7 +136,7 @@ class AzureDeploymentServer:
     def _bicep_what_if(self, subscription_id: str, arguments: dict) -> dict:
         """Run Bicep what-if analysis via Azure CLI."""
         template_file = arguments["template_file"]
-        location = arguments.get("location", "eastus2")
+        location = arguments.get("location", "southcentralus")
         params = arguments.get("parameters", {})
 
         cmd = [
@@ -159,7 +159,7 @@ class AzureDeploymentServer:
         """Deploy Bicep template via Azure CLI."""
         template_file = arguments["template_file"]
         deployment_name = arguments["deployment_name"]
-        location = arguments.get("location", "eastus2")
+        location = arguments.get("location", "southcentralus")
         params = arguments.get("parameters", {})
 
         cmd = [

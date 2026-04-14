@@ -193,7 +193,7 @@ class RemediationAgent:
                     template_path=template_path,
                     parameters={
                         "resourceId": action.violation.get("resource_id", ""),
-                        "location": "eastus2",
+                        "location": self.settings.azure.deployment_region,
                     },
                 )
             else:

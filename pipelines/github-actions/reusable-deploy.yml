@@ -23,7 +23,7 @@ on:
         description: "Azure region"
         required: false
         type: string
-        default: "eastus2"
+        default: "southcentralus"
       deployment_name:
         description: "Custom deployment name prefix"
         required: false

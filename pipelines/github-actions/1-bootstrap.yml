@@ -20,6 +20,11 @@ on:
         options:
           - plan
           - deploy
+      location:
+        description: "Azure region for deployment"
+        required: false
+        type: string
+        default: "southcentralus"
 
 permissions:
   id-token: write
@@ -57,7 +62,7 @@ jobs:
         run: |
           az deployment mg what-if \
             --management-group-id "${{ inputs.parent_management_group_id || tenant().tenantId }}" \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file infra/bicep/modules/billing-and-tenant/main.bicep \
             --parameters prefix=${{ inputs.prefix }} \
             --parameters parentManagementGroupId="${{ inputs.parent_management_group_id }}"
@@ -67,7 +72,7 @@ jobs:
         run: |
           az deployment mg create \
             --management-group-id "${{ inputs.parent_management_group_id || tenant().tenantId }}" \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file infra/bicep/modules/billing-and-tenant/main.bicep \
             --parameters prefix=${{ inputs.prefix }} \
             --parameters parentManagementGroupId="${{ inputs.parent_management_group_id }}" \

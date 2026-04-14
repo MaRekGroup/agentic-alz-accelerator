@@ -33,6 +33,11 @@ on:
         options:
           - plan
           - deploy
+      location:
+        description: "Azure region for deployment"
+        required: false
+        type: string
+        default: "southcentralus"
 
 permissions:
   id-token: write
@@ -105,7 +110,7 @@ jobs:
           esac
 
           az deployment sub what-if \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file "$TEMPLATE" \
             --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam
 
@@ -121,7 +126,7 @@ jobs:
           esac
 
           az deployment sub create \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file "$TEMPLATE" \
             --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam \
             --name "platform-${{ inputs.platform_subscription }}-$(date +%Y%m%d%H%M%S)"

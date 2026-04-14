@@ -86,6 +86,7 @@ var regionShortcode = {
   westus2: 'wus2'
   westus3: 'wus3'
   centralus: 'cus'
+  southcentralus: 'scus'
   northeurope: 'neu'
   westeurope: 'weu'
   uksouth: 'uks'

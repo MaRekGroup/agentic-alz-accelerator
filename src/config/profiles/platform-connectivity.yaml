@@ -107,7 +107,7 @@ networking:
   vwan:
     type: "Standard"               # Basic | Standard
     hubs:                          # One entry per region
-      - location: "eastus2"
+      - location: "southcentralus"
         hub_address_prefix: "10.200.0.0/23"
         sku: "Standard"
         expressroute_gateway:

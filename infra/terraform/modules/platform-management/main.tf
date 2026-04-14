@@ -11,7 +11,7 @@ terraform {
 }
 
 variable "subscription_id"   { type = string }
-variable "location"           { type = string, default = "eastus2" }
+variable "location"           { type = string, default = "southcentralus" }
 variable "prefix"             { type = string }
 variable "environment"        { type = string }
 variable "retention_days"     { type = number, default = 365 }
@@ -23,7 +23,7 @@ variable "budget_alert_emails" { type = list(string), default = [] }
 variable "tags"               { type = map(string), default = {} }
 
 locals {
-  region_shortcodes = { eastus2 = "eus2", westus2 = "wus2", westeurope = "weu", uksouth = "uks" }
+  region_shortcodes = { eastus2 = "eus2", westus2 = "wus2", westeurope = "weu", uksouth = "uks", southcentralus = "scus" }
   region_code = lookup(local.region_shortcodes, var.location, var.location)
   rg_monitoring = "${var.prefix}-mgmt-monitoring-${local.region_code}-rg"
   rg_security   = "${var.prefix}-mgmt-security-${local.region_code}-rg"

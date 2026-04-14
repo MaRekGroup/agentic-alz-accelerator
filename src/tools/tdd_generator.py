@@ -808,7 +808,7 @@ def generate_all_tdds(
         config = json.load(f)
 
     generated = []
-    location = config.get("primary_location", "eastus2")
+    location = config.get("primary_location", "southcentralus")
 
     # Platform LZs
     for key, cfg in config.get("platform", {}).items():
@@ -853,7 +853,7 @@ if __name__ == "__main__":
     parser.add_argument("--profile", required=True, help="LZ profile")
     parser.add_argument("--subscription-id", required=True)
     parser.add_argument("--subscription-name", required=True)
-    parser.add_argument("--location", default="eastus2")
+    parser.add_argument("--location", default="southcentralus")
     parser.add_argument("--environment", default="prod")
     parser.add_argument("--framework", default="bicep")
     parser.add_argument("--deployment-id", default="")

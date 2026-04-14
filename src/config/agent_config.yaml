@@ -82,7 +82,7 @@ azure:
   policy:
     assignment_scope: "/providers/Microsoft.Management/managementGroups/{prefix}"
   deployment:
-    location: "eastus2"
+    location: "southcentralus"
     timeout_minutes: 60
     what_if_before_deploy: true
 

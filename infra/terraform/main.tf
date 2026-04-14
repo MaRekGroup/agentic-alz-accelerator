@@ -44,7 +44,7 @@ variable "subscription_id" {
 variable "location" {
   description = "Azure region for the deployment"
   type        = string
-  default     = "eastus2"
+  default     = "southcentralus"
 }
 
 variable "management_group_name" {

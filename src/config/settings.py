@@ -24,6 +24,9 @@ class AzureSettings(BaseSettings):
     management_group_prefix: str = Field(
         default="alz", alias="AZURE_MANAGEMENT_GROUP_PREFIX"
     )
+    deployment_region: str = Field(
+        default="southcentralus", alias="AZURE_DEPLOYMENT_REGION"
+    )
 
     model_config = _BASE_CONFIG
 

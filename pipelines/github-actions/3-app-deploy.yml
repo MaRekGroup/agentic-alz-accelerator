@@ -33,6 +33,11 @@ on:
         options:
           - plan
           - deploy
+      location:
+        description: "Azure region for deployment"
+        required: false
+        type: string
+        default: "southcentralus"
 
 permissions:
   id-token: write
@@ -119,7 +124,7 @@ jobs:
         if: inputs.action == 'plan'
         run: |
           az deployment sub what-if \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file infra/bicep/main.bicep \
             --parameters profileName=${{ inputs.profile }} \
             --parameters managementGroupName=${{ inputs.profile }}
@@ -128,7 +133,7 @@ jobs:
         if: inputs.action == 'deploy'
         run: |
           az deployment sub create \
-            --location eastus2 \
+            --location ${{ inputs.location }} \
             --template-file infra/bicep/main.bicep \
             --parameters profileName=${{ inputs.profile }} \
             --parameters managementGroupName=${{ inputs.profile }} \

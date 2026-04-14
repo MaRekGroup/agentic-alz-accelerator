@@ -27,6 +27,7 @@ Usage:
 
 import copy
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -176,7 +177,7 @@ class ProfileLoader:
         framework = automation.get("iac_framework", "bicep")
 
         params = {
-            "location": "eastus2",            # Override via env var or CLI
+            "location": os.environ.get("AZURE_DEPLOYMENT_REGION", "southcentralus"),  # Override via env var or CLI
             "prefix": profile.get("naming", {}).get("prefix", "alz"),
             "environment": environment,
             "iac_framework": framework,

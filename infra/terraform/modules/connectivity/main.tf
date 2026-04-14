@@ -16,7 +16,7 @@ terraform {
 # ─── Variables ────────────────────────────────────────────────────────────────
 
 variable "subscription_id"              { type = string }
-variable "location"                     { type = string, default = "eastus2" }
+variable "location"                     { type = string, default = "southcentralus" }
 variable "prefix"                       { type = string, description = "Naming prefix (≤10 chars)" }
 variable "environment"                  { type = string, validation { condition = contains(["dev","staging","prod"], var.environment) } }
 
@@ -70,6 +70,7 @@ locals {
     westus2       = "wus2"
     westus3       = "wus3"
     centralus     = "cus"
+    southcentralus = "scus"
     northeurope   = "neu"
     westeurope    = "weu"
     uksouth       = "uks"

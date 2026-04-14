@@ -27,6 +27,11 @@ parameters:
     default: 'plan'
     values: ['plan', 'deploy']
 
+  - name: location
+    displayName: 'Azure region for deployment'
+    type: string
+    default: 'southcentralus'
+
 variables:
   - group: alz-accelerator-${{ parameters.environment }}
   - name: azureServiceConnection
@@ -106,7 +111,7 @@ stages:
                 scriptLocation: 'inlineScript'
                 inlineScript: |
                   az deployment sub what-if \
-                    --location eastus2 \
+                    --location ${{ parameters.location }} \
                     --template-file infra/bicep/main.bicep \
                     --parameters profileName=${{ parameters.profile }}
 
@@ -151,7 +156,7 @@ stages:
                       scriptLocation: 'inlineScript'
                       inlineScript: |
                         az deployment sub create \
-                          --location eastus2 \
+                          --location ${{ parameters.location }} \
                           --template-file infra/bicep/main.bicep \
                           --parameters profileName=${{ parameters.profile }} \
                           --name "alz-${{ parameters.profile }}-$(Build.BuildId)"

@@ -8,7 +8,7 @@ targetScope = 'subscription'
 // ============================================================================
 
 @description('Azure region for the deployment')
-param location string = 'eastus2'
+param location string = 'southcentralus'
 
 @description('Management group name for the landing zone')
 param managementGroupName string
