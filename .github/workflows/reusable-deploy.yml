@@ -3,30 +3,6 @@
 # Called by platform-deploy.yml and app-deploy.yml
 # Handles: validate → plan → deploy → verify for a single subscription
 # ============================================================================
-# CHANGES (2026-04-15):
-#   - Removed 'resolve' job: GitHub Actions masks job outputs matching secrets,
-#     causing empty subscription-id in downstream jobs. Now each job references
-#     secrets.SUBSCRIPTION_ID directly.
-#   - Added SUBSCRIPTION_ID to accepted secrets (required: false for backward
-#     compatibility with app-deploy that uses subscription_id_secret).
-#   - Added 'Install Azure CLI' step before each Azure Login for self-hosted
-#     runners that may not have az pre-installed.
-#   - Fixed Teams webhook: moved from secrets context in 'if:' condition
-#     (not allowed) to env var with runtime check.
-# ============================================================================
-# ============================================================================
-# CHANGES (2026-04-15):
-#   - Removed 'resolve' job: GitHub Actions masks job outputs matching secrets,
-#     causing empty subscription-id in downstream jobs. Now each job references
-#     secrets.SUBSCRIPTION_ID directly.
-#   - Added SUBSCRIPTION_ID to accepted secrets (required: false for backward
-#     compatibility with app-deploy that uses subscription_id_secret).
-#   - Added 'Install Azure CLI' step before each Azure Login for self-hosted
-#     runners that may not have az pre-installed.
-#   - Fixed Teams webhook: moved from secrets context in 'if:' condition
-#     (not allowed) to env var with runtime check.
-# ============================================================================
-# ============================================================================
 name: _Reusable Deploy
 
 on:
@@ -75,15 +51,24 @@ on:
         required: false
         type: string
         default: 'ubuntu-latest'
+      # CHANGED: Added deployment_scope and resource_group inputs to support
+      # both subscription-level and resource-group-level Bicep deployments.
+      # RG-scoped modules (e.g. management) use 'group'; root main.bicep uses 'subscription'.
+      deployment_scope:
+        description: 'Bicep deployment scope: subscription or group'
+        required: false
+        type: string
+        default: 'subscription'
+      resource_group:
+        description: 'Resource group name (required when deployment_scope=group)'
+        required: false
+        type: string
+        default: ''
     secrets:
       AZURE_TENANT_ID:
         required: true
       AZURE_CLIENT_ID:
         required: true
-      # ADDED: Platform-deploy passes subscription ID as a secret (not input)
-      # because GitHub Actions masks job outputs that match known secrets.
-      # ADDED: Platform-deploy passes subscription ID as a secret (not input)
-      # because GitHub Actions masks job outputs that match known secrets.
       SUBSCRIPTION_ID:
         required: false
       TF_STATE_STORAGE_ACCOUNT:
@@ -96,11 +81,48 @@ permissions:
   contents: read
 
 jobs:
+  # =========================================================================
+  # Resolve subscription ID from either direct input or secret name
+  # =========================================================================
+  resolve:
+    name: "Resolve · ${{ inputs.project_name }}"
+    runs-on: ${{ inputs.runner_label }}
+    outputs:
+      sub_id: ${{ steps.resolve.outputs.sub_id }}
+    steps:
+      - name: Resolve subscription ID
+        id: resolve
+        env:
+          DIRECT_ID: ${{ inputs.subscription_id }}
+          SECRET_ID: ${{ secrets.SUBSCRIPTION_ID }}
+          SECRET_NAME: ${{ inputs.subscription_id_secret }}
+          ALL_SECRETS: ${{ toJson(secrets) }}
+        run: |
+          if [ -n "$DIRECT_ID" ]; then
+            echo "sub_id=$DIRECT_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from direct input: ${DIRECT_ID:0:8}..."
+          elif [ -n "$SECRET_ID" ]; then
+            echo "sub_id=$SECRET_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from SUBSCRIPTION_ID secret: ${SECRET_ID:0:8}..."
+          elif [ -n "$SECRET_NAME" ]; then
+            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
+            if [ -z "$SUB_ID" ]; then
+              echo "ERROR: Secret '$SECRET_NAME' not found. Set it in GitHub repo Settings > Secrets."
+              exit 1
+            fi
+            echo "sub_id=$SUB_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from secret '$SECRET_NAME': ${SUB_ID:0:8}..."
+          else
+            echo "ERROR: Either subscription_id or subscription_id_secret must be provided"
+            exit 1
+          fi
+
+  # =========================================================================
   # Stage 1: Validate profile config + IaC templates
   # =========================================================================
   validate:
     name: "Validate · ${{ inputs.project_name }}"
-
+    needs: resolve
     runs-on: ${{ inputs.runner_label }}
     outputs:
       profile_valid: ${{ steps.check.outputs.valid }}
@@ -115,12 +137,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Install Azure CLI
-        run: |
-          if ! command -v az &>/dev/null; then
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -192,12 +208,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Azure CLI
-        run: |
-          if ! command -v az &>/dev/null; then
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          fi
-
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -205,16 +215,39 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      - name: Ensure Resource Group exists
+        if: inputs.deployment_scope == 'group' && inputs.resource_group != ''
+        run: |
+          az group create \
+            --name ${{ inputs.resource_group }} \
+            --location ${{ inputs.location }} \
+            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
+
       - name: Bicep What-If
         if: inputs.framework == 'bicep'
+        # CHANGED: Use bicepparam 'using' directive instead of --template-file.
+        # Support both subscription and resource-group scoped deployments.
+        # Param file pattern: {project_name}-{environment}.bicepparam
         run: |
-          az deployment sub what-if \
-            --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
-            --parameters profileName=${{ inputs.profile }} \
-            --parameters projectName=${{ inputs.project_name }} \
-            --subscription ${{ secrets.SUBSCRIPTION_ID }}
+          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
+          if [ ! -f "$PARAMS_FILE" ]; then
+            echo "ERROR: Parameters file not found: $PARAMS_FILE"
+            ls -la infra/bicep/parameters/ || true
+            exit 1
+          fi
+
+          if [ "${{ inputs.deployment_scope }}" = "group" ]; then
+            az deployment group what-if \
+              --resource-group ${{ inputs.resource_group }} \
+              --parameters "$PARAMS_FILE" \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }}
+          else
+            az deployment sub what-if \
+              --location ${{ inputs.location }} \
+              --parameters "$PARAMS_FILE" \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }}
+          fi
 
       - name: Terraform Plan
         if: inputs.framework == 'terraform'
@@ -261,12 +294,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Azure CLI
-        run: |
-          if ! command -v az &>/dev/null; then
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          fi
-
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -274,20 +301,37 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      - name: Ensure Resource Group exists
+        if: inputs.deployment_scope == 'group' && inputs.resource_group != ''
+        run: |
+          az group create \
+            --name ${{ inputs.resource_group }} \
+            --location ${{ inputs.location }} \
+            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
+
       - name: Deploy with Bicep
         id: deploy-bicep
         if: inputs.framework == 'bicep'
+        # CHANGED: Use bicepparam 'using' directive instead of --template-file.
+        # Support both subscription and resource-group scoped deployments.
         run: |
           DEPLOYMENT_NAME="alz-${{ inputs.project_name }}-$(date +%Y%m%d%H%M%S)"
+          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
 
-          az deployment sub create \
-            --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
-            --parameters profileName=${{ inputs.profile }} \
-            --parameters projectName=${{ inputs.project_name }} \
-            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
-            --name "$DEPLOYMENT_NAME"
+          if [ "${{ inputs.deployment_scope }}" = "group" ]; then
+            az deployment group create \
+              --resource-group ${{ inputs.resource_group }} \
+              --parameters "$PARAMS_FILE" \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+              --name "$DEPLOYMENT_NAME"
+          else
+            az deployment sub create \
+              --location ${{ inputs.location }} \
+              --parameters "$PARAMS_FILE" \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+              --name "$DEPLOYMENT_NAME"
+          fi
 
           echo "deployment_id=$DEPLOYMENT_NAME" >> "$GITHUB_OUTPUT"
 
@@ -336,12 +380,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Install Azure CLI
-        run: |
-          if ! command -v az &>/dev/null; then
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2

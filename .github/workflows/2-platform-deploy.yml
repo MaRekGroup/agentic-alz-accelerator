@@ -4,12 +4,6 @@
 #   1. Management → 2. Connectivity → 3. Identity → 4. Security
 # Each depends on the previous. Each has its own approval gate.
 # ============================================================================
-# CHANGES (2026-04-15):
-#   - Moved subscription_id from with: to secrets: block in all 4 jobs.
-#     GitHub Actions does not allow secrets context in with: for reusable
-#     workflow calls. Subscription IDs are now passed via secrets.SUBSCRIPTION_ID.
-# ============================================================================
-# ============================================================================
 name: "2 · Deploy Platform Landing Zones"
 
 on:
@@ -71,10 +65,13 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      # CHANGED: Management module is RG-scoped, not subscription-scoped
+      deployment_scope: group
+      resource_group: alz-platform-management-rg
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}  # Was in with: — moved to secrets
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -101,7 +98,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}  # Was in with: — moved to secrets
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -128,7 +125,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}  # Was in with: — moved to secrets
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -154,7 +151,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}   # Was in with: — moved to secrets
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
