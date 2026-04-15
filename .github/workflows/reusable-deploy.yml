@@ -431,8 +431,15 @@ jobs:
           retention-days: 90
 
       - name: Notify Teams on completion
-        if: always() && secrets.TEAMS_WEBHOOK_URL != ''
+        if: always()
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: |
+          if [ -z "$TEAMS_WEBHOOK" ]; then
+            echo "No Teams webhook configured, skipping notification."
+            exit 0
+          fi
+
           STATUS="${{ job.status }}"
           COLOR="good"
           [ "$STATUS" != "success" ] && COLOR="attention"
@@ -457,4 +464,4 @@ jobs:
                 ]
               }
             }]
-          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          }' "$TEAMS_WEBHOOK"
