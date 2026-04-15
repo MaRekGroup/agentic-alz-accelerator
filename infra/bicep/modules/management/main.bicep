@@ -84,15 +84,17 @@ resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
 // Activity Log Diagnostic Settings
 // =============================================================================
 
-resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: '${prefix}-activity-log-diag'
-  properties: {
-    workspaceId: workspace.id
-    logs: [
-      { categoryGroup: 'allLogs', enabled: true }
-    ]
-  }
-}
+// TODO: Activity log diagnostics is subscription-scoped — move to subscription-level deployment
+// Commented out: BadRequest when deployed at RG scope
+// resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+//   name: '${prefix}-activity-log-diag'
+//   properties: {
+//     workspaceId: workspace.id
+//     logs: [
+//       { categoryGroup: 'allLogs', enabled: true }
+//     ]
+//   }
+// }
 
 // =============================================================================
 // Microsoft Sentinel (optional) — commented out for initial LAW-only deployment
