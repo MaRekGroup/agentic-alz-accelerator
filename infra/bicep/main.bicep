@@ -109,6 +109,10 @@ module logging 'modules/logging/main.bicep' = {
     prefix: prefix
     retentionDays: logRetentionDays
     tags: tags
+    // CHANGED: Added missing required params for cost governance (BCP035)
+    environment: environment
+    budgetAmount: budgetAmount
+    technicalContact: technicalContact
   }
 }
 
@@ -123,6 +127,10 @@ module networking 'modules/networking/main.bicep' = {
     enableDdos: enableDdos
     logAnalyticsWorkspaceId: logging.outputs.workspaceId
     tags: tags
+    // CHANGED: Added missing required params for cost governance (BCP035)
+    environment: environment
+    budgetAmount: budgetAmount
+    technicalContact: technicalContact
   }
 }
 
@@ -136,6 +144,10 @@ module security 'modules/security/main.bicep' = {
     defenderPlans: defenderPlans
     logAnalyticsWorkspaceId: logging.outputs.workspaceId
     tags: tags
+    // CHANGED: Added missing required params for cost governance (BCP035)
+    environment: environment
+    budgetAmount: budgetAmount
+    technicalContact: technicalContact
   }
 }
 
@@ -146,6 +158,10 @@ module identity 'modules/identity/main.bicep' = {
     location: location
     prefix: prefix
     tags: tags
+    // CHANGED: Added missing required params for cost governance (BCP035)
+    environment: environment
+    budgetAmount: budgetAmount
+    technicalContact: technicalContact
   }
 }
 

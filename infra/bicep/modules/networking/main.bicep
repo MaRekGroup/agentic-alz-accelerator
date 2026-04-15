@@ -62,9 +62,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
           networkSecurityGroup: subnet.name != 'AzureBastionSubnet' ? {
             id: resourceId('Microsoft.Network/networkSecurityGroups', '${prefix}-${subnet.name}-nsg')
           } : null
-          serviceEndpoints: contains(subnet, 'serviceEndpoints') ? [
-            for se in subnet.serviceEndpoints: { service: se }
-          ] : []
+          // CHANGED: Use map() instead of nested for-expression to avoid BCP142
+          serviceEndpoints: map(contains(subnet, 'serviceEndpoints') ? subnet.serviceEndpoints : [], se => { service: se })
           privateEndpointNetworkPolicies: contains(subnet, 'privateEndpointPolicies') && subnet.privateEndpointPolicies ? 'Enabled' : 'Disabled'
         }
       }

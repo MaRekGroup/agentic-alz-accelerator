@@ -56,37 +56,43 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 // Defender for Cloud
 // ============================================================================
 
-resource defenderPricing 'Microsoft.Security/pricings@2024-01-01' = [
-  for plan in defenderPlans: if (enableDefender) {
-    name: plan
-    properties: {
-      pricingTier: 'Standard'
-    }
-  }
-]
+// TODO: Defender resources are subscription-scoped — move to a subscription-level deployment
+// Commented out: BCP135 - cannot deploy subscription-scoped resources from RG-scoped module
+// resource defenderPricing 'Microsoft.Security/pricings@2024-01-01' = [
+//   for plan in defenderPlans: if (enableDefender) {
+//     name: plan
+//     properties: {
+//       pricingTier: 'Standard'
+//     }
+//   }
+// ]
 
 // ============================================================================
 // Security Center Auto Provisioning
 // ============================================================================
 
-resource autoProvisioning 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = if (enableDefender) {
-  name: 'default'
-  properties: {
-    autoProvision: 'On'
-  }
-}
+
+// TODO: autoProvisioning is subscription-scoped — move to subscription-level deployment
+// resource autoProvisioning 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = if (enableDefender) {
+//   name: 'default'
+//   properties: {
+//     autoProvision: 'On'
+//   }
+// }
 
 // ============================================================================
 // Security Center Workspace Settings
 // ============================================================================
 
-resource workspaceSettings 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = if (enableDefender) {
-  name: 'default'
-  properties: {
-    workspaceId: logAnalyticsWorkspaceId
-    scope: subscription().id
-  }
-}
+
+// TODO: workspaceSettings is subscription-scoped — move to subscription-level deployment
+// resource workspaceSettings 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = if (enableDefender) {
+//   name: 'default'
+//   properties: {
+//     workspaceId: logAnalyticsWorkspaceId
+//     scope: subscription().id
+//   }
+// }
 
 // ============================================================================
 // Key Vault Diagnostic Settings
