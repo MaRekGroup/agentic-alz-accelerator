@@ -21,6 +21,8 @@ param projectName string
 @description('Environment name')
 param environment string
 
+param now string = utcNow('yyyy-MM-01')
+
 // =============================================================================
 // Built-in Policy Initiative Assignments
 // =============================================================================
@@ -188,7 +190,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'budget-${projectName}-${environment}'
   properties: {
     timePeriod: {
-      startDate: '2026-01-01'
+      startDate: now
     }
     timeGrain: 'Monthly'
     amount: budgetAmount

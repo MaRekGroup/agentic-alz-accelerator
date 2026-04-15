@@ -57,6 +57,9 @@ param projectName string
 @description('Environment name')
 param environment string
 
+// CHANGED: Dynamic budget start date — Azure rejects dates prior to current month
+param now string = utcNow('yyyy-MM-01')
+
 // ============================================================================
 // Variables
 // ============================================================================
@@ -181,7 +184,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'budget-platform-${environment}'
   properties: {
     timePeriod: {
-      startDate: '2026-01-01'
+      startDate: now
     }
     timeGrain: 'Monthly'
     amount: budgetAmount

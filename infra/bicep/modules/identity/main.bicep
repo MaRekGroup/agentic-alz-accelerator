@@ -18,6 +18,8 @@ param technicalContact string
 @description('Environment name')
 param environment string
 
+param now string = utcNow('yyyy-MM-01')
+
 // ============================================================================
 // User-Assigned Managed Identity (for landing zone workloads)
 // ============================================================================
@@ -72,7 +74,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'budget-identity-${environment}'
   properties: {
     timePeriod: {
-      startDate: '2026-01-01'
+      startDate: now
     }
     timeGrain: 'Monthly'
     amount: budgetAmount

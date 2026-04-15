@@ -26,6 +26,8 @@ param prefix string
 @allowed(['dev', 'staging', 'prod'])
 param environment string
 
+param now string = utcNow('yyyy-MM-01')
+
 @description('Sentinel workspace mode: dedicated (new workspace) or linked (reuse management workspace)')
 @allowed(['dedicated', 'linked'])
 param sentinelWorkspaceMode string = 'dedicated'
@@ -136,7 +138,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'budget-platform-security-${environment}'
   properties: {
     timePeriod: {
-      startDate: '2026-01-01'
+      startDate: now
     }
     timeGrain: 'Monthly'
     amount: budgetAmountUsd
