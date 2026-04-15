@@ -59,7 +59,6 @@ jobs:
     with:
       profile: platform-management
       project_name: platform-management
-      subscription_id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
       environment: prod
       github_environment: platform-management
       framework: ${{ inputs.framework }}
@@ -69,6 +68,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -86,7 +86,6 @@ jobs:
     with:
       profile: platform-connectivity
       project_name: platform-connectivity
-      subscription_id: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
       environment: prod
       github_environment: platform-connectivity
       framework: ${{ inputs.framework }}
@@ -96,6 +95,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -113,7 +113,6 @@ jobs:
     with:
       profile: platform-identity
       project_name: platform-identity
-      subscription_id: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
       environment: prod
       github_environment: platform-identity
       framework: ${{ inputs.framework }}
@@ -123,6 +122,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -139,7 +139,6 @@ jobs:
     with:
       profile: platform-security
       project_name: platform-security
-      subscription_id: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
       environment: prod
       github_environment: platform-security
       framework: ${{ inputs.framework }}
@@ -149,6 +148,7 @@ jobs:
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
       TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 

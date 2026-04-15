@@ -56,6 +56,8 @@ on:
         required: true
       AZURE_CLIENT_ID:
         required: true
+      SUBSCRIPTION_ID:
+        required: false
       TF_STATE_STORAGE_ACCOUNT:
         required: false
       TEAMS_WEBHOOK_URL:
@@ -79,12 +81,16 @@ jobs:
         id: resolve
         env:
           DIRECT_ID: ${{ inputs.subscription_id }}
+          SECRET_ID: ${{ secrets.SUBSCRIPTION_ID }}
           SECRET_NAME: ${{ inputs.subscription_id_secret }}
           ALL_SECRETS: ${{ toJson(secrets) }}
         run: |
           if [ -n "$DIRECT_ID" ]; then
             echo "sub_id=$DIRECT_ID" >> "$GITHUB_OUTPUT"
             echo "Resolved from direct input: ${DIRECT_ID:0:8}..."
+          elif [ -n "$SECRET_ID" ]; then
+            echo "sub_id=$SECRET_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from SUBSCRIPTION_ID secret: ${SECRET_ID:0:8}..."
           elif [ -n "$SECRET_NAME" ]; then
             SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
             if [ -z "$SUB_ID" ]; then
