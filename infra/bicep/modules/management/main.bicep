@@ -25,6 +25,10 @@ param technicalContact string
 @description('Environment name')
 param environment string
 
+// CHANGED: utcNow() can only be used as a parameter default value in Bicep
+@description('Current UTC timestamp — used to derive budget start date')
+param now string = utcNow()
+
 // =============================================================================
 // Log Analytics Workspace (Centralized)
 // =============================================================================
@@ -123,7 +127,8 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: 'budget-management-${environment}'
   properties: {
     timePeriod: {
-      startDate: '2026-01-01'
+      // CHANGED: Derive current month start from utcNow() param — Azure rejects past start dates
+      startDate: '${substring(now, 0, 7)}-01'
     }
     timeGrain: 'Monthly'
     amount: budgetAmount
