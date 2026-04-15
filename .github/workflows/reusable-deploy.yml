@@ -68,48 +68,11 @@ permissions:
   contents: read
 
 jobs:
-  # =========================================================================
-  # Resolve subscription ID from either direct input or secret name
-  # =========================================================================
-  resolve:
-    name: "Resolve · ${{ inputs.project_name }}"
-    runs-on: ${{ inputs.runner_label }}
-    outputs:
-      sub_id: ${{ steps.resolve.outputs.sub_id }}
-    steps:
-      - name: Resolve subscription ID
-        id: resolve
-        env:
-          DIRECT_ID: ${{ inputs.subscription_id }}
-          SECRET_ID: ${{ secrets.SUBSCRIPTION_ID }}
-          SECRET_NAME: ${{ inputs.subscription_id_secret }}
-          ALL_SECRETS: ${{ toJson(secrets) }}
-        run: |
-          if [ -n "$DIRECT_ID" ]; then
-            echo "sub_id=$DIRECT_ID" >> "$GITHUB_OUTPUT"
-            echo "Resolved from direct input: ${DIRECT_ID:0:8}..."
-          elif [ -n "$SECRET_ID" ]; then
-            echo "sub_id=$SECRET_ID" >> "$GITHUB_OUTPUT"
-            echo "Resolved from SUBSCRIPTION_ID secret: ${SECRET_ID:0:8}..."
-          elif [ -n "$SECRET_NAME" ]; then
-            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
-            if [ -z "$SUB_ID" ]; then
-              echo "ERROR: Secret '$SECRET_NAME' not found. Set it in GitHub repo Settings > Secrets."
-              exit 1
-            fi
-            echo "sub_id=$SUB_ID" >> "$GITHUB_OUTPUT"
-            echo "Resolved from secret '$SECRET_NAME': ${SUB_ID:0:8}..."
-          else
-            echo "ERROR: Either subscription_id or subscription_id_secret must be provided"
-            exit 1
-          fi
-
-  # =========================================================================
   # Stage 1: Validate profile config + IaC templates
   # =========================================================================
   validate:
     name: "Validate · ${{ inputs.project_name }}"
-    needs: resolve
+
     runs-on: ${{ inputs.runner_label }}
     outputs:
       profile_valid: ${{ steps.check.outputs.valid }}
@@ -130,7 +93,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.resolve.outputs.sub_id }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Validate profile configuration
         id: check
@@ -190,7 +153,7 @@ jobs:
   # =========================================================================
   plan:
     name: "Plan · ${{ inputs.project_name }}"
-    needs: [resolve, validate]
+    needs: validate
     runs-on: ${{ inputs.runner_label }}
     steps:
       - uses: actions/checkout@v4
@@ -200,7 +163,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.resolve.outputs.sub_id }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Bicep What-If
         if: inputs.framework == 'bicep'
@@ -211,7 +174,7 @@ jobs:
             --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
             --parameters profileName=${{ inputs.profile }} \
             --parameters projectName=${{ inputs.project_name }} \
-            --subscription ${{ needs.resolve.outputs.sub_id }}
+            --subscription ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Terraform Plan
         if: inputs.framework == 'terraform'
@@ -224,7 +187,7 @@ jobs:
 
           terraform plan \
             -var-file="environments/${{ inputs.environment }}/terraform.tfvars" \
-            -var="subscription_id=${{ needs.resolve.outputs.sub_id }}" \
+            -var="subscription_id=${{ secrets.SUBSCRIPTION_ID }}" \
             -var="profile=${{ inputs.profile }}" \
             -var="project_name=${{ inputs.project_name }}" \
             -var="location=${{ inputs.location }}" \
@@ -235,7 +198,7 @@ jobs:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ needs.resolve.outputs.sub_id }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Upload plan artifact
         if: inputs.framework == 'terraform'
@@ -249,7 +212,7 @@ jobs:
   # =========================================================================
   deploy:
     name: "Deploy · ${{ inputs.project_name }}"
-    needs: [resolve, plan]
+    needs: plan
     if: inputs.action == 'deploy'
     runs-on: ${{ inputs.runner_label }}
     environment: ${{ inputs.github_environment }}
@@ -263,7 +226,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.resolve.outputs.sub_id }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Deploy with Bicep
         id: deploy-bicep
@@ -277,7 +240,7 @@ jobs:
             --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
             --parameters profileName=${{ inputs.profile }} \
             --parameters projectName=${{ inputs.project_name }} \
-            --subscription ${{ needs.resolve.outputs.sub_id }} \
+            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
             --name "$DEPLOYMENT_NAME"
 
           echo "deployment_id=$DEPLOYMENT_NAME" >> "$GITHUB_OUTPUT"
@@ -306,14 +269,14 @@ jobs:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ needs.resolve.outputs.sub_id }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
 
   # =========================================================================
   # Stage 4: Verify — post-deployment compliance check
   # =========================================================================
   verify:
     name: "Verify · ${{ inputs.project_name }}"
-    needs: [resolve, deploy]
+    needs: deploy
     if: inputs.action == 'deploy'
     runs-on: ${{ inputs.runner_label }}
     steps:
@@ -333,7 +296,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.resolve.outputs.sub_id }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Run post-deployment validation
         run: |
@@ -346,7 +309,7 @@ jobs:
           async def main():
               settings = Settings()
               detector = DriftDetector(DefaultAzureCredential(), settings)
-              scope = '/subscriptions/${{ needs.resolve.outputs.sub_id }}'
+              scope = '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}'
 
               # Capture baseline for future drift detection
               baseline = await detector.capture_baseline(scope)
@@ -355,7 +318,7 @@ jobs:
           asyncio.run(main())
           "
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ needs.resolve.outputs.sub_id }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Run compliance scan
         id: compliance
@@ -369,7 +332,7 @@ jobs:
 
           async def main():
               settings = Settings()
-              settings.azure.subscription_id = '${{ needs.resolve.outputs.sub_id }}'
+              settings.azure.subscription_id = '${{ secrets.SUBSCRIPTION_ID }}'
               kernel = Kernel()
               agent = MonitoringAgent(kernel, DefaultAzureCredential(), settings)
               result = await agent.run_compliance_scan()
@@ -388,7 +351,7 @@ jobs:
           asyncio.run(main())
           "
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ needs.resolve.outputs.sub_id }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Generate As-Built Technical Design Document
         id: tdd
@@ -398,7 +361,7 @@ jobs:
           # Read subscription name from config
           SUB_NAME=$(jq -r '
             (.platform + .application) | to_entries[]
-            | select(.value.subscription_id == "${{ needs.resolve.outputs.sub_id }}"
+            | select(.value.subscription_id == "${{ secrets.SUBSCRIPTION_ID }}"
                      or .key == "${{ inputs.project_name }}")
             | .value.subscription_name // .key
           ' environments/subscriptions.json 2>/dev/null || echo "${{ inputs.project_name }}")
@@ -409,7 +372,7 @@ jobs:
           path = generate_tdd_for_deployment(
               project_name='${{ inputs.project_name }}',
               profile='${{ inputs.profile }}',
-              subscription_id='${{ needs.resolve.outputs.sub_id }}',
+              subscription_id='${{ secrets.SUBSCRIPTION_ID }}',
               subscription_name='${SUB_NAME}',
               location='${{ inputs.location }}',
               environment='${{ inputs.environment }}',
@@ -455,7 +418,7 @@ jobs:
                   {"type": "TextBlock", "text": "ALZ Deployment: ${{ inputs.project_name }}", "weight": "bolder", "size": "large"},
                   {"type": "FactSet", "facts": [
                     {"title": "Profile", "value": "${{ inputs.profile }}"},
-                    {"title": "Subscription", "value": "${{ needs.resolve.outputs.sub_id }}"},
+                    {"title": "Subscription", "value": "${{ secrets.SUBSCRIPTION_ID }}"},
                     {"title": "Environment", "value": "${{ inputs.environment }}"},
                     {"title": "Status", "value": "'"$STATUS"'"},
                     {"title": "Framework", "value": "${{ inputs.framework }}"},
