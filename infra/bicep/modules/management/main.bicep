@@ -95,23 +95,23 @@ resource activityLogDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-previ
 }
 
 // =============================================================================
-// Microsoft Sentinel (optional)
+// Microsoft Sentinel (optional) — commented out for initial LAW-only deployment
 // =============================================================================
 
-resource sentinel 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = if (enableSentinel) {
-  name: 'SecurityInsights(${workspace.name})'
-  location: location
-  tags: tags
-  plan: {
-    name: 'SecurityInsights(${workspace.name})'
-    publisher: 'Microsoft'
-    product: 'OMSGallery/SecurityInsights'
-    promotionCode: ''
-  }
-  properties: {
-    workspaceResourceId: workspace.id
-  }
-}
+// resource sentinel 'Microsoft.OperationsManagement/solutions@2015-11-01-preview' = if (enableSentinel) {
+//   name: 'SecurityInsights(${workspace.name})'
+//   location: location
+//   tags: tags
+//   plan: {
+//     name: 'SecurityInsights(${workspace.name})'
+//     publisher: 'Microsoft'
+//     product: 'OMSGallery/SecurityInsights'
+//     promotionCode: ''
+//   }
+//   properties: {
+//     workspaceResourceId: workspace.id
+//   }
+// }
 
 // =============================================================================
 // Cost Governance
