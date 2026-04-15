@@ -3,6 +3,30 @@
 # Called by platform-deploy.yml and app-deploy.yml
 # Handles: validate → plan → deploy → verify for a single subscription
 # ============================================================================
+# CHANGES (2026-04-15):
+#   - Removed 'resolve' job: GitHub Actions masks job outputs matching secrets,
+#     causing empty subscription-id in downstream jobs. Now each job references
+#     secrets.SUBSCRIPTION_ID directly.
+#   - Added SUBSCRIPTION_ID to accepted secrets (required: false for backward
+#     compatibility with app-deploy that uses subscription_id_secret).
+#   - Added 'Install Azure CLI' step before each Azure Login for self-hosted
+#     runners that may not have az pre-installed.
+#   - Fixed Teams webhook: moved from secrets context in 'if:' condition
+#     (not allowed) to env var with runtime check.
+# ============================================================================
+# ============================================================================
+# CHANGES (2026-04-15):
+#   - Removed 'resolve' job: GitHub Actions masks job outputs matching secrets,
+#     causing empty subscription-id in downstream jobs. Now each job references
+#     secrets.SUBSCRIPTION_ID directly.
+#   - Added SUBSCRIPTION_ID to accepted secrets (required: false for backward
+#     compatibility with app-deploy that uses subscription_id_secret).
+#   - Added 'Install Azure CLI' step before each Azure Login for self-hosted
+#     runners that may not have az pre-installed.
+#   - Fixed Teams webhook: moved from secrets context in 'if:' condition
+#     (not allowed) to env var with runtime check.
+# ============================================================================
+# ============================================================================
 name: _Reusable Deploy
 
 on:
@@ -56,6 +80,10 @@ on:
         required: true
       AZURE_CLIENT_ID:
         required: true
+      # ADDED: Platform-deploy passes subscription ID as a secret (not input)
+      # because GitHub Actions masks job outputs that match known secrets.
+      # ADDED: Platform-deploy passes subscription ID as a secret (not input)
+      # because GitHub Actions masks job outputs that match known secrets.
       SUBSCRIPTION_ID:
         required: false
       TF_STATE_STORAGE_ACCOUNT:
@@ -87,6 +115,12 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Azure CLI
+        run: |
+          if ! command -v az &>/dev/null; then
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -158,6 +192,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Azure CLI
+        run: |
+          if ! command -v az &>/dev/null; then
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          fi
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -220,6 +260,12 @@ jobs:
       deployment_id: ${{ steps.deploy-bicep.outputs.deployment_id || steps.deploy-tf.outputs.deployment_id }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Azure CLI
+        run: |
+          if ! command -v az &>/dev/null; then
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -290,6 +336,12 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Azure CLI
+        run: |
+          if ! command -v az &>/dev/null; then
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2

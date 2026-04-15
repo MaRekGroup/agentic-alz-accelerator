@@ -332,3 +332,89 @@ where the workflow runs.
 
 **Fix:** Update the federated credentials (see Step 4). The subject claim must
 match `repo:<org>/<repo>:ref:refs/heads/main` exactly.
+
+### Subscription ID empty in reusable workflow jobs (secret masking)
+
+**Cause:** The original `reusable-deploy.yml` used a `resolve` job to pass
+subscription IDs via job outputs (`needs.resolve.outputs.sub_id`). GitHub
+Actions automatically masks job outputs whose values match known repository
+secrets, replacing the value with an empty string. This caused all downstream
+jobs (validate, plan, deploy, verify) to receive an empty `subscription-id`.
+
+**Symptoms:**
+- Resolve job shows `success` but logs contain:
+  `##[warning]Skip output 'sub_id' since it may contain secret.`
+- Azure Login fails with:
+  `Ensure 'subscription-id' is supplied or 'allow-no-subscriptions' is 'true'`
+
+**Fix (applied 2026-04-15):**
+1. Removed the `resolve` job from `reusable-deploy.yml`
+2. Added `SUBSCRIPTION_ID` as a secret input to the reusable workflow
+3. Each job now references `secrets.SUBSCRIPTION_ID` directly
+4. Platform-deploy passes subscription IDs via `secrets:` block (not `with:`)
+
+### Azure CLI not found on self-hosted runner
+
+**Cause:** Self-hosted runners don't come with Azure CLI pre-installed (unlike
+GitHub-hosted `ubuntu-latest` runners).
+
+**Symptoms:**
+- Azure Login step fails with:
+  `Unable to locate executable file: az`
+- Login cleanup also fails with the same message
+
+**Fix (applied 2026-04-15):** Added an `Install Azure CLI` step before each
+`Azure Login (OIDC)` step in `reusable-deploy.yml`:
+
+```yaml
+- name: Install Azure CLI
+  run: |
+    if ! command -v az &>/dev/null; then
+      curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    fi
+```
+
+### Secrets not allowed in `with:` for reusable workflows
+
+**Cause:** GitHub Actions does not allow `${{ secrets.* }}` in the `with:` block
+of reusable workflow calls. This causes a workflow parse error:
+`Unrecognized named-value: 'secrets'`.
+
+**Fix (applied 2026-04-15):** Moved `subscription_id` from `with:` to `secrets:`
+in `2-platform-deploy.yml` for all 4 platform jobs.
+
+### Secrets not allowed in `if:` conditions
+
+**Cause:** GitHub Actions does not allow `secrets.*` in job/step `if:` conditions.
+The `reusable-deploy.yml` had `if: always() && secrets.TEAMS_WEBHOOK_URL != ''`.
+
+**Fix (applied 2026-04-15):** Replaced with an env var + runtime check:
+
+```yaml
+- name: Notify Teams on completion
+  if: always()
+  env:
+    TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+  run: |
+    if [ -z "$TEAMS_WEBHOOK" ]; then
+      echo "No Teams webhook configured, skipping notification."
+      exit 0
+    fi
+    # ... rest of curl command
+```
+
+---
+
+## Change Log
+
+### 2026-04-15 — Workflow Fixes for Platform Deployment
+
+| Change | File | Description |
+|--------|------|-------------|
+| Comment out Sentinel | `infra/bicep/modules/management/main.bicep` | Sentinel disabled for initial LAW-only deployment |
+| Create param file | `infra/bicep/parameters/platform-management-prod.bicepparam` | Bicep parameters: prefix=mrg, retention=90d, budget=$500 |
+| Fix secrets in `with:` | `.github/workflows/2-platform-deploy.yml` | Moved subscription IDs from `with:` to `secrets:` block |
+| Remove resolve job | `.github/workflows/reusable-deploy.yml` | Replaced masked job outputs with direct `secrets.SUBSCRIPTION_ID` |
+| Fix Teams webhook | `.github/workflows/reusable-deploy.yml` | Moved from `if:` condition to env var + runtime check |
+| Add Azure CLI install | `.github/workflows/reusable-deploy.yml` | Added install step for self-hosted runners without `az` |
+| Switch to self-hosted | `RUNNER_LABEL` variable | Changed from `ubuntu-latest` to `self-hosted` |
