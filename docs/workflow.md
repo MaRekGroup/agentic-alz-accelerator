@@ -90,15 +90,13 @@ documentation (step 7) and continuous operations (steps 8–9).
 
 ## MCP Tool Integration
 
-Agents connect to Azure services via MCP servers:
+Agents connect to Azure services via 3 MCP servers:
 
 | MCP Server | Tools | Used By |
 |-----------|-------|---------|
-| Azure Pricing | Cost estimation, region comparison, RI pricing | Architect, Planner, Chronicler |
-| Azure Resource Graph | Resource queries, inventory, drift detection | Monitor, Remediate, Governance |
-| Azure Policy | Policy discovery, compliance checking | Governance, Monitor, Challenger |
-| Azure Deployment | Bicep/Terraform deploy, what-if, status | Deploy, Remediate |
-| Azure Monitor | Secure score, recommendations, activity log | Monitor, Remediate, Chronicler |
+| Azure Pricing | Cost estimation, region comparison, SKU pricing (18 tools) | Architect, Planner, Chronicler |
+| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC (22 tools, consolidated) | All agents |
+| Draw.io | Architecture diagram generation with Azure icons | Artisan |
 
 ## Agent Tools (`src/tools/`)
 
@@ -112,6 +110,7 @@ Agents invoke these Azure SDK integrations during workflow execution:
 | Resource Graph | `resource_graph.py` | Sentinel, Mender, Warden |
 | Drift Detector | `drift_detector.py` | Sentinel |
 | Diagram Generator | `azure_diagram_generator.py` | Artisan, Chronicler |
+| Python Diagrams | `python_diagram_generator.py` | Artisan |
 | TDD Generator | `tdd_generator.py` | Chronicler |
 
 ## Profile Configuration

@@ -11,10 +11,10 @@ design areas and the [APEX](https://github.com/jonathan-vella/azure-agentic-infr
 
 | Component | Description |
 |-----------|-------------|
-| **Agent Definitions** | 10 specialized agents with Semantic Kernel function calling |
+| **Agent Definitions** | 11 specialized agents with Semantic Kernel function calling |
 | **Workflow Engine** | DAG-based orchestration with approval gates and artifact handoffs |
 | **IaC Modules** | Bicep + Terraform organized by CAF design area |
-| **MCP Servers** | Azure Pricing, Resource Graph, Policy, Deployment, Monitor |
+| **MCP Servers** | Azure Pricing, Azure Platform (consolidated), Draw.io |
 | **Validation Scripts** | Security baseline, cost governance, pre-commit hooks |
 | **CI/CD Pipelines** | GitHub Actions with OIDC, approval environments, self-hosted runner support |
 | **Bootstrap Checklist** | Excel workbook to gather settings from networking, security, identity teams |
@@ -55,6 +55,7 @@ Every IaC module maps to an official Azure Landing Zone design area:
 | Orchestrator | 🧠 Conductor | — | Master workflow orchestration |
 | Requirements | 📜 Scribe | 1 | Gather LZ requirements mapped to CAF |
 | Architect | 🏛️ Oracle | 2 | WAF assessment + cost estimation |
+| Design | 🎨 Artisan | 3 | Architecture diagrams and ADRs |
 | Governance | 🛡️ Warden | 3.5 | Policy discovery + security baseline |
 | IaC Planner | 📐 Strategist | 4 | Implementation planning + AVM selection |
 | Code Generator | ⚒️ Forge | 5 | Bicep/Terraform generation (AVM-first) |
@@ -68,11 +69,9 @@ Every IaC module maps to an official Azure Landing Zone design area:
 
 | MCP Server | Tools | Used By |
 |-----------|-------|---------|
-| Azure Pricing | Cost estimation, region comparison | Oracle, Strategist |
-| Azure Resource Graph | Resource queries, drift detection | Sentinel, Mender, Warden |
-| Azure Policy | Policy discovery, compliance | Warden, Sentinel, Challenger |
-| Azure Deployment | Bicep/TF deploy, what-if | Envoy, Mender |
-| Azure Monitor | Secure score, activity log | Sentinel, Chronicler |
+| Azure Pricing | Cost estimation, region comparison, SKU pricing (18 tools) | Oracle, Strategist |
+| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC (22 tools, consolidated) | All agents |
+| Draw.io | Architecture diagram generation with Azure icons | Artisan |
 
 ## Security Baseline
 
@@ -202,7 +201,8 @@ python scripts/validators/validate_cost_governance.py infra/
 │   │   ├── policy_checker.py        # Policy compliance checks
 │   │   ├── resource_graph.py        # Azure Resource Graph queries
 │   │   ├── drift_detector.py        # Configuration drift detection
-│   │   ├── azure_diagram_generator.py # Architecture diagrams
+│   │   ├── azure_diagram_generator.py # Architecture diagrams (engine selector)
+│   │   ├── python_diagram_generator.py # Python diagrams library engine
 │   │   └── tdd_generator.py         # Technical Design Documents
 │   └── config/                # Agent and profile configs
 │       ├── settings.py              # pydantic-settings from .env

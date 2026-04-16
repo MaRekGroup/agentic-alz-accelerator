@@ -144,13 +144,13 @@ python -m pytest tests/ -v
 | Design Area | IaC Module | Agent(s) |
 |-------------|-----------|----------|
 | Billing & Tenant | `billing-and-tenant/` | Scribe, Oracle |
-| Identity & Access | `identity-and-access/` | Warden, Forge |
-| Resource Organization | `resource-organization/` | Oracle, Strategist |
-| Network Topology | `network-topology/` | Oracle, Forge |
-| Security | `security/` | Warden, Sentinel |
-| Management | `management/` | Chronicler, Sentinel |
-| Governance | `governance/` | Warden, Sentinel |
-| Platform Automation | `platform-automation/` | Envoy, Forge |
+| Identity & Access | `identity/` | Warden, Forge |
+| Resource Organization | `governance/`, `policies/` | Oracle, Strategist |
+| Network Topology | `connectivity/`, `networking/` | Oracle, Forge |
+| Security | `security/`, `platform-security/` | Warden, Sentinel |
+| Management | `management/`, `logging/` | Chronicler, Sentinel |
+| Governance | `governance/`, `policies/` | Warden, Sentinel |
+| Platform Automation | — (CI/CD pipelines) | Envoy, Forge |
 
 ## Day-2 Operations
 

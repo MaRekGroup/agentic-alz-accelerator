@@ -20,13 +20,13 @@ Every agent and IaC module maps to official Azure Landing Zone design areas:
 | CAF Design Area | IaC Module | Agent(s) Responsible |
 |-----------------|------------|---------------------|
 | Billing & Tenant | `billing-and-tenant/` | Scribe, Oracle |
-| Identity & Access | `identity-and-access/` | Warden, Forge |
-| Resource Organization | `resource-organization/` | Oracle, Strategist |
-| Network Topology & Connectivity | `network-topology/` | Oracle, Forge |
-| Security | `security/` | Warden, Sentinel |
-| Management | `management/` | Chronicler, Sentinel |
-| Governance | `governance/` | Warden, Sentinel |
-| Platform Automation & DevOps | `platform-automation/` | Envoy, Forge |
+| Identity & Access | `identity/` | Warden, Forge |
+| Resource Organization | `governance/`, `policies/` | Oracle, Strategist |
+| Network Topology & Connectivity | `connectivity/`, `networking/` | Oracle, Forge |
+| Security | `security/`, `platform-security/` | Warden, Sentinel |
+| Management | `management/`, `logging/` | Chronicler, Sentinel |
+| Governance | `governance/`, `policies/` | Warden, Sentinel |
+| Platform Automation & DevOps | — (CI/CD pipelines) | Envoy, Forge |
 
 ---
 
