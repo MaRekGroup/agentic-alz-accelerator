@@ -831,3 +831,66 @@ def generate_full_estate_diagram(mg_prefix: str, subscriptions_config: dict) -> 
     ])
 
     return gen.generate_svg()
+
+
+# ── Unified Diagram Facade ────────────────────────────────────────────────────
+# Selectable engine: "python" (diagrams lib → PNG) | "svg" (custom SVG) | "drawio"
+
+
+def generate_diagrams(
+    engine: str = "python",
+    output_dir: str = "docs/diagrams",
+    mg_prefix: str = "alz",
+    subscriptions_config: dict | None = None,
+) -> list[str]:
+    """Generate the standard set of ALZ architecture diagrams.
+
+    Args:
+        engine: "python" for PNG via diagrams library (default),
+                "svg" for built-in custom SVG generator,
+                "drawio" for Draw.io MCP (external — returns empty list).
+        output_dir: Directory for output files.
+        mg_prefix: Management group prefix.
+        subscriptions_config: Optional subscriptions config for full-estate diagram.
+
+    Returns:
+        List of generated file paths.
+    """
+    if engine == "python":
+        from src.tools.python_diagram_generator import DiagramEngine
+
+        eng = DiagramEngine(output_dir=output_dir)
+        outputs = [
+            eng.generate_mg_hierarchy(mg_prefix=mg_prefix),
+            eng.generate_hub_spoke(),
+            eng.generate_security_governance(),
+            eng.generate_alz_architecture(mg_prefix=mg_prefix),
+        ]
+        if subscriptions_config:
+            outputs.append(eng.generate_full_estate(mg_prefix, subscriptions_config))
+        return outputs
+
+    elif engine == "svg":
+        from pathlib import Path
+
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=True)
+        outputs = []
+        for name, gen_func in [
+            ("management-group-hierarchy.svg", generate_management_subscription_diagram),
+            ("hub-spoke-network.svg", lambda: generate_hub_spoke_diagram("hub_spoke")),
+            ("full-estate.svg", lambda: generate_full_estate_diagram(
+                mg_prefix, subscriptions_config or {})),
+        ]:
+            svg = gen_func()
+            path = out / name
+            path.write_text(svg)
+            outputs.append(str(path))
+        return outputs
+
+    elif engine == "drawio":
+        logger.info("Draw.io engine selected — diagrams generated via MCP server, not locally.")
+        return []
+
+    else:
+        raise ValueError(f"Unknown diagram engine: {engine!r}. Use 'python', 'svg', or 'drawio'.")

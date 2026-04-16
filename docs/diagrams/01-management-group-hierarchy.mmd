@@ -1,0 +1,59 @@
+%%{ init: { 'theme': 'base', 'themeVariables': { 'fontSize': '14px' } } }%%
+graph TD
+    classDef mgRoot fill:#1a3a5c,stroke:#0d2137,color:#fff,font-weight:bold
+    classDef mgPlatform fill:#2d6a9f,stroke:#1a4e7a,color:#fff
+    classDef mgLZ fill:#3d8b37,stroke:#2d6b27,color:#fff
+    classDef mgOther fill:#6b6b6b,stroke:#4a4a4a,color:#fff
+    classDef sub fill:#e8f0fe,stroke:#4285f4,color:#1a1a1a
+    classDef subSandbox fill:#fff3cd,stroke:#ffc107,color:#1a1a1a
+
+    ROOT["🏢 Tenant Root Group"]:::mgRoot
+    ALZ["alz<br/><i>Intermediate Root MG</i>"]:::mgRoot
+
+    PLAT["Platform"]:::mgPlatform
+    MGMT_MG["Management"]:::mgPlatform
+    CONN_MG["Connectivity"]:::mgPlatform
+    ID_MG["Identity"]:::mgPlatform
+
+    LZ["Landing Zones"]:::mgLZ
+    CORP["Corp"]:::mgLZ
+    ONLINE["Online"]:::mgLZ
+
+    SANDBOX["Sandbox"]:::mgOther
+    DECOMM["Decommissioned"]:::mgOther
+
+    SUB_MGMT["📊 alz-platform-management<br/><i>Observability & Automation</i>"]:::sub
+    SUB_CONN["🌐 alz-platform-connectivity<br/><i>Hub Networking & DNS</i>"]:::sub
+    SUB_ID["🔑 alz-platform-identity<br/><i>AD DS & PAW</i>"]:::sub
+    SUB_SEC["🛡️ alz-platform-security<br/><i>Sentinel & Defender</i>"]:::sub
+    SUB_ERP["💼 corp-erp<br/><i>ERP Workloads</i>"]:::sub
+    SUB_CRM["💼 corp-crm<br/><i>CRM Workloads</i>"]:::sub
+    SUB_SAP["💼 sap-s4hana<br/><i>SAP S/4HANA</i>"]:::sub
+    SUB_WEB["🌍 web-portal<br/><i>Public Web App</i>"]:::sub
+    SUB_API["🌍 api-gateway<br/><i>API Backend</i>"]:::sub
+    SUB_DEV["🧪 dev-sandbox<br/><i>Dev/Test</i>"]:::subSandbox
+
+    ROOT --> ALZ
+    ALZ --> PLAT
+    ALZ --> LZ
+    ALZ --> SANDBOX
+    ALZ --> DECOMM
+
+    PLAT --> MGMT_MG
+    PLAT --> CONN_MG
+    PLAT --> ID_MG
+
+    MGMT_MG --> SUB_MGMT
+    CONN_MG --> SUB_CONN
+    ID_MG --> SUB_ID
+    PLAT --> SUB_SEC
+
+    LZ --> CORP
+    LZ --> ONLINE
+    CORP --> SUB_ERP
+    CORP --> SUB_CRM
+    CORP --> SUB_SAP
+    ONLINE --> SUB_WEB
+    ONLINE --> SUB_API
+
+    SANDBOX --> SUB_DEV

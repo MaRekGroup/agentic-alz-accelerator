@@ -1,0 +1,84 @@
+name: 🏗️ Landing Zone Request
+description: Request a new Azure Landing Zone deployment
+labels: ["landing-zone", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "Describe the landing zone you need. This will feed into the APEX workflow starting at Step 1 (Requirements)."
+
+  - type: input
+    id: workload
+    attributes:
+      label: Workload Name
+      description: "Name of the workload or project"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Workload Description
+      description: "What does this workload do? What services does it need?"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: iac_framework
+    attributes:
+      label: IaC Framework
+      options:
+        - Bicep
+        - Terraform
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environments
+    attributes:
+      label: Environments Needed
+      multiple: true
+      options:
+        - dev
+        - staging
+        - prod
+    validations:
+      required: true
+
+  - type: input
+    id: primary_region
+    attributes:
+      label: Primary Region
+      description: "Azure region for deployment"
+      placeholder: "southcentralus"
+    validations:
+      required: true
+
+  - type: input
+    id: secondary_region
+    attributes:
+      label: Secondary Region (DR)
+      description: "Leave blank if DR not needed"
+
+  - type: checkboxes
+    id: compliance
+    attributes:
+      label: Compliance Requirements
+      options:
+        - label: ISO 27001
+        - label: SOC 2
+        - label: HIPAA
+        - label: PCI-DSS
+        - label: None / Not sure
+
+  - type: input
+    id: budget
+    attributes:
+      label: Monthly Budget (USD)
+      description: "Estimated monthly budget per environment"
+      placeholder: "$5,000"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Requirements
+      description: "Network topology, identity needs, specific Azure services, etc."

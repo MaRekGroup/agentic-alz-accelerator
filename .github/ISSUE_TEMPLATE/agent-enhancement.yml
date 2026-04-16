@@ -1,0 +1,43 @@
+name: 🤖 Agent Enhancement
+description: Suggest an improvement to an agent, skill, or prompt
+labels: ["agent", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "Suggest an improvement to the agent framework."
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent / Component
+      options:
+        - Orchestrator (Conductor)
+        - Requirements (Scribe)
+        - Architect (Oracle)
+        - Design (Artisan)
+        - Governance (Warden)
+        - IaC Planner (Strategist)
+        - Code Generator (Forge)
+        - Deployment (Envoy)
+        - Monitoring (Sentinel)
+        - Remediation (Mender)
+        - Challenger
+        - Skill
+        - Prompt
+        - Instruction
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "What improvement do you suggest?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: "Why is this improvement needed?"

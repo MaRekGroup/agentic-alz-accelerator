@@ -5,22 +5,47 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/python:3-3.14-trixie",
 	"features": {
-		"ghcr.io/devcontainers/features/azure-cli:1": {},
-		"ghcr.io/devcontainers/features/terraform:1": {}
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+			"installBicep": true,
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/terraform:1": {
+			"tflint": "0.61.0",
+			"installTFsec": false
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-community/features/deno": {
+			"version": "latest"
+		}
+	},
+
+	"postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y -qq graphviz && pip3 install --user -r requirements.txt && git submodule update --init --recursive && pip3 install --user -r mcp/azure-pricing-mcp/requirements.txt && cd mcp/drawio-mcp-server && deno cache src/index.ts",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot-chat",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-azuretools.vscode-bicep",
+				"ms-vscode.azurecli",
+				"HashiCorp.terraform",
+				"ms-azuretools.vscode-azureterraform",
+				"hediet.vscode-drawio",
+				"denoland.vscode-deno",
+				"bierner.markdown-mermaid",
+				"bierner.markdown-preview-github-styles",
+				"davidanson.vscode-markdownlint",
+				"github.vscode-github-actions",
+				"github.vscode-pull-request-github",
+				"redhat.vscode-yaml"
+			],
+			"settings": {
+				"deno.enable": false,
+				"deno.enablePaths": ["mcp/drawio-mcp-server"]
+			}
+		}
 	}
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install --user -r requirements.txt",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
 }

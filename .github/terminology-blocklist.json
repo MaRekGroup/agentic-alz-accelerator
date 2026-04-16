@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Terminology blocklist — prevents stale brand/agent names from creeping back in after renames",
+  "rules": [
+    {
+      "id": "old-mcp-count-5",
+      "pattern": "5 MCP servers",
+      "replacement": "3 MCP servers",
+      "severity": "error",
+      "reason": "MCP servers consolidated from 5 to 3 (azure-pricing, azure-platform, drawio)"
+    },
+    {
+      "id": "old-mcp-count-4",
+      "pattern": "4 MCP servers",
+      "replacement": "3 MCP servers",
+      "severity": "error",
+      "reason": "MCP servers consolidated to 3"
+    },
+    {
+      "id": "coordinator-alias",
+      "pattern": "also known as the Coordinator",
+      "replacement": "(remove alias — use Conductor or Orchestrator only)",
+      "severity": "error",
+      "reason": "Coordinator is not a valid alias; use Conductor (codename) or Orchestrator (agent name)"
+    },
+    {
+      "id": "old-tools-count-7",
+      "pattern": "7 tools",
+      "replacement": "8 tools",
+      "severity": "warning",
+      "reason": "python_diagram_generator.py was added as the 8th tool"
+    },
+    {
+      "id": "old-agent-count-10",
+      "pattern": "10 agents",
+      "replacement": "11 agents",
+      "severity": "warning",
+      "reason": "Artisan (Design) agent added, bringing count to 11"
+    },
+    {
+      "id": "bootstrap-checklist-xlsx",
+      "pattern": "ALZ_Bootstrap_Settings_Checklist",
+      "replacement": "(remove — this file does not exist in the repo)",
+      "severity": "error",
+      "reason": "Referenced Excel file was never created; bootstrap settings are in src/config/profiles/"
+    },
+    {
+      "id": "azure-policy-mcp",
+      "pattern": "azure-policy MCP",
+      "replacement": "azure-platform MCP (consolidated server)",
+      "severity": "warning",
+      "reason": "azure-policy was merged into the consolidated azure-platform MCP server"
+    },
+    {
+      "id": "azure-monitor-mcp",
+      "pattern": "azure-monitor MCP",
+      "replacement": "azure-platform MCP (consolidated server)",
+      "severity": "warning",
+      "reason": "azure-monitor was merged into the consolidated azure-platform MCP server"
+    },
+    {
+      "id": "resource-graph-mcp",
+      "pattern": "resource-graph MCP",
+      "replacement": "azure-platform MCP (consolidated server)",
+      "severity": "warning",
+      "reason": "resource-graph was merged into the consolidated azure-platform MCP server"
+    },
+    {
+      "id": "missing-artisan-step3",
+      "pattern": "Step 3.*Warden",
+      "replacement": "Step 3 is Design (Artisan), Step 3.5 is Governance (Warden)",
+      "severity": "error",
+      "isRegex": true,
+      "reason": "Step 3 is Design (Artisan), not Governance; Governance is Step 3.5"
+    }
+  ],
+  "updated": "2026-04-16"
+}

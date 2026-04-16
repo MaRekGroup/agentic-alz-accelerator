@@ -99,8 +99,16 @@ class AgentOrchestrator:
         self,
         project_name: str,
         iac_tool: str = "bicep",
+        diagram_engine: str = "python",
     ) -> WorkflowState:
-        """Execute the full APEX-aligned workflow with approval gates."""
+        """Execute the full APEX-aligned workflow with approval gates.
+
+        Args:
+            project_name: Project identifier for artifact output.
+            iac_tool: "bicep" or "terraform".
+            diagram_engine: "python" (PNG via diagrams lib, default),
+                            "svg" (custom inline SVG), or "drawio" (MCP).
+        """
         state = WorkflowState(project_name=project_name, iac_tool=iac_tool)
         output_dir = Path("agent-output") / project_name
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -124,6 +132,15 @@ class AgentOrchestrator:
         # Gate 2: Approval
         gate_2 = await self._request_approval("Gate 2", "Approve WAF/CAF assessment")
         state.gate_approvals["gate-2"] = gate_2
+
+        # Step 3: Design (Artisan) — architecture diagrams
+        logger.info("Step 3: Generating architecture diagrams (engine=%s)...", diagram_engine)
+        state.steps["step-3-design"] = StepStatus.IN_PROGRESS
+        diagram_outputs = self._run_design_step(
+            state, output_dir, diagram_engine=diagram_engine,
+        )
+        state.artifacts["03-design-diagrams"] = diagram_outputs
+        state.steps["step-3-design"] = StepStatus.COMPLETED
 
         # Step 3.5: Governance (Warden)
         logger.info("Step 3.5: Governance discovery...")
@@ -167,6 +184,33 @@ class AgentOrchestrator:
         # In interactive mode, this would be a conversation
         # In automated mode, use the template + profile
         return {"template": template, "status": "gathered"}
+
+    def _run_design_step(
+        self,
+        state: WorkflowState,
+        output_dir: Path,
+        diagram_engine: str = "python",
+    ) -> list[str]:
+        """Execute Step 3 — generate architecture diagrams.
+
+        Args:
+            diagram_engine: "python" | "svg" | "drawio"
+
+        Returns:
+            List of generated file paths.
+        """
+        from src.tools.azure_diagram_generator import generate_diagrams
+
+        mg_prefix = self.settings.azure.management_group_prefix or "alz"
+        diagram_dir = str(output_dir / "diagrams")
+
+        outputs = generate_diagrams(
+            engine=diagram_engine,
+            output_dir=diagram_dir,
+            mg_prefix=mg_prefix,
+        )
+        logger.info("Step 3 produced %d diagram(s): %s", len(outputs), outputs)
+        return outputs
 
     async def _request_approval(self, gate_name: str, description: str) -> bool:
         """Request human approval at a gate. Returns True for now (auto-approve in dev)."""

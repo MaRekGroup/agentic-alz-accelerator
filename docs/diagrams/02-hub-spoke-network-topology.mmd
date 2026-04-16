@@ -1,0 +1,89 @@
+%%{ init: { 'theme': 'base', 'themeVariables': { 'fontSize': '12px' } } }%%
+graph TB
+    classDef hub fill:#2d6a9f,stroke:#1a4e7a,color:#fff,font-weight:bold
+    classDef spoke fill:#4a9e4a,stroke:#2d6b27,color:#fff
+    classDef service fill:#e8f0fe,stroke:#4285f4,color:#1a1a1a,font-size:11px
+    classDef onprem fill:#8b5e3c,stroke:#5a3d28,color:#fff
+    classDef internet fill:#c62828,stroke:#8e1c1c,color:#fff
+    classDef dns fill:#7b1fa2,stroke:#4a148c,color:#fff
+
+    INTERNET["☁️ Internet"]:::internet
+    ONPREM["🏠 On-Premises<br/>Corporate Network"]:::onprem
+
+    subgraph HUB["Connectivity Hub — 10.0.0.0/16"]
+        direction TB
+        FW["🔥 Azure Firewall Premium<br/>Threat Intel: Deny | TLS Inspect | IDPS"]:::hub
+        ERGW["⚡ ExpressRoute Gateway<br/>ErGw1AZ"]:::hub
+        VPNGW["🔒 VPN Gateway<br/>VpnGw2AZ Active-Active"]:::hub
+        BASTION_HUB["🖥️ Azure Bastion<br/>Standard · 2 Scale Units"]:::hub
+        DDOS["🛡️ DDoS Protection Plan"]:::hub
+
+        subgraph DNS_RESOLVER["Private DNS Resolver"]
+            DNS_IN["DNS Inbound<br/>10.0.3.0/28"]:::dns
+            DNS_OUT["DNS Outbound<br/>10.0.3.16/28"]:::dns
+        end
+
+        PDNS["📋 20 Private DNS Zones<br/>blob · sql · vault · acr · openai · etc."]:::dns
+    end
+
+    subgraph MGMT_SPOKE["Management — 10.100.0.0/24"]
+        LAW["📊 Log Analytics<br/>365-day retention"]:::service
+        AUTO["⚙️ Automation Account"]:::service
+        ALERTS["🔔 Action Group"]:::service
+        SENTINEL_M["🔭 Sentinel"]:::service
+    end
+
+    subgraph ID_SPOKE["Identity — 10.101.0.0/24"]
+        DC1["🖥️ DC-01<br/>Zone 1 · 10.101.0.4"]:::service
+        DC2["🖥️ DC-02<br/>Zone 2 · 10.101.0.5"]:::service
+        PAW["🔐 PAW VMs x2"]:::service
+        KV_ID["🔑 Key Vault<br/>AD Secrets"]:::service
+    end
+
+    subgraph SEC_SPOKE["Security — Dedicated"]
+        SENTINEL_S["🔭 Sentinel Dedicated<br/>730-day retention"]:::service
+        DEFENDER["🛡️ Defender for Cloud<br/>12 Plans Enabled"]:::service
+        SOAR["🤖 SOAR Playbooks x4"]:::service
+        KV_SEC["🔑 Security Key Vault"]:::service
+    end
+
+    subgraph CORP_SPOKE["Corp Landing Zone — 10.2.0.0/16"]
+        APP_CORP["💼 App Tier VMs"]:::service
+        DATA_CORP["🗄️ Azure SQL<br/>Private Endpoint"]:::service
+        STOR_CORP["📦 Storage<br/>Private Endpoint"]:::service
+    end
+
+    subgraph ONLINE_SPOKE["Online Landing Zone — 10.1.0.0/16"]
+        WAF_O["🌐 Azure WAF<br/>OWASP 3.1"]:::service
+        APP_ONLINE["🌍 App Service"]:::service
+        DATA_ONLINE["🗄️ Azure SQL<br/>Private Endpoint"]:::service
+    end
+
+    subgraph SAP_SPOKE["SAP Landing Zone — 10.5.0.0/16"]
+        SAP_APP["⚙️ SAP App Servers<br/>Accel Networking"]:::service
+        HANA["🗄️ HANA DB<br/>M-series · Ultra Disk"]:::service
+        ANF["📦 Azure NetApp Files"]:::service
+    end
+
+    subgraph SANDBOX_NET["Sandbox — 10.10.0.0/16 (Isolated)"]
+        DEV_VM["🧪 Test VMs"]:::service
+    end
+
+    INTERNET -->|"HTTPS"| WAF_O
+    ONPREM <-->|"ExpressRoute"| ERGW
+    ONPREM <-->|"S2S VPN"| VPNGW
+    ERGW <--> FW
+    VPNGW <--> FW
+
+    FW <-->|"Peering"| MGMT_SPOKE
+    FW <-->|"Peering"| ID_SPOKE
+    FW <-->|"Peering"| SEC_SPOKE
+    FW <-->|"Peering"| CORP_SPOKE
+    FW <-->|"Peering"| ONLINE_SPOKE
+    FW <-->|"Peering"| SAP_SPOKE
+
+    LAW -.->|"Logs"| FW
+    LAW -.->|"Logs"| DEFENDER
+    SENTINEL_S -.->|"Alerts"| SOAR
+
+    DNS_IN <-.->|"Hybrid DNS"| ONPREM

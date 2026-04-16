@@ -23,6 +23,12 @@ python-dotenv>=1.0.1
 rich>=13.9.0
 typer>=0.15.0
 
+# MCP SDK
+mcp>=1.0.0
+
+# Diagram generation
+diagrams>=0.24.0
+
 # Async support
 aiohttp>=3.11.0
 asyncio-throttle>=1.0.2

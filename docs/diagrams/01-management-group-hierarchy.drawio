@@ -1,0 +1,132 @@
+<mxfile host="65bd71144e">
+    <diagram id="mg-hierarchy" name="Management Group Hierarchy">
+        <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="e-root-alz" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;" parent="1" source="tenant-root" target="alz-root" edge="1"/>
+                <mxCell id="e-alz-platform" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;" parent="1" source="alz-root" target="mg-platform" edge="1"/>
+                <mxCell id="e-alz-lz" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;" parent="1" source="alz-root" target="mg-lz" edge="1"/>
+                <mxCell id="e-alz-sandbox" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;" parent="1" source="alz-root" target="mg-sandbox" edge="1"/>
+                <mxCell id="e-alz-decomm" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;" parent="1" source="alz-root" target="mg-decomm" edge="1"/>
+                <mxCell id="e-plat-mgmt" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2d6a9f;strokeWidth=1.5;" parent="1" source="mg-platform" target="mg-mgmt" edge="1"/>
+                <mxCell id="e-plat-conn" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2d6a9f;strokeWidth=1.5;" parent="1" source="mg-platform" target="mg-conn" edge="1"/>
+                <mxCell id="e-plat-id" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2d6a9f;strokeWidth=1.5;" parent="1" source="mg-platform" target="mg-identity" edge="1"/>
+                <mxCell id="e-lz-corp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1.5;" parent="1" source="mg-lz" target="mg-corp" edge="1"/>
+                <mxCell id="e-lz-online" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1.5;" parent="1" source="mg-lz" target="mg-online" edge="1"/>
+                <mxCell id="e-mgmt-sub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4285f4;strokeWidth=1;dashed=1;" parent="1" source="mg-mgmt" target="sub-mgmt" edge="1"/>
+                <mxCell id="e-conn-sub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4285f4;strokeWidth=1;dashed=1;" parent="1" source="mg-conn" target="sub-conn" edge="1"/>
+                <mxCell id="e-id-sub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4285f4;strokeWidth=1;dashed=1;" parent="1" source="mg-identity" target="sub-id" edge="1"/>
+                <mxCell id="e-plat-sec" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2d6a9f;strokeWidth=1;dashed=1;" parent="1" source="mg-platform" target="sub-sec" edge="1"/>
+                <mxCell id="e-corp-erp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1;dashed=1;" parent="1" source="mg-corp" target="sub-erp" edge="1"/>
+                <mxCell id="e-corp-crm" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1;dashed=1;" parent="1" source="mg-corp" target="sub-crm" edge="1"/>
+                <mxCell id="e-corp-sap" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1;dashed=1;" parent="1" source="mg-corp" target="sub-sap" edge="1"/>
+                <mxCell id="e-online-web" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1;dashed=1;" parent="1" source="mg-online" target="sub-web" edge="1"/>
+                <mxCell id="e-online-api" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=1;dashed=1;" parent="1" source="mg-online" target="sub-api" edge="1"/>
+                <mxCell id="e-sandbox-dev" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ffc107;strokeWidth=1;dashed=1;" parent="1" source="mg-sandbox" target="sub-dev" edge="1"/>
+                <mxCell id="2" value="&lt;b&gt;Azure Landing Zone — Management Group Hierarchy &amp; Subscription Organization&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a3a5c;" vertex="1" parent="1">
+                    <mxGeometry x="-16660" y="-9360" width="700" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;b&gt;Tenant Root Group&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a5c;fontColor=#ffffff;strokeColor=#0d2137;fontSize=14;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16400" y="-9300" width="220" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;b&gt;alz&lt;/b&gt;&lt;br&gt;&lt;i&gt;Intermediate Root MG&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a5c;fontColor=#ffffff;strokeColor=#0d2137;fontSize=13;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16400" y="-9210" width="220" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="&lt;b&gt;Platform&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=13;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16800" y="-9100" width="180" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;b&gt;Landing Zones&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3d8b37;fontColor=#ffffff;strokeColor=#2d6b27;fontSize=13;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16400" y="-9100" width="180" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="&lt;b&gt;Sandbox&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6b6b6b;fontColor=#ffffff;strokeColor=#4a4a4a;fontSize=13;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16050" y="-9100" width="160" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;b&gt;Decommissioned&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6b6b6b;fontColor=#ffffff;strokeColor=#4a4a4a;fontSize=13;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-15840" y="-9100" width="160" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="&lt;b&gt;Management&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=12;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16940" y="-9000" width="150" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;b&gt;Connectivity&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=12;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16770" y="-9000" width="150" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="&lt;b&gt;Identity&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=12;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16600" y="-9000" width="150" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="&lt;b&gt;Corp&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3d8b37;fontColor=#ffffff;strokeColor=#2d6b27;fontSize=12;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16430" y="-9000" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="&lt;b&gt;Online&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3d8b37;fontColor=#ffffff;strokeColor=#2d6b27;fontSize=12;arcSize=20;" vertex="1" parent="1">
+                    <mxGeometry x="-16280" y="-9000" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="📊 &lt;b&gt;alz-platform-management&lt;/b&gt;&lt;br&gt;&lt;i&gt;Observability &amp; Automation&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;LAW · Automation · Sentinel · Alerts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#4285f4;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16970" y="-8910" width="210" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="🌐 &lt;b&gt;alz-platform-connectivity&lt;/b&gt;&lt;br&gt;&lt;i&gt;Hub Networking &amp; DNS&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Firewall · Gateways · DNS · DDoS · Bastion&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#4285f4;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16745" y="-8910" width="220" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="🔑 &lt;b&gt;alz-platform-identity&lt;/b&gt;&lt;br&gt;&lt;i&gt;AD DS &amp; PAW&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Domain Controllers · Key Vault · PIM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#4285f4;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16510" y="-8910" width="210" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="🛡️ &lt;b&gt;alz-platform-security&lt;/b&gt;&lt;br&gt;&lt;i&gt;Sentinel &amp; Defender&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Sentinel · Defender · SOAR · Key Vault&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce8f7;fontColor=#1a1a1a;strokeColor=#2d6a9f;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16970" y="-8820" width="210" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="💼 &lt;b&gt;corp-erp&lt;/b&gt;&lt;br&gt;&lt;i&gt;ERP Workloads&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#3d8b37;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16470" y="-8820" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="💼 &lt;b&gt;corp-crm&lt;/b&gt;&lt;br&gt;&lt;i&gt;CRM Workloads&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#3d8b37;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16470" y="-8760" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="💼 &lt;b&gt;sap-s4hana&lt;/b&gt;&lt;br&gt;&lt;i&gt;SAP S/4HANA&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#3d8b37;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16470" y="-8700" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="🌍 &lt;b&gt;web-portal&lt;/b&gt;&lt;br&gt;&lt;i&gt;Public Web App&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#3d8b37;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16290" y="-8910" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="🌍 &lt;b&gt;api-gateway&lt;/b&gt;&lt;br&gt;&lt;i&gt;API Backend&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#1a1a1a;strokeColor=#3d8b37;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16290" y="-8850" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="🧪 &lt;b&gt;dev-sandbox&lt;/b&gt;&lt;br&gt;&lt;i&gt;Dev/Test · $500/mo cap&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;fontColor=#1a1a1a;strokeColor=#ffc107;fontSize=11;arcSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-16050" y="-9000" width="160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;arcSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="-15910" y="-8910" width="230" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8905" width="80" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a5c;strokeColor=#0d2137;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8875" width="20" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="Root / Intermediate MG" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="-15865" y="-8878" width="160" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;strokeColor=#1a4e7a;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8850" width="20" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="Platform Management Group" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="-15865" y="-8853" width="170" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3d8b37;strokeColor=#2d6b27;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8825" width="20" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="Landing Zone Management Group" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="-15865" y="-8828" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8800" width="20" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="Subscription" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="-15865" y="-8803" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#ffc107;" vertex="1" parent="1">
+                    <mxGeometry x="-15895" y="-8775" width="20" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="Sandbox (Isolated)" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="-15865" y="-8778" width="120" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

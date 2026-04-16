@@ -1,0 +1,47 @@
+%%{ init: { 'theme': 'base', 'themeVariables': { 'fontSize': '13px' } } }%%
+graph LR
+    classDef platform fill:#2d6a9f,stroke:#1a4e7a,color:#fff
+    classDef security fill:#c62828,stroke:#8e1c1c,color:#fff
+    classDef governance fill:#f57f17,stroke:#c66900,color:#fff
+    classDef monitor fill:#1b5e20,stroke:#0d3b0d,color:#fff
+
+    subgraph SECURITY_BASELINE["Security Baseline — Non-Negotiable Rules"]
+        direction TB
+        S1["TLS 1.2 Minimum"]:::security
+        S2["HTTPS-Only Traffic"]:::security
+        S3["No Public Blob Access"]:::security
+        S4["Managed Identity Preferred"]:::security
+        S5["Azure AD-Only SQL Auth"]:::security
+        S6["Public Network Disabled — Prod"]:::security
+    end
+
+    subgraph GOVERNANCE["Governance & Policy"]
+        direction TB
+        P1["Azure Security Benchmark"]:::governance
+        P2["CIS Azure Foundations"]:::governance
+        P3["ISO 27001:2013"]:::governance
+        P4["15 Custom ALZ Policies"]:::governance
+        P5["Budget Alerts<br/>80% · 100% · 120%"]:::governance
+    end
+
+    subgraph MONITORING["Monitoring & Observability"]
+        direction TB
+        M1["Central Log Analytics<br/>365-day retention"]:::monitor
+        M2["Sentinel — 10 Connectors<br/>730-day retention"]:::monitor
+        M3["Defender for Cloud<br/>12 Plans"]:::monitor
+        M4["4 SOAR Playbooks<br/>Auto-Remediation"]:::monitor
+        M5["Compliance Scans<br/>Every 30 min"]:::monitor
+        M6["Drift Detection<br/>Every 60 min"]:::monitor
+    end
+
+    subgraph PLATFORM_SERVICES["Platform Services"]
+        direction TB
+        PS1["Automation Account<br/>Update Mgmt · Change Tracking"]:::platform
+        PS2["Recovery Services Vault<br/>Daily + Weekly Backup"]:::platform
+        PS3["Action Groups<br/>Alert Notifications"]:::platform
+        PS4["Azure Bastion<br/>Per-Subscription"]:::platform
+    end
+
+    SECURITY_BASELINE --> GOVERNANCE
+    GOVERNANCE --> MONITORING
+    MONITORING --> PLATFORM_SERVICES

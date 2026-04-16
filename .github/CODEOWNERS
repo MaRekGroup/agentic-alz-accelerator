@@ -1,0 +1,30 @@
+# CODEOWNERS — Define code ownership for review requirements
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+*                               @ytesfaye
+
+# Agent definitions require careful review
+.github/agents/                 @ytesfaye
+.github/instructions/           @ytesfaye
+.github/prompts/                @ytesfaye
+.github/skills/                 @ytesfaye
+
+# Workflow changes require review
+.github/workflows/              @ytesfaye
+pipelines/                      @ytesfaye
+
+# Infrastructure code
+infra/                          @ytesfaye
+
+# MCP server code
+mcp/                            @ytesfaye
+
+# Agent and tool implementations
+src/                            @ytesfaye
+
+# Scripts and validators
+scripts/                        @ytesfaye
+
+# Documentation (lower barrier)
+docs/                           @ytesfaye

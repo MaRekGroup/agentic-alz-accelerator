@@ -802,10 +802,10 @@
       📐 CAF Design Areas <span class="nav-badge">8</span>
     </a>
     <a class="nav-item" onclick="showSection('agents')">
-      🤖 Agent Roster <span class="nav-badge">10</span>
+      🤖 Agent Roster <span class="nav-badge">11</span>
     </a>
     <a class="nav-item" onclick="showSection('tools')">
-      🛠️ Agent Tools <span class="nav-badge">7</span>
+      🛠️ Agent Tools <span class="nav-badge">8</span>
     </a>
 
     <div class="nav-section">Get Started</div>
@@ -873,11 +873,11 @@
         <p>A multi-agent workflow that transforms Azure Landing Zone requirements into deployed, governed, and continuously monitored infrastructure — aligned with the Cloud Adoption Framework and APEX agentic infrastructure patterns.</p>
         <div class="hero-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
         <div class="hero-stats">
-          <div class="hero-stat"><div class="num">10</div><div class="lbl">Specialized Agents</div></div>
+          <div class="hero-stat"><div class="num">11</div><div class="lbl">Specialized Agents</div></div>
           <div class="hero-stat"><div class="num">8</div><div class="lbl">CAF Design Areas</div></div>
           <div class="hero-stat"><div class="num">6</div><div class="lbl">Approval Gates</div></div>
           <div class="hero-stat"><div class="num">2</div><div class="lbl">IaC Frameworks</div></div>
-          <div class="hero-stat"><div class="num">5</div><div class="lbl">MCP Servers</div></div>
+          <div class="hero-stat"><div class="num">3</div><div class="lbl">MCP Servers</div></div>
         </div>
       </div>
 
@@ -928,7 +928,7 @@
         </div>
         <div class="card">
           <h3>🔌 MCP Server Integration</h3>
-          <p>5 MCP servers connect agents to live Azure data: Pricing, Resource Graph, Policy, Deployment, and Monitor. Real-time cost estimates, drift detection, and compliance queries.</p>
+          <p>3 MCP servers connect agents to live Azure data: Azure Pricing (cost estimation), Azure Platform (consolidated Resource Graph, Policy, Deployment &amp; Monitor tools), and Draw.io (architecture diagrams). Real-time cost estimates, drift detection, compliance queries, and diagram generation.</p>
         </div>
         <div class="card">
           <h3>🤝 Human-in-the-Loop</h3>
@@ -970,6 +970,7 @@
           <div class="arch-layer-items">
             <div class="arch-chip">📜 Scribe</div>
             <div class="arch-chip">🏛️ Oracle</div>
+            <div class="arch-chip">🎨 Artisan</div>
             <div class="arch-chip">🛡️ Warden</div>
             <div class="arch-chip">📐 Strategist</div>
             <div class="arch-chip">⚒️ Forge</div>
@@ -985,10 +986,8 @@
           <div class="arch-layer-label">🔌 MCP Servers</div>
           <div class="arch-layer-items">
             <div class="arch-chip purple">Azure Pricing</div>
-            <div class="arch-chip purple">Resource Graph</div>
-            <div class="arch-chip purple">Azure Policy</div>
-            <div class="arch-chip purple">Deployment</div>
-            <div class="arch-chip purple">Azure Monitor</div>
+            <div class="arch-chip purple">Azure Platform (Resource Graph · Policy · Deploy · Monitor)</div>
+            <div class="arch-chip purple">Draw.io Diagrams</div>
           </div>
         </div>
         <div class="arch-arrow">↓</div>
@@ -1017,20 +1016,18 @@
 
       <div class="section-header">
         <h2>MCP Server Details</h2>
-        <p>Agents connect to live Azure data through 5 Model Context Protocol servers.</p>
+        <p>Agents connect to live Azure data and tooling through 3 Model Context Protocol servers.</p>
       </div>
 
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>MCP Server</th><th>Key Tools</th><th>Used By</th></tr>
+            <tr><th>MCP Server</th><th>Key Tools (22 total)</th><th>Used By</th></tr>
           </thead>
           <tbody>
-            <tr><td><strong>Azure Pricing</strong></td><td>Cost estimation, region comparison, RI pricing, budget calculation</td><td>Oracle, Strategist, Chronicler</td></tr>
-            <tr><td><strong>Azure Resource Graph</strong></td><td>Resource queries, inventory, drift detection, public resource scan</td><td>Sentinel, Mender, Warden</td></tr>
-            <tr><td><strong>Azure Policy</strong></td><td>Policy discovery, compliance checking, assignment classification</td><td>Warden, Sentinel, Challenger</td></tr>
-            <tr><td><strong>Azure Deployment</strong></td><td>Bicep/TF deploy, what-if preview, deployment status</td><td>Envoy, Mender</td></tr>
-            <tr><td><strong>Azure Monitor</strong></td><td>Secure score, Defender recommendations, activity log</td><td>Sentinel, Chronicler</td></tr>
+            <tr><td><strong>Azure Pricing</strong><br/><span style="font-size:11px;color:var(--muted)">mcp/azure-pricing-mcp/</span></td><td>Cost estimation, region comparison, RI pricing, budget calculation</td><td>Oracle, Strategist, Chronicler</td></tr>
+            <tr><td><strong>Azure Platform</strong><br/><span style="font-size:11px;color:var(--muted)">mcp/azure-platform/ (consolidated)</span></td><td>Resource Graph queries &amp; inventory · Azure Policy discovery &amp; compliance · Bicep/TF deploy &amp; what-if · Defender secure score · Activity log &amp; drift detection</td><td>All agents</td></tr>
+            <tr><td><strong>Draw.io Diagrams</strong><br/><span style="font-size:11px;color:var(--muted)">mcp/drawio-mcp-server/</span></td><td>Architecture diagram generation, shape search, diagram export, Azure icon library</td><td>Artisan, Chronicler</td></tr>
           </tbody>
         </table>
       </div>
@@ -1107,7 +1104,7 @@
     <div id="section-agents" class="section">
       <div class="section-header">
         <h2>Agent Roster</h2>
-        <p>10 specialized agents coordinated by the Conductor orchestrator.</p>
+        <p>11 specialized agents coordinated by the Conductor orchestrator.</p>
       </div>
 
       <div class="table-wrap">
@@ -1136,6 +1133,13 @@
               <td><span class="badge badge-blue">2</span></td>
               <td>WAF assessment, CAF design area mapping, real-time cost estimate via MCP</td>
               <td><code>02-architecture-assessment.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>Design</strong></td>
+              <td>🎨 Artisan</td>
+              <td><span class="badge badge-blue">3</span></td>
+              <td>Architecture diagrams (Python diagrams + Draw.io MCP), ADRs, design visualization</td>
+              <td><code>03-design-*.{drawio,png,md}</code></td>
             </tr>
             <tr>
               <td><strong>Governance</strong></td>
@@ -1213,7 +1217,8 @@
             <tr><td><strong>Policy Checker</strong></td><td><code>policy_checker.py</code></td><td>Azure Policy compliance checks, violation scanning, effect classification</td></tr>
             <tr><td><strong>Resource Graph</strong></td><td><code>resource_graph.py</code></td><td>Azure Resource Graph queries for inventory, topology, and drift detection</td></tr>
             <tr><td><strong>Drift Detector</strong></td><td><code>drift_detector.py</code></td><td>Configuration drift detection by comparing desired vs actual state</td></tr>
-            <tr><td><strong>Diagram Generator</strong></td><td><code>azure_diagram_generator.py</code></td><td>Architecture diagram generation for design documents</td></tr>
+            <tr><td><strong>Diagram Generator</strong></td><td><code>azure_diagram_generator.py</code></td><td>Architecture diagram facade — engine selector (Python, SVG, or Draw.io MCP)</td></tr>
+            <tr><td><strong>Python Diagram Engine</strong></td><td><code>python_diagram_generator.py</code></td><td>Graphviz-based PNG diagrams using <code>diagrams</code> library with official Azure icons</td></tr>
             <tr><td><strong>TDD Generator</strong></td><td><code>tdd_generator.py</code></td><td>Technical Design Document generation with as-built resource details</td></tr>
           </tbody>
         </table>
@@ -1271,18 +1276,18 @@
           <div class="card-icon bg-green" style="margin-bottom:0;width:36px;height:36px;font-size:18px">📋</div>
           <h3 style="margin-bottom:0;font-size:16px">Bootstrap Settings Checklist</h3>
         </div>
-        <p style="margin-bottom:12px">Before starting, complete the Bootstrap Settings Checklist (<code>docs/ALZ_Bootstrap_Settings_Checklist.xlsx</code>) to gather all required values. The checklist has three tabs:</p>
+        <p style="margin-bottom:12px">Before starting, gather the required bootstrap values. Use the table below as a checklist — coordinate with your networking, security, and identity teams to collect inputs in parallel.</p>
         <div class="table-wrap" style="margin-bottom:12px">
           <table>
-            <thead><tr><th>Tab</th><th>Covers</th></tr></thead>
+            <thead><tr><th>Area</th><th>Required Inputs</th></tr></thead>
             <tbody>
-              <tr><td><strong>Accelerator - Bootstrap</strong></td><td>Subscriptions, OIDC configuration, GitHub environments</td></tr>
-              <tr><td><strong>Accelerator - Bicep</strong></td><td>Topology, IP addressing, policies, budgets</td></tr>
-              <tr><td><strong>Accelerator - Terraform</strong></td><td>Same as Bicep + state management</td></tr>
+              <tr><td><strong>Bootstrap</strong></td><td>Subscription IDs (10), OIDC app registration, GitHub environments, MG prefix, primary region</td></tr>
+              <tr><td><strong>Bicep / Terraform</strong></td><td>Hub-spoke topology, IP addressing (CIDRs), policy initiatives, budget amounts per env</td></tr>
+              <tr><td><strong>Terraform Only</strong></td><td>State storage account, resource group, container name</td></tr>
             </tbody>
           </table>
         </div>
-        <p style="font-size:12px;color:var(--muted)"><strong>Tip:</strong> Share this checklist with your networking, security, and identity teams to gather inputs in parallel.</p>
+        <p style="font-size:12px;color:var(--muted)"><strong>Tip:</strong> The OIDC setup script (<code>scripts/setup-oidc.sh</code>) and <code>environments/subscriptions.json</code> capture most of these values programmatically.</p>
       </div>
     </div>
 
@@ -1485,6 +1490,8 @@ agents:
           <div class="prog-arrow">→</div>
           <div class="prog-gate" data-tip="Approval Gate 2">🛑</div>
           <div class="prog-arrow">→</div>
+          <div class="prog-step"><div class="prog-dot" data-tip="Design">3</div><div class="prog-label">Design</div></div>
+          <div class="prog-arrow">→</div>
           <div class="prog-step"><div class="prog-dot" data-tip="Governance">3.5</div><div class="prog-label">Governance</div></div>
           <div class="prog-arrow">→</div>
           <div class="prog-gate" data-tip="Approval Gate 3">🛑</div>
@@ -1579,6 +1586,39 @@ agents:
         </div>
 
         <div class="gate-banner">🛑 Gate 2 — Approve WAF/CAF architecture assessment</div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🎨</span>
+                <div>
+                  <div class="step-agent">🎨 ARTISAN</div>
+                  <div class="step-name">Architecture Design</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-blue">Artifacts: 03-design-*.{drawio,png,md}</span>
+                <span class="badge badge-green">Python + Draw.io MCP</span>
+              </div>
+              <ul>
+                <li>Generates architecture diagrams using Python <code>diagrams</code> library (PNG with Azure icons)</li>
+                <li>Also supports Draw.io MCP server for interactive .drawio files</li>
+                <li>Produces 4 standard diagrams: MG hierarchy, hub-spoke network, security/governance/monitoring, full ALZ overview</li>
+                <li>Generates Architecture Decision Records (ADRs) for key design choices</li>
+                <li>Diagram engine selectable: <code>python</code> (Graphviz), <code>svg</code> (custom), or <code>drawio</code> (MCP)</li>
+                <li>Outputs stored in <code>docs/diagrams/</code> for Chronicler handoff</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         <div class="step-item">
           <div class="step-left">
@@ -2284,7 +2324,7 @@ asyncio.run(main())
         <div class="card" style="margin-bottom:18px;padding:20px;background:linear-gradient(135deg,#0B1A33 0%,#1B2A4A 100%);color:#fff">
           <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Full Deployment Sequence</h3>
           <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
-Step 0  Complete Bootstrap Settings Checklist (docs/ALZ_Bootstrap_Settings_Checklist.xlsx)
+Step 0  Gather bootstrap inputs (see Prerequisites → Bootstrap Settings Checklist)
 Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
 Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
 Step 3  1-bootstrap.yml          →  Management groups + subscription placement
@@ -2434,7 +2474,7 @@ gh variable set RUNNER_LABEL <span class="flag">--body</span> <span class="str">
         <h3>1 · Bootstrap Landing Zone Foundation</h3>
         <p style="margin:8px 0">Run <strong>once</strong> before any deployment. Creates the CAF management group hierarchy, moves all 10 subscriptions, and registers resource providers.</p>
         <div class="card card-accent" style="margin:10px 0;padding:12px;border-top-color:#D83B01">
-          <p style="font-size:12px;margin:0"><strong>Pre-requisite:</strong> Complete the <strong>Bootstrap Settings Checklist</strong> (<code>docs/ALZ_Bootstrap_Settings_Checklist.xlsx</code>) and the <strong>OIDC &amp; Secrets Setup</strong> tab before running this workflow. If using a self-hosted runner, set <code>vars.RUNNER_LABEL</code> first.</p>
+          <p style="font-size:12px;margin:0"><strong>Pre-requisite:</strong> Gather bootstrap inputs (see <strong>Prerequisites → Bootstrap Settings Checklist</strong>) and complete the <strong>OIDC &amp; Secrets Setup</strong> tab before running this workflow. If using a self-hosted runner, set <code>vars.RUNNER_LABEL</code> first.</p>
         </div>
         <div class="code-block" style="font-size:11px">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>

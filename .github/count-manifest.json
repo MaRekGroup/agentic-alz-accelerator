@@ -1,0 +1,47 @@
+{
+  "$schema": "count-manifest-v1",
+  "description": "Single source of truth for project entity counts. Never hard-code these counts elsewhere — use descriptive language and reference this file when exact numbers are needed.",
+  "counts": {
+    "agents": {
+      "computed_from": ".github/agents/*.md",
+      "description": "Agent definition files in .github/agents/"
+    },
+    "skills": {
+      "computed_from": ".github/skills/*/SKILL.md",
+      "description": "Skills with SKILL.md entry points"
+    },
+    "prompts": {
+      "computed_from": ".github/prompts/*.prompt.md",
+      "description": "Reusable prompt files"
+    },
+    "instructions": {
+      "computed_from": ".github/instructions/*.instructions.md",
+      "description": "Glob-matched instruction files"
+    },
+    "workflows": {
+      "computed_from": ".github/workflows/*.yml",
+      "description": "GitHub Actions / CI workflows"
+    },
+    "tools": {
+      "computed_from": "src/tools/*.py (excluding __init__.py)",
+      "description": "Python tool implementations"
+    },
+    "mcp_servers": {
+      "value": 3,
+      "description": "MCP servers: azure-pricing, azure-platform, drawio"
+    },
+    "caf_design_areas": {
+      "value": 8,
+      "description": "CAF design areas (static)"
+    },
+    "approval_gates": {
+      "value": 6,
+      "description": "Non-negotiable approval gates (static)"
+    },
+    "security_baseline_rules": {
+      "value": 6,
+      "description": "Non-negotiable security baseline rules (static)"
+    }
+  },
+  "updated": "2026-04-16"
+}

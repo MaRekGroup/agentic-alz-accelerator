@@ -1,0 +1,67 @@
+{
+  "$schema": "skill-affinity-v1",
+  "description": "Maps each agent to skills with affinity weights. Primary = always load. Secondary = on demand. Never = skip to save context.",
+  "affinities": {
+    "orchestrator": {
+      "primary": ["workflow-engine", "session-resume"],
+      "secondary": ["caf-design-areas", "profile-management", "github-operations"],
+      "never": ["security-baseline", "cost-governance", "azure-bicep-patterns", "terraform-patterns"]
+    },
+    "requirements": {
+      "primary": ["caf-design-areas"],
+      "secondary": ["cost-governance", "azure-defaults"],
+      "never": ["security-baseline", "profile-management", "workflow-engine", "azure-bicep-patterns", "terraform-patterns"]
+    },
+    "architect": {
+      "primary": ["caf-design-areas", "azure-defaults"],
+      "secondary": ["azure-cost-optimization", "azure-compliance", "azure-rbac"],
+      "never": ["workflow-engine", "profile-management"]
+    },
+    "design": {
+      "primary": ["drawio", "python-diagrams"],
+      "secondary": ["caf-design-areas", "azure-defaults"],
+      "never": ["security-baseline", "cost-governance", "workflow-engine"]
+    },
+    "governance": {
+      "primary": ["security-baseline", "caf-design-areas", "azure-compliance"],
+      "secondary": ["cost-governance", "azure-rbac"],
+      "never": ["profile-management", "workflow-engine", "drawio", "python-diagrams"]
+    },
+    "iac-planner": {
+      "primary": ["iac-common", "azure-defaults"],
+      "secondary": ["azure-bicep-patterns", "terraform-patterns", "caf-design-areas"],
+      "never": ["workflow-engine", "drawio", "python-diagrams"]
+    },
+    "bicep-code": {
+      "primary": ["azure-bicep-patterns", "security-baseline", "iac-common"],
+      "secondary": ["azure-defaults", "cost-governance", "azure-diagnostics"],
+      "never": ["terraform-patterns", "workflow-engine", "drawio"]
+    },
+    "terraform-code": {
+      "primary": ["terraform-patterns", "security-baseline", "iac-common"],
+      "secondary": ["azure-defaults", "cost-governance", "azure-diagnostics"],
+      "never": ["azure-bicep-patterns", "workflow-engine", "drawio"]
+    },
+    "challenger": {
+      "primary": ["security-baseline", "cost-governance", "caf-design-areas", "azure-compliance"],
+      "secondary": ["azure-rbac", "azure-defaults"],
+      "never": ["profile-management", "workflow-engine", "drawio", "python-diagrams"]
+    },
+    "deployment": {
+      "primary": ["profile-management", "github-operations"],
+      "secondary": ["security-baseline", "iac-common"],
+      "never": ["caf-design-areas", "workflow-engine", "drawio"]
+    },
+    "monitoring": {
+      "primary": ["security-baseline", "cost-governance", "azure-diagnostics"],
+      "secondary": ["caf-design-areas", "azure-compliance", "azure-cost-optimization"],
+      "never": ["profile-management", "workflow-engine", "drawio"]
+    },
+    "remediation": {
+      "primary": ["security-baseline", "azure-diagnostics"],
+      "secondary": ["cost-governance", "azure-rbac"],
+      "never": ["caf-design-areas", "profile-management", "workflow-engine", "drawio"]
+    }
+  },
+  "updated": "2026-04-16"
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "agent-registry-v1",
+  "description": "Machine-readable mapping of agents to their definitions, skills, and configuration.",
+  "agents": {
+    "orchestrator": {
+      "agent": ".github/agents/orchestrator.md",
+      "codename": "Conductor",
+      "emoji": "🧠",
+      "step": null,
+      "skills": ["workflow-engine", "session-resume", "github-operations"],
+      "invokable": true,
+      "description": "Master orchestrator — routes workflow steps, enforces approval gates, maintains session state"
+    },
+    "requirements": {
+      "agent": ".github/agents/requirements.md",
+      "codename": "Scribe",
+      "emoji": "📜",
+      "step": 1,
+      "skills": ["caf-design-areas", "azure-defaults"],
+      "invokable": true,
+      "description": "Captures landing zone requirements through conversation"
+    },
+    "architect": {
+      "agent": null,
+      "codename": "Oracle",
+      "emoji": "🏛️",
+      "step": 2,
+      "skills": ["caf-design-areas", "cost-governance", "azure-defaults", "azure-cost-optimization"],
+      "invokable": false,
+      "description": "WAF assessment, CAF design area mapping, cost estimation"
+    },
+    "design": {
+      "agent": null,
+      "codename": "Artisan",
+      "emoji": "🎨",
+      "step": 3,
+      "skills": ["drawio", "python-diagrams"],
+      "invokable": false,
+      "description": "Architecture diagrams and ADRs"
+    },
+    "governance": {
+      "agent": ".github/agents/governance.md",
+      "codename": "Warden",
+      "emoji": "🛡️",
+      "step": 3.5,
+      "skills": ["security-baseline", "caf-design-areas", "azure-compliance", "azure-rbac"],
+      "invokable": true,
+      "description": "Policy discovery, compliance constraints, security baseline"
+    },
+    "iac-planner": {
+      "agent": null,
+      "codename": "Strategist",
+      "emoji": "📐",
+      "step": 4,
+      "skills": ["profile-management", "iac-common", "azure-defaults"],
+      "invokable": false,
+      "description": "Implementation planning with AVM module selection"
+    },
+    "bicep-code": {
+      "agent": null,
+      "codename": "Forge",
+      "emoji": "⚒️",
+      "step": 5,
+      "skills": ["azure-bicep-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
+      "invokable": false,
+      "description": "Bicep template generation (AVM-first)"
+    },
+    "terraform-code": {
+      "agent": null,
+      "codename": "Forge",
+      "emoji": "⚒️",
+      "step": 5,
+      "skills": ["terraform-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
+      "invokable": false,
+      "description": "Terraform configuration generation (AVM-TF)"
+    },
+    "deployment": {
+      "agent": ".github/agents/deployment.md",
+      "codename": "Envoy",
+      "emoji": "🚀",
+      "step": 6,
+      "skills": ["profile-management", "github-operations"],
+      "invokable": true,
+      "description": "Deployment with what-if/plan preview"
+    },
+    "monitoring": {
+      "agent": ".github/agents/monitoring.md",
+      "codename": "Sentinel",
+      "emoji": "🔭",
+      "step": 8,
+      "skills": ["security-baseline", "cost-governance", "azure-diagnostics", "azure-compliance"],
+      "invokable": true,
+      "description": "Continuous compliance monitoring, drift detection, security posture"
+    },
+    "remediation": {
+      "agent": ".github/agents/remediation.md",
+      "codename": "Mender",
+      "emoji": "🔧",
+      "step": 9,
+      "skills": ["security-baseline", "azure-diagnostics", "azure-rbac"],
+      "invokable": true,
+      "description": "Auto-remediation with snapshot/rollback, policy violation repair"
+    },
+    "challenger": {
+      "agent": ".github/agents/challenger.md",
+      "codename": "Challenger",
+      "emoji": "⚔️",
+      "step": null,
+      "skills": ["security-baseline", "cost-governance", "caf-design-areas", "azure-compliance"],
+      "invokable": true,
+      "description": "Adversarial reviewer — challenges architecture, plans, code, and security"
+    }
+  },
+  "updated": "2026-04-16"
+}

@@ -229,13 +229,11 @@ python scripts/validators/validate_cost_governance.py infra/
 │       ├── platform-security/
 │       ├── policies/
 │       └── security/
-├── mcp/                       # MCP servers (Python)
-│   ├── mcp-config.json
-│   ├── azure-resource-graph/
-│   ├── azure-policy/
-│   ├── azure-deployment/
-│   ├── azure-monitor/
-│   └── azure-pricing/
+├── mcp/                       # MCP servers
+│   ├── mcp-config.json        # 3-server configuration
+│   ├── azure-platform/        # Consolidated platform server (22 tools, MCP SDK)
+│   ├── azure-pricing-mcp/     # APEX pricing submodule (18 tools)
+│   └── drawio-mcp-server/     # Diagram generation (Deno/TypeScript)
 ├── .github/skills/            # Workflow engine DAG
 ├── scripts/validators/        # Security + cost validators
 ├── pipelines/                 # CI/CD (GitHub Actions + ADO)

@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net" modified="2026-04-15" type="device">
+  <diagram id="security-governance" name="Security, Governance &amp; Monitoring">
+    <mxGraphModel dx="1422" dy="766" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;Azure Landing Zone — Security, Governance &amp; Monitoring Stack&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a3a5c;" vertex="1" parent="1">
+          <mxGeometry x="300" y="15" width="700" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== SECURITY BASELINE ===== -->
+        <mxCell id="sec-container" value="&lt;b&gt;🔒 Security Baseline — Non-Negotiable Rules&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;fontColor=#c62828;strokeColor=#c62828;strokeWidth=2;verticalAlign=top;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="30" y="75" width="330" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="1. TLS 1.2 Minimum" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="115" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="2. HTTPS-Only Traffic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="155" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="3. No Public Blob Access" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="195" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="4. Managed Identity Preferred" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="235" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" value="5. Azure AD-Only SQL Auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="275" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6" value="6. Public Network Disabled (Prod)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="315" width="290" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== GOVERNANCE ===== -->
+        <mxCell id="gov-container" value="&lt;b&gt;🛡️ Governance &amp; Policy&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;fontColor=#f57f17;strokeColor=#f57f17;strokeWidth=2;verticalAlign=top;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="400" y="75" width="330" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="Azure Security Benchmark" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="115" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="CIS Azure Foundations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="155" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="ISO 27001:2013" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="195" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="NIST SP 800-53 Rev. 5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="235" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="15 Custom ALZ Policies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="275" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="p6" value="Budget Alerts: 80% · 100% · 120%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f57f17;fontColor=#ffffff;strokeColor=#c66900;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="315" width="290" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== MONITORING ===== -->
+        <mxCell id="mon-container" value="&lt;b&gt;🔭 Monitoring &amp; Observability&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;fontColor=#1b5e20;strokeColor=#1b5e20;strokeWidth=2;verticalAlign=top;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="770" y="75" width="330" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="m1" value="Central Log Analytics (365d)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="115" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="m2" value="Sentinel — 10 Connectors (730d)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="155" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="m3" value="Defender for Cloud — 12 Plans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="195" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="m4" value="4 SOAR Playbooks (Auto-Remediate)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="235" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="m5" value="Compliance Scans — Every 30 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="275" width="290" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="m6" value="Drift Detection — Every 60 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1b5e20;fontColor=#ffffff;strokeColor=#0d3b0d;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="315" width="290" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== PLATFORM SERVICES ===== -->
+        <mxCell id="plat-container" value="&lt;b&gt;⚙️ Platform Services&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;fontColor=#2d6a9f;strokeColor=#2d6a9f;strokeWidth=2;verticalAlign=top;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="75" width="330" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps1" value="Automation Account&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Update Mgmt · Change Tracking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="115" width="290" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps2" value="Recovery Services Vault&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Daily + Weekly Backup&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="170" width="290" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps3" value="Action Groups&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Email · SMS · Webhook Notifications&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="225" width="290" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps4" value="Azure Bastion (Per-Subscription)&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Standard SKU · Secure RDP/SSH&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="280" width="290" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow arrows -->
+        <mxCell id="flow1" value="enforces" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;strokeWidth=2;fontSize=10;fontColor=#666666;fontStyle=2;" edge="1" source="sec-container" target="gov-container" parent="1"/>
+        <mxCell id="flow2" value="monitors" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;strokeWidth=2;fontSize=10;fontColor=#666666;fontStyle=2;" edge="1" source="gov-container" target="mon-container" parent="1"/>
+        <mxCell id="flow3" value="operates" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;strokeWidth=2;fontSize=10;fontColor=#666666;fontStyle=2;" edge="1" source="mon-container" target="plat-container" parent="1"/>
+
+        <!-- Applied to banner -->
+        <mxCell id="banner" value="&lt;b&gt;Applied across all 10 subscriptions · Enforced at Management Group scope · Continuous Day-2 operations&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a5c;fontColor=#ffffff;strokeColor=#0d2137;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="420" width="900" height="40" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
