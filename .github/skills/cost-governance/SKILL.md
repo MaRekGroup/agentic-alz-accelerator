@@ -1,3 +1,14 @@
+---
+name: cost-governance
+description: "Budget enforcement rules, alert thresholds, and cost validation for Azure Landing Zone deployments. USE FOR: budget resource generation, cost governance validation, per-environment budget configuration. DO NOT USE FOR: cost optimization recommendations (use azure-cost-optimization)."
+compatibility: Works with Claude Code, GitHub Copilot, VS Code, and any Agent Skills compatible tool.
+license: MIT
+metadata:
+  author: yeselam-tesfaye
+  version: "2.0"
+  category: azure-cost
+---
+
 # Cost Governance Skill
 
 Domain knowledge for enforcing Azure Landing Zone cost governance.

@@ -1,3 +1,14 @@
+---
+name: security-baseline
+description: "Non-negotiable security rules (TLS 1.2, HTTPS-only, managed identity, private endpoints) with Bicep and Terraform enforcement. USE FOR: code generation security checks, deployment preflight validation, continuous monitoring. DO NOT USE FOR: compliance framework mapping (use azure-compliance)."
+compatibility: Works with Claude Code, GitHub Copilot, VS Code, and any Agent Skills compatible tool.
+license: MIT
+metadata:
+  author: yeselam-tesfaye
+  version: "2.0"
+  category: azure-security
+---
+
 # Security Baseline Skill
 
 Domain knowledge for enforcing the Azure Landing Zone security baseline.

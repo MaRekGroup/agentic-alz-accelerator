@@ -1,3 +1,14 @@
+---
+name: profile-management
+description: "Landing Zone profile configuration system with 3-tier inheritance (base → size → environment). USE FOR: profile selection, parameter inheritance, environment-specific overrides. DO NOT USE FOR: IaC module structure (use iac-common)."
+compatibility: Works with Claude Code, GitHub Copilot, VS Code, and any Agent Skills compatible tool.
+license: MIT
+metadata:
+  author: yeselam-tesfaye
+  version: "2.0"
+  category: azure-configuration
+---
+
 # Profile Management Skill
 
 Domain knowledge for the Landing Zone profile configuration system.

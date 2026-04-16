@@ -1,3 +1,14 @@
+---
+name: caf-design-areas
+description: "Cloud Adoption Framework (CAF) design area mapping for Azure Landing Zones. USE FOR: architecture assessments, management group hierarchy, subscription placement, IaC module mapping. DO NOT USE FOR: IaC code generation (use azure-bicep-patterns or terraform-patterns)."
+compatibility: Works with Claude Code, GitHub Copilot, VS Code, and any Agent Skills compatible tool.
+license: MIT
+metadata:
+  author: yeselam-tesfaye
+  version: "2.0"
+  category: azure-architecture
+---
+
 # CAF Design Areas Skill
 
 Domain knowledge for mapping Azure Landing Zone components to Cloud Adoption

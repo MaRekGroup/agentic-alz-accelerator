@@ -37,7 +37,14 @@
       "codename": "Artisan",
       "artifact": "03-design-*.md",
       "description": "Architecture diagrams and ADRs",
-      "optional": true
+      "optional": true,
+      "options": {
+        "diagram_engine": {
+          "description": "Diagram generation engine",
+          "values": ["python", "svg", "drawio"],
+          "default": "python"
+        }
+      }
     },
     {
       "id": "step-3.5-governance",
