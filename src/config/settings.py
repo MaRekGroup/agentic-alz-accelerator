@@ -8,8 +8,8 @@ _BASE_CONFIG = {"env_file": _ENV_FILE, "env_file_encoding": "utf-8", "extra": "i
 
 
 class AzureAISettings(BaseSettings):
-    project_connection_string: str = Field(alias="AZURE_AI_PROJECT_CONNECTION_STRING")
-    openai_endpoint: str = Field(alias="AZURE_OPENAI_ENDPOINT")
+    project_connection_string: str = Field(default="", alias="AZURE_AI_PROJECT_CONNECTION_STRING")
+    openai_endpoint: str = Field(default="", alias="AZURE_OPENAI_ENDPOINT")
     openai_deployment: str = Field(default="gpt-4o", alias="AZURE_OPENAI_DEPLOYMENT")
     openai_api_version: str = Field(
         default="2025-01-01-preview", alias="AZURE_OPENAI_API_VERSION"

@@ -221,10 +221,14 @@ jobs:
         run: |
           python -c "
           import asyncio, json
+          from azure.identity import DefaultAzureCredential
+          from src.config.settings import Settings
           from src.tools.resource_graph import ResourceGraphClient
 
           async def main():
-              client = ResourceGraphClient()
+              credential = DefaultAzureCredential()
+              settings = Settings()
+              client = ResourceGraphClient(credential=credential, settings=settings)
               result = await client.validate_landing_zone('${{ secrets[env.SUBSCRIPTION_SECRET] }}')
               print(json.dumps(result, indent=2))
               assert result.get('validation_passed', False), 'Landing zone validation failed'
