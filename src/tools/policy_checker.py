@@ -44,8 +44,20 @@ class PolicyChecker:
                     "compliance_pct": 100.0,
                 }
 
-            total = results.results.total_resources or 0
-            non_compliant = results.results.non_compliant_resources or 0
+            # Compatible with both v1 (total_resources) and v2+ (resource_details) SDK
+            sr = results.results
+            if hasattr(sr, 'total_resources'):
+                total = sr.total_resources or 0
+                non_compliant = sr.non_compliant_resources or 0
+            elif hasattr(sr, 'resource_details'):
+                total = sum(d.count or 0 for d in (sr.resource_details or []))
+                non_compliant = sum(
+                    d.count or 0 for d in (sr.resource_details or [])
+                    if d.compliance_state == 'noncompliant'
+                )
+            else:
+                total = getattr(sr, 'query_results_count', 0) or 0
+                non_compliant = getattr(sr, 'non_compliant_resources', 0) or 0
             compliant = total - non_compliant
 
             return {
