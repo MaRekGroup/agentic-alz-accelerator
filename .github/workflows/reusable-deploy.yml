@@ -498,6 +498,7 @@ jobs:
 
       - name: Generate As-Built Technical Design Document
         id: tdd
+        continue-on-error: true
         run: |
           pip install cairosvg python-docx pillow pyyaml 2>/dev/null
 
