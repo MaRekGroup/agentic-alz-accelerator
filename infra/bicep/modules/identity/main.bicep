@@ -1,4 +1,7 @@
 // Identity Module - Managed Identities and RBAC Assignments
+// Subscription-scoped: creates its own RG using the prefix convention
+
+targetScope = 'subscription'
 
 @description('Azure region')
 param location string
@@ -20,37 +23,55 @@ param environment string
 
 param now string = utcNow('yyyy-MM-01')
 
-// ============================================================================
-// User-Assigned Managed Identity (for landing zone workloads)
-// ============================================================================
+// ─── Variables ──────────────────────────────────────────────────────────────
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${prefix}-identity'
+var regionShortcode = {
+  eastus: 'eus'
+  eastus2: 'eus2'
+  westus: 'wus'
+  westus2: 'wus2'
+  westus3: 'wus3'
+  centralus: 'cus'
+  southcentralus: 'scus'
+  northeurope: 'neu'
+  westeurope: 'weu'
+  uksouth: 'uks'
+  southeastasia: 'sea'
+  australiaeast: 'aue'
+  japaneast: 'jpe'
+}[location] ?? location
+
+var rgName = '${prefix}-identity-${regionShortcode}-rg'
+
+// ─── Resource Group ─────────────────────────────────────────────────────────
+
+resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
+  name: rgName
   location: location
   tags: tags
 }
 
-// ============================================================================
-// Managed Identity for ALZ Agent operations
-// ============================================================================
+// ─── Identity Resources (RG-scoped module) ──────────────────────────────────
 
-resource agentIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${prefix}-agent-identity'
-  location: location
-  tags: union(tags, {
-    purpose: 'alz-agent-operations'
-  })
+module identityResources 'resources.bicep' = {
+  name: 'identity-resources-deployment'
+  scope: rg
+  params: {
+    location: location
+    prefix: prefix
+    tags: tags
+  }
 }
 
 // ============================================================================
-// Role Assignments
+// Role Assignments (subscription-scoped)
 // ============================================================================
 
 // Reader role for the agent at subscription scope
 resource agentReaderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, agentIdentity.id, 'Reader')
+  name: guid(subscription().id, '${prefix}-agent-identity', 'Reader')
   properties: {
-    principalId: agentIdentity.properties.principalId
+    principalId: identityResources.outputs.agentIdentityPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7') // Reader
     principalType: 'ServicePrincipal'
   }
@@ -58,16 +79,16 @@ resource agentReaderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
 
 // Policy Contributor for policy management
 resource agentPolicyRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, agentIdentity.id, 'ResourcePolicyContributor')
+  name: guid(subscription().id, '${prefix}-agent-identity', 'ResourcePolicyContributor')
   properties: {
-    principalId: agentIdentity.properties.principalId
+    principalId: identityResources.outputs.agentIdentityPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '36243c78-bf99-498c-9df9-86d9f8d28608') // Resource Policy Contributor
     principalType: 'ServicePrincipal'
   }
 }
 
 // ============================================================================
-// Cost Governance
+// Cost Governance (subscription-scoped)
 // ============================================================================
 
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
@@ -109,8 +130,9 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 // Outputs
 // ============================================================================
 
-output managedIdentityId string = managedIdentity.id
-output managedIdentityPrincipalId string = managedIdentity.properties.principalId
-output managedIdentityClientId string = managedIdentity.properties.clientId
-output agentIdentityId string = agentIdentity.id
-output agentIdentityPrincipalId string = agentIdentity.properties.principalId
+output resourceGroupName string = rg.name
+output managedIdentityId string = identityResources.outputs.managedIdentityId
+output managedIdentityPrincipalId string = identityResources.outputs.managedIdentityPrincipalId
+output managedIdentityClientId string = identityResources.outputs.managedIdentityClientId
+output agentIdentityId string = identityResources.outputs.agentIdentityId
+output agentIdentityPrincipalId string = identityResources.outputs.agentIdentityPrincipalId
