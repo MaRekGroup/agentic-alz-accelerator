@@ -64,17 +64,14 @@ on:
         required: false
         type: string
         default: ''
-      extra_bicep_params:
-        description: 'Extra Bicep parameter overrides (e.g. logAnalyticsWorkspaceId=/subscriptions/.../workspaces/mrg-law)'
-        required: false
-        type: string
-        default: ''
     secrets:
       AZURE_TENANT_ID:
         required: true
       AZURE_CLIENT_ID:
         required: true
       SUBSCRIPTION_ID:
+        required: false
+      MGMT_SUBSCRIPTION_ID:
         required: false
       TF_STATE_STORAGE_ACCOUNT:
         required: false
@@ -242,17 +239,28 @@ jobs:
             exit 1
           fi
 
+          # Build extra params for LAW ID if MGMT subscription is available
+          EXTRA_PARAMS=""
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
+            if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
+              EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
+            else
+              EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LAW_ID}"
+            fi
+          fi
+
           if [ "${{ inputs.deployment_scope }}" = "group" ]; then
             az deployment group what-if \
               --resource-group ${{ inputs.resource_group }} \
               --parameters "$PARAMS_FILE" \
-              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
+              $EXTRA_PARAMS \
               --subscription ${{ secrets.SUBSCRIPTION_ID }}
           else
             az deployment sub what-if \
               --location ${{ inputs.location }} \
               --parameters "$PARAMS_FILE" \
-              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
+              $EXTRA_PARAMS \
               --subscription ${{ secrets.SUBSCRIPTION_ID }}
           fi
 
@@ -326,18 +334,29 @@ jobs:
           DEPLOYMENT_NAME="alz-${{ inputs.project_name }}-$(date +%Y%m%d%H%M%S)"
           PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
 
+          # Build extra params for LAW ID if MGMT subscription is available
+          EXTRA_PARAMS=""
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
+            if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
+              EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
+            else
+              EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LAW_ID}"
+            fi
+          fi
+
           if [ "${{ inputs.deployment_scope }}" = "group" ]; then
             az deployment group create \
               --resource-group ${{ inputs.resource_group }} \
               --parameters "$PARAMS_FILE" \
-              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
+              $EXTRA_PARAMS \
               --subscription ${{ secrets.SUBSCRIPTION_ID }} \
               --name "$DEPLOYMENT_NAME"
           else
             az deployment sub create \
               --location ${{ inputs.location }} \
               --parameters "$PARAMS_FILE" \
-              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
+              $EXTRA_PARAMS \
               --subscription ${{ secrets.SUBSCRIPTION_ID }} \
               --name "$DEPLOYMENT_NAME"
           fi
