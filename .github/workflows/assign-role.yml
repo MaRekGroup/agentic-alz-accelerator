@@ -1,0 +1,104 @@
+# ============================================================================
+# Utility — Assign Azure Role to OIDC Service Principal
+# Use when a platform LZ deploy needs a role beyond Contributor.
+# ============================================================================
+name: "Utility · Assign Role to SPN"
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_secret:
+        description: 'GitHub secret name for target subscription ID'
+        required: true
+        type: choice
+        options:
+          - PLATFORM_MGMT_SUBSCRIPTION_ID
+          - PLATFORM_CONN_SUBSCRIPTION_ID
+          - PLATFORM_IDTY_SUBSCRIPTION_ID
+          - PLATFORM_SEC_SUBSCRIPTION_ID
+      role_name:
+        description: 'Azure RBAC role to assign'
+        required: true
+        type: choice
+        options:
+          - Microsoft Sentinel Contributor
+          - Security Admin
+          - Key Vault Administrator
+          - Log Analytics Contributor
+      action:
+        description: 'Assign or remove the role'
+        required: true
+        type: choice
+        options:
+          - assign
+          - remove
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  assign-role:
+    name: "${{ inputs.action }} '${{ inputs.role_name }}'"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    environment: platform
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets[inputs.subscription_secret] }}
+
+      - name: Resolve SPN Object ID
+        id: spn
+        run: |
+          OID=$(az ad sp show --id "${{ secrets.AZURE_CLIENT_ID }}" --query id -o tsv)
+          echo "object_id=$OID" >> "$GITHUB_OUTPUT"
+          echo "SPN Object ID: $OID"
+
+      - name: Get subscription scope
+        id: scope
+        run: |
+          SUB_ID=$(az account show --query id -o tsv)
+          echo "scope=/subscriptions/$SUB_ID" >> "$GITHUB_OUTPUT"
+          echo "Subscription: $SUB_ID"
+
+      - name: "${{ inputs.action }} role"
+        run: |
+          set -euo pipefail
+          ROLE="${{ inputs.role_name }}"
+          SCOPE="${{ steps.scope.outputs.scope }}"
+          OID="${{ steps.spn.outputs.object_id }}"
+
+          echo "Role:  $ROLE"
+          echo "Scope: $SCOPE"
+          echo "SPN:   $OID"
+
+          if [ "${{ inputs.action }}" = "assign" ]; then
+            echo "Assigning role..."
+            az role assignment create \
+              --assignee-object-id "$OID" \
+              --assignee-principal-type ServicePrincipal \
+              --role "$ROLE" \
+              --scope "$SCOPE" \
+              --output table
+            echo "✅ Role assigned successfully"
+          else
+            echo "Removing role..."
+            az role assignment delete \
+              --assignee "$OID" \
+              --role "$ROLE" \
+              --scope "$SCOPE" \
+              --output table
+            echo "✅ Role removed successfully"
+          fi
+
+      - name: Verify role assignments
+        run: |
+          echo "Current roles for SPN on this subscription:"
+          az role assignment list \
+            --assignee "${{ steps.spn.outputs.object_id }}" \
+            --scope "${{ steps.scope.outputs.scope }}" \
+            --query "[].{Role:roleDefinitionName, Scope:scope}" \
+            --output table
