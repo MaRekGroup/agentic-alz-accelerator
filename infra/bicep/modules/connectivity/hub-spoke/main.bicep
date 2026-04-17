@@ -151,7 +151,7 @@ resource firewall 'Microsoft.Network/azureFirewalls@2024-01-01' = if (deployAzur
 
 // ─── Firewall Diagnostics ─────────────────────────────────────────────────────
 
-resource firewallDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (deployAzureFirewall) {
+resource firewallDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (deployAzureFirewall && logAnalyticsWorkspaceId != '') {
   name: '${prefix}-fw-diag'
   scope: firewall
   properties: {
@@ -206,7 +206,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2024-01-01' = if (enableBastion
 
 // ─── Hub VNet Diagnostics ─────────────────────────────────────────────────────
 
-resource hubVnetDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+resource hubVnetDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (logAnalyticsWorkspaceId != '') {
   name: '${prefix}-hub-vnet-diag'
   scope: hubVnet
   properties: {

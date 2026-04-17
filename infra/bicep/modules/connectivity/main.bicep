@@ -54,6 +54,9 @@ param vpnGatewaySku string = 'VpnGw1AZ'
 @description('Enable DDoS Protection Plan')
 param enableDdosProtection bool = true
 
+@description('Deploy DNS Resolver')
+param deployDnsResolver bool = true
+
 @description('Enable Azure Bastion')
 param enableBastion bool = true
 
@@ -254,7 +257,7 @@ module privateDns 'private-dns/main.bicep' = {
 
 // ─── DNS Resolver ─────────────────────────────────────────────────────────────
 
-module dnsResolver 'br/public:avm/res/network/dns-resolver:0.3.0' = if (hubTopology == 'hub-spoke') {
+module dnsResolver 'br/public:avm/res/network/dns-resolver:0.3.0' = if (hubTopology == 'hub-spoke' && deployDnsResolver) {
   name: 'dns-resolver'
   scope: resourceGroup(rgHub)
   params: {

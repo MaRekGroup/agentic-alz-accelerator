@@ -81,7 +81,7 @@ jobs:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     environment: platform-${{ inputs.platform_subscription }}
     env:
-      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MANAGEMENT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONNECTIVITY_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDENTITY_SUBSCRIPTION_ID' || 'PLATFORM_SECURITY_SUBSCRIPTION_ID' }}
+      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MGMT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONN_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDTY_SUBSCRIPTION_ID' || 'PLATFORM_SEC_SUBSCRIPTION_ID' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -98,6 +98,13 @@ jobs:
       - name: Set Subscription Context
         run: az account set --subscription "${{ secrets[env.SUBSCRIPTION_SECRET] }}"
 
+      - name: Resolve Log Analytics Workspace ID
+        if: inputs.platform_subscription != 'management'
+        run: |
+          MGMT_SUB_ID="${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}"
+          LAW_ID="/subscriptions/${MGMT_SUB_ID}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
+          echo "LOG_ANALYTICS_WORKSPACE_ID=${LAW_ID}" >> $GITHUB_ENV
+
       - name: Bicep What-If
         if: inputs.action == 'plan'
         run: |
@@ -109,10 +116,16 @@ jobs:
             security)     TEMPLATE="$MODULE_PATH/platform-security/main.bicep" ;;
           esac
 
+          EXTRA_PARAMS=""
+          if [[ -n "${LOG_ANALYTICS_WORKSPACE_ID:-}" ]]; then
+            EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LOG_ANALYTICS_WORKSPACE_ID}"
+          fi
+
           az deployment sub what-if \
             --location ${{ inputs.location }} \
             --template-file "$TEMPLATE" \
-            --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam
+            --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam \
+            $EXTRA_PARAMS
 
       - name: Bicep Deploy
         if: inputs.action == 'deploy'
@@ -125,10 +138,16 @@ jobs:
             security)     TEMPLATE="$MODULE_PATH/platform-security/main.bicep" ;;
           esac
 
+          EXTRA_PARAMS=""
+          if [[ -n "${LOG_ANALYTICS_WORKSPACE_ID:-}" ]]; then
+            EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LOG_ANALYTICS_WORKSPACE_ID}"
+          fi
+
           az deployment sub create \
             --location ${{ inputs.location }} \
             --template-file "$TEMPLATE" \
             --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam \
+            $EXTRA_PARAMS \
             --name "platform-${{ inputs.platform_subscription }}-$(date +%Y%m%d%H%M%S)"
 
   # =========================================================================
@@ -141,7 +160,7 @@ jobs:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     environment: platform-${{ inputs.platform_subscription }}
     env:
-      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MANAGEMENT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONNECTIVITY_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDENTITY_SUBSCRIPTION_ID' || 'PLATFORM_SECURITY_SUBSCRIPTION_ID' }}
+      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MGMT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONN_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDTY_SUBSCRIPTION_ID' || 'PLATFORM_SEC_SUBSCRIPTION_ID' }}
     steps:
       - uses: actions/checkout@v4
 
