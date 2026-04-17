@@ -69,8 +69,6 @@ var rgNames = {
   networking: '${prefix}-networking-rg'
   security: '${prefix}-security-rg'
   logging: '${prefix}-logging-rg'
-  identity: '${prefix}-identity-rg'
-}
 
 // ============================================================================
 // Resource Groups
@@ -94,15 +92,8 @@ resource loggingRg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   tags: tags
 }
 
-resource identityRg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: rgNames.identity
-  location: location
-  tags: tags
-}
-
-// ============================================================================
-// Module Deployments
-// ============================================================================
+// Identity module is subscription-scoped and creates its own RG
+// Identity module is subscription-scoped and creates its own RG===================================================================
 
 module logging 'modules/logging/main.bicep' = {
   name: '${prefix}-logging'
@@ -156,19 +147,15 @@ module security 'modules/security/main.bicep' = {
 
 module identity 'modules/identity/main.bicep' = {
   name: '${prefix}-identity'
-  scope: identityRg
   params: {
     location: location
     prefix: prefix
     tags: tags
-    // CHANGED: Added missing required params for cost governance (BCP035)
     environment: environment
-    budgetAmount: budgetAmount
-    technicalContact: technicalContact
-  }
-}
-
-module policies 'modules/policies/main.bicep' = {
+  params: {
+    location: location
+    prefix: prefix
+    tags: tags
   name: '${prefix}-policies'
   params: {
     policyInitiatives: policyInitiatives
