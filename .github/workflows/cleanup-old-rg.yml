@@ -1,0 +1,50 @@
+# One-time cleanup: delete old hardcoded resource groups after migration to prefix-based naming
+name: "Cleanup Old Resource Groups"
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Resource group name to delete'
+        required: true
+        type: string
+      subscription_secret:
+        description: 'Which subscription secret holds the target sub'
+        required: true
+        type: choice
+        options:
+          - PLATFORM_MGMT_SUBSCRIPTION_ID
+          - PLATFORM_CONN_SUBSCRIPTION_ID
+          - PLATFORM_IDTY_SUBSCRIPTION_ID
+          - PLATFORM_SEC_SUBSCRIPTION_ID
+      confirm:
+        description: 'Type the RG name again to confirm deletion'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  delete-rg:
+    name: "Delete ${{ inputs.resource_group }}"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    if: inputs.resource_group == inputs.confirm
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets[inputs.subscription_secret] }}
+
+      - name: Delete Resource Group
+        run: |
+          echo "Deleting resource group: ${{ inputs.resource_group }}"
+          az group delete \
+            --name "${{ inputs.resource_group }}" \
+            --subscription "${{ secrets[inputs.subscription_secret] }}" \
+            --yes \
+            --no-wait
+          echo "Deletion initiated (async). RG will be removed shortly."
