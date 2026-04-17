@@ -98,20 +98,21 @@ Every deployment includes budget alerts — **no budget, no merge**:
 
 ## CI/CD Pipelines
 
-6 GitHub Actions workflows orchestrate the full lifecycle:
+7 GitHub Actions workflows orchestrate the full lifecycle:
 
 | Workflow | Trigger | Scope |
 |----------|---------|-------|
 | `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
-| `2-platform-deploy.yml` | Manual | 4 platform LZs in strict order with approval gates |
+| `2-platform-deploy.yml` | Manual | 4 platform LZs (Mgmt → Conn → Ident → Sec) with cascade or targeted deploy |
 | `3-app-deploy.yml` | Manual | Config-driven app LZs from `subscriptions.json` (parallel) |
-| `monitor.yml` | Cron + Manual | Compliance, drift detection, auto-remediation (24/7) |
+| `monitor.yml` | Cron + Manual | Compliance scan across all 4 platform subscriptions in parallel |
 | `5-pr-validate.yml` | PR to main | Lint, security, cost, tests, what-if preview |
-| `reusable-deploy.yml` | Called by 2 & 3 | DRY: validate → plan → deploy → verify → TDD |
+| `reusable-deploy.yml` | Called by 2 & 3 | DRY: resolve → validate → plan → deploy → verify |
+| `assign-role.yml` | Manual (utility) | Assign/remove RBAC roles on platform subscriptions |
 
 ### Self-Hosted Runner Support
 
-All workflows use `vars.RUNNER_LABEL` to select the runner — set it once, all 23 jobs follow:
+All workflows use `vars.RUNNER_LABEL` to select the runner — set it once, all jobs follow:
 
 ```bash
 # Use a private self-hosted runner
@@ -122,6 +123,44 @@ gh variable set RUNNER_LABEL --body "alz-runner"
 ```
 
 If `RUNNER_LABEL` is not set, all workflows default to `ubuntu-latest` (GitHub-hosted).
+
+### Platform Landing Zone Deployment
+
+The accelerator deploys 4 platform landing zones in dependency order:
+
+```
+Management → Connectivity → Identity → Security
+  (LAW, AA)   (Hub, Bastion)  (DC, RBAC)  (Sentinel, Defender, KV, SOAR)
+```
+
+Each platform LZ follows the reusable pipeline: **Resolve → Validate → Plan → Deploy → Verify**.
+
+Deploy all or target a single LZ:
+
+```bash
+# Deploy all platform LZs in cascade
+gh workflow run "2-platform-deploy.yml" -f framework=bicep -f action=deploy \
+  -f location=southcentralus -f prefix=mrg
+
+# Deploy only the security LZ
+gh workflow run "2-platform-deploy.yml" -f framework=bicep -f action=deploy \
+  -f start_from=security -f deploy_only=security \
+  -f location=southcentralus -f prefix=mrg
+```
+
+### Compliance Monitoring
+
+The monitor workflow scans all deployed subscriptions for policy compliance:
+
+```bash
+# Full compliance scan across all 4 platform subscriptions
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+
+# Scan a single LZ
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=security
+```
+
+Results include per-subscription compliance percentages and detailed violation listings.
 
 ### Bootstrap Settings Checklist
 
@@ -185,6 +224,9 @@ python scripts/validators/validate_cost_governance.py infra/
 
 ```
 ├── AGENTS.md                  # Agent roster, workflow, gates, baseline
+├── agent-output/              # Estate state and per-LZ session tracking
+│   ├── 00-estate-state.json         # All platform + app LZ statuses
+│   └── {lz-name}/                   # Per-LZ artifacts and session state
 ├── src/
 │   ├── agents/                # Agent implementations
 │   │   ├── orchestrator.py          # 🧠 Conductor (APEX workflow)
@@ -234,9 +276,19 @@ python scripts/validators/validate_cost_governance.py infra/
 │   ├── azure-platform/        # Consolidated platform server (22 tools, MCP SDK)
 │   ├── azure-pricing-mcp/     # APEX pricing submodule (18 tools)
 │   └── drawio-mcp-server/     # Diagram generation (Deno/TypeScript)
-├── .github/skills/            # Workflow engine DAG
-├── scripts/validators/        # Security + cost validators
-├── pipelines/                 # CI/CD (GitHub Actions + ADO)
+├── .github/
+│   ├── workflows/             # CI/CD (7 workflows)
+│   │   ├── 1-bootstrap.yml          # One-time MG hierarchy setup
+│   │   ├── 2-platform-deploy.yml    # Platform LZ deployments
+│   │   ├── 3-app-deploy.yml         # Application LZ deployments
+│   │   ├── 5-pr-validate.yml        # PR validation (lint, security, what-if)
+│   │   ├── monitor.yml              # Multi-subscription compliance scanning
+│   │   ├── reusable-deploy.yml      # Shared: resolve → validate → plan → deploy → verify
+│   │   └── assign-role.yml          # Utility: RBAC role assignments to SPN
+│   ├── agents/                # Agent definition files
+│   ├── skills/                # 17 skill SKILL.md entry points
+│   └── instructions/          # Per-filetype coding instructions
+├── pipelines/                 # Legacy / Azure DevOps pipelines
 ├── docs/                      # Security baseline, cost governance, workflow
 │   └── tdd/                   # Generated Technical Design Documents
 └── tests/                     # 18 tests (deployment, monitoring, remediation)

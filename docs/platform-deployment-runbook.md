@@ -291,8 +291,17 @@ After bootstrap completes:
 
 1. **Register resource providers** — run with `register-providers-only` if skipped
 2. **Deploy platform landing zones** — trigger `2-platform-deploy.yml`
-3. **Set app subscription secrets** — when ready to deploy application landing zones
-4. **Re-run bootstrap** with `move-subscriptions-only` to place app subs
+3. **Grant Sentinel Contributor role** — the Security LZ requires `Microsoft Sentinel Contributor` on the security subscription for Sentinel onboarding. Use the utility workflow:
+   ```bash
+   gh workflow run "assign-role.yml" \
+     -f subscription_secret=PLATFORM_SEC_SUBSCRIPTION_ID \
+     -f role_name="Microsoft Sentinel Contributor" \
+     -f action=assign
+   ```
+   Or assign manually via the Azure portal. Allow 10-15 minutes for RBAC propagation.
+4. **Set app subscription secrets** — when ready to deploy application landing zones
+5. **Re-run bootstrap** with `move-subscriptions-only` to place app subs
+6. **Run compliance scan** — `gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all`
 
 ---
 
@@ -332,6 +341,39 @@ where the workflow runs.
 
 **Fix:** Update the federated credentials (see Step 4). The subject claim must
 match `repo:<org>/<repo>:ref:refs/heads/main` exactly.
+
+### Sentinel "Unauthorized" / "Access denied" during Security LZ deploy
+
+**Cause:** The OIDC service principal has `Contributor` but Sentinel onboarding
+and data connector operations require `Microsoft Sentinel Contributor`.
+
+**Fix:** Assign the role via the portal or the utility workflow:
+
+```bash
+gh workflow run "assign-role.yml" \
+  -f subscription_secret=PLATFORM_SEC_SUBSCRIPTION_ID \
+  -f role_name="Microsoft Sentinel Contributor" \
+  -f action=assign
+```
+
+Wait 10-15 minutes for RBAC propagation before re-deploying.
+
+### Defender plans "Another update operation is in progress"
+
+**Cause:** Multiple Defender plan resources deploying concurrently hit Azure's
+serial update requirement.
+
+**Fix:** The `defender/main.bicep` module uses `@batchSize(1)` on the pricing
+loop to serialize plan deployments. If you see this error after a cancelled run,
+wait a few minutes for the orphaned operations to complete.
+
+### Deprecated autoProvisioningSettings error
+
+**Cause:** The `Microsoft.Security/autoProvisioningSettings@2017-08-01-preview`
+resource with `autoProvision: 'On'` is deprecated and can no longer be enabled.
+
+**Fix:** This resource has been removed from `defender/main.bicep`. If using a
+custom Defender module, remove any `autoProvisioningSettings` resources.
 
 ### Subscription ID empty in reusable workflow jobs (secret masking)
 

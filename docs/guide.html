@@ -837,16 +837,19 @@
     <a class="nav-item" onclick="showSection('monitor')">
       🔭 Monitoring
     </a>
+    <a class="nav-item" onclick="showSection('estate')">
+      📊 Estate Status
+    </a>
     <a class="nav-item" onclick="showSection('remediate')">
       🔧 Remediation
     </a>
     <a class="nav-item" onclick="showSection('cicd')">
-      🚀 CI/CD Pipelines <span class="nav-badge">6</span>
+      🚀 CI/CD Pipelines <span class="nav-badge">7</span>
     </a>
   </nav>
 
   <div class="sidebar-footer">
-    APEX-Aligned · CAF-Compliant · v2.0
+    APEX-Aligned · CAF-Compliant · v2.1
   </div>
 </aside>
 
@@ -859,7 +862,7 @@
     <div class="topbar-pills">
       <span class="pill pill-green">✓ APEX-Aligned</span>
       <span class="pill pill-blue">CAF 8/8 Areas</span>
-      <span class="pill pill-orange">v2.0</span>
+      <span class="pill pill-orange">v2.1</span>
     </div>
   </div>
 
@@ -2233,24 +2236,88 @@ resource budget <span class="str">'Microsoft.Consumption/budgets@2023-05-01'</sp
 
       <div class="code-block">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="comment"># Start continuous monitoring</span>
-python -m src.agents.orchestrator <span class="flag">--mode</span> monitor
+<span class="comment"># Run compliance scan across all 4 platform subscriptions</span>
+gh workflow run <span class="str">"monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scan_scope=all
 
-<span class="comment"># Run a single compliance scan and exit</span>
-python -c <span class="str">"
-import asyncio
-from src.agents.monitoring_agent import MonitoringAgent
-from src.config.settings import Settings
-from azure.identity import DefaultAzureCredential
-from semantic_kernel import Kernel
+<span class="comment"># Scan a single landing zone</span>
+gh workflow run <span class="str">"monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scan_scope=security
 
-async def main():
-    agent = MonitoringAgent(Kernel(), DefaultAzureCredential(), Settings())
-    result = await agent.run_compliance_scan()
-    print(result['summary'])
+<span class="comment"># View scan results</span>
+gh run view <span class="str">&lt;run-id&gt;</span> <span class="flag">--log</span> 2>/dev/null | grep <span class="str">"compliance_pct"</span></div>
 
-asyncio.run(main())
-"</span></div>
+      <div class="card" style="margin-top:14px;border-left:3px solid var(--ms-blue)">
+        <h3>Scan Output Per Subscription</h3>
+        <p style="margin-top:6px">Each scan job reports: total resources, compliant count, non-compliant count, compliance percentage, and up to 20 detailed violations (resource ID + policy name). Results uploaded as artifacts and summarized in the workflow step summary.</p>
+      </div>
+    </div>
+
+    <!-- ═══ ESTATE STATUS ═══ -->
+    <div id="section-estate" class="section">
+      <div class="section-header">
+        <h2>Estate Status &amp; Platform Deployment</h2>
+        <p>Multi-LZ estate tracking with per-subscription compliance monitoring.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:18px;padding:20px;background:linear-gradient(135deg,#0B1A33 0%,#1B2A4A 100%);color:#fff">
+        <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Platform Landing Zone Deployment Order</h3>
+        <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
+Management ──▶ Connectivity ──▶ Identity ──▶ Security
+ (LAW, AA)      (Hub, Bastion)   (DC, RBAC)   (Sentinel, Defender, KV, SOAR)
+
+Each LZ follows: Resolve → Validate → Plan → Deploy → Verify</pre>
+      </div>
+
+      <div class="section-header" style="margin-top:8px">
+        <h2>Platform LZ Details</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Platform LZ</th><th>Key Resources</th><th>Resource Groups</th><th>Depends On</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Management</strong></td><td>Log Analytics Workspace, Automation Account, Action Groups</td><td><code>{prefix}-management-{region}-rg</code></td><td>—</td></tr>
+            <tr><td><strong>Connectivity</strong></td><td>Hub VNet, Bastion, Private DNS Zones (9), optional Firewall &amp; VPN/ER Gateways</td><td><code>{prefix}-conn-hub-{region}-rg</code>, <code>-gateways-</code>, <code>-dns-</code></td><td>Management</td></tr>
+            <tr><td><strong>Identity</strong></td><td>Domain Controllers, Managed Identities, RBAC assignments</td><td><code>{prefix}-identity-{region}-rg</code></td><td>Connectivity</td></tr>
+            <tr><td><strong>Security</strong></td><td>Microsoft Sentinel, Defender for Cloud (11 plans), Key Vault, 4 SOAR Playbooks</td><td><code>{prefix}-sec-soc-</code>, <code>-posture-</code>, <code>-automation-</code>, <code>-governance-</code></td><td>Identity</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-header" style="margin-top:14px">
+        <h2>Estate State Tracking</h2>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>📊 Estate State</h3>
+          <p style="margin-top:6px"><code>agent-output/00-estate-state.json</code> — Tracks all platform + app LZ statuses, deploy history (run IDs), key resources, and cross-cutting governance state. Updated after every deployment.</p>
+        </div>
+        <div class="card">
+          <h3>📋 Per-LZ Session State</h3>
+          <p style="margin-top:6px"><code>agent-output/{lz-name}/00-session-state.json</code> — Tracks workflow step progress, gate approvals, challenger findings, decisions (IaC tool, complexity, region), and artifact inventory for each individual landing zone.</p>
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-top:14px">
+        <h2>Deploy Commands</h2>
+      </div>
+
+      <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Deploy all platform LZs in cascade order</span>
+gh workflow run <span class="str">"2-platform-deploy.yml"</span> <span class="flag">-f</span> framework=bicep <span class="flag">-f</span> action=deploy \
+  <span class="flag">-f</span> location=southcentralus <span class="flag">-f</span> prefix=mrg
+
+<span class="comment"># Deploy only the security LZ (skip management, connectivity, identity)</span>
+gh workflow run <span class="str">"2-platform-deploy.yml"</span> <span class="flag">-f</span> framework=bicep <span class="flag">-f</span> action=deploy \
+  <span class="flag">-f</span> start_from=security <span class="flag">-f</span> deploy_only=security \
+  <span class="flag">-f</span> location=southcentralus <span class="flag">-f</span> prefix=mrg
+
+<span class="comment"># Assign additional RBAC role (e.g., Sentinel Contributor)</span>
+gh workflow run <span class="str">"assign-role.yml"</span> \
+  <span class="flag">-f</span> subscription_secret=PLATFORM_SEC_SUBSCRIPTION_ID \
+  <span class="flag">-f</span> role_name=<span class="str">"Microsoft Sentinel Contributor"</span> \
+  <span class="flag">-f</span> action=assign</div>
     </div>
 
     <!-- ═══ REMEDIATE ═══ -->
@@ -2306,7 +2373,7 @@ asyncio.run(main())
     <div id="section-cicd" class="section">
       <div class="section-header">
         <h2>CI/CD Pipelines</h2>
-        <p>6 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 Platform + configurable Application Landing Zones. App LZ names, profiles, and subscriptions are defined in <code>environments/subscriptions.json</code> — no workflow YAML changes needed.</p>
+        <p>7 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 Platform + configurable Application Landing Zones. App LZ names, profiles, and subscriptions are defined in <code>environments/subscriptions.json</code> — no workflow YAML changes needed.</p>
       </div>
 
       <div class="tabs">
@@ -2329,9 +2396,10 @@ Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
 Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
 Step 3  1-bootstrap.yml          →  Management groups + subscription placement
 Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
-Step 5  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
-Step 6  monitor.yml               →  Continuous compliance + drift detection (24/7)
-Step 7  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</pre>
+Step 5  assign-role.yml          →  (if needed) Add RBAC roles for Sentinel/Defender
+Step 6  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
+Step 7  monitor.yml              →  Compliance scan across all 4 platform subscriptions
+Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</pre>
           <p style="font-size:11px;color:#aaa;margin:8px 0 0 0">All workflows support self-hosted runners via <code style="color:var(--ms-light-blue)">vars.RUNNER_LABEL</code> — defaults to <code style="color:var(--ms-light-blue)">ubuntu-latest</code> if not set.</p>
         </div>
 
@@ -2342,21 +2410,23 @@ Step 7  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
               <tr><td><strong>1-bootstrap.yml</strong></td><td>Manual (one-time)</td><td>Tenant-wide</td><td>Creates 11 management groups, moves 10 subs, registers 20 providers</td></tr>
               <tr><td><strong>2-platform-deploy.yml</strong></td><td>Manual</td><td>4 platform subs</td><td>Sequential with approval gate per LZ, <code>start_from</code> for resume</td></tr>
               <tr><td><strong>3-app-deploy.yml</strong></td><td>Manual</td><td>Config-driven</td><td>Reads app LZs from <code>subscriptions.json</code>, dynamic matrix, parallel deployment</td></tr>
-              <tr><td><strong>monitor.yml</strong></td><td>Cron + Manual</td><td>All 10 subs</td><td>30-min compliance, hourly drift, daily audit, Teams alerts</td></tr>
+              <tr><td><strong>monitor.yml</strong></td><td>Cron + Manual</td><td>All 4 platform subs</td><td>Parallel compliance scan per subscription using PolicyInsights SDK v2+, per-LZ violation details</td></tr>
               <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
-              <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: validate → plan → deploy → verify → TDD; self-hosted runner via <code>runner_label</code> input</td></tr>
+              <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: resolve → validate → plan → deploy → verify; self-hosted runner via <code>runner_label</code> input</td></tr>
+              <tr><td><strong>assign-role.yml</strong></td><td>Manual (utility)</td><td>Single sub</td><td>Assign/remove RBAC roles (e.g., Sentinel Contributor) to the OIDC service principal</td></tr>
             </tbody>
           </table>
         </div>
 
-        <h3 style="margin-top:18px">Reusable Deploy Pipeline (4 stages)</h3>
+        <h3 style="margin-top:18px">Reusable Deploy Pipeline (5 stages)</h3>
         <div class="table-wrap" style="margin-top:8px">
           <table>
             <thead><tr><th>Stage</th><th>What Happens</th><th>Gate</th></tr></thead>
             <tbody>
+              <tr><td><strong>Resolve</strong></td><td>Resolve subscription ID from secret name, validate Azure access via OIDC</td><td>Fails if secret not found</td></tr>
               <tr><td><strong>Validate</strong></td><td>Profile config, security baseline, cost governance, IaC lint</td><td>Fails pipeline on violation</td></tr>
-              <tr><td><strong>Plan</strong></td><td>Bicep what-if or Terraform plan (saved as artifact)</td><td>Output saved for review</td></tr>
-              <tr><td><strong>Deploy</strong></td><td>GitHub Environment approval gate → apply changes</td><td>Requires reviewer approval</td></tr>
+              <tr><td><strong>Plan</strong></td><td>Bicep what-if or Terraform plan (continue-on-error for resources requiring live state)</td><td>Output saved for review</td></tr>
+              <tr><td><strong>Deploy</strong></td><td>Runs if not cancelled (even if Plan warned) → apply changes with timestamped deployment name</td><td>Requires reviewer approval</td></tr>
               <tr><td><strong>Verify</strong></td><td>Drift baseline capture, compliance scan, generate As-Built TDD, Teams notification</td><td>Fails if compliance &lt; 80%</td></tr>
             </tbody>
           </table>

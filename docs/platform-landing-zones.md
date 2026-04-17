@@ -168,12 +168,15 @@ Dedicated security operations subscription — enforces separation of duties bet
 
 | Resource | Details |
 |---------|---------|
-| Microsoft Sentinel | Dedicated workspace, 730-day retention, 10 data connectors, Fusion ML detection |
-| Microsoft Defender for Cloud | All 12 plans enabled, auto-provisioning, MDE integration |
+| Microsoft Sentinel | Dedicated workspace, 90-day retention (configurable), onboarding + solution, TI connector (requires Sentinel Contributor role) |
+| Microsoft Defender for Cloud | 11 plans enabled (Api plan excluded — requires subPlan), security contacts with alert notifications |
 | SOAR Playbooks (Logic Apps) | Block-SuspiciousIP, Isolate-CompromisedVM, Revoke-EntraIDSession, Enrich-ThreatIntel |
-| Threat Intelligence | Microsoft TI feed + STIX/TAXII (prod), watchlists (HighValueAssets, TrustedIPs, ServiceAccounts) |
 | Security Key Vault | Private endpoint only, purge protection, RBAC-authorized |
 | Automation Account | SecurityBaseline-Check runbook, SecurityPosture-Report (weekly) |
+
+> **Note:** The deprecated `autoProvisioningSettings` resource has been removed.
+> Security contacts use the `2020-01-01-preview` API version. Defender plans deploy
+> with `@batchSize(1)` to avoid concurrent update conflicts.
 
 **Sentinel workspace modes:**
 
@@ -189,7 +192,7 @@ Dedicated security operations subscription — enforces separation of duties bet
 security:
   sentinel:
     workspace_mode: "dedicated"    # dedicated | linked
-    retention_days: 730            # 2-year compliance retention
+    retention_days: 90             # configurable per environment
 ```
 
 **SOAR playbook approval gates:**
