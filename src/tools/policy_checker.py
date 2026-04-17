@@ -32,7 +32,7 @@ class PolicyChecker:
         try:
             summary = self.client.policy_states.summarize_for_subscription(
                 subscription_id=self.settings.azure.subscription_id,
-                policy_states_resource="latest",
+                policy_states_summary_resource="latest",
             )
 
             results = summary.value[0] if summary.value else None
