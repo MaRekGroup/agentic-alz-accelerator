@@ -79,6 +79,7 @@ jobs:
           async def main():
               from azure.identity import DefaultAzureCredential
               from azure.mgmt.policyinsights import PolicyInsightsClient
+              from azure.mgmt.policyinsights.models import QueryOptions
 
               sub_id = os.environ['AZURE_SUBSCRIPTION_ID']
               credential = DefaultAzureCredential()
@@ -114,11 +115,11 @@ jobs:
                   # Get violations detail
                   violations = []
                   try:
+                      qo = QueryOptions(filter=\"complianceState eq 'NonCompliant'\", top=20)
                       states = client.policy_states.list_query_results_for_subscription(
                           subscription_id=sub_id,
                           policy_states_resource='latest',
-                          filter=\"complianceState eq 'NonCompliant'\",
-                          top=20,
+                          query_options=qo,
                       )
                       for s in states:
                           violations.append({
@@ -206,6 +207,7 @@ jobs:
           async def main():
               from azure.identity import DefaultAzureCredential
               from azure.mgmt.policyinsights import PolicyInsightsClient
+              from azure.mgmt.policyinsights.models import QueryOptions
 
               sub_id = os.environ['AZURE_SUBSCRIPTION_ID']
               credential = DefaultAzureCredential()
@@ -239,11 +241,11 @@ jobs:
 
                   violations = []
                   try:
+                      qo = QueryOptions(filter=\"complianceState eq 'NonCompliant'\", top=20)
                       states = client.policy_states.list_query_results_for_subscription(
                           subscription_id=sub_id,
                           policy_states_resource='latest',
-                          filter=\"complianceState eq 'NonCompliant'\",
-                          top=20,
+                          query_options=qo,
                       )
                       for s in states:
                           violations.append({
@@ -330,6 +332,7 @@ jobs:
           async def main():
               from azure.identity import DefaultAzureCredential
               from azure.mgmt.policyinsights import PolicyInsightsClient
+              from azure.mgmt.policyinsights.models import QueryOptions
 
               sub_id = os.environ['AZURE_SUBSCRIPTION_ID']
               credential = DefaultAzureCredential()
@@ -363,11 +366,11 @@ jobs:
 
                   violations = []
                   try:
+                      qo = QueryOptions(filter=\"complianceState eq 'NonCompliant'\", top=20)
                       states = client.policy_states.list_query_results_for_subscription(
                           subscription_id=sub_id,
                           policy_states_resource='latest',
-                          filter=\"complianceState eq 'NonCompliant'\",
-                          top=20,
+                          query_options=qo,
                       )
                       for s in states:
                           violations.append({
@@ -454,6 +457,7 @@ jobs:
           async def main():
               from azure.identity import DefaultAzureCredential
               from azure.mgmt.policyinsights import PolicyInsightsClient
+              from azure.mgmt.policyinsights.models import QueryOptions
 
               sub_id = os.environ['AZURE_SUBSCRIPTION_ID']
               credential = DefaultAzureCredential()
@@ -487,11 +491,11 @@ jobs:
 
                   violations = []
                   try:
+                      qo = QueryOptions(filter=\"complianceState eq 'NonCompliant'\", top=20)
                       states = client.policy_states.list_query_results_for_subscription(
                           subscription_id=sub_id,
                           policy_states_resource='latest',
-                          filter=\"complianceState eq 'NonCompliant'\",
-                          top=20,
+                          query_options=qo,
                       )
                       for s in states:
                           violations.append({
