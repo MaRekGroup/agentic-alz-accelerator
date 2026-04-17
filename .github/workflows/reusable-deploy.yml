@@ -64,6 +64,11 @@ on:
         required: false
         type: string
         default: ''
+      extra_bicep_params:
+        description: 'Extra Bicep parameter overrides (e.g. logAnalyticsWorkspaceId=/subscriptions/.../workspaces/mrg-law)'
+        required: false
+        type: string
+        default: ''
     secrets:
       AZURE_TENANT_ID:
         required: true
@@ -241,11 +246,13 @@ jobs:
             az deployment group what-if \
               --resource-group ${{ inputs.resource_group }} \
               --parameters "$PARAMS_FILE" \
+              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
               --subscription ${{ secrets.SUBSCRIPTION_ID }}
           else
             az deployment sub what-if \
               --location ${{ inputs.location }} \
               --parameters "$PARAMS_FILE" \
+              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
               --subscription ${{ secrets.SUBSCRIPTION_ID }}
           fi
 
@@ -323,12 +330,14 @@ jobs:
             az deployment group create \
               --resource-group ${{ inputs.resource_group }} \
               --parameters "$PARAMS_FILE" \
+              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
               --subscription ${{ secrets.SUBSCRIPTION_ID }} \
               --name "$DEPLOYMENT_NAME"
           else
             az deployment sub create \
               --location ${{ inputs.location }} \
               --parameters "$PARAMS_FILE" \
+              ${{ inputs.extra_bicep_params != '' && format('--parameters {0}', inputs.extra_bicep_params) || '' }} \
               --subscription ${{ secrets.SUBSCRIPTION_ID }} \
               --name "$DEPLOYMENT_NAME"
           fi

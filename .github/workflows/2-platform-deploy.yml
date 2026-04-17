@@ -95,6 +95,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      extra_bicep_params: logAnalyticsWorkspaceId=/subscriptions/${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -148,6 +149,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      extra_bicep_params: managementLogAnalyticsWorkspaceId=/subscriptions/${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
