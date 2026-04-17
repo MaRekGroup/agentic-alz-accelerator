@@ -1,0 +1,43 @@
+{
+  "$schema": "session-state/v2",
+  "description": "Per-landing-zone session state — tracks workflow progress, decisions, and artifacts for a single LZ.",
+  "lz_name": "",
+  "lz_type": "",
+  "prefix": "",
+  "region": "",
+  "iac_tool": "",
+  "environment": "prod",
+  "subscription_id": "",
+  "created": "",
+  "updated": "",
+  "current_step": 1,
+  "complexity": "standard",
+  "steps": {
+    "1": { "name": "requirements", "status": "not_started", "artifact": null },
+    "2": { "name": "architecture", "status": "not_started", "artifact": null },
+    "3": { "name": "design", "status": "not_started", "artifact": null, "optional": true },
+    "3.5": { "name": "governance", "status": "not_started", "artifact": null },
+    "4": { "name": "plan", "status": "not_started", "artifact": null },
+    "5": { "name": "code", "status": "not_started", "artifact": null },
+    "6": { "name": "deploy", "status": "not_started", "artifact": null },
+    "7": { "name": "documentation", "status": "not_started", "artifact": null },
+    "8": { "name": "monitor", "status": "not_started", "continuous": true },
+    "9": { "name": "remediate", "status": "not_started", "triggered_by": "monitor" }
+  },
+  "gates": {
+    "gate-1": { "status": "pending", "challenger_pass": null, "approved_by": null },
+    "gate-2": { "status": "pending", "challenger_pass": null, "approved_by": null },
+    "gate-3": { "status": "pending", "approved_by": null },
+    "gate-4": { "status": "pending", "challenger_pass": null, "approved_by": null },
+    "gate-5": { "status": "pending", "challenger_pass": null, "approved_by": null },
+    "gate-6": { "status": "pending", "approved_by": null }
+  },
+  "decisions": {},
+  "artifacts": [],
+  "deployment": {
+    "run_id": null,
+    "run_url": null,
+    "status": null,
+    "deployed_at": null
+  }
+}

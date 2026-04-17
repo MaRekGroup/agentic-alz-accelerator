@@ -1,0 +1,95 @@
+{
+  "$schema": "estate-state/v1",
+  "description": "Estate-level state — tracks ALL landing zones across the enterprise-scale deployment.",
+  "estate": {
+    "prefix": "mrg",
+    "primary_region": "southcentralus",
+    "iac_tool": "bicep",
+    "management_group_prefix": "alz",
+    "created": "2026-04-16",
+    "updated": "2026-04-17"
+  },
+  "platform_landing_zones": {
+    "management": {
+      "status": "deployed",
+      "subscription_secret": "PLATFORM_MGMT_SUBSCRIPTION_ID",
+      "profile": "platform-management",
+      "resource_group": "mrg-management-scus-rg",
+      "key_resources": {
+        "log_analytics_workspace": "mrg-law",
+        "automation_account": "mrg-automation"
+      },
+      "last_deploy_run": 24577574981,
+      "session_state": "agent-output/platform-management/00-session-state.json"
+    },
+    "connectivity": {
+      "status": "pending",
+      "subscription_secret": "PLATFORM_CONN_SUBSCRIPTION_ID",
+      "profile": "platform-connectivity",
+      "depends_on": ["management"],
+      "session_state": "agent-output/platform-connectivity/00-session-state.json"
+    },
+    "identity": {
+      "status": "deployed",
+      "subscription_secret": "PLATFORM_IDTY_SUBSCRIPTION_ID",
+      "profile": "platform-identity",
+      "resource_group": "mrg-identity-scus-rg",
+      "depends_on": ["connectivity"],
+      "last_deploy_run": 24576179090,
+      "session_state": "agent-output/platform-identity/00-session-state.json"
+    },
+    "security": {
+      "status": "pending",
+      "subscription_secret": "PLATFORM_SEC_SUBSCRIPTION_ID",
+      "profile": "platform-security",
+      "depends_on": ["identity"],
+      "session_state": "agent-output/platform-security/00-session-state.json"
+    }
+  },
+  "application_landing_zones": {},
+  "cross_cutting": {
+    "management_group_hierarchy": {
+      "status": "not_started",
+      "design": "CAF enterprise-scale"
+    },
+    "policy_assignments": {
+      "status": "not_started",
+      "framework": "CAF baseline"
+    },
+    "rbac": {
+      "status": "not_started"
+    },
+    "budgets": {
+      "status": "deployed",
+      "per_subscription": true
+    }
+  },
+  "day2_operations": {
+    "monitoring": {
+      "status": "active",
+      "workflow": ".github/workflows/4-monitor.yml",
+      "compliance_scan": "verify step in reusable-deploy.yml",
+      "last_scan": null
+    },
+    "remediation": {
+      "status": "standby",
+      "auto_remediate_severity": ["critical", "high"]
+    }
+  },
+  "deploy_history": [
+    {
+      "run_id": 24577574981,
+      "lz": "platform-management",
+      "action": "deploy",
+      "status": "success",
+      "timestamp": "2026-04-17T17:14:00Z"
+    },
+    {
+      "run_id": 24576179090,
+      "lz": "platform-identity",
+      "action": "deploy",
+      "status": "success",
+      "timestamp": "2026-04-17T16:34:00Z"
+    }
+  ]
+}

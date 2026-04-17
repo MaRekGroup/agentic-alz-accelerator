@@ -1,21 +1,46 @@
 {
-  "$schema": "agent-registry-v1",
-  "description": "Machine-readable mapping of agents to their definitions, skills, and configuration.",
+  "$schema": "agent-registry-v2",
+  "description": "Agent registry for the Agentic ALZ Accelerator — enterprise-scale landing zone lifecycle.",
+  "scope_types": {
+    "estate": "Operates across all landing zones (monitoring, governance, orchestration)",
+    "per-lz": "Scoped to a single landing zone instance (platform or application)"
+  },
+  "delegation_rules": {
+    "interactive": "Use handoff — agent needs user interaction (askQuestions)",
+    "autonomous": "Use runSubagent — agent runs to completion without user input"
+  },
+  "landing_zone_types": {
+    "platform": {
+      "description": "CAF enterprise-scale platform subscriptions",
+      "members": ["platform-management", "platform-connectivity", "platform-identity", "platform-security"],
+      "deploy_order": ["management", "connectivity", "identity", "security"],
+      "workflow": ".github/workflows/2-platform-deploy.yml"
+    },
+    "application": {
+      "description": "Workload landing zones stamped on top of the platform",
+      "members": [],
+      "workflow": ".github/workflows/3-app-deploy.yml"
+    }
+  },
   "agents": {
     "orchestrator": {
       "agent": ".github/agents/orchestrator.md",
       "codename": "Conductor",
       "emoji": "🧠",
       "step": null,
+      "scope": "estate",
+      "delegation": "interactive",
       "skills": ["workflow-engine", "session-resume", "github-operations"],
       "invokable": true,
-      "description": "Master orchestrator — routes workflow steps, enforces approval gates, maintains session state"
+      "description": "Master orchestrator — routes workflow steps, enforces approval gates, manages estate state"
     },
     "requirements": {
       "agent": ".github/agents/requirements.md",
       "codename": "Scribe",
       "emoji": "📜",
       "step": 1,
+      "scope": "per-lz",
+      "delegation": "interactive",
       "skills": ["caf-design-areas", "azure-defaults"],
       "invokable": true,
       "description": "Captures landing zone requirements through conversation"
@@ -25,6 +50,8 @@
       "codename": "Oracle",
       "emoji": "🏛️",
       "step": 2,
+      "scope": "per-lz",
+      "delegation": "autonomous",
       "skills": ["caf-design-areas", "cost-governance", "azure-defaults", "azure-cost-optimization"],
       "invokable": false,
       "description": "WAF assessment, CAF design area mapping, cost estimation"
@@ -34,8 +61,11 @@
       "codename": "Artisan",
       "emoji": "🎨",
       "step": 3,
+      "scope": "per-lz",
+      "delegation": "autonomous",
       "skills": ["drawio", "python-diagrams"],
       "invokable": false,
+      "optional": true,
       "description": "Architecture diagrams and ADRs"
     },
     "governance": {
@@ -43,15 +73,19 @@
       "codename": "Warden",
       "emoji": "🛡️",
       "step": 3.5,
+      "scope": "estate",
+      "delegation": "autonomous",
       "skills": ["security-baseline", "caf-design-areas", "azure-compliance", "azure-rbac"],
       "invokable": true,
-      "description": "Policy discovery, compliance constraints, security baseline"
+      "description": "Policy discovery, compliance constraints, security baseline across the estate"
     },
     "iac-planner": {
       "agent": null,
       "codename": "Strategist",
       "emoji": "📐",
       "step": 4,
+      "scope": "per-lz",
+      "delegation": "interactive",
       "skills": ["profile-management", "iac-common", "azure-defaults"],
       "invokable": false,
       "description": "Implementation planning with AVM module selection"
@@ -61,6 +95,8 @@
       "codename": "Forge",
       "emoji": "⚒️",
       "step": 5,
+      "scope": "per-lz",
+      "delegation": "autonomous",
       "skills": ["azure-bicep-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
       "invokable": false,
       "description": "Bicep template generation (AVM-first)"
@@ -70,6 +106,8 @@
       "codename": "Forge",
       "emoji": "⚒️",
       "step": 5,
+      "scope": "per-lz",
+      "delegation": "autonomous",
       "skills": ["terraform-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
       "invokable": false,
       "description": "Terraform configuration generation (AVM-TF)"
@@ -79,37 +117,59 @@
       "codename": "Envoy",
       "emoji": "🚀",
       "step": 6,
+      "scope": "per-lz",
+      "delegation": "autonomous",
       "skills": ["profile-management", "github-operations"],
       "invokable": true,
-      "description": "Deployment with what-if/plan preview"
+      "description": "Deployment with what-if/plan preview via GitHub Actions"
+    },
+    "documentation": {
+      "agent": null,
+      "codename": "Chronicler",
+      "emoji": "📚",
+      "step": 7,
+      "scope": "per-lz",
+      "delegation": "autonomous",
+      "skills": ["azure-diagnostics"],
+      "invokable": false,
+      "description": "Post-deployment documentation suite (TDD, runbook, inventory)"
     },
     "monitoring": {
       "agent": ".github/agents/monitoring.md",
       "codename": "Sentinel",
       "emoji": "🔭",
       "step": 8,
+      "scope": "estate",
+      "delegation": "autonomous",
+      "continuous": true,
       "skills": ["security-baseline", "cost-governance", "azure-diagnostics", "azure-compliance"],
       "invokable": true,
-      "description": "Continuous compliance monitoring, drift detection, security posture"
+      "description": "Continuous compliance monitoring, drift detection across ALL landing zones"
     },
     "remediation": {
       "agent": ".github/agents/remediation.md",
       "codename": "Mender",
       "emoji": "🔧",
       "step": 9,
+      "scope": "estate",
+      "delegation": "autonomous",
+      "triggered_by": "monitoring",
       "skills": ["security-baseline", "azure-diagnostics", "azure-rbac"],
       "invokable": true,
-      "description": "Auto-remediation with snapshot/rollback, policy violation repair"
+      "description": "Auto-remediation with snapshot/rollback across ALL landing zones"
     },
     "challenger": {
       "agent": ".github/agents/challenger.md",
       "codename": "Challenger",
       "emoji": "⚔️",
       "step": null,
+      "scope": "per-lz",
+      "delegation": "autonomous",
+      "gates": ["gate-1", "gate-2", "gate-4", "gate-5"],
       "skills": ["security-baseline", "cost-governance", "caf-design-areas", "azure-compliance"],
       "invokable": true,
       "description": "Adversarial reviewer — challenges architecture, plans, code, and security"
     }
   },
-  "updated": "2026-04-16"
+  "updated": "2026-04-17"
 }
