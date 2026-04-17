@@ -23,7 +23,7 @@ class PolicyChecker:
     def __init__(self, credential: DefaultAzureCredential, settings: Settings):
         self.credential = credential
         self.settings = settings
-        self.client = PolicyInsightsClient(credential)
+        self.client = PolicyInsightsClient(credential, settings.azure.subscription_id)
 
     async def get_compliance_state(self, scope: str) -> dict:
         """Get overall compliance state for a scope."""

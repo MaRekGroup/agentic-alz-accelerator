@@ -32,6 +32,16 @@ on:
           - connectivity   # Skip management
           - identity       # Skip management + connectivity
           - security       # Deploy security only
+      deploy_only:
+        description: 'Deploy ONLY this LZ (no cascade). Leave blank to cascade from start_from.'
+        required: false
+        type: choice
+        options:
+          - ''               # Cascade (default)
+          - management
+          - connectivity
+          - identity
+          - security
       location:
         description: 'Primary Azure region'
         required: true
@@ -59,7 +69,9 @@ jobs:
   # =========================================================================
   platform-management:
     name: "1 · Platform Management"
-    if: inputs.start_from == 'management'
+    if: |
+      (inputs.deploy_only == '' && inputs.start_from == 'management') ||
+      inputs.deploy_only == 'management'
     uses: ./.github/workflows/reusable-deploy.yml
     with:
       profile: platform-management
@@ -86,7 +98,10 @@ jobs:
     needs: platform-management
     if: |
       always() &&
-      (inputs.start_from == 'management' || inputs.start_from == 'connectivity') &&
+      (
+        (inputs.deploy_only == '' && (inputs.start_from == 'management' || inputs.start_from == 'connectivity')) ||
+        inputs.deploy_only == 'connectivity'
+      ) &&
       (needs.platform-management.result == 'success' || needs.platform-management.result == 'skipped')
     uses: ./.github/workflows/reusable-deploy.yml
     with:
@@ -115,7 +130,10 @@ jobs:
     needs: platform-connectivity
     if: |
       always() &&
-      (inputs.start_from != 'security') &&
+      (
+        (inputs.deploy_only == '' && inputs.start_from != 'security') ||
+        inputs.deploy_only == 'identity'
+      ) &&
       (needs.platform-connectivity.result == 'success' || needs.platform-connectivity.result == 'skipped')
     uses: ./.github/workflows/reusable-deploy.yml
     with:
@@ -143,6 +161,10 @@ jobs:
     needs: platform-identity
     if: |
       always() &&
+      (
+        (inputs.deploy_only == '') ||
+        inputs.deploy_only == 'security'
+      ) &&
       (needs.platform-identity.result == 'success' || needs.platform-identity.result == 'skipped')
     uses: ./.github/workflows/reusable-deploy.yml
     with:
