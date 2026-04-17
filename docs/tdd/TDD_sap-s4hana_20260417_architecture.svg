@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 660"
+     width="840" height="660"
+     font-family="Segoe UI, -apple-system, sans-serif">
+  <defs>
+    <style>
+      .group-box { fill: AzureColor.LIGHT_GRAY; stroke: #D0D0D0; stroke-width: 1.5; rx: 8; }
+      .group-label { font-size: 13px; font-weight: 600; fill: AzureColor.DARK_BLUE; }
+      .node-label { font-size: 11px; fill: #333; text-anchor: middle; }
+      .node-sublabel { font-size: 9px; fill: #777; text-anchor: middle; }
+      .edge { stroke: #999; stroke-width: 1.2; fill: none; }
+      .edge-dashed { stroke-dasharray: 6 3; }
+      .edge-label { font-size: 9px; fill: #666; text-anchor: middle; }
+      .title { font-size: 18px; font-weight: 700; fill: #0078D4; }
+      .subtitle { font-size: 12px; fill: #555; }
+      .icon-bg { rx: 6; ry: 6; }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#999"/>
+    </marker>
+  </defs>
+  <text x="20" y="30" class="title">Application Landing Zone: Sap S4Hana — As-Built</text>
+  <text x="20" y="48" class="subtitle">alz-lz-sap  ·  southcentralus  ·  Profile: sap</text>
+  <!-- Group: Subscription: alz-lz-sap -->
+    <rect x="10" y="70" width="780" height="460"
+          rx="8" fill="AzureColor.BLUE" fill-opacity="0.06"
+          stroke="AzureColor.BLUE" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(18,76) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm0 3.2L25 9.6v12.8L16 26.8 7 22.4V9.6L16 5.2z" fill="AzureColor.BLUE"/>
+    </g>
+    <text x="46" y="90" class="group-label" fill="AzureColor.BLUE">Subscription: alz-lz-sap</text>
+  <!-- Group: SAP VNet (10.5.0.0/16) -->
+    <rect x="30" y="110" width="740" height="200"
+          rx="8" fill="AzureColor.GREEN" fill-opacity="0.06"
+          stroke="AzureColor.GREEN" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,116) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.GREEN" opacity="0.12"/>
+      <path d="M16 2C8.27 2 2 8.27 2 16s6.27 14 14 14 14-6.27 14-14S23.73 2 16 2zm0 26C9.37 28 4 22.63 4 16S9.37 4 16 4s12 5.37 12 12-5.37 12-12 12zm-2-18h4v4h4v4h-4v4h-4v-4H10v-4h4V10z" fill="AzureColor.GREEN"/>
+    </g>
+    <text x="66" y="130" class="group-label" fill="AzureColor.GREEN">SAP VNet (10.5.0.0/16)</text>
+  <!-- Group: SAP Compute &amp; Storage -->
+    <rect x="30" y="330" width="740" height="170"
+          rx="8" fill="#0FAAFF" fill-opacity="0.06"
+          stroke="#0FAAFF" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,336) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="#0FAAFF" opacity="0.12"/>
+      <path d="M4 6h24v20H4V6zm8 4v12h2V10h-2zm4 2v10h2V12h-2zm4-4v14h2V8h-2z" fill="#0FAAFF"/>
+    </g>
+    <text x="66" y="350" class="group-label" fill="#0FAAFF">SAP Compute &amp; Storage</text>
+  <!-- SAP App Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="145" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(92.0,153) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="110.0" y="201" class="node-label">SAP App Subnet</text>
+      <text x="110.0" y="215" class="node-sublabel">/24 · Accel Net</text>
+    </g>
+  <!-- HANA DB Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="190" y="145" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(232.0,153) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="250.0" y="201" class="node-label">HANA DB Subnet</text>
+      <text x="250.0" y="215" class="node-sublabel">/24 · Accel Net</text>
+    </g>
+  <!-- ANF Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="330" y="145" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(372.0,153) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="390.0" y="201" class="node-label">ANF Subnet</text>
+      <text x="390.0" y="215" class="node-sublabel">/26 · Delegated</text>
+    </g>
+  <!-- Web Dispatcher -->
+    <g filter="url(#shadow)">
+      <rect x="470" y="145" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(512.0,153) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="530.0" y="201" class="node-label">Web Dispatcher</text>
+      <text x="530.0" y="215" class="node-sublabel">/26</text>
+    </g>
+  <!-- Management -->
+    <g filter="url(#shadow)">
+      <rect x="610" y="145" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(652.0,153) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="670.0" y="201" class="node-label">Management</text>
+      <text x="670.0" y="215" class="node-sublabel">/26</text>
+    </g>
+  <!-- Proximity Group -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="365" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(92.0,373) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0FAAFF" opacity="0.12"/>
+      <path d="M4 6h24v20H4V6zm8 4v12h2V10h-2zm4 2v10h2V12h-2zm4-4v14h2V8h-2z" fill="#0FAAFF"/>
+    </g>
+      <text x="110.0" y="421" class="node-label">Proximity Group</text>
+      <text x="110.0" y="435" class="node-sublabel">Low latency</text>
+    </g>
+  <!-- NetApp Files -->
+    <g filter="url(#shadow)">
+      <rect x="190" y="365" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(232.0,373) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm3 3h14v2H9zm0 4h10v2H9z" fill="AzureColor.BLUE"/>
+    </g>
+      <text x="250.0" y="421" class="node-label">NetApp Files</text>
+      <text x="250.0" y="435" class="node-sublabel">Ultra tier</text>
+    </g>
+  <!-- Key Vault -->
+    <g filter="url(#shadow)">
+      <rect x="330" y="365" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(372.0,373) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.PURPLE" opacity="0.12"/>
+      <path d="M16 2a6 6 0 00-6 6c0 2.22 1.21 4.16 3 5.2V28h6V13.2c1.79-1.04 3-2.98 3-5.2a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z" fill="AzureColor.PURPLE"/>
+    </g>
+      <text x="390.0" y="421" class="node-label">Key Vault</text>
+      <text x="390.0" y="435" class="node-sublabel">SAP creds</text>
+    </g>
+  <!-- Diagnostics -->
+    <g filter="url(#shadow)">
+      <rect x="470" y="365" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(512.0,373) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.ORANGE" opacity="0.12"/>
+      <path d="M4 4h24v24H4V4zm2 2v20h20V6H6zm4 14l4-6 3 4 5-8v12H10v-2z" fill="AzureColor.ORANGE"/>
+    </g>
+      <text x="530.0" y="421" class="node-label">Diagnostics</text>
+      <text x="530.0" y="435" class="node-sublabel">→ Central LAW</text>
+    </g>
+  <!-- ExpressRoute -->
+    <g filter="url(#shadow)">
+      <rect x="610" y="365" width="120" height="75"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(652.0,373) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.GREEN" opacity="0.12"/>
+      <path d="M2 16h6l3-6 4 12 4-12 3 6h6" fill="AzureColor.GREEN"/>
+    </g>
+      <text x="670.0" y="421" class="node-label">ExpressRoute</text>
+      <text x="670.0" y="435" class="node-sublabel">To on-prem</text>
+    </g>
+    <path d="M110.0,220 C110.0,182.5 250.0,182.5 250.0,145"
+          stroke="AzureColor.GREEN" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="180.0" y="176.5" class="edge-label">private</text>    <path d="M250.0,220 C250.0,182.5 390.0,182.5 390.0,145"
+          stroke="AzureColor.GREEN" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="320.0" y="176.5" class="edge-label">NFS mount</text>    <path d="M110.0,440 C110.0,402.5 250.0,402.5 250.0,365"
+          stroke="#0FAAFF" stroke-width="1.2" fill="none" class="edge-dashed"
+          marker-end="url(#arrow)"/>
+    <text x="180.0" y="396.5" class="edge-label">co-located</text></svg>

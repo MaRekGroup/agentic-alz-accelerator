@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 660"
+     width="840" height="660"
+     font-family="Segoe UI, -apple-system, sans-serif">
+  <defs>
+    <style>
+      .group-box { fill: AzureColor.LIGHT_GRAY; stroke: #D0D0D0; stroke-width: 1.5; rx: 8; }
+      .group-label { font-size: 13px; font-weight: 600; fill: AzureColor.DARK_BLUE; }
+      .node-label { font-size: 11px; fill: #333; text-anchor: middle; }
+      .node-sublabel { font-size: 9px; fill: #777; text-anchor: middle; }
+      .edge { stroke: #999; stroke-width: 1.2; fill: none; }
+      .edge-dashed { stroke-dasharray: 6 3; }
+      .edge-label { font-size: 9px; fill: #666; text-anchor: middle; }
+      .title { font-size: 18px; font-weight: 700; fill: #0078D4; }
+      .subtitle { font-size: 12px; fill: #555; }
+      .icon-bg { rx: 6; ry: 6; }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#999"/>
+    </marker>
+  </defs>
+  <text x="20" y="30" class="title">Application Landing Zone: Api Gateway — As-Built</text>
+  <text x="20" y="48" class="subtitle">alz-lz-online-api  ·  southcentralus  ·  Profile: online</text>
+  <!-- Group: Subscription: alz-lz-online-api -->
+    <rect x="10" y="70" width="780" height="430"
+          rx="8" fill="AzureColor.BLUE" fill-opacity="0.06"
+          stroke="AzureColor.BLUE" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(18,76) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm0 3.2L25 9.6v12.8L16 26.8 7 22.4V9.6L16 5.2z" fill="AzureColor.BLUE"/>
+    </g>
+    <text x="46" y="90" class="group-label" fill="AzureColor.BLUE">Subscription: alz-lz-online-api</text>
+  <!-- Group: Edge Protection -->
+    <rect x="30" y="110" width="740" height="130"
+          rx="8" fill="AzureColor.RED" fill-opacity="0.06"
+          stroke="AzureColor.RED" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,116) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.RED" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm0 6a2 2 0 110 4 2 2 0 010-4zm-1 6h2v8h-2v-8z" fill="AzureColor.RED"/>
+    </g>
+    <text x="66" y="130" class="group-label" fill="AzureColor.RED">Edge Protection</text>
+  <!-- Group: Online VNet (10.1.0.0/16) -->
+    <rect x="30" y="260" width="740" height="110"
+          rx="8" fill="AzureColor.GREEN" fill-opacity="0.06"
+          stroke="AzureColor.GREEN" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,266) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.GREEN" opacity="0.12"/>
+      <path d="M16 2C8.27 2 2 8.27 2 16s6.27 14 14 14 14-6.27 14-14S23.73 2 16 2zm0 26C9.37 28 4 22.63 4 16S9.37 4 16 4s12 5.37 12 12-5.37 12-12 12zm-2-18h4v4h4v4h-4v4h-4v-4H10v-4h4V10z" fill="AzureColor.GREEN"/>
+    </g>
+    <text x="66" y="280" class="group-label" fill="AzureColor.GREEN">Online VNet (10.1.0.0/16)</text>
+  <!-- Group: Governance &amp; Observability -->
+    <rect x="30" y="390" width="740" height="90"
+          rx="8" fill="AzureColor.TEAL" fill-opacity="0.06"
+          stroke="AzureColor.TEAL" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,396) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.TEAL" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm0 4l8 3.4v6.6c0 5.34-3.42 10.33-8 11.8-4.58-1.47-8-6.46-8-11.8V9.4L16 6z" fill="AzureColor.TEAL"/>
+    </g>
+    <text x="66" y="410" class="group-label" fill="AzureColor.TEAL">Governance &amp; Observability</text>
+  <!-- WAF Policy -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="135" width="120" height="80"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(92.0,143) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.RED" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm0 6a2 2 0 110 4 2 2 0 010-4zm-1 6h2v8h-2v-8z" fill="AzureColor.RED"/>
+    </g>
+      <text x="110.0" y="191" class="node-label">WAF Policy</text>
+      <text x="110.0" y="205" class="node-sublabel">OWASP 3.2</text>
+    </g>
+  <!-- DDoS Standard -->
+    <g filter="url(#shadow)">
+      <rect x="200" y="135" width="120" height="80"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(242.0,143) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.RED" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm0 4l8 3.4v6.6c0 5.34-3.42 10.33-8 11.8V6z" fill="AzureColor.RED"/>
+    </g>
+      <text x="260.0" y="191" class="node-label">DDoS Standard</text>
+      <text x="260.0" y="205" class="node-sublabel">Auto-mitigate</text>
+    </g>
+  <!-- Front Door -->
+    <g filter="url(#shadow)">
+      <rect x="350" y="135" width="120" height="80"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(392.0,143) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm-3 10l6 4-6 4v-8z" fill="AzureColor.BLUE"/>
+    </g>
+      <text x="410.0" y="191" class="node-label">Front Door</text>
+      <text x="410.0" y="205" class="node-sublabel">CDN + WAF</text>
+    </g>
+  <!-- Web Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="285" width="120" height="65"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(92.0,293) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="110.0" y="341" class="node-label">Web Subnet</text>
+      <text x="110.0" y="355" class="node-sublabel">/24</text>
+    </g>
+  <!-- App Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="200" y="285" width="120" height="65"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(242.0,293) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="260.0" y="341" class="node-label">App Subnet</text>
+      <text x="260.0" y="355" class="node-sublabel">/24</text>
+    </g>
+  <!-- Data Subnet -->
+    <g filter="url(#shadow)">
+      <rect x="350" y="285" width="120" height="65"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(392.0,293) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0063B1" opacity="0.12"/>
+      <path d="M4 8h24v16H4V8zm2 2v12h20V10H6zm4 3h12v2H10zm0 4h8v2H10z" fill="#0063B1"/>
+    </g>
+      <text x="410.0" y="341" class="node-label">Data Subnet</text>
+      <text x="410.0" y="355" class="node-sublabel">/24</text>
+    </g>
+  <!-- Azure Policy -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="405" width="120" height="60"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(92.0,413) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.TEAL" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm0 4l8 3.4v6.6c0 5.34-3.42 10.33-8 11.8-4.58-1.47-8-6.46-8-11.8V9.4L16 6z" fill="AzureColor.TEAL"/>
+    </g>
+      <text x="110.0" y="461" class="node-label">Azure Policy</text>
+      <text x="110.0" y="475" class="node-sublabel">Online baseline</text>
+    </g>
+  <!-- Defender -->
+    <g filter="url(#shadow)">
+      <rect x="200" y="405" width="120" height="60"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(242.0,413) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.PURPLE" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm-2 20l-5-5 1.41-1.41L14 19.17l7.59-7.59L23 13l-9 9z" fill="AzureColor.PURPLE"/>
+    </g>
+      <text x="260.0" y="461" class="node-label">Defender</text>
+      <text x="260.0" y="475" class="node-sublabel">5 plans</text>
+    </g>
+  <!-- Diagnostics -->
+    <g filter="url(#shadow)">
+      <rect x="350" y="405" width="120" height="60"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(392.0,413) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.ORANGE" opacity="0.12"/>
+      <path d="M4 4h24v24H4V4zm2 2v20h20V6H6zm4 14l4-6 3 4 5-8v12H10v-2z" fill="AzureColor.ORANGE"/>
+    </g>
+      <text x="410.0" y="461" class="node-label">Diagnostics</text>
+      <text x="410.0" y="475" class="node-sublabel">→ Central LAW</text>
+    </g>
+    <path d="M110.0,215 C110.0,175.0 410.0,175.0 410.0,135"
+          stroke="AzureColor.RED" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="260.0" y="169.0" class="edge-label">protects</text>    <path d="M410.0,215 C410.0,250.0 110.0,250.0 110.0,285"
+          stroke="AzureColor.GREEN" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="260.0" y="244.0" class="edge-label">routes</text></svg>

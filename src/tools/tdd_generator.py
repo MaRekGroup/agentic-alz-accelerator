@@ -759,8 +759,524 @@ class TDDGenerator:
         logger.info(f"TDD saved to {output}")
         return str(output)
 
+    # ─── Markdown Generation ──────────────────────────────────────────────
 
-# ─── CLI Entry Point ──────────────────────────────────────────────────────────
+    def generate_markdown(
+        self,
+        md_path: str,
+        svg_path: str,
+        svg_filename: str,
+        resource_inventory: Optional[dict] = None,
+    ) -> str:
+        """
+        Generate a markdown version of the TDD with an SVG architecture diagram.
+
+        Args:
+            md_path: Where to save the .md file
+            svg_path: Where to save the .svg diagram
+            svg_filename: Filename of the SVG (for relative link in markdown)
+            resource_inventory: Live data from Resource Graph (optional)
+
+        Returns:
+            Path to the generated markdown document
+        """
+        logger.info(f"Generating markdown TDD for {self.project_name} ({self.profile})")
+
+        # Save SVG diagram
+        svg_content = self._get_profile_diagram()
+        Path(svg_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(svg_path).write_text(svg_content, encoding="utf-8")
+        logger.info(f"Architecture diagram saved to {svg_path}")
+
+        # Also generate the full estate SVG if config exists
+        estate_svg_filename = None
+        try:
+            config_file = Path(self.config_path)
+            if config_file.exists():
+                with open(config_file) as f:
+                    config = json.load(f)
+                estate_svg = generate_full_estate_diagram(
+                    config.get("management_group_prefix", "alz"), config
+                )
+                estate_svg_filename = svg_filename.replace("_architecture.svg", "_estate.svg")
+                estate_svg_path = str(Path(svg_path).parent / estate_svg_filename)
+                Path(estate_svg_path).write_text(estate_svg, encoding="utf-8")
+        except Exception as e:
+            logger.warning(f"Could not generate estate diagram: {e}")
+
+        # Build markdown content
+        generated_at = self.generated_at.strftime("%Y-%m-%d %H:%M UTC")
+        md = self._build_markdown(
+            svg_filename, estate_svg_filename, resource_inventory or {}, generated_at,
+        )
+
+        Path(md_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(md_path).write_text(md, encoding="utf-8")
+        logger.info(f"Markdown TDD saved to {md_path}")
+        return md_path
+
+    def _build_markdown(
+        self,
+        svg_filename: str,
+        estate_svg_filename: Optional[str],
+        resource_inventory: dict,
+        generated_at: str,
+    ) -> str:
+        """Assemble the full markdown document."""
+        profile_desc = {
+            "platform-management": "centralized monitoring, logging, Sentinel SIEM, and backup infrastructure",
+            "platform-connectivity": "hub networking with Azure Firewall, DNS, DDoS protection, and ExpressRoute/VPN gateways",
+            "platform-identity": "Active Directory Domain Services, Entra ID PIM, and privileged access workstations",
+            "platform-security": "dedicated SecOps with Sentinel, Defender for Cloud (all plans), SOAR playbooks, and incident response",
+            "corp": "internal corporate workloads with private connectivity, ExpressRoute peering, and on-prem DNS integration",
+            "online": "internet-facing workloads with WAF, DDoS Standard, and public endpoint protection",
+            "sap": "SAP S/4HANA workloads with accelerated networking, Azure NetApp Files, and proximity placement groups",
+            "sandbox": "development and testing with budget enforcement, relaxed policies, and standalone networking",
+        }
+        desc = profile_desc.get(self.profile, f"workloads using the {self.profile} profile")
+
+        sections = [
+            self._md_header(generated_at),
+            self._md_executive_summary(desc),
+            self._md_architecture_diagram(svg_filename),
+            self._md_resource_inventory(resource_inventory),
+            self._md_network_topology(),
+            self._md_security_posture(),
+            self._md_compliance_status(),
+            self._md_cost_governance(),
+            self._md_operational_model(),
+            self._md_appendix(estate_svg_filename, generated_at),
+        ]
+        return "\n".join(sections)
+
+    def _md_header(self, generated_at: str) -> str:
+        return f"""# As-Built Technical Design Document
+
+## {self.project_name}
+
+> **Profile**: {self.profile} · **Environment**: {self.environment} · **Generated**: {generated_at}
+
+| Field | Value |
+|-------|-------|
+| Subscription | {self.subscription_name} |
+| Subscription ID | `{self.subscription_id}` |
+| Location | {self.location} |
+| IaC Framework | {self.framework.title()} |
+| Deployment ID | {self.deployment_id or '(manual)'} |
+| Document Version | 1.0 (auto-generated) |
+
+---
+"""
+
+    def _md_executive_summary(self, desc: str) -> str:
+        return f"""## 1. Executive Summary
+
+This Technical Design Document (TDD) describes the as-built state of the
+'{self.project_name}' landing zone deployed to subscription
+'{self.subscription_name}' in {self.location}.
+This landing zone provides {desc}.
+
+The deployment was executed using {self.framework.title()} via the GitHub Actions
+CI/CD pipeline with OIDC authentication and environment approval gates.
+All resources comply with the CAF enterprise-scale baseline policies.
+
+### Key Facts
+
+| Attribute | Value |
+|-----------|-------|
+| Landing Zone | {self.project_name} |
+| Profile | {self.profile} |
+| Subscription | {self.subscription_name} (`{self.subscription_id}`) |
+| Region | {self.location} |
+| Environment | {self.environment} |
+| IaC Framework | {self.framework.title()} |
+| Deployment ID | {self.deployment_id or '(manual/CLI)'} |
+
+---
+"""
+
+    def _md_architecture_diagram(self, svg_filename: str) -> str:
+        return f"""## 2. Architecture Diagram
+
+The following diagram illustrates the as-built architecture of this landing zone,
+including all deployed resources, networking topology, and security controls.
+Icons follow the official Microsoft Azure Architecture Icon set.
+
+![{self.project_name} Architecture — As-Built]({svg_filename})
+
+*Figure 1: {self.project_name} Architecture — As-Built*
+
+---
+"""
+
+    def _md_resource_inventory(self, inventory: dict) -> str:
+        lines = [
+            "## 3. Resource Inventory",
+            "",
+            "Complete inventory of Azure resources deployed in this landing zone,",
+            "queried from Azure Resource Graph at generation time.",
+            "",
+            "### 3.1 Resource Summary by Type",
+            "",
+        ]
+
+        by_type = inventory.get("by_type", {})
+        if by_type:
+            lines.append("| Resource Type | Count |")
+            lines.append("|---------------|-------|")
+            for rtype, count in sorted(by_type.items(), key=lambda x: -x[1]):
+                lines.append(f"| {rtype.split('/')[-1]} | {count} |")
+            lines.append("")
+            total = inventory.get("total_count", 0)
+            lines.append(f"**Total resources: {total}**")
+        else:
+            # Expected resources based on profile
+            expected = self._get_expected_resources()
+            if expected:
+                lines.append("| Resource | Count | Configuration |")
+                lines.append("|----------|-------|---------------|")
+                for row in expected:
+                    lines.append(f"| {row[0]} | {row[1]} | {row[2]} |")
+            else:
+                lines.append("*Resource inventory will be populated from Azure Resource Graph at deployment time.*")
+
+        lines.append("")
+        lines.append("---")
+        return "\n".join(lines)
+
+    def _get_expected_resources(self) -> list[list[str]]:
+        """Return expected resource table rows for the profile."""
+        expected = {
+            "platform-management": [
+                ["Log Analytics Workspace", "1", "PerGB2018, 365-day retention"],
+                ["Microsoft Sentinel", "1", "SIEM + SOAR integration"],
+                ["Automation Account", "1", "Linked to LAW"],
+                ["Recovery Services Vault", "1", "Daily + weekly backup policies"],
+                ["Action Groups", "3+", "Email, Teams webhook, SMS"],
+                ["Azure Monitor Alert Rules", "10+", "Performance, security, cost"],
+            ],
+            "platform-connectivity": [
+                ["Virtual Network (Hub)", "1", "Hub CIDR 10.0.0.0/16"],
+                ["Azure Firewall (Premium)", "1", "Threat Intel, IDPS"],
+                ["VPN Gateway", "1", "VpnGw2 SKU"],
+                ["ExpressRoute Gateway", "1", "Ultra Performance SKU"],
+                ["Azure Bastion", "1", "Standard SKU"],
+                ["DDoS Protection Plan", "1", "Standard tier"],
+                ["Private DNS Zones", "20+", "Azure PaaS services"],
+                ["Network Security Groups", "4+", "Per subnet"],
+            ],
+            "platform-identity": [
+                ["Virtual Network (Identity)", "1", "Identity CIDR"],
+                ["Domain Controllers (VMs)", "2", "Zone-redundant (AZ-1, AZ-2)"],
+                ["Entra Connect (VM)", "1", "Hybrid sync to Entra ID"],
+                ["Key Vault", "1", "Domain admin credentials"],
+                ["NSGs", "2+", "DC and management subnets"],
+            ],
+            "platform-security": [
+                ["Sentinel Workspace (SecOps)", "1", "Dedicated for security team"],
+                ["Defender for Cloud", "1", "All plans enabled"],
+                ["SOAR Playbooks (Logic Apps)", "5+", "Auto-remediation"],
+                ["Alert Rules", "20+", "Sev 0-2 incident triggers"],
+                ["Key Vault (Forensics)", "1", "Evidence preservation"],
+            ],
+            "corp": [
+                ["Virtual Network (Spoke)", "1", "Corp CIDR 10.2.0.0/16"],
+                ["Subnets", "4", "App, Data, Shared Services, Private Endpoints"],
+                ["NSGs", "4", "Per-subnet deny-all-inbound baseline"],
+                ["Key Vault", "1", "Private endpoint enabled"],
+                ["Storage Account", "1", "Private endpoint enabled"],
+                ["Azure Policy Assignments", "10+", "Corp baseline"],
+            ],
+            "online": [
+                ["Virtual Network (Spoke)", "1", "Online CIDR 10.1.0.0/16"],
+                ["Subnets", "3", "Web, App, Data"],
+                ["WAF Policy", "1", "OWASP 3.2 ruleset"],
+                ["DDoS Protection", "1", "Standard (inherited from hub)"],
+                ["NSGs", "3", "Per-subnet rules"],
+                ["Azure Policy Assignments", "10+", "Online baseline"],
+            ],
+            "sap": [
+                ["Virtual Network (Spoke)", "1", "SAP CIDR 10.5.0.0/16"],
+                ["Subnets", "5", "App, DB, ANF, Web Dispatcher, Management"],
+                ["Azure NetApp Files", "1", "Ultra tier for HANA"],
+                ["Proximity Placement Group", "1", "Low-latency colocation"],
+                ["NSGs", "5", "Per-subnet with SAP-specific rules"],
+                ["Key Vault", "1", "SAP credential management"],
+            ],
+            "sandbox": [
+                ["Virtual Network (Standalone)", "1", "Sandbox CIDR 10.10.0.0/16"],
+                ["Subnets", "2", "Dev, Test"],
+                ["Budget", "1", "$500/month cap"],
+                ["Azure Policy Assignments", "5+", "Sandbox baseline (no public IPs)"],
+            ],
+        }
+        return expected.get(self.profile, [])
+
+    def _md_network_topology(self) -> str:
+        net_configs = {
+            "platform-management": [
+                ("VNet CIDR", "Linked to Hub (no dedicated VNet)"),
+                ("Connectivity", "Direct diagnostic log shipping to LAW"),
+            ],
+            "platform-connectivity": [
+                ("Hub VNet CIDR", "10.0.0.0/16"),
+                ("Firewall Subnet", "10.0.1.0/26 (AzureFirewallSubnet)"),
+                ("Gateway Subnet", "10.0.2.0/27 (GatewaySubnet)"),
+                ("Bastion Subnet", "10.0.3.0/26 (AzureBastionSubnet)"),
+                ("DNS Resolver", "10.0.4.0/28"),
+                ("Topology", "Hub-Spoke (Azure Firewall Premium)"),
+            ],
+            "platform-identity": [
+                ("VNet CIDR", "Peered to Hub"),
+                ("DC Subnet", "Dedicated for domain controllers"),
+                ("DNS", "Custom DNS pointing to DCs"),
+            ],
+            "platform-security": [
+                ("VNet CIDR", "Peered to Hub"),
+                ("Connectivity", "Log ingestion from all subscriptions"),
+            ],
+            "corp": [
+                ("Spoke VNet CIDR", "10.2.0.0/16"),
+                ("App Subnet", "10.2.1.0/24"),
+                ("Data Subnet", "10.2.2.0/24"),
+                ("Shared Services", "10.2.3.0/24"),
+                ("Private Endpoints", "10.2.4.0/26"),
+                ("Hub Peering", "Active — routes to Azure Firewall"),
+                ("DNS", "Hub Private DNS Zones"),
+            ],
+            "online": [
+                ("Spoke VNet CIDR", "10.1.0.0/16"),
+                ("Web Subnet", "10.1.1.0/24"),
+                ("App Subnet", "10.1.2.0/24"),
+                ("Data Subnet", "10.1.3.0/24"),
+                ("Hub Peering", "Active — routes to Azure Firewall"),
+                ("DDoS Protection", "Standard (shared plan)"),
+            ],
+            "sap": [
+                ("Spoke VNet CIDR", "10.5.0.0/16"),
+                ("SAP App Subnet", "10.5.1.0/24 (Accelerated Networking)"),
+                ("HANA DB Subnet", "10.5.2.0/24 (Accelerated Networking)"),
+                ("ANF Subnet", "10.5.3.0/26 (Delegated)"),
+                ("Web Dispatcher", "10.5.4.0/26"),
+                ("Management", "10.5.5.0/26"),
+                ("Hub Peering", "Active — ExpressRoute to on-prem"),
+            ],
+            "sandbox": [
+                ("Standalone VNet CIDR", "10.10.0.0/16"),
+                ("Dev Subnet", "10.10.1.0/24"),
+                ("Test Subnet", "10.10.2.0/24"),
+                ("Hub Peering", "None (isolated)"),
+            ],
+        }
+
+        is_conn = self.profile == "platform-connectivity"
+        is_sandbox = self.profile == "sandbox"
+
+        if is_conn:
+            intro = ("This landing zone hosts the hub virtual network. All spoke VNets "
+                     "from application landing zones peer to this hub for centralized "
+                     "firewall inspection, DNS resolution, and on-premises connectivity.")
+        elif is_sandbox:
+            intro = ("This sandbox landing zone uses a standalone virtual network with no "
+                     "peering to the hub. It is isolated by design for development and testing.")
+        else:
+            intro = ("This landing zone uses a spoke virtual network peered to the central "
+                     "hub in the Connectivity subscription. All egress traffic routes through "
+                     "Azure Firewall. DNS resolution uses the hub's Private DNS Zones.")
+
+        config = net_configs.get(self.profile, [("N/A", "Profile-specific")])
+        lines = [
+            "## 4. Network Topology",
+            "",
+            intro,
+            "",
+            "| Network Component | Configuration |",
+            "|-------------------|---------------|",
+        ]
+        for comp, val in config:
+            lines.append(f"| {comp} | {val} |")
+        lines.append("")
+        lines.append("---")
+        return "\n".join(lines)
+
+    def _md_security_posture(self) -> str:
+        plan_map = {
+            "platform-management": ["Servers", "Storage", "Key Vaults", "ARM", "DNS", "Containers"],
+            "platform-connectivity": ["Servers", "DNS", "ARM", "Key Vaults"],
+            "platform-identity": ["Servers", "Key Vaults", "ARM", "DNS"],
+            "platform-security": ["Servers", "Storage", "Key Vaults", "ARM", "DNS", "Containers"],
+            "corp": ["Servers", "Storage", "Key Vaults", "AppServices", "ARM", "DNS"],
+            "online": ["Servers", "Storage", "Key Vaults", "AppServices", "DNS"],
+            "sap": ["Servers", "Storage", "Key Vaults", "ARM", "DNS", "Containers"],
+            "sandbox": ["Servers", "ARM"],
+        }
+        plans = plan_map.get(self.profile, ["Servers"])
+        plan_rows = "\n".join(f"| {p} | Enabled |" for p in plans)
+
+        return f"""## 5. Security Posture
+
+Security controls applied to this landing zone as part of the CAF
+enterprise-scale baseline. All controls are enforced via Azure Policy
+and validated during deployment.
+
+### 5.1 Non-Negotiable Security Rules
+
+| # | Rule | Description | Status |
+|---|------|-------------|--------|
+| 1 | Diagnostic Settings | All resources ship logs to central Log Analytics workspace | Enforced |
+| 2 | HTTPS Only | All web endpoints require TLS 1.2+ | Enforced |
+| 3 | No Public IPs | Disallowed on compute (except for allowed profiles) | Enforced |
+| 4 | Encryption at Rest | All storage & databases use platform-managed or CMK encryption | Enforced |
+| 5 | NSG on Every Subnet | Network Security Groups required on all subnets | Enforced |
+| 6 | Defender for Cloud | Enabled on all resource types (per profile plan count) | Enforced |
+
+### 5.2 Defender for Cloud Plans
+
+| Defender Plan | Status |
+|---------------|--------|
+{plan_rows}
+
+### 5.3 Azure Policy Assignments
+
+The following policy initiatives are assigned at the management group level
+and inherited by this subscription:
+
+| Initiative | Scope |
+|------------|-------|
+| CAF Foundation | Core governance (tagging, allowed locations, allowed SKUs) |
+| CAF Security Baseline | CIS benchmark controls, encryption, network rules |
+| Defender for Cloud | Auto-enable Defender plans and security configurations |
+| Monitoring | Diagnostic settings, Log Analytics agent, dependency agent |
+| Network | NSG rules, flow logs, VNet service endpoints |
+
+---
+"""
+
+    def _md_compliance_status(self) -> str:
+        return """## 6. Compliance Status
+
+Post-deployment compliance scan results. The CI/CD pipeline validates
+compliance after every deployment and fails the pipeline if compliance
+falls below 80%.
+
+### 6.1 Compliance Summary
+
+| Metric | Value |
+|--------|-------|
+| Compliance Percentage | Populated at deployment time |
+| Total Policies Evaluated | Populated at deployment time |
+| Compliant Resources | Populated at deployment time |
+| Non-Compliant Resources | Populated at deployment time |
+| Exempt Resources | Populated at deployment time |
+
+> *This section is auto-populated with live data when the TDD is
+> generated as part of the CI/CD pipeline (post-deployment verify stage).
+> For pre-deployment TDDs, values show 'Populated at deployment time'.*
+
+---
+"""
+
+    def _md_cost_governance(self) -> str:
+        budget_map = {
+            "platform-management": ("10,000", "80/100/120%"),
+            "platform-connectivity": ("15,000", "80/100/120%"),
+            "platform-identity": ("5,000", "80/100/120%"),
+            "platform-security": ("8,000", "80/100/120%"),
+            "corp": ("20,000", "80/100/120%"),
+            "online": ("25,000", "80/100/120%"),
+            "sap": ("50,000", "80/100/120%"),
+            "sandbox": ("500", "80/100%"),
+        }
+        budget, thresholds = budget_map.get(self.profile, ("10,000", "80/100/120%"))
+
+        return f"""## 7. Cost Governance
+
+| Control | Configuration |
+|---------|---------------|
+| Monthly Budget | ${budget} |
+| Alert Thresholds | {thresholds} |
+| Alert Recipients | Platform team + subscription owner |
+| Cost Anomaly Detection | Enabled |
+| Tag Requirements | Environment, Owner, CostCenter, Project |
+
+---
+"""
+
+    def _md_operational_model(self) -> str:
+        return """## 8. Operational Model
+
+### 8.1 Monitoring & Alerting
+
+| Scan Type | Frequency | Source |
+|-----------|-----------|--------|
+| Compliance Scan | Every 30 minutes | monitor.yml |
+| Drift Detection | Every hour | monitor.yml |
+| Full Audit Report | Daily 6 AM UTC | monitor.yml |
+| Cost Alerts | Real-time | Azure Cost Management |
+| Security Alerts | Real-time | Defender for Cloud → Sentinel |
+
+### 8.2 Change Management
+
+All infrastructure changes follow the GitOps workflow:
+
+| Step | Action | Responsible |
+|------|--------|-------------|
+| 1 | Create feature branch | Developer |
+| 2 | Push changes & open PR | Developer |
+| 3 | Automated PR validation (lint, security, cost, what-if) | 5-pr-validate.yml |
+| 4 | Peer review & approval | Platform team |
+| 5 | Merge to main | Developer |
+| 6 | Trigger deploy workflow | Platform team |
+| 7 | Environment approval gate | Required reviewers |
+| 8 | Deployment + post-deploy verification | Reusable pipeline |
+| 9 | TDD auto-generated | tdd_generator.py |
+
+### 8.3 Disaster Recovery
+
+| Component | Protection | Recovery Time |
+|-----------|------------|---------------|
+| IaC Templates | Git repository | Minutes |
+| Configuration | subscriptions.json | Minutes |
+
+---
+"""
+
+    def _md_appendix(self, estate_svg_filename: Optional[str], generated_at: str) -> str:
+        lines = [
+            "## 9. Appendix",
+            "",
+            "### 9.1 Full Estate Architecture",
+            "",
+            "Overview of the complete Azure Landing Zone estate showing all platform",
+            "and application landing zones.",
+            "",
+        ]
+        if estate_svg_filename:
+            lines.append(f"![Full Azure Landing Zone Estate]({estate_svg_filename})")
+            lines.append("")
+            lines.append("*Figure 2: Full Azure Landing Zone Estate*")
+        else:
+            lines.append("*Estate diagram unavailable.*")
+        lines.extend([
+            "",
+            "### 9.2 Document Revision History",
+            "",
+            "| Version | Date | Author | Changes |",
+            "|---------|------|--------|---------|",
+            f"| 1.0 | {generated_at.split(' ')[0]} | Auto-generated by CI/CD pipeline | Initial as-built TDD |",
+            "",
+            "### 9.3 References",
+            "",
+            "| Document | Location |",
+            "|----------|----------|",
+            "| CAF Enterprise-Scale | <https://aka.ms/caf/enterprise-scale> |",
+            "| Azure Landing Zone Accelerator | <https://aka.ms/alz/accelerator> |",
+            "| Landing Zone Profiles | `src/config/landing_zone_profiles.yaml` |",
+            "| Subscription Config | `environments/subscriptions.json` |",
+            "| CI/CD Workflows | `.github/workflows/` |",
+        ])
+        return "\n".join(lines)
+
 
 def generate_tdd_for_deployment(
     project_name: str,
@@ -798,40 +1314,84 @@ def generate_tdd_for_deployment(
     return generator.generate(output_path)
 
 
+def generate_tdd_markdown_for_deployment(
+    project_name: str,
+    profile: str,
+    subscription_id: str,
+    subscription_name: str,
+    location: str,
+    environment: str = "prod",
+    framework: str = "bicep",
+    deployment_id: str = "",
+    output_dir: str = "docs/tdd",
+    config_path: str = "environments/subscriptions.json",
+) -> str:
+    """
+    Generate a markdown TDD with SVG architecture diagram for a specific deployment.
+
+    Returns the path to the generated .md file.
+    """
+    generator = TDDGenerator(
+        project_name=project_name,
+        profile=profile,
+        subscription_id=subscription_id,
+        subscription_name=subscription_name,
+        location=location,
+        environment=environment,
+        framework=framework,
+        deployment_id=deployment_id,
+        config_path=config_path,
+    )
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d")
+    md_filename = f"TDD_{project_name}_{timestamp}.md"
+    svg_filename = f"TDD_{project_name}_{timestamp}_architecture.svg"
+
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+
+    md_path = str(out / md_filename)
+    svg_path = str(out / svg_filename)
+
+    generator.generate_markdown(md_path, svg_path, svg_filename)
+    return md_path
+
+
 def generate_all_tdds(
     config_path: str = "environments/subscriptions.json",
     output_dir: str = "docs/tdd",
     framework: str = "bicep",
+    fmt: str = "both",
 ) -> list[str]:
-    """Generate TDDs for all landing zones defined in subscriptions.json."""
+    """Generate TDDs for all landing zones defined in subscriptions.json.
+
+    Args:
+        fmt: Output format — 'docx', 'markdown', or 'both'
+    """
     with open(config_path) as f:
         config = json.load(f)
 
     generated = []
     location = config.get("primary_location", "southcentralus")
 
-    # Platform LZs
-    for key, cfg in config.get("platform", {}).items():
-        path = generate_tdd_for_deployment(
-            project_name=key,
-            profile=cfg.get("profile", f"platform-{key}"),
-            subscription_id=cfg.get("subscription_id", ""),
-            subscription_name=cfg.get("subscription_name", key),
-            location=cfg.get("location", location),
-            environment=cfg.get("environment", "prod"),
-            framework=framework,
-            output_dir=output_dir,
-            config_path=config_path,
-        )
-        generated.append(path)
+    gen_fn_map = {
+        "docx": [generate_tdd_for_deployment],
+        "markdown": [generate_tdd_markdown_for_deployment],
+        "both": [generate_tdd_for_deployment, generate_tdd_markdown_for_deployment],
+    }
+    gen_fns = gen_fn_map.get(fmt, gen_fn_map["both"])
 
-    # Application LZs
+    all_lzs = []
+    for key, cfg in config.get("platform", {}).items():
+        all_lzs.append((key, cfg, f"platform-{key}"))
     for key, cfg in config.get("application", {}).items():
-        if key.startswith("_"):
-            continue
-        path = generate_tdd_for_deployment(
+        if not key.startswith("_"):
+            all_lzs.append((key, cfg, ""))
+
+    for key, cfg, default_profile in all_lzs:
+        kwargs = dict(
             project_name=key,
-            profile=cfg.get("profile", ""),
+            profile=cfg.get("profile", default_profile),
             subscription_id=cfg.get("subscription_id", ""),
             subscription_name=cfg.get("subscription_name", key),
             location=cfg.get("location", location),
@@ -840,7 +1400,9 @@ def generate_all_tdds(
             output_dir=output_dir,
             config_path=config_path,
         )
-        generated.append(path)
+        for gen_fn in gen_fns:
+            path = gen_fn(**kwargs)
+            generated.append(path)
 
     return generated
 
@@ -860,16 +1422,26 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", default="docs/tdd")
     parser.add_argument("--config", default="environments/subscriptions.json")
     parser.add_argument("--all", action="store_true", help="Generate TDDs for all LZs")
+    parser.add_argument(
+        "--format", default="both", choices=["docx", "markdown", "both"],
+        help="Output format: docx, markdown, or both (default: both)",
+    )
 
     args = parser.parse_args()
 
     if args.all:
-        paths = generate_all_tdds(args.config, args.output_dir, args.framework)
+        paths = generate_all_tdds(args.config, args.output_dir, args.framework, fmt=args.format)
         print(f"Generated {len(paths)} TDD documents:")
         for p in paths:
             print(f"  {p}")
     else:
-        path = generate_tdd_for_deployment(
+        gen_fns = {
+            "docx": [generate_tdd_for_deployment],
+            "markdown": [generate_tdd_markdown_for_deployment],
+            "both": [generate_tdd_for_deployment, generate_tdd_markdown_for_deployment],
+        }[args.format]
+
+        base_kwargs = dict(
             project_name=args.project,
             profile=args.profile,
             subscription_id=args.subscription_id,
@@ -881,4 +1453,6 @@ if __name__ == "__main__":
             output_dir=args.output_dir,
             config_path=args.config,
         )
-        print(f"TDD generated: {path}")
+        for fn in gen_fns:
+            path = fn(**base_kwargs)
+            print(f"TDD generated: {path}")

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 660"
+     width="840" height="660"
+     font-family="Segoe UI, -apple-system, sans-serif">
+  <defs>
+    <style>
+      .group-box { fill: AzureColor.LIGHT_GRAY; stroke: #D0D0D0; stroke-width: 1.5; rx: 8; }
+      .group-label { font-size: 13px; font-weight: 600; fill: AzureColor.DARK_BLUE; }
+      .node-label { font-size: 11px; fill: #333; text-anchor: middle; }
+      .node-sublabel { font-size: 9px; fill: #777; text-anchor: middle; }
+      .edge { stroke: #999; stroke-width: 1.2; fill: none; }
+      .edge-dashed { stroke-dasharray: 6 3; }
+      .edge-label { font-size: 9px; fill: #666; text-anchor: middle; }
+      .title { font-size: 18px; font-weight: 700; fill: #0078D4; }
+      .subtitle { font-size: 12px; fill: #555; }
+      .icon-bg { rx: 6; ry: 6; }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#999"/>
+    </marker>
+  </defs>
+  <text x="20" y="30" class="title">Platform Security Landing Zone — As-Built</text>
+  <text x="20" y="48" class="subtitle">alz-platform-security  ·  southcentralus  ·  Dedicated SecOps</text>
+  <!-- Group: Subscription: alz-platform-security -->
+    <rect x="10" y="70" width="780" height="380"
+          rx="8" fill="AzureColor.RED" fill-opacity="0.06"
+          stroke="AzureColor.RED" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(18,76) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm0 3.2L25 9.6v12.8L16 26.8 7 22.4V9.6L16 5.2z" fill="AzureColor.BLUE"/>
+    </g>
+    <text x="46" y="90" class="group-label" fill="AzureColor.RED">Subscription: alz-platform-security</text>
+  <!-- Group: SIEM &amp; Threat Intelligence -->
+    <rect x="30" y="110" width="740" height="140"
+          rx="8" fill="AzureColor.RED" fill-opacity="0.06"
+          stroke="AzureColor.RED" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,116) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="#0078D4" opacity="0.12"/>
+      <path d="M16 2C8.27 2 2 8.27 2 16s6.27 14 14 14 14-6.27 14-14S23.73 2 16 2zm0 4c5.52 0 10 4.48 10 10s-4.48 10-10 10S6 21.52 6 16 10.48 6 16 6zm0 4a6 6 0 100 12 6 6 0 000-12zm0 2a4 4 0 110 8 4 4 0 010-8z" fill="#0078D4"/>
+    </g>
+    <text x="66" y="130" class="group-label" fill="AzureColor.RED">SIEM &amp; Threat Intelligence</text>
+  <!-- Group: Incident Response &amp; Forensics -->
+    <rect x="30" y="270" width="740" height="160"
+          rx="8" fill="AzureColor.PURPLE" fill-opacity="0.06"
+          stroke="AzureColor.PURPLE" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <g transform="translate(38,276) scale(0.625)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.PURPLE" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm-2 20l-5-5 1.41-1.41L14 19.17l7.59-7.59L23 13l-9 9z" fill="AzureColor.PURPLE"/>
+    </g>
+    <text x="66" y="290" class="group-label" fill="AzureColor.PURPLE">Incident Response &amp; Forensics</text>
+  <!-- Sentinel (SecOps) -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="140" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(107.0,148) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0078D4" opacity="0.12"/>
+      <path d="M16 2C8.27 2 2 8.27 2 16s6.27 14 14 14 14-6.27 14-14S23.73 2 16 2zm0 4c5.52 0 10 4.48 10 10s-4.48 10-10 10S6 21.52 6 16 10.48 6 16 6zm0 4a6 6 0 100 12 6 6 0 000-12zm0 2a4 4 0 110 8 4 4 0 010-8z" fill="#0078D4"/>
+    </g>
+      <text x="125.0" y="196" class="node-label">Sentinel (SecOps)</text>
+      <text x="125.0" y="210" class="node-sublabel">Dedicated workspace</text>
+    </g>
+  <!-- Defender for Cloud -->
+    <g filter="url(#shadow)">
+      <rect x="220" y="140" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(277.0,148) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.PURPLE" opacity="0.12"/>
+      <path d="M16 2L4 7v9c0 7.46 5.12 14.43 12 16 6.88-1.57 12-8.54 12-16V7L16 2zm-2 20l-5-5 1.41-1.41L14 19.17l7.59-7.59L23 13l-9 9z" fill="AzureColor.PURPLE"/>
+    </g>
+      <text x="295.0" y="196" class="node-label">Defender for Cloud</text>
+      <text x="295.0" y="210" class="node-sublabel">All 6 plans</text>
+    </g>
+  <!-- SOAR Playbooks -->
+    <g filter="url(#shadow)">
+      <rect x="390" y="140" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(447.0,148) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.TEAL" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm-4 18l-3-3 1.4-1.4L12 17.2l5.6-5.6L19 13l-7 7z" fill="AzureColor.TEAL"/>
+    </g>
+      <text x="465.0" y="196" class="node-label">SOAR Playbooks</text>
+      <text x="465.0" y="210" class="node-sublabel">Logic Apps</text>
+    </g>
+  <!-- Threat Intel -->
+    <g filter="url(#shadow)">
+      <rect x="560" y="140" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(617.0,148) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="#0078D4" opacity="0.12"/>
+      <path d="M16 2C8.27 2 2 8.27 2 16s6.27 14 14 14 14-6.27 14-14S23.73 2 16 2zm0 4c5.52 0 10 4.48 10 10s-4.48 10-10 10S6 21.52 6 16 10.48 6 16 6zm0 4a6 6 0 100 12 6 6 0 000-12zm0 2a4 4 0 110 8 4 4 0 010-8z" fill="#0078D4"/>
+    </g>
+      <text x="635.0" y="196" class="node-label">Threat Intel</text>
+      <text x="635.0" y="210" class="node-sublabel">TAXII feeds</text>
+    </g>
+  <!-- Forensics Vault -->
+    <g filter="url(#shadow)">
+      <rect x="50" y="300" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(107.0,308) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.PURPLE" opacity="0.12"/>
+      <path d="M16 2a6 6 0 00-6 6c0 2.22 1.21 4.16 3 5.2V28h6V13.2c1.79-1.04 3-2.98 3-5.2a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z" fill="AzureColor.PURPLE"/>
+    </g>
+      <text x="125.0" y="356" class="node-label">Forensics Vault</text>
+      <text x="125.0" y="370" class="node-sublabel">Evidence storage</text>
+    </g>
+  <!-- Forensics LAW -->
+    <g filter="url(#shadow)">
+      <rect x="220" y="300" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(277.0,308) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.ORANGE" opacity="0.12"/>
+      <path d="M4 4h24v24H4V4zm2 2v20h20V6H6zm4 14l4-6 3 4 5-8v12H10v-2z" fill="AzureColor.ORANGE"/>
+    </g>
+      <text x="295.0" y="356" class="node-label">Forensics LAW</text>
+      <text x="295.0" y="370" class="node-sublabel">Long-term retention</text>
+    </g>
+  <!-- Auto-Remediation -->
+    <g filter="url(#shadow)">
+      <rect x="390" y="300" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(447.0,308) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.TEAL" opacity="0.12"/>
+      <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm-4 18l-3-3 1.4-1.4L12 17.2l5.6-5.6L19 13l-7 7z" fill="AzureColor.TEAL"/>
+    </g>
+      <text x="465.0" y="356" class="node-label">Auto-Remediation</text>
+      <text x="465.0" y="370" class="node-sublabel">Policy-driven</text>
+    </g>
+  <!-- Alert Rules -->
+    <g filter="url(#shadow)">
+      <rect x="560" y="300" width="150" height="90"
+            rx="8" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+      <g transform="translate(617.0,308) scale(1.125)">
+      <rect width="32" height="32" class="icon-bg" fill="AzureColor.ORANGE" opacity="0.12"/>
+      <path d="M4 4h24v18H4V4zm2 2v14h20V6H6zm4 10h2v2h-2zm4-4h2v6h-2zm4-2h2v8h-2zm4-4h2v12h-2z" fill="AzureColor.ORANGE"/>
+    </g>
+      <text x="635.0" y="356" class="node-label">Alert Rules</text>
+      <text x="635.0" y="370" class="node-sublabel">Sev 0-2 → PagerDuty</text>
+    </g>
+    <path d="M125.0,230 C125.0,185.0 295.0,185.0 295.0,140"
+          stroke="AzureColor.RED" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="210.0" y="179.0" class="edge-label">ingests</text>    <path d="M295.0,230 C295.0,185.0 465.0,185.0 465.0,140"
+          stroke="AzureColor.RED" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="380.0" y="179.0" class="edge-label">triggers</text>    <path d="M465.0,230 C465.0,185.0 635.0,185.0 635.0,140"
+          stroke="AzureColor.RED" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="550.0" y="179.0" class="edge-label">enriches</text>    <path d="M465.0,230 C465.0,265.0 465.0,265.0 465.0,300"
+          stroke="AzureColor.PURPLE" stroke-width="1.2" fill="none" class="edge-dashed"
+          marker-end="url(#arrow)"/>
+    <text x="465.0" y="259.0" class="edge-label">remediates</text>    <path d="M465.0,390 C465.0,345.0 635.0,345.0 635.0,300"
+          stroke="AzureColor.ORANGE" stroke-width="1.2" fill="none"
+          marker-end="url(#arrow)"/>
+    <text x="550.0" y="339.0" class="edge-label">notifies</text></svg>

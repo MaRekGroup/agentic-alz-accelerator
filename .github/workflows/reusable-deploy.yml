@@ -85,7 +85,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   # =========================================================================
@@ -511,10 +511,11 @@ jobs:
             | .value.subscription_name // .key
           ' environments/subscriptions.json 2>/dev/null || echo "${{ inputs.project_name }}")
 
+          # Generate both .docx and .md (with SVG diagrams)
           python -c "
-          from src.tools.tdd_generator import generate_tdd_for_deployment
+          from src.tools.tdd_generator import generate_tdd_for_deployment, generate_tdd_markdown_for_deployment
 
-          path = generate_tdd_for_deployment(
+          kwargs = dict(
               project_name='${{ inputs.project_name }}',
               profile='${{ inputs.profile }}',
               subscription_id='${{ secrets.SUBSCRIPTION_ID }}',
@@ -526,7 +527,12 @@ jobs:
               output_dir='docs/tdd',
               config_path='environments/subscriptions.json',
           )
-          print(f'TDD generated: {path}')
+
+          docx_path = generate_tdd_for_deployment(**kwargs)
+          print(f'TDD (docx) generated: {docx_path}')
+
+          md_path = generate_tdd_markdown_for_deployment(**kwargs)
+          print(f'TDD (markdown+svg) generated: {md_path}')
           "
 
           echo "tdd_path=docs/tdd/" >> "$GITHUB_OUTPUT"
@@ -535,8 +541,28 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tdd-${{ inputs.project_name }}
-          path: docs/tdd/TDD_${{ inputs.project_name }}_*.docx
+          path: |
+            docs/tdd/TDD_${{ inputs.project_name }}_*.docx
+            docs/tdd/TDD_${{ inputs.project_name }}_*.md
+            docs/tdd/TDD_${{ inputs.project_name }}_*.svg
           retention-days: 90
+
+      - name: Commit TDD to repository
+        if: steps.tdd.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/tdd/TDD_${{ inputs.project_name }}_*.docx \
+                  docs/tdd/TDD_${{ inputs.project_name }}_*.md \
+                  docs/tdd/TDD_${{ inputs.project_name }}_*.svg
+          if git diff --cached --quiet; then
+            echo "No TDD changes to commit"
+          else
+            git commit -m "docs(tdd): update as-built TDD for ${{ inputs.project_name }} [skip ci]"
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push origin HEAD:"${{ github.ref_name }}"
+            echo "TDD committed and pushed"
+          fi
 
       - name: Notify Teams on completion
         if: always()
