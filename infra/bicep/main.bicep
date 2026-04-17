@@ -69,6 +69,7 @@ var rgNames = {
   networking: '${prefix}-networking-rg'
   security: '${prefix}-security-rg'
   logging: '${prefix}-logging-rg'
+}
 
 // ============================================================================
 // Resource Groups
@@ -93,7 +94,10 @@ resource loggingRg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 // Identity module is subscription-scoped and creates its own RG
-// Identity module is subscription-scoped and creates its own RG===================================================================
+
+// ============================================================================
+// Module Deployments
+// ============================================================================
 
 module logging 'modules/logging/main.bicep' = {
   name: '${prefix}-logging'
@@ -152,10 +156,12 @@ module identity 'modules/identity/main.bicep' = {
     prefix: prefix
     tags: tags
     environment: environment
-  params: {
-    location: location
-    prefix: prefix
-    tags: tags
+    budgetAmount: budgetAmount
+    technicalContact: technicalContact
+  }
+}
+
+module policies 'modules/policies/main.bicep' = {
   name: '${prefix}-policies'
   params: {
     policyInitiatives: policyInitiatives
