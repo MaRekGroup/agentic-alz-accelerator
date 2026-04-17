@@ -52,7 +52,7 @@ param defenderPlans array = [
   'VirtualMachines'
   'SqlServers'
   'AppServices'
-  'Storage'
+  'StorageAccounts'
   'KeyVaults'
   'Dns'
   'Arm'

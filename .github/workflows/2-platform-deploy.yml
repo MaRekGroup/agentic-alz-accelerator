@@ -43,6 +43,11 @@ on:
           - eastus
           - westus2
           - centralus
+      prefix:
+        description: 'Resource naming prefix (e.g. alz, mrg)'
+        required: true
+        default: 'alz'
+        type: string
 
 permissions:
   id-token: write
@@ -65,9 +70,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-      # CHANGED: Management module is RG-scoped, not subscription-scoped
-      deployment_scope: group
-      resource_group: alz-platform-management-rg
+      prefix: ${{ inputs.prefix }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -95,6 +98,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -123,6 +127,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -149,6 +154,7 @@ jobs:
       location: ${{ inputs.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

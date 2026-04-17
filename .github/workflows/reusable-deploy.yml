@@ -64,6 +64,11 @@ on:
         required: false
         type: string
         default: ''
+      prefix:
+        description: 'Resource naming prefix (e.g. alz, mrg) — used to derive LAW ID and RG names'
+        required: false
+        type: string
+        default: 'alz'
     secrets:
       AZURE_TENANT_ID:
         required: true
@@ -242,7 +247,17 @@ jobs:
           # Build extra params for LAW ID if MGMT subscription is available
           EXTRA_PARAMS=""
           if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
-            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
+            # Derive region shortcode to match Bicep naming convention
+            declare -A REGION_MAP=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT="${REGION_MAP[${{ inputs.location }}]:-${{ inputs.location }}}"
+            PREFIX="${{ inputs.prefix }}"
+            LAW_RG="${PREFIX}-management-${REGION_SHORT}-rg"
+            LAW_NAME="${PREFIX}-law"
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/${LAW_RG}/providers/Microsoft.OperationalInsights/workspaces/${LAW_NAME}"
             if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
               EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
             else
@@ -337,7 +352,17 @@ jobs:
           # Build extra params for LAW ID if MGMT subscription is available
           EXTRA_PARAMS=""
           if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
-            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
+            # Derive region shortcode to match Bicep naming convention
+            declare -A REGION_MAP=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT="${REGION_MAP[${{ inputs.location }}]:-${{ inputs.location }}}"
+            PREFIX="${{ inputs.prefix }}"
+            LAW_RG="${PREFIX}-management-${REGION_SHORT}-rg"
+            LAW_NAME="${PREFIX}-law"
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/${LAW_RG}/providers/Microsoft.OperationalInsights/workspaces/${LAW_NAME}"
             if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
               EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
             else
