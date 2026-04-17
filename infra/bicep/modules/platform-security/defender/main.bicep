@@ -14,6 +14,7 @@ param logAnalyticsWorkspaceId string
 
 // ─── Defender for Cloud Pricing Tiers ─────────────────────────────────────────
 
+@batchSize(1)
 resource defenderPricing 'Microsoft.Security/pricings@2024-01-01' = [
   for plan in defenderPlans: {
     name: plan
@@ -25,24 +26,18 @@ resource defenderPricing 'Microsoft.Security/pricings@2024-01-01' = [
 
 // ─── Security Contact ─────────────────────────────────────────────────────────
 
-resource securityContact 'Microsoft.Security/securityContacts@2023-12-01-preview' = {
+resource securityContact 'Microsoft.Security/securityContacts@2020-01-01-preview' = {
   name: 'default'
   properties: {
     emails: securityContactEmail
+    alertNotifications: {
+      state: 'On'
+      minimalSeverity: 'Medium'
+    }
     notificationsByRole: {
       state: 'On'
       roles: ['Owner', 'ServiceAdmin']
     }
-    isEnabled: true
-  }
-}
-
-// ─── Auto Provisioning ────────────────────────────────────────────────────────
-
-resource autoProvisioning 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = {
-  name: 'default'
-  properties: {
-    autoProvision: 'On'
   }
 }
 
