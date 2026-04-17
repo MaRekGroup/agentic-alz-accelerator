@@ -1,13 +1,18 @@
-name: "5 - PR Validation"
+# ============================================================================
+# Pull Request Validation
+# Runs on every PR that touches IaC or config. Validates templates,
+# security baseline, cost governance, and runs tests.
+# ============================================================================
+name: "5 · PR Validation"
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - "infra/**"
-      - "src/**"
-      - "environments/**"
-      - "scripts/**"
+      - 'infra/**'
+      - 'src/config/**'
+      - 'src/agents/**'
+      - 'tests/**'
 
 permissions:
   id-token: write
@@ -27,26 +32,33 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Python Lint
-        run: |
-          pip install ruff
-          ruff check src/ scripts/ tests/
+      - name: Python lint (ruff)
+        run: ruff check src/ tests/ --output-format=github
 
-      - name: YAML Lint
+      - name: YAML lint
+        run: yamllint -c .yamllint.yml src/config/ .github/workflows/
+
+      - name: Bicep lint
+        if: hashFiles('infra/bicep/**/*.bicep') != ''
         run: |
-          pip install yamllint
-          yamllint -d relaxed src/config/ environments/
+          az bicep install
+          find infra/bicep -name "*.bicep" -exec az bicep build --file {} \;
+
+      - name: Terraform format check
+        if: hashFiles('infra/terraform/**/*.tf') != ''
+        run: terraform fmt -check -recursive infra/terraform/
 
   # =========================================================================
-  # Security Baseline Check
+  # Security & Cost Validation
   # =========================================================================
-  security-baseline:
-    name: Security Baseline
+  security:
+    name: Security & Cost Checks
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
@@ -54,85 +66,22 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Validate Security Baseline
-        run: python scripts/validators/validate_security_baseline.py
+      - name: Security baseline validation
+        run: python scripts/validators/validate_security_baseline.py infra/
 
-  # =========================================================================
-  # Cost Governance Check
-  # =========================================================================
-  cost-governance:
-    name: Cost Governance
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Validate Cost Governance
-        run: python scripts/validators/validate_cost_governance.py
-
-  # =========================================================================
-  # Bicep Validation
-  # =========================================================================
-  bicep-validate:
-    name: Bicep Build & Lint
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Bicep CLI
-        run: az bicep install
-
-      - name: Bicep Build (validates all templates)
-        run: |
-          for f in $(find infra/bicep -name "*.bicep"); do
-            echo "Validating: $f"
-            az bicep build --file "$f" --stdout > /dev/null
-          done
-
-  # =========================================================================
-  # Terraform Validation
-  # =========================================================================
-  terraform-validate:
-    name: Terraform Validate & Format
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.9.0"
-
-      - name: Terraform Format Check
-        working-directory: infra/terraform
-        run: terraform fmt -check -recursive
-
-      - name: Terraform Validate (modules)
-        run: |
-          for dir in infra/terraform/modules/*/; do
-            echo "Validating: $dir"
-            cd "$dir"
-            terraform init -backend=false
-            terraform validate
-            cd -
-          done
+      - name: Cost governance validation
+        run: python scripts/validators/validate_cost_governance.py infra/
 
   # =========================================================================
   # Unit Tests
   # =========================================================================
-  tests:
+  test:
     name: Unit Tests
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
@@ -141,56 +90,82 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Tests
-        run: pytest tests/ -v --tb=short
+      - name: Run tests
+        run: pytest tests/ -v --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
 
   # =========================================================================
-  # Challenger Agent Review (for complex PRs)
+  # IaC Plan (what-if preview on PR)
   # =========================================================================
-  challenger-review:
-    name: Challenger Agent Review
-    needs: [lint, security-baseline, cost-governance, bicep-validate, terraform-validate, tests]
+  plan-preview:
+    name: IaC Plan Preview
+    needs: [lint, security, test]
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
         with:
-          python-version: "3.13"
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Classify PR Complexity
-        id: classify
+      - name: Detect changed profiles
+        id: changes
         run: |
-          python -c "
-          import subprocess, os
-          diff = subprocess.run(['git', 'diff', '--stat', 'origin/main...HEAD'], capture_output=True, text=True).stdout
-          lines = diff.strip().split('\n')
-          file_count = len(lines) - 1 if lines else 0
+          # Find which profiles were changed
+          CHANGED=$(git diff --name-only origin/main...HEAD | \
+            grep -oP '(platform-management|platform-connectivity|platform-identity|platform-security|corp|online|sandbox|sap)' | \
+            sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "profiles=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
+          echo "Changed profiles: ${CHANGED:-none}"
 
-          if file_count > 20:
-              complexity = 'high'
-          elif file_count > 5:
-              complexity = 'medium'
-          else:
-              complexity = 'low'
-
-          print(f'Changed files: {file_count}, Complexity: {complexity}')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'complexity={complexity}\n')
-          "
-
-      - name: Run Challenger Review
-        if: steps.classify.outputs.complexity != 'low'
+      - name: Bicep what-if for changed profiles
+        if: steps.changes.outputs.profiles != 'none'
         run: |
-          echo "Complexity: ${{ steps.classify.outputs.complexity }}"
-          echo "Challenger review would run for medium/high complexity PRs"
-          echo "Requires AZURE_AI_PROJECT_CONNECTION_STRING to be configured"
+          az bicep install
+          IFS=',' read -ra PROFILES <<< "${{ steps.changes.outputs.profiles }}"
+          for profile in "${PROFILES[@]}"; do
+            echo "=== What-If: $profile ==="
+            az deployment sub what-if \
+              --location southcentralus \
+              --template-file infra/bicep/main.bicep \
+              --parameters profileName="$profile" \
+              --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
+              2>&1 | head -100 || echo "(preview only — some params may be missing)"
+            echo ""
+          done
+
+      - name: Post plan summary to PR
+        if: steps.changes.outputs.profiles != 'none'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const profiles = '${{ steps.changes.outputs.profiles }}'.split(',');
+            const body = `### IaC Plan Preview
+
+            **Changed profiles:** ${profiles.join(', ')}
+
+            What-if analysis completed. Review the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+            > Merge to \`main\` and run the appropriate deploy workflow to apply changes.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

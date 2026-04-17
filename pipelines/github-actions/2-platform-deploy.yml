@@ -1,43 +1,63 @@
-name: "2 - Deploy Platform Landing Zones"
+# ============================================================================
+# Platform Landing Zone Deployment — Strict Sequential Order
+# Deploys the 4 CAF enterprise-scale platform subscriptions:
+#   1. Management → 2. Connectivity → 3. Identity → 4. Security
+# Each depends on the previous. Each has its own approval gate.
+# ============================================================================
+name: "2 · Deploy Platform Landing Zones"
 
 on:
   workflow_dispatch:
     inputs:
-      platform_subscription:
-        description: "Platform subscription to deploy"
-        required: true
-        type: choice
-        options:
-          - management
-          - connectivity
-          - identity
-          - security
       framework:
-        description: "IaC Framework"
+        description: 'IaC framework'
         required: true
         type: choice
         options:
           - bicep
           - terraform
-      environment:
-        description: "Target Environment"
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
       action:
-        description: "Deployment Action"
+        description: 'Plan (preview) or Deploy (apply)'
         required: true
         type: choice
         options:
           - plan
           - deploy
-      location:
-        description: "Azure region for deployment"
+      start_from:
+        description: 'Start from this platform LZ (skip earlier ones)'
+        required: true
+        type: choice
+        options:
+          - management     # Start from the beginning
+          - connectivity   # Skip management
+          - identity       # Skip management + connectivity
+          - security       # Deploy security only
+      deploy_only:
+        description: 'Deploy ONLY this LZ (no cascade). Leave blank to cascade from start_from.'
         required: false
+        type: choice
+        options:
+          - ''               # Cascade (default)
+          - management
+          - connectivity
+          - identity
+          - security
+      location:
+        description: 'Primary Azure region'
+        required: true
+        default: 'southcentralus'
+        type: choice
+        options:
+          - southcentralus
+          - eastus2
+          - eastus
+          - westus2
+          - centralus
+      prefix:
+        description: 'Resource naming prefix (e.g. alz, mrg)'
+        required: true
+        default: 'alz'
         type: string
-        default: "southcentralus"
 
 permissions:
   id-token: write
@@ -45,212 +65,192 @@ permissions:
 
 jobs:
   # =========================================================================
-  # Pre-flight: Security Baseline & Cost Governance Validation
+  # 1. Management — centralized logging (everything depends on this)
   # =========================================================================
-  preflight:
-    name: Pre-flight Checks
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Security Baseline Validation
-        run: |
-          python scripts/validators/validate_security_baseline.py \
-            --module "infra/${{ inputs.framework }}/modules/${{ inputs.platform_subscription == 'management' && 'management' || inputs.platform_subscription == 'connectivity' && 'connectivity' || inputs.platform_subscription == 'identity' && 'identity' || 'platform-security' }}"
-
-      - name: Cost Governance Validation
-        run: |
-          python scripts/validators/validate_cost_governance.py \
-            --module "infra/${{ inputs.framework }}/modules/${{ inputs.platform_subscription == 'management' && 'management' || inputs.platform_subscription == 'connectivity' && 'connectivity' || inputs.platform_subscription == 'identity' && 'identity' || 'platform-security' }}"
-
-  # =========================================================================
-  # Deploy Platform Subscription (Bicep)
-  # =========================================================================
-  deploy-bicep:
-    name: "Deploy ${{ inputs.platform_subscription }} (Bicep)"
-    needs: preflight
-    if: inputs.framework == 'bicep'
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    environment: platform-${{ inputs.platform_subscription }}
-    env:
-      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MGMT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONN_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDTY_SUBSCRIPTION_ID' || 'PLATFORM_SEC_SUBSCRIPTION_ID' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets[env.SUBSCRIPTION_SECRET] }}
-
-      - name: Install Bicep CLI
-        run: az bicep install
-
-      - name: Set Subscription Context
-        run: az account set --subscription "${{ secrets[env.SUBSCRIPTION_SECRET] }}"
-
-      - name: Resolve Log Analytics Workspace ID
-        if: inputs.platform_subscription != 'management'
-        run: |
-          MGMT_SUB_ID="${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}"
-          LAW_ID="/subscriptions/${MGMT_SUB_ID}/resourceGroups/mrg-management-scus-rg/providers/Microsoft.OperationalInsights/workspaces/mrg-law"
-          echo "LOG_ANALYTICS_WORKSPACE_ID=${LAW_ID}" >> $GITHUB_ENV
-
-      - name: Bicep What-If
-        if: inputs.action == 'plan'
-        run: |
-          MODULE_PATH="infra/bicep/modules"
-          case "${{ inputs.platform_subscription }}" in
-            management)   TEMPLATE="$MODULE_PATH/management/main.bicep" ;;
-            connectivity) TEMPLATE="$MODULE_PATH/connectivity/main.bicep" ;;
-            identity)     TEMPLATE="$MODULE_PATH/identity/main.bicep" ;;
-            security)     TEMPLATE="$MODULE_PATH/platform-security/main.bicep" ;;
-          esac
-
-          EXTRA_PARAMS=""
-          if [[ -n "${LOG_ANALYTICS_WORKSPACE_ID:-}" ]]; then
-            EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LOG_ANALYTICS_WORKSPACE_ID}"
-          fi
-
-          az deployment sub what-if \
-            --location ${{ inputs.location }} \
-            --template-file "$TEMPLATE" \
-            --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam \
-            $EXTRA_PARAMS
-
-      - name: Bicep Deploy
-        if: inputs.action == 'deploy'
-        run: |
-          MODULE_PATH="infra/bicep/modules"
-          case "${{ inputs.platform_subscription }}" in
-            management)   TEMPLATE="$MODULE_PATH/management/main.bicep" ;;
-            connectivity) TEMPLATE="$MODULE_PATH/connectivity/main.bicep" ;;
-            identity)     TEMPLATE="$MODULE_PATH/identity/main.bicep" ;;
-            security)     TEMPLATE="$MODULE_PATH/platform-security/main.bicep" ;;
-          esac
-
-          EXTRA_PARAMS=""
-          if [[ -n "${LOG_ANALYTICS_WORKSPACE_ID:-}" ]]; then
-            EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LOG_ANALYTICS_WORKSPACE_ID}"
-          fi
-
-          az deployment sub create \
-            --location ${{ inputs.location }} \
-            --template-file "$TEMPLATE" \
-            --parameters @infra/bicep/parameters/platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.bicepparam \
-            $EXTRA_PARAMS \
-            --name "platform-${{ inputs.platform_subscription }}-$(date +%Y%m%d%H%M%S)"
-
-  # =========================================================================
-  # Deploy Platform Subscription (Terraform)
-  # =========================================================================
-  deploy-terraform:
-    name: "Deploy ${{ inputs.platform_subscription }} (Terraform)"
-    needs: preflight
-    if: inputs.framework == 'terraform'
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    environment: platform-${{ inputs.platform_subscription }}
-    env:
-      SUBSCRIPTION_SECRET: ${{ inputs.platform_subscription == 'management' && 'PLATFORM_MGMT_SUBSCRIPTION_ID' || inputs.platform_subscription == 'connectivity' && 'PLATFORM_CONN_SUBSCRIPTION_ID' || inputs.platform_subscription == 'identity' && 'PLATFORM_IDTY_SUBSCRIPTION_ID' || 'PLATFORM_SEC_SUBSCRIPTION_ID' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets[env.SUBSCRIPTION_SECRET] }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.9.0"
-
-      - name: Terraform Init
-        working-directory: infra/terraform/modules/${{ inputs.platform_subscription == 'management' && 'platform-management' || inputs.platform_subscription == 'security' && 'platform-security' || inputs.platform_subscription }}
-        run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=platform-${{ inputs.platform_subscription }}-${{ inputs.environment }}.terraform.tfstate"
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets[env.SUBSCRIPTION_SECRET] }}
-
-      - name: Terraform Plan
-        working-directory: infra/terraform/modules/${{ inputs.platform_subscription == 'management' && 'platform-management' || inputs.platform_subscription == 'security' && 'platform-security' || inputs.platform_subscription }}
-        run: terraform plan -out=tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets[env.SUBSCRIPTION_SECRET] }}
-
-      - name: Terraform Apply
-        if: inputs.action == 'deploy'
-        working-directory: infra/terraform/modules/${{ inputs.platform_subscription == 'management' && 'platform-management' || inputs.platform_subscription == 'security' && 'platform-security' || inputs.platform_subscription }}
-        run: terraform apply -auto-approve tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets[env.SUBSCRIPTION_SECRET] }}
-
-  # =========================================================================
-  # Post-Deployment Validation
-  # =========================================================================
-  validate:
-    name: Post-Deployment Validation
-    needs: [deploy-bicep, deploy-terraform]
+  platform-management:
+    name: "1 · Platform Management"
     if: |
-      always() && inputs.action == 'deploy' &&
-      (needs.deploy-bicep.result == 'success' || needs.deploy-terraform.result == 'success')
+      (inputs.deploy_only == '' && inputs.start_from == 'management') ||
+      inputs.deploy_only == 'management'
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-management
+      project_name: platform-management
+      environment: prod
+      github_environment: platform-management
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 2. Connectivity — hub networking (requires management for logging)
+  # =========================================================================
+  platform-connectivity:
+    name: "2 · Platform Connectivity"
+    needs: platform-management
+    if: |
+      always() &&
+      (
+        (inputs.deploy_only == '' && (inputs.start_from == 'management' || inputs.start_from == 'connectivity')) ||
+        inputs.deploy_only == 'connectivity'
+      ) &&
+      (needs.platform-management.result == 'success' || needs.platform-management.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-connectivity
+      project_name: platform-connectivity
+      environment: prod
+      github_environment: platform-connectivity
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
+      MGMT_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 3. Identity — domain services (requires connectivity for networking)
+  # =========================================================================
+  platform-identity:
+    name: "3 · Platform Identity"
+    needs: platform-connectivity
+    if: |
+      always() &&
+      (
+        (inputs.deploy_only == '' && inputs.start_from != 'security') ||
+        inputs.deploy_only == 'identity'
+      ) &&
+      (needs.platform-connectivity.result == 'success' || needs.platform-connectivity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-identity
+      project_name: platform-identity
+      environment: prod
+      github_environment: platform-identity
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # 4. Security — dedicated SecOps (requires all 3 above)
+  # =========================================================================
+  platform-security:
+    name: "4 · Platform Security"
+    needs: platform-identity
+    if: |
+      always() &&
+      (
+        (inputs.deploy_only == '') ||
+        inputs.deploy_only == 'security'
+      ) &&
+      (needs.platform-identity.result == 'success' || needs.platform-identity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-security
+      project_name: platform-security
+      environment: prod
+      github_environment: platform-security
+      framework: ${{ inputs.framework }}
+      location: ${{ inputs.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ inputs.prefix }}
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+      MGMT_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # Summary — report on all 4 platform deployments
+  # =========================================================================
+  summary:
+    name: "Platform Deployment Summary"
+    needs: [platform-management, platform-connectivity, platform-identity, platform-security]
+    if: always()
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Validate Landing Zone Resources
+      - name: Generate summary
         run: |
-          python -c "
-          import asyncio, json
-          from azure.identity import DefaultAzureCredential
-          from src.config.settings import Settings
-          from src.tools.resource_graph import ResourceGraphClient
+          echo "=========================================="
+          echo "  Platform Landing Zone Deployment Report"
+          echo "=========================================="
+          echo ""
+          echo "  1. Management:    ${{ needs.platform-management.result }}"
+          echo "  2. Connectivity:  ${{ needs.platform-connectivity.result }}"
+          echo "  3. Identity:      ${{ needs.platform-identity.result }}"
+          echo "  4. Security:      ${{ needs.platform-security.result }}"
+          echo ""
+          echo "Framework: ${{ inputs.framework }}"
+          echo "Action:    ${{ inputs.action }}"
+          echo "Location:  ${{ inputs.location }}"
+          echo ""
 
-          async def main():
-              credential = DefaultAzureCredential()
-              settings = Settings()
-              client = ResourceGraphClient(credential=credential, settings=settings)
-              result = await client.validate_landing_zone('${{ secrets[env.SUBSCRIPTION_SECRET] }}')
-              print(json.dumps(result, indent=2))
-              assert result.get('validation_passed', False), 'Landing zone validation failed'
+          # Check for failures
+          FAILED=0
+          for result in "${{ needs.platform-management.result }}" \
+                        "${{ needs.platform-connectivity.result }}" \
+                        "${{ needs.platform-identity.result }}" \
+                        "${{ needs.platform-security.result }}"; do
+            if [ "$result" = "failure" ]; then
+              FAILED=$((FAILED + 1))
+            fi
+          done
 
-          asyncio.run(main())
-          "
+          if [ $FAILED -gt 0 ]; then
+            echo "WARNING: $FAILED platform deployment(s) failed."
+            echo "Fix failures before deploying application landing zones."
+            exit 1
+          fi
+
+          echo "All platform landing zones deployed successfully."
+          echo "Next step: Run '3 · Deploy Application Landing Zones'"
+
+      - name: Notify Teams
+        if: always() && env.TEAMS_WEBHOOK_URL != ''
+        run: |
+          curl -s -H "Content-Type: application/json" -d '{
+            "type": "message",
+            "attachments": [{
+              "contentType": "application/vnd.microsoft.card.adaptive",
+              "content": {
+                "type": "AdaptiveCard", "version": "1.4",
+                "body": [
+                  {"type": "TextBlock", "text": "Platform LZ Deployment Complete", "weight": "bolder", "size": "large"},
+                  {"type": "FactSet", "facts": [
+                    {"title": "Management",   "value": "${{ needs.platform-management.result }}"},
+                    {"title": "Connectivity",  "value": "${{ needs.platform-connectivity.result }}"},
+                    {"title": "Identity",     "value": "${{ needs.platform-identity.result }}"},
+                    {"title": "Security",     "value": "${{ needs.platform-security.result }}"},
+                    {"title": "Framework",    "value": "${{ inputs.framework }}"}
+                  ]}
+                ]
+              }
+            }]
+          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}

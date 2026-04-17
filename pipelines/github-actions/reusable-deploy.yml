@@ -1,55 +1,217 @@
-name: Reusable Deploy Workflow
+# ============================================================================
+# Reusable Landing Zone Deployment Workflow
+# Called by platform-deploy.yml and app-deploy.yml
+# Handles: validate → plan → deploy → verify for a single subscription
+# ============================================================================
+name: _Reusable Deploy
 
 on:
   workflow_call:
     inputs:
-      template_file:
-        description: "Path to Bicep template or Terraform module directory"
+      profile:
+        description: 'Landing zone profile name'
+        required: true
+        type: string
+      project_name:
+        description: 'Project name for this deployment'
+        required: true
+        type: string
+      subscription_id:
+        description: 'Target Azure subscription ID (direct, used by platform-deploy)'
+        required: false
+        type: string
+        default: ''
+      subscription_id_secret:
+        description: 'Name of the GitHub secret holding the subscription ID (used by app-deploy)'
+        required: false
+        type: string
+        default: ''
+      environment:
+        description: 'Target environment (dev/prod)'
+        required: true
+        type: string
+      github_environment:
+        description: 'GitHub environment for approval gates'
         required: true
         type: string
       framework:
-        description: "IaC framework: bicep or terraform"
-        required: true
-        type: string
-      environment:
-        description: "Target environment"
-        required: true
-        type: string
-      action:
-        description: "plan or deploy"
+        description: 'IaC framework (bicep/terraform)'
         required: true
         type: string
       location:
-        description: "Azure region"
-        required: false
-        type: string
-        default: "southcentralus"
-      deployment_name:
-        description: "Custom deployment name prefix"
-        required: false
-        type: string
-        default: "alz"
-    secrets:
-      AZURE_CLIENT_ID:
+        description: 'Azure region'
         required: true
+        type: string
+      action:
+        description: 'plan or deploy'
+        required: true
+        type: string
+      runner_label:
+        description: 'GitHub runner label (self-hosted or ubuntu-latest)'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+      # CHANGED: Added deployment_scope and resource_group inputs to support
+      # both subscription-level and resource-group-level Bicep deployments.
+      # RG-scoped modules (e.g. management) use 'group'; root main.bicep uses 'subscription'.
+      deployment_scope:
+        description: 'Bicep deployment scope: subscription or group'
+        required: false
+        type: string
+        default: 'subscription'
+      resource_group:
+        description: 'Resource group name (required when deployment_scope=group)'
+        required: false
+        type: string
+        default: ''
+      prefix:
+        description: 'Resource naming prefix (e.g. alz, mrg) — used to derive LAW ID and RG names'
+        required: false
+        type: string
+        default: 'alz'
+    secrets:
       AZURE_TENANT_ID:
         required: true
-      AZURE_SUBSCRIPTION_ID:
+      AZURE_CLIENT_ID:
         required: true
+      SUBSCRIPTION_ID:
+        required: false
+      MGMT_SUBSCRIPTION_ID:
+        required: false
       TF_STATE_STORAGE_ACCOUNT:
         required: false
-    outputs:
-      deployment_status:
-        description: "Deployment outcome"
-        value: ${{ jobs.deploy.outputs.status }}
+      TEAMS_WEBHOOK_URL:
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
-    name: "Deploy (${{ inputs.framework }})"
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    environment: ${{ inputs.environment }}
+  # =========================================================================
+  # Resolve subscription ID from either direct input or secret name
+  # =========================================================================
+  resolve:
+    name: "Resolve · ${{ inputs.project_name }}"
+    runs-on: ${{ inputs.runner_label }}
     outputs:
-      status: ${{ steps.result.outputs.status }}
+      sub_id: ${{ steps.resolve.outputs.sub_id }}
+    steps:
+      - name: Resolve subscription ID
+        id: resolve
+        env:
+          DIRECT_ID: ${{ inputs.subscription_id }}
+          SECRET_ID: ${{ secrets.SUBSCRIPTION_ID }}
+          SECRET_NAME: ${{ inputs.subscription_id_secret }}
+          ALL_SECRETS: ${{ toJson(secrets) }}
+        run: |
+          if [ -n "$DIRECT_ID" ]; then
+            echo "sub_id=$DIRECT_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from direct input: ${DIRECT_ID:0:8}..."
+          elif [ -n "$SECRET_ID" ]; then
+            echo "sub_id=$SECRET_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from SUBSCRIPTION_ID secret: ${SECRET_ID:0:8}..."
+          elif [ -n "$SECRET_NAME" ]; then
+            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
+            if [ -z "$SUB_ID" ]; then
+              echo "ERROR: Secret '$SECRET_NAME' not found. Set it in GitHub repo Settings > Secrets."
+              exit 1
+            fi
+            echo "sub_id=$SUB_ID" >> "$GITHUB_OUTPUT"
+            echo "Resolved from secret '$SECRET_NAME': ${SUB_ID:0:8}..."
+          else
+            echo "ERROR: Either subscription_id or subscription_id_secret must be provided"
+            exit 1
+          fi
+
+  # =========================================================================
+  # Stage 1: Validate profile config + IaC templates
+  # =========================================================================
+  validate:
+    name: "Validate · ${{ inputs.project_name }}"
+    needs: resolve
+    runs-on: ${{ inputs.runner_label }}
+    outputs:
+      profile_valid: ${{ steps.check.outputs.valid }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Validate profile configuration
+        id: check
+        run: |
+          python -c "
+          import yaml, sys, json
+
+          with open('src/config/landing_zone_profiles.yaml') as f:
+              config = yaml.safe_load(f)
+
+          profile = '${{ inputs.profile }}'
+          all_profiles = {}
+
+          # Merge platform + application profiles
+          for section in ['platform_profiles', 'profiles']:
+              if section in config:
+                  all_profiles.update(config[section])
+
+          if profile not in all_profiles:
+              print(f'ERROR: Profile \"{profile}\" not found')
+              print(f'Available: {list(all_profiles.keys())}')
+              sys.exit(1)
+
+          p = all_profiles[profile]
+          print(f'Profile validated: {profile}')
+          print(f'  Description: {p.get(\"description\", \"N/A\")}')
+          print(f'  Deploy order: {p.get(\"deploy_order\", \"N/A\")}')
+
+          with open('$GITHUB_OUTPUT', 'a') as f:
+              f.write('valid=true\n')
+          "
+
+      - name: Validate security baseline
+        run: |
+          python scripts/validators/validate_security_baseline.py \
+            infra/${{ inputs.framework }}/modules/
+
+      - name: Validate cost governance
+        run: |
+          python scripts/validators/validate_cost_governance.py \
+            infra/${{ inputs.framework }}/modules/
+
+      - name: Validate IaC templates
+        run: |
+          if [ "${{ inputs.framework }}" = "bicep" ]; then
+            az bicep build --file infra/bicep/main.bicep
+            echo "Bicep validated"
+          else
+            cd infra/terraform
+            terraform init -backend=false
+            terraform validate
+            echo "Terraform validated"
+          fi
+
+  # =========================================================================
+  # Stage 2: Plan — preview what will change
+  # =========================================================================
+  plan:
+    name: "Plan · ${{ inputs.project_name }}"
+    needs: validate
+    runs-on: ${{ inputs.runner_label }}
     steps:
       - uses: actions/checkout@v4
 
@@ -58,72 +220,355 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      # ── Bicep Path ──────────────────────────────────────────────────────
-      - name: Install Bicep CLI
-        if: inputs.framework == 'bicep'
-        run: az bicep install
+      - name: Ensure Resource Group exists
+        if: inputs.deployment_scope == 'group' && inputs.resource_group != ''
+        run: |
+          az group create \
+            --name ${{ inputs.resource_group }} \
+            --location ${{ inputs.location }} \
+            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
 
       - name: Bicep What-If
-        if: inputs.framework == 'bicep' && inputs.action == 'plan'
+        if: inputs.framework == 'bicep'
+        # CHANGED: Use bicepparam 'using' directive instead of --template-file.
+        # Support both subscription and resource-group scoped deployments.
+        # Param file pattern: {project_name}-{environment}.bicepparam
         run: |
-          az deployment sub what-if \
-            --location ${{ inputs.location }} \
-            --template-file ${{ inputs.template_file }}
+          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
+          if [ ! -f "$PARAMS_FILE" ]; then
+            echo "ERROR: Parameters file not found: $PARAMS_FILE"
+            ls -la infra/bicep/parameters/ || true
+            exit 1
+          fi
 
-      - name: Bicep Deploy
-        if: inputs.framework == 'bicep' && inputs.action == 'deploy'
-        run: |
-          az deployment sub create \
-            --location ${{ inputs.location }} \
-            --template-file ${{ inputs.template_file }} \
-            --name "${{ inputs.deployment_name }}-$(date +%Y%m%d%H%M%S)"
+          # Build extra params for LAW ID if MGMT subscription is available
+          EXTRA_PARAMS=""
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+            # Derive region shortcode to match Bicep naming convention
+            declare -A REGION_MAP=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT="${REGION_MAP[${{ inputs.location }}]:-${{ inputs.location }}}"
+            PREFIX="${{ inputs.prefix }}"
+            LAW_RG="${PREFIX}-management-${REGION_SHORT}-rg"
+            LAW_NAME="${PREFIX}-law"
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/${LAW_RG}/providers/Microsoft.OperationalInsights/workspaces/${LAW_NAME}"
+            if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
+              EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
+            else
+              EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LAW_ID}"
+            fi
+          fi
 
-      # ── Terraform Path ──────────────────────────────────────────────────
-      - name: Setup Terraform
+          if [ "${{ inputs.deployment_scope }}" = "group" ]; then
+            az deployment group what-if \
+              --resource-group ${{ inputs.resource_group }} \
+              --parameters "$PARAMS_FILE" \
+              $EXTRA_PARAMS \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }}
+          else
+            az deployment sub what-if \
+              --location ${{ inputs.location }} \
+              --parameters "$PARAMS_FILE" \
+              $EXTRA_PARAMS \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }}
+          fi
+
+      - name: Terraform Plan
         if: inputs.framework == 'terraform'
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.9.0"
-
-      - name: Terraform Init
-        if: inputs.framework == 'terraform'
-        working-directory: ${{ inputs.template_file }}
+        working-directory: infra/terraform
         run: |
           terraform init \
             -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=${{ inputs.deployment_name }}-${{ inputs.environment }}.terraform.tfstate"
+            -backend-config="key=${{ inputs.project_name }}.${{ inputs.environment }}.tfstate"
+
+          terraform plan \
+            -var-file="environments/${{ inputs.environment }}/terraform.tfvars" \
+            -var="subscription_id=${{ secrets.SUBSCRIPTION_ID }}" \
+            -var="profile=${{ inputs.profile }}" \
+            -var="project_name=${{ inputs.project_name }}" \
+            -var="location=${{ inputs.location }}" \
+            -out=tfplan
+
+          terraform show -no-color tfplan > plan-output.txt
         env:
           ARM_USE_OIDC: true
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Terraform Plan
+      - name: Upload plan artifact
         if: inputs.framework == 'terraform'
-        working-directory: ${{ inputs.template_file }}
-        run: terraform plan -out=tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ inputs.project_name }}
+          path: infra/terraform/tfplan
 
-      - name: Terraform Apply
-        if: inputs.framework == 'terraform' && inputs.action == 'deploy'
-        working-directory: ${{ inputs.template_file }}
-        run: terraform apply -auto-approve tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  # =========================================================================
+  # Stage 3: Deploy — apply changes (requires GitHub environment approval)
+  # =========================================================================
+  deploy:
+    name: "Deploy · ${{ inputs.project_name }}"
+    needs: plan
+    if: inputs.action == 'deploy'
+    runs-on: ${{ inputs.runner_label }}
+    environment: ${{ inputs.github_environment }}
+    outputs:
+      deployment_id: ${{ steps.deploy-bicep.outputs.deployment_id || steps.deploy-tf.outputs.deployment_id }}
+    steps:
+      - uses: actions/checkout@v4
 
-      # ── Result ──────────────────────────────────────────────────────────
-      - name: Set Result
-        id: result
-        if: always()
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Ensure Resource Group exists
+        if: inputs.deployment_scope == 'group' && inputs.resource_group != ''
         run: |
-          echo "status=${{ job.status }}" >> "$GITHUB_OUTPUT"
+          az group create \
+            --name ${{ inputs.resource_group }} \
+            --location ${{ inputs.location }} \
+            --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
+
+      - name: Deploy with Bicep
+        id: deploy-bicep
+        if: inputs.framework == 'bicep'
+        # CHANGED: Use bicepparam 'using' directive instead of --template-file.
+        # Support both subscription and resource-group scoped deployments.
+        run: |
+          DEPLOYMENT_NAME="alz-${{ inputs.project_name }}-$(date +%Y%m%d%H%M%S)"
+          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
+
+          # Build extra params for LAW ID if MGMT subscription is available
+          EXTRA_PARAMS=""
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+            # Derive region shortcode to match Bicep naming convention
+            declare -A REGION_MAP=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT="${REGION_MAP[${{ inputs.location }}]:-${{ inputs.location }}}"
+            PREFIX="${{ inputs.prefix }}"
+            LAW_RG="${PREFIX}-management-${REGION_SHORT}-rg"
+            LAW_NAME="${PREFIX}-law"
+            LAW_ID="/subscriptions/${{ secrets.MGMT_SUBSCRIPTION_ID }}/resourceGroups/${LAW_RG}/providers/Microsoft.OperationalInsights/workspaces/${LAW_NAME}"
+            if [[ "${{ inputs.project_name }}" == "platform-security" ]]; then
+              EXTRA_PARAMS="--parameters managementLogAnalyticsWorkspaceId=${LAW_ID}"
+            else
+              EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LAW_ID}"
+            fi
+          fi
+
+          if [ "${{ inputs.deployment_scope }}" = "group" ]; then
+            az deployment group create \
+              --resource-group ${{ inputs.resource_group }} \
+              --parameters "$PARAMS_FILE" \
+              $EXTRA_PARAMS \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+              --name "$DEPLOYMENT_NAME"
+          else
+            az deployment sub create \
+              --location ${{ inputs.location }} \
+              --parameters "$PARAMS_FILE" \
+              $EXTRA_PARAMS \
+              --subscription ${{ secrets.SUBSCRIPTION_ID }} \
+              --name "$DEPLOYMENT_NAME"
+          fi
+
+          echo "deployment_id=$DEPLOYMENT_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Download Terraform plan
+        if: inputs.framework == 'terraform'
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ inputs.project_name }}
+          path: infra/terraform/
+
+      - name: Deploy with Terraform
+        id: deploy-tf
+        if: inputs.framework == 'terraform'
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ inputs.project_name }}.${{ inputs.environment }}.tfstate"
+
+          terraform apply -auto-approve tfplan
+
+          echo "deployment_id=tf-${{ inputs.project_name }}-$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+        env:
+          ARM_USE_OIDC: true
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+
+  # =========================================================================
+  # Stage 4: Verify — post-deployment compliance check
+  # =========================================================================
+  verify:
+    name: "Verify · ${{ inputs.project_name }}"
+    needs: deploy
+    if: inputs.action == 'deploy'
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Run post-deployment validation
+        run: |
+          python -c "
+          import asyncio, json, sys
+          from src.tools.drift_detector import DriftDetector
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+
+          async def main():
+              settings = Settings()
+              detector = DriftDetector(DefaultAzureCredential(), settings)
+              scope = '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}'
+
+              # Capture baseline for future drift detection
+              baseline = await detector.capture_baseline(scope)
+              print(f'Baseline captured: {json.dumps(baseline, indent=2, default=str)[:500]}')
+
+          asyncio.run(main())
+          "
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Run compliance scan
+        id: compliance
+        continue-on-error: true
+        run: |
+          python -c "
+          import asyncio, json, sys
+          from src.agents.monitoring_agent import MonitoringAgent
+          from src.config.settings import Settings
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+
+          async def main():
+              settings = Settings()
+              settings.azure.subscription_id = '${{ secrets.SUBSCRIPTION_ID }}'
+              kernel = Kernel()
+              agent = MonitoringAgent(kernel, DefaultAzureCredential(), settings)
+              result = await agent.run_compliance_scan()
+
+              pct = result['summary']['compliance_percentage']
+              violations = len(result.get('violations', []))
+              print(f'Compliance: {pct:.1f}%')
+              print(f'Violations: {violations}')
+
+              if pct < 80:
+                  print(f'::warning::Compliance {pct:.1f}% is below 80% threshold ({violations} violations)')
+
+              print('Compliance scan complete')
+
+          asyncio.run(main())
+          "
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Generate As-Built Technical Design Document
+        id: tdd
+        continue-on-error: true
+        run: |
+          pip install cairosvg python-docx pillow pyyaml 2>/dev/null
+
+          # Read subscription name from config
+          SUB_NAME=$(jq -r '
+            (.platform + .application) | to_entries[]
+            | select(.value.subscription_id == "${{ secrets.SUBSCRIPTION_ID }}"
+                     or .key == "${{ inputs.project_name }}")
+            | .value.subscription_name // .key
+          ' environments/subscriptions.json 2>/dev/null || echo "${{ inputs.project_name }}")
+
+          python -c "
+          from src.tools.tdd_generator import generate_tdd_for_deployment
+
+          path = generate_tdd_for_deployment(
+              project_name='${{ inputs.project_name }}',
+              profile='${{ inputs.profile }}',
+              subscription_id='${{ secrets.SUBSCRIPTION_ID }}',
+              subscription_name='${SUB_NAME}',
+              location='${{ inputs.location }}',
+              environment='${{ inputs.environment }}',
+              framework='${{ inputs.framework }}',
+              deployment_id='${{ needs.deploy.outputs.deployment_id }}',
+              output_dir='docs/tdd',
+              config_path='environments/subscriptions.json',
+          )
+          print(f'TDD generated: {path}')
+          "
+
+          echo "tdd_path=docs/tdd/" >> "$GITHUB_OUTPUT"
+
+      - name: Upload TDD artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tdd-${{ inputs.project_name }}
+          path: docs/tdd/TDD_${{ inputs.project_name }}_*.docx
+          retention-days: 90
+
+      - name: Notify Teams on completion
+        if: always()
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          if [ -z "$TEAMS_WEBHOOK" ]; then
+            echo "No Teams webhook configured, skipping notification."
+            exit 0
+          fi
+
+          STATUS="${{ job.status }}"
+          COLOR="good"
+          [ "$STATUS" != "success" ] && COLOR="attention"
+
+          curl -s -H "Content-Type: application/json" -d '{
+            "type": "message",
+            "attachments": [{
+              "contentType": "application/vnd.microsoft.card.adaptive",
+              "content": {
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [
+                  {"type": "TextBlock", "text": "ALZ Deployment: ${{ inputs.project_name }}", "weight": "bolder", "size": "large"},
+                  {"type": "FactSet", "facts": [
+                    {"title": "Profile", "value": "${{ inputs.profile }}"},
+                    {"title": "Subscription", "value": "${{ secrets.SUBSCRIPTION_ID }}"},
+                    {"title": "Environment", "value": "${{ inputs.environment }}"},
+                    {"title": "Status", "value": "'"$STATUS"'"},
+                    {"title": "Framework", "value": "${{ inputs.framework }}"},
+                    {"title": "TDD", "value": "Generated as pipeline artifact"}
+                  ]}
+                ]
+              }
+            }]
+          }' "$TEAMS_WEBHOOK"

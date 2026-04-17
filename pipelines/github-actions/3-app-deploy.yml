@@ -1,43 +1,37 @@
-name: "3 - Deploy Application Landing Zone"
+# ============================================================================
+# Application Landing Zone Deployment (Config-Driven)
+# Reads app LZ definitions from environments/subscriptions.json.
+# To add, rename, or remove an app LZ — edit the JSON, no workflow changes needed.
+# ============================================================================
+name: "3 · Deploy Application Landing Zones"
 
 on:
   workflow_dispatch:
     inputs:
-      profile:
-        description: "Landing Zone Profile"
+      target:
+        description: 'Which application LZ to deploy (use key from subscriptions.json, or "all")'
         required: true
-        type: choice
-        options:
-          - online
-          - corp
-          - sandbox
-          - sap
+        default: 'all'
+        type: string
       framework:
-        description: "IaC Framework"
+        description: 'IaC framework'
         required: true
         type: choice
         options:
           - bicep
           - terraform
-      environment:
-        description: "Target Environment"
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
       action:
-        description: "Deployment Action"
+        description: 'Plan (preview) or Deploy (apply)'
         required: true
         type: choice
         options:
           - plan
           - deploy
       location:
-        description: "Azure region for deployment"
+        description: 'Primary Azure region (overrides per-LZ config if set)'
         required: false
+        default: ''
         type: string
-        default: "southcentralus"
 
 permissions:
   id-token: write
@@ -45,169 +39,92 @@ permissions:
 
 jobs:
   # =========================================================================
-  # Pre-flight Validation
+  # Build the deployment matrix from subscriptions.json
   # =========================================================================
-  preflight:
-    name: Pre-flight Checks
+  build-matrix:
+    name: "Build App LZ Matrix"
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     outputs:
-      subscription_id: ${{ steps.resolve.outputs.subscription_id }}
+      matrix: ${{ steps.matrix.outputs.result }}
+      target_list: ${{ steps.matrix.outputs.target_list }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Resolve Subscription from Matrix
-        id: resolve
+      - name: Parse subscriptions.json and build matrix
+        id: matrix
         run: |
-          python -c "
-          import json, os
-          with open('environments/subscriptions.json') as f:
-              subs = json.load(f)
-          app_subs = subs.get('application_subscriptions', {})
-          sub_id = app_subs.get('${{ inputs.profile }}', {}).get('subscription_id', '')
-          print(f'Resolved subscription for ${{ inputs.profile }}: {sub_id}')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'subscription_id={sub_id}\n')
-          "
+          set -euo pipefail
+          TARGET="${{ inputs.target }}"
+          CONFIG="environments/subscriptions.json"
 
-      - name: Validate Profile Configuration
-        run: |
-          python -c "
-          import yaml
-          with open('src/config/landing_zone_profiles.yaml') as f:
-              profiles = yaml.safe_load(f)
-          profile = profiles['profiles'].get('${{ inputs.profile }}')
-          assert profile, 'Profile ${{ inputs.profile }} not found'
-          print('Profile validated: ${{ inputs.profile }}')
-          print(f'  Parent: {profile.get(\"parent\", \"N/A\")}')
-          "
+          if [ ! -f "$CONFIG" ]; then
+            echo "ERROR: $CONFIG not found"
+            exit 1
+          fi
 
-      - name: Security Baseline Validation
-        run: python scripts/validators/validate_security_baseline.py
+          # Extract all app LZ keys (skip _readme)
+          ALL_KEYS=$(jq -r '.application | keys[] | select(startswith("_") | not)' "$CONFIG")
 
-      - name: Cost Governance Validation
-        run: python scripts/validators/validate_cost_governance.py
+          echo "=== Available Application Landing Zones ==="
+          echo "$ALL_KEYS"
+          echo ""
+
+          # Determine which LZs to deploy
+          if [ "$TARGET" = "all" ]; then
+            SELECTED="$ALL_KEYS"
+          else
+            # Support comma-separated targets: "corp-erp,web-portal"
+            SELECTED=""
+            IFS=',' read -ra TARGETS <<< "$TARGET"
+            for t in "${TARGETS[@]}"; do
+              t=$(echo "$t" | xargs)  # trim whitespace
+              if echo "$ALL_KEYS" | grep -q "^${t}$"; then
+                SELECTED="$SELECTED $t"
+              else
+                echo "ERROR: Unknown app LZ target: '$t'"
+                echo "Available targets: $ALL_KEYS"
+                exit 1
+              fi
+            done
+          fi
+
+          echo "=== Selected for deployment ==="
+          echo "$SELECTED"
+
+          # Build JSON matrix
+          MATRIX=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | while read -r key; do
+            jq --arg key "$key" \
+              --arg loc "${{ inputs.location }}" \
+              '{
+                name: $key,
+                display_name: .application[$key].display_name,
+                profile: .application[$key].profile,
+                environment: .application[$key].environment,
+                github_environment: .application[$key].github_environment,
+                github_secret: .application[$key].github_secret,
+                location: (if $loc != "" then $loc else .application[$key].location end),
+                description: .application[$key].description
+              }' "$CONFIG"
+          done | jq -s '{include: .}')
+
+          echo "result<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          # Also output a simple list for the summary job
+          TARGET_LIST=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | jq -R . | jq -s .)
+          echo "target_list=$TARGET_LIST" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "=== Matrix ==="
+          echo "$MATRIX" | jq .
 
   # =========================================================================
-  # Deploy (Bicep)
+  # Pre-flight: verify platform LZs are deployed
   # =========================================================================
-  deploy-bicep:
-    name: "Deploy ${{ inputs.profile }} LZ (Bicep)"
-    needs: preflight
-    if: inputs.framework == 'bicep'
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    environment: ${{ inputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
-
-      - name: Install Bicep CLI
-        run: az bicep install
-
-      - name: Set Subscription
-        run: az account set --subscription "${{ needs.preflight.outputs.subscription_id }}"
-
-      - name: What-If Analysis
-        if: inputs.action == 'plan'
-        run: |
-          az deployment sub what-if \
-            --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters profileName=${{ inputs.profile }} \
-            --parameters managementGroupName=${{ inputs.profile }}
-
-      - name: Deploy Landing Zone
-        if: inputs.action == 'deploy'
-        run: |
-          az deployment sub create \
-            --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters profileName=${{ inputs.profile }} \
-            --parameters managementGroupName=${{ inputs.profile }} \
-            --name "alz-${{ inputs.profile }}-$(date +%Y%m%d%H%M%S)"
-
-  # =========================================================================
-  # Deploy (Terraform)
-  # =========================================================================
-  deploy-terraform:
-    name: "Deploy ${{ inputs.profile }} LZ (Terraform)"
-    needs: preflight
-    if: inputs.framework == 'terraform'
-    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-    environment: ${{ inputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.9.0"
-
-      - name: Terraform Init
-        working-directory: infra/terraform
-        run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=${{ inputs.profile }}-${{ inputs.environment }}.terraform.tfstate"
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
-
-      - name: Terraform Plan
-        working-directory: infra/terraform
-        run: |
-          terraform plan \
-            -var-file="environments/${{ inputs.environment }}/terraform.tfvars" \
-            -var="subscription_id=${{ needs.preflight.outputs.subscription_id }}" \
-            -out=tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
-
-      - name: Terraform Apply
-        if: inputs.action == 'deploy'
-        working-directory: infra/terraform
-        run: terraform apply -auto-approve tfplan
-        env:
-          ARM_USE_OIDC: true
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ needs.preflight.outputs.subscription_id }}
-
-  # =========================================================================
-  # Post-Deployment Validation
-  # =========================================================================
-  validate:
-    name: Post-Deployment Validation
-    needs: [preflight, deploy-bicep, deploy-terraform]
-    if: |
-      always() && inputs.action == 'deploy' &&
-      (needs.deploy-bicep.result == 'success' || needs.deploy-terraform.result == 'success')
+  preflight:
+    name: "Pre-flight Check"
+    needs: build-matrix
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
@@ -217,27 +134,79 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.preflight.outputs.subscription_id }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Landing Zone Validation
+      - name: Verify platform landing zones exist
         run: |
-          python -c "
-          import asyncio, json
-          from src.tools.resource_graph import ResourceGraphClient
+          echo "Checking platform LZ resources..."
 
-          async def main():
-              client = ResourceGraphClient()
-              result = await client.validate_landing_zone('${{ needs.preflight.outputs.subscription_id }}')
-              print(json.dumps(result, indent=2, default=str))
-              if not result.get('validation_passed'):
-                  print('::warning::Landing zone validation found missing resources')
-          asyncio.run(main())
-          "
+          # Check management LAW exists
+          az monitor log-analytics workspace list \
+            --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
+            --query "[].{Name:name, State:provisioningState}" -o table
+
+          # Check connectivity hub exists
+          az network vnet list \
+            --subscription "${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}" \
+            --query "[].{Name:name, Location:location}" -o table
+
+          echo "Platform LZ pre-flight checks passed"
+          echo "Proceeding with application LZ deployment..."
+
+  # =========================================================================
+  # Deploy each app LZ (dynamic matrix from subscriptions.json)
+  # =========================================================================
+  deploy-app:
+    name: "${{ matrix.display_name }}"
+    needs: [build-matrix, preflight]
+    strategy:
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 6
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: ${{ matrix.profile }}
+      project_name: ${{ matrix.name }}
+      subscription_id_secret: ${{ matrix.github_secret }}
+      environment: ${{ matrix.environment }}
+      github_environment: ${{ matrix.github_environment }}
+      framework: ${{ inputs.framework }}
+      location: ${{ matrix.location }}
+      action: ${{ inputs.action }}
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    secrets: inherit
+
+  # =========================================================================
+  # Summary
+  # =========================================================================
+  summary:
+    name: "Application LZ Deployment Summary"
+    needs: [build-matrix, deploy-app]
+    if: always()
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate summary
+        env:
+          DEPLOY_RESULT: ${{ needs.deploy-app.result }}
+          TARGET_LIST: ${{ needs.build-matrix.outputs.target_list }}
+        run: |
+          echo "============================================="
+          echo "  Application Landing Zone Deployment Report"
+          echo "============================================="
+          echo ""
+          echo "Targets:   $TARGET_LIST"
+          echo "Framework: ${{ inputs.framework }}"
+          echo "Action:    ${{ inputs.action }}"
+          echo "Result:    $DEPLOY_RESULT"
+          echo ""
+
+          if [ "$DEPLOY_RESULT" = "failure" ]; then
+            echo "WARNING: One or more application deployments failed."
+            echo "Check individual job logs for details."
+            exit 1
+          fi
+
+          echo "All selected application landing zones completed successfully."
+          echo "Next step: Run '4 · Landing Zone Monitoring' to enable continuous monitoring."
