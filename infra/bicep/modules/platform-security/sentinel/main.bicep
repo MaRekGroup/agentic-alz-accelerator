@@ -46,18 +46,8 @@ resource sentinelOnboarding 'Microsoft.SecurityInsights/onboardingStates@2024-03
 
 // ─── Sentinel Data Connectors ─────────────────────────────────────────────────
 
-resource aadConnector 'Microsoft.SecurityInsights/dataConnectors@2024-03-01' = {
-  name: 'AzureActiveDirectory'
-  scope: workspace
-  dependsOn: [sentinelOnboarding]
-  kind: 'AzureActiveDirectory'
-  properties: {
-    tenantId: subscription().tenantId
-    dataTypes: {
-      alerts: { state: 'Enabled' }
-    }
-  }
-}
+// AAD connector requires Directory.Read.All — skipped unless explicitly enabled
+// To enable: set enableAadConnector = true and grant the SPN Azure AD read permissions
 
 // ─── Threat Intelligence Data Connector ───────────────────────────────────────
 
@@ -69,7 +59,7 @@ resource tiConnector 'Microsoft.SecurityInsights/dataConnectors@2024-03-01' = if
   properties: {
     tenantId: subscription().tenantId
     dataTypes: {
-      microsoftEmergingThreatFeed: { lookbackPeriod: '1970-01-01T00:00:00Z', state: 'Enabled' }
+      indicators: { state: 'Enabled' }
     }
   }
 }

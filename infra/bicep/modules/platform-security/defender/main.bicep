@@ -38,11 +38,6 @@ resource securityContact 'Microsoft.Security/securityContacts@2020-01-01-preview
       state: 'On'
       roles: ['Owner', 'ServiceAdmin']
     }
-  }
-}
-
-// ─── Workspace Settings ───────────────────────────────────────────────────────
-
 resource workspaceSettings 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = {
   name: 'default'
   properties: {

@@ -29,7 +29,35 @@
 - Old MCP dirs removed: azure-deployment/, azure-monitor/, azure-policy/, azure-resource-graph/, azure-pricing/
 - `.gitmodules` maps `mcp/azure-pricing-mcp` → `https://github.com/msftnadavbh/AzurePricingMCP.git`
 
+## Diagram Detail Improvements (Round 2)
+- **01-MG Hierarchy**: Added policy assignment indicators at each MG level
+- **02-Hub-Spoke**: Added CIDRs, named subnets, NSGs, route tables, DDoS, Private DNS Zones, VNet Peering labels
+- **03-Security/Gov/Mon**: Added Compliance Dashboard, Identity & Access (PIM/RBAC, Conditional Access), Action Groups, budget alerts, diagnostic settings flow
+- **04-ALZ Architecture**: Added Azure Monitor, Bastion, Private DNS, PIM/RBAC, NSGs, Private Endpoints, App GW + WAF, Route Tables, Compliance, CIDRs
+
+## Guide HTML Fixes (Round 3)
+- MCP count 5→3 (hero stat, description card, architecture chips, MCP table)
+- Added Step 3 Design/Artisan (progress tracker, workflow step card, agent roster row)
+- Agent count 10→11 (hero stat, sidebar badge, roster header)
+- Tools count 7→8 (sidebar badge, added python_diagram_generator.py row)
+- MCP architecture layer: 5 chips → 3 (Pricing, Platform consolidated, Draw.io)
+- MCP table: 5 rows → 3 rows with module paths
+- Removed 3 references to non-existent ALZ_Bootstrap_Settings_Checklist.xlsx, replaced with inline table
+
+## Deployment Status (as of April 16)
+- **Management LZ**: Bicep deployment SUCCEEDED via GitHub Actions (Log Analytics, Automation Account, Action Group, Budget deployed). Post-deploy Python verify step failed (pydantic AzureAISettings error — FIXED in commit d9dde2f).
+- **Connectivity LZ**: NOT deployed — was blocked by missing bicepparam file (FIXED — platform-connectivity-prod.bicepparam created)
+- **Identity LZ**: NOT deployed — was blocked by missing bicepparam file (FIXED — platform-identity-prod.bicepparam created)  
+- **Security LZ**: NOT deployed — was blocked by missing bicepparam file (FIXED — platform-security-prod.bicepparam created)
+- **Azure CLI**: NOT authenticated locally (device code expired in last session)
+
+## Fixes Applied (commit d9dde2f, pushed to main)
+- AzureAISettings: project_connection_string and openai_endpoint default to "" 
+- Created 3 missing .bicepparam files (connectivity, identity, security)
+- Fixed ResourceGraphClient constructor args in verify step
+
 ## Pending / Next Steps
-- Continue APEX workflow steps (requirements → architecture → design → governance → IaC → deploy)
-- Potentially improve diagram detail further
+- Re-trigger GitHub Actions pipeline to deploy remaining 3 platform LZs (Connectivity, Identity, Security)
+- Or authenticate locally (`az login`) and run verification
+- Continue APEX workflow after all 4 platform LZs are deployed
 - Test full end-to-end workflow

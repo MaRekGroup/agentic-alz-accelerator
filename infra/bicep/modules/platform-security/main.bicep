@@ -60,7 +60,6 @@ param defenderPlans array = [
   'OpenSourceRelationalDatabases'
   'SqlServerVirtualMachines'
   'CosmosDbs'
-  'Api'
 ]
 
 @description('Security contact email for Defender for Cloud alerts')
