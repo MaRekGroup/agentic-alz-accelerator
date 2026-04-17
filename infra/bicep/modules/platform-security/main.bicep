@@ -173,7 +173,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 
 module securityWorkspace 'security-workspace/main.bicep' = if (sentinelWorkspaceMode == 'dedicated') {
   name: 'security-workspace-deployment'
-  scope: resourceGroup(rgSoc)
+  scope: rgSocRes
   params: {
     location: location
     workspaceName: workspaceName
@@ -186,7 +186,7 @@ module securityWorkspace 'security-workspace/main.bicep' = if (sentinelWorkspace
 
 module sentinel 'sentinel/main.bicep' = if (enableSentinel) {
   name: 'sentinel-deployment'
-  scope: resourceGroup(rgSoc)
+  scope: rgSocRes
   dependsOn: [securityWorkspace]
   params: {
     workspaceId: sentinelWorkspaceMode == 'dedicated'
@@ -201,14 +201,12 @@ module sentinel 'sentinel/main.bicep' = if (enableSentinel) {
 
 module defenderConfig 'defender/main.bicep' = {
   name: 'defender-deployment'
-  scope: resourceGroup(rgPosture)
   params: {
     defenderPlans: defenderPlans
     securityContactEmail: securityContactEmail
     logAnalyticsWorkspaceId: sentinelWorkspaceMode == 'dedicated'
       ? securityWorkspace.outputs.workspaceId
       : managementLogAnalyticsWorkspaceId
-    tags: tags
   }
 }
 
@@ -216,7 +214,7 @@ module defenderConfig 'defender/main.bicep' = {
 
 module soarPlaybooks 'soar/main.bicep' = if (enableSoar) {
   name: 'soar-deployment'
-  scope: resourceGroup(rgAutomation)
+  scope: rgAutomationRes
   params: {
     location: location
     prefix: prefix
@@ -231,7 +229,7 @@ module soarPlaybooks 'soar/main.bicep' = if (enableSoar) {
 
 module keyVault 'br/public:avm/res/key-vault/vault:0.6.0' = {
   name: 'security-key-vault'
-  scope: resourceGroup(rgAutomation)
+  scope: rgAutomationRes
   params: {
     name: kvName
     location: location
@@ -248,7 +246,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.6.0' = {
 
 module automationAccount 'br/public:avm/res/automation/automation-account:0.9.0' = {
   name: 'security-automation'
-  scope: resourceGroup(rgAutomation)
+  scope: rgAutomationRes
   params: {
     name: autoName
     location: location

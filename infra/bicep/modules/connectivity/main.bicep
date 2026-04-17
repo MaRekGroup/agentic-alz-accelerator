@@ -183,7 +183,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 
 module hubSpoke 'hub-spoke/main.bicep' = if (hubTopology == 'hub-spoke') {
   name: 'hub-spoke-deployment'
-  scope: resourceGroup(rgHub)
+  scope: rgHubRes
   params: {
     location: location
     prefix: prefix
@@ -200,7 +200,7 @@ module hubSpoke 'hub-spoke/main.bicep' = if (hubTopology == 'hub-spoke') {
 
 module gatewaysHubSpoke 'gateways/main.bicep' = if (hubTopology == 'hub-spoke') {
   name: 'gateways-deployment'
-  scope: resourceGroup(rgGateways)
+  scope: rgGatewaysRes
   params: {
     location: location
     prefix: prefix
@@ -218,7 +218,7 @@ module gatewaysHubSpoke 'gateways/main.bicep' = if (hubTopology == 'hub-spoke') 
 
 module vwan 'vwan/main.bicep' = if (hubTopology == 'vwan') {
   name: 'vwan-deployment'
-  scope: resourceGroup(rgHub)
+  scope: rgHubRes
   params: {
     location: location
     prefix: prefix
@@ -234,7 +234,7 @@ module vwan 'vwan/main.bicep' = if (hubTopology == 'vwan') {
 
 module ddosProtectionPlan 'br/public:avm/res/network/ddos-protection-plan:0.1.0' = if (enableDdosProtection) {
   name: 'ddos-protection-plan'
-  scope: resourceGroup(rgDdos)
+  scope: rgDdosRes
   params: {
     name: '${prefix}-ddos-plan'
     location: location
@@ -246,7 +246,7 @@ module ddosProtectionPlan 'br/public:avm/res/network/ddos-protection-plan:0.1.0'
 
 module privateDns 'private-dns/main.bicep' = {
   name: 'private-dns-deployment'
-  scope: resourceGroup(rgDns)
+  scope: rgDnsRes
   params: {
     prefix: prefix
     privateDnsZones: privateDnsZones
@@ -259,7 +259,7 @@ module privateDns 'private-dns/main.bicep' = {
 
 module dnsResolver 'br/public:avm/res/network/dns-resolver:0.3.0' = if (hubTopology == 'hub-spoke' && deployDnsResolver) {
   name: 'dns-resolver'
-  scope: resourceGroup(rgHub)
+  scope: rgHubRes
   params: {
     name: '${prefix}-dns-resolver'
     location: location

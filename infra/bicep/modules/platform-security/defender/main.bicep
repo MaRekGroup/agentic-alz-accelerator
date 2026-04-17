@@ -1,6 +1,8 @@
 // Defender for Cloud Sub-module
 // Configures Microsoft Defender for Cloud plans and security contacts
 
+targetScope = 'subscription'
+
 @description('Defender plan names to enable')
 param defenderPlans array
 
@@ -9,9 +11,6 @@ param securityContactEmail string
 
 @description('Log Analytics workspace ID for Defender data')
 param logAnalyticsWorkspaceId string
-
-@description('Resource tags')
-param tags object
 
 // ─── Defender for Cloud Pricing Tiers ─────────────────────────────────────────
 
