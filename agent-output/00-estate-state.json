@@ -7,7 +7,7 @@
     "iac_tool": "bicep",
     "management_group_prefix": "alz",
     "created": "2026-04-16",
-    "updated": "2026-04-17T19:00:00Z"
+    "updated": "2026-04-17T21:40:00Z"
   },
   "platform_landing_zones": {
     "management": {
@@ -50,10 +50,22 @@
       "session_state": "agent-output/platform-identity/00-session-state.json"
     },
     "security": {
-      "status": "pending",
+      "status": "deployed",
       "subscription_secret": "PLATFORM_SEC_SUBSCRIPTION_ID",
       "profile": "platform-security",
+      "resource_groups": [
+        "mrg-sec-soc-scus-rg",
+        "mrg-sec-posture-scus-rg",
+        "mrg-sec-automation-scus-rg",
+        "mrg-sec-governance-scus-rg"
+      ],
+      "key_resources": {
+        "sentinel": "enabled (TI connector pending)",
+        "defender_plans": 11,
+        "key_vault": "mrg-sec-kv"
+      },
       "depends_on": ["identity"],
+      "last_deploy_run": 24587738074,
       "session_state": "agent-output/platform-security/00-session-state.json"
     }
   },
@@ -108,6 +120,14 @@
       "action": "deploy",
       "status": "success",
       "timestamp": "2026-04-17T19:00:00Z"
+    },
+    {
+      "run_id": 24587738074,
+      "lz": "platform-security",
+      "action": "deploy",
+      "status": "success",
+      "timestamp": "2026-04-17T21:40:00Z",
+      "notes": "TI connector disabled pending permissions; Sentinel onboarding successful"
     }
   ]
 }
