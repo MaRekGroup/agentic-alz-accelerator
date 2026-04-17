@@ -233,6 +233,7 @@ jobs:
 
       - name: Bicep What-If
         if: inputs.framework == 'bicep'
+        continue-on-error: true
         # CHANGED: Use bicepparam 'using' directive instead of --template-file.
         # Support both subscription and resource-group scoped deployments.
         # Param file pattern: {project_name}-{environment}.bicepparam
@@ -316,7 +317,7 @@ jobs:
   deploy:
     name: "Deploy · ${{ inputs.project_name }}"
     needs: plan
-    if: inputs.action == 'deploy'
+    if: inputs.action == 'deploy' && !cancelled()
     runs-on: ${{ inputs.runner_label }}
     environment: ${{ inputs.github_environment }}
     outputs:
