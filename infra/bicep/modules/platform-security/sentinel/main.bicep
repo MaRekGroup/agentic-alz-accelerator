@@ -30,11 +30,26 @@ resource sentinelSolution 'Microsoft.OperationsManagement/solutions@2015-11-01-p
   }
 }
 
+// ─── Sentinel Onboarding ──────────────────────────────────────────────────────
+
+// Reference the existing workspace to scope Sentinel resources
+resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+  name: workspaceName
+}
+
+resource sentinelOnboarding 'Microsoft.SecurityInsights/onboardingStates@2024-03-01' = {
+  name: 'default'
+  scope: workspace
+  dependsOn: [sentinelSolution]
+  properties: {}
+}
+
 // ─── Sentinel Data Connectors ─────────────────────────────────────────────────
 
 resource aadConnector 'Microsoft.SecurityInsights/dataConnectors@2024-03-01' = {
   name: 'AzureActiveDirectory'
-  scope: sentinelSolution
+  scope: workspace
+  dependsOn: [sentinelOnboarding]
   kind: 'AzureActiveDirectory'
   properties: {
     tenantId: subscription().tenantId
@@ -48,8 +63,9 @@ resource aadConnector 'Microsoft.SecurityInsights/dataConnectors@2024-03-01' = {
 
 resource tiConnector 'Microsoft.SecurityInsights/dataConnectors@2024-03-01' = if (enableThreatIntelligence) {
   name: 'ThreatIntelligence'
-  scope: sentinelSolution
-  kind: 'MicrosoftThreatIntelligence'
+  scope: workspace
+  dependsOn: [sentinelOnboarding]
+  kind: 'ThreatIntelligence'
   properties: {
     tenantId: subscription().tenantId
     dataTypes: {
