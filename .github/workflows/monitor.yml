@@ -412,12 +412,136 @@ jobs:
           name: compliance-identity
           path: compliance-identity.json
 
+  scan-security:
+    name: "Scan · Security"
+    if: >-
+      github.event.inputs.scan_scope == 'all' ||
+      github.event.inputs.scan_scope == 'security' ||
+      github.event_name == 'schedule'
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      compliance_pct: ${{ steps.scan.outputs.compliance_pct }}
+      violations: ${{ steps.scan.outputs.violations }}
+      total_resources: ${{ steps.scan.outputs.total_resources }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Compliance Scan
+        id: scan
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SCAN_TYPE: ${{ inputs.scan_type || 'compliance' }}
+        run: |
+          python -c "
+          import asyncio, json, os
+
+          async def main():
+              from azure.identity import DefaultAzureCredential
+              from azure.mgmt.policyinsights import PolicyInsightsClient
+
+              sub_id = os.environ['AZURE_SUBSCRIPTION_ID']
+              credential = DefaultAzureCredential()
+              client = PolicyInsightsClient(credential, sub_id)
+
+              try:
+                  summary = client.policy_states.summarize_for_subscription(
+                      subscription_id=sub_id,
+                      policy_states_summary_resource='latest',
+                  )
+                  results = summary.value[0] if summary.value else None
+                  if not results:
+                      total, non_compliant = 0, 0
+                  else:
+                      sr = results.results
+                      if hasattr(sr, 'total_resources'):
+                          total = sr.total_resources or 0
+                          non_compliant = sr.non_compliant_resources or 0
+                      elif hasattr(sr, 'resource_details'):
+                          total = sum(d.count or 0 for d in (sr.resource_details or []))
+                          non_compliant = sum(
+                              d.count or 0 for d in (sr.resource_details or [])
+                              if d.compliance_state == 'noncompliant'
+                          )
+                      else:
+                          total = getattr(sr, 'query_results_count', 0) or 0
+                          non_compliant = getattr(sr, 'non_compliant_resources', 0) or 0
+
+                  compliant = total - non_compliant
+                  pct = (compliant / total * 100) if total > 0 else 100.0
+
+                  violations = []
+                  try:
+                      states = client.policy_states.list_query_results_for_subscription(
+                          subscription_id=sub_id,
+                          policy_states_resource='latest',
+                          filter=\"complianceState eq 'NonCompliant'\",
+                          top=20,
+                      )
+                      for s in states:
+                          violations.append({
+                              'resource_id': getattr(s, 'resource_id', 'unknown'),
+                              'policy': getattr(s, 'policy_definition_name', 'unknown'),
+                          })
+                  except Exception as ve:
+                      print(f'::warning::Could not list violations: {ve}')
+
+                  report = {
+                      'subscription': sub_id[:8] + '...',
+                      'lz': 'security',
+                      'total_resources': total,
+                      'compliant': compliant,
+                      'non_compliant': non_compliant,
+                      'compliance_pct': round(pct, 1),
+                      'violations': violations,
+                  }
+                  print(json.dumps(report, indent=2, default=str))
+
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write(f'compliance_pct={pct:.1f}\n')
+                      f.write(f'violations={len(violations)}\n')
+                      f.write(f'total_resources={total}\n')
+
+                  with open('compliance-security.json', 'w') as f:
+                      json.dump(report, f, indent=2, default=str)
+
+              except Exception as e:
+                  print(f'::warning::Compliance scan failed: {e}')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('compliance_pct=0\n')
+                      f.write('violations=-1\n')
+                      f.write('total_resources=0\n')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-security
+          path: compliance-security.json
+
   # =========================================================================
   # Summary
   # =========================================================================
   summary:
     name: "Compliance Summary"
-    needs: [scan-management, scan-connectivity, scan-identity]
+    needs: [scan-management, scan-connectivity, scan-identity, scan-security]
     if: always()
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
@@ -430,5 +554,6 @@ jobs:
           echo "| Management | ${{ needs.scan-management.outputs.total_resources }} | ${{ needs.scan-management.outputs.compliance_pct }}% | ${{ needs.scan-management.outputs.violations }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Connectivity | ${{ needs.scan-connectivity.outputs.total_resources }} | ${{ needs.scan-connectivity.outputs.compliance_pct }}% | ${{ needs.scan-connectivity.outputs.violations }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Identity | ${{ needs.scan-identity.outputs.total_resources }} | ${{ needs.scan-identity.outputs.compliance_pct }}% | ${{ needs.scan-identity.outputs.violations }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.scan-security.outputs.total_resources }} | ${{ needs.scan-security.outputs.compliance_pct }}% | ${{ needs.scan-security.outputs.violations }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Scan completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
