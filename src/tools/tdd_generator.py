@@ -727,16 +727,22 @@ class TDDGenerator:
             "and application landing zones."
         )
 
-        # Load config for full estate diagram
+        # Use shared estate PNG (diagrams library with real Azure icons)
         try:
             config_file = Path(self.config_path)
             if config_file.exists():
                 with open(config_file) as f:
                     config = json.load(f)
-                svg = generate_full_estate_diagram(
-                    config.get("management_group_prefix", "mrg"), config
+                engine = DiagramEngine(output_dir=str(Path(self.config_path).parent.parent / "docs" / "tdd"))
+                estate_png = engine.generate_full_estate(
+                    mg_prefix=config.get("management_group_prefix", "mrg"),
+                    subscriptions_config=config,
+                    filename="alz-estate-overview",
                 )
-                self._insert_diagram(svg, "Figure 2: Full Azure Landing Zone Estate")
+                if estate_png and Path(estate_png).exists():
+                    self._insert_png_diagram(estate_png, "Figure 2: Full Azure Landing Zone Estate")
+                else:
+                    raise FileNotFoundError(f"Estate PNG not generated at {estate_png}")
         except Exception as e:
             logger.warning(f"Could not generate estate diagram: {e}")
             self.doc.add_paragraph(f"[Estate diagram unavailable: {e}]")
@@ -840,19 +846,22 @@ class TDDGenerator:
             png_filename = Path(png_path).name
             logger.info(f"Architecture diagram (PNG) saved to {png_path}")
 
-        # Also generate the full estate SVG if config exists
-        estate_svg_filename = None
+        # Generate shared estate PNG once (all TDDs reference the same file)
+        estate_diagram_filename = None
         try:
             config_file = Path(self.config_path)
             if config_file.exists():
                 with open(config_file) as f:
                     config = json.load(f)
-                estate_svg = generate_full_estate_diagram(
-                    config.get("management_group_prefix", "mrg"), config
-                )
-                estate_svg_filename = svg_filename.replace("_architecture.svg", "_estate.svg")
-                estate_svg_path = str(Path(svg_path).parent / estate_svg_filename)
-                Path(estate_svg_path).write_text(estate_svg, encoding="utf-8")
+                estate_png_path = Path(svg_path).parent / "alz-estate-overview.png"
+                if not estate_png_path.exists():
+                    engine = DiagramEngine(output_dir=str(Path(svg_path).parent))
+                    engine.generate_full_estate(
+                        mg_prefix=config.get("management_group_prefix", "mrg"),
+                        subscriptions_config=config,
+                        filename="alz-estate-overview",
+                    )
+                estate_diagram_filename = "alz-estate-overview.png"
         except Exception as e:
             logger.warning(f"Could not generate estate diagram: {e}")
 
@@ -860,7 +869,7 @@ class TDDGenerator:
         generated_at = self.generated_at.strftime("%Y-%m-%d %H:%M UTC")
         diagram_filename = png_filename or svg_filename
         md = self._build_markdown(
-            diagram_filename, estate_svg_filename, resource_inventory or {}, generated_at,
+            diagram_filename, estate_diagram_filename, resource_inventory or {}, generated_at,
         )
 
         Path(md_path).parent.mkdir(parents=True, exist_ok=True)
@@ -871,7 +880,7 @@ class TDDGenerator:
     def _build_markdown(
         self,
         diagram_filename: str,
-        estate_svg_filename: Optional[str],
+        estate_diagram_filename: Optional[str],
         resource_inventory: dict,
         generated_at: str,
     ) -> str:
@@ -898,7 +907,7 @@ class TDDGenerator:
             self._md_compliance_status(),
             self._md_cost_governance(),
             self._md_operational_model(),
-            self._md_appendix(estate_svg_filename, generated_at),
+            self._md_appendix(estate_diagram_filename, generated_at),
         ]
         return "\n".join(sections)
 
@@ -1294,7 +1303,7 @@ All infrastructure changes follow the GitOps workflow:
 ---
 """
 
-    def _md_appendix(self, estate_svg_filename: Optional[str], generated_at: str) -> str:
+    def _md_appendix(self, estate_diagram_filename: Optional[str], generated_at: str) -> str:
         lines = [
             "## 9. Appendix",
             "",
@@ -1304,8 +1313,8 @@ All infrastructure changes follow the GitOps workflow:
             "and application landing zones.",
             "",
         ]
-        if estate_svg_filename:
-            lines.append(f"![Full Azure Landing Zone Estate]({estate_svg_filename})")
+        if estate_diagram_filename:
+            lines.append(f"![Full Azure Landing Zone Estate]({estate_diagram_filename})")
             lines.append("")
             lines.append("*Figure 2: Full Azure Landing Zone Estate*")
         else:

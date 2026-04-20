@@ -204,7 +204,7 @@ All infrastructure changes follow the GitOps workflow:
 Overview of the complete Azure Landing Zone estate showing all platform
 and application landing zones.
 
-![Full Azure Landing Zone Estate](TDD_connectivity_20260417_estate.svg)
+![Full Azure Landing Zone Estate](alz-estate-overview.png)
 
 *Figure 2: Full Azure Landing Zone Estate*
 
