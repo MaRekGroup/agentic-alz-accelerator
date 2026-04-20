@@ -1,0 +1,56 @@
+name: Generate Architecture Diagrams
+
+on:
+  workflow_dispatch:
+    inputs:
+      mg_prefix:
+        description: Management group prefix
+        required: false
+        default: mrg
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    name: Generate ALZ Diagrams
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Install Python dependencies
+        run: pip install diagrams graphviz
+
+      - name: Generate diagrams
+        run: |
+          python -c "
+          from src.tools.python_diagram_generator import generate_all_diagrams
+          paths = generate_all_diagrams(
+              output_dir='docs/diagrams',
+              mg_prefix='${{ inputs.mg_prefix }}',
+          )
+          for p in paths:
+              print(f'Generated: {p}')
+          "
+
+      - name: Commit updated diagrams
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/diagrams/*.png
+          if git diff --cached --quiet; then
+            echo "No diagram changes to commit."
+          else
+            git commit -m "docs(diagrams): regenerate architecture PNGs [skip ci]"
+            git push
+          fi
