@@ -448,7 +448,7 @@ class DiagramEngine:
         with Diagram(
             f"Platform Management — {sub}",
             filename=outpath, show=False, direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
                 with Cluster("Monitoring & Analytics"):
@@ -472,8 +472,8 @@ class DiagramEngine:
     def _tdd_connectivity(self, outpath: str, sub: str, loc: str) -> None:
         with Diagram(
             f"Platform Connectivity — {sub}",
-            filename=outpath, show=False, direction="LR",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.0"},
+            filename=outpath, show=False, direction="TB",
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
                 with Cluster("Hub VNet — 10.0.0.0/16"):
@@ -497,8 +497,8 @@ class DiagramEngine:
     def _tdd_identity(self, outpath: str, sub: str, loc: str) -> None:
         with Diagram(
             f"Platform Identity — {sub}",
-            filename=outpath, show=False, direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+            filename=outpath, show=False, direction="LR",
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
                 with Cluster("Identity Services"):
@@ -520,8 +520,8 @@ class DiagramEngine:
     def _tdd_security(self, outpath: str, sub: str, loc: str) -> None:
         with Diagram(
             f"Platform Security — {sub}",
-            filename=outpath, show=False, direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+            filename=outpath, show=False, direction="LR",
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
                 with Cluster("Security Operations Center"):
@@ -546,8 +546,8 @@ class DiagramEngine:
     ) -> None:
         with Diagram(
             f"{display_name} Landing Zone — {sub}",
-            filename=outpath, show=False, direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+            filename=outpath, show=False, direction="LR",
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc}) — {profile}"):
                 with Cluster("Networking"):
@@ -623,45 +623,51 @@ class DiagramEngine:
     ) -> str:
         """Generate full-estate overview showing all landing zones."""
         outpath = str(self.output_dir / filename)
-        platform_lzs = subscriptions_config.get("platform", {})
         app_lzs = {
             k: v for k, v in subscriptions_config.get("application", {}).items()
             if not k.startswith("_")
         }
+
+        # Group app LZs by profile for balanced layout
+        app_by_profile: dict[str, list[tuple[str, str]]] = {}
+        for key, cfg in app_lzs.items():
+            profile = cfg.get("profile", "corp")
+            display = cfg.get("display_name", key)
+            app_by_profile.setdefault(profile, []).append((key, display))
 
         with Diagram(
             f"{mg_prefix} — Full Estate Overview",
             filename=outpath,
             show=False,
             direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.0"},
+            graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.5"},
         ):
             root = ManagementGroups(f"{mg_prefix}\n(Root)")
 
             with Cluster("Platform Landing Zones"):
-                plat_nodes = []
-                for name in ["Management", "Connectivity", "Identity", "Security"]:
-                    plat_nodes.append(Subscriptions(name))
+                mgmt = Subscriptions("Management")
+                conn = Subscriptions("Connectivity")
+                ident = Subscriptions("Identity")
+                sec = Subscriptions("Security")
+                plat_nodes = [mgmt, conn, ident, sec]
 
             with Cluster("Application Landing Zones"):
                 app_nodes = []
-                for key, cfg in app_lzs.items():
-                    display = cfg.get("display_name", key)
-                    profile = cfg.get("profile", "corp")
+                for profile_name, entries in app_by_profile.items():
                     icon_type = {
                         "corp": "vnet", "online": "front_door",
                         "sap": "vm", "sandbox": "cost_management",
-                    }.get(profile, "resource_group")
-                    app_nodes.append(_icon(icon_type, f"{display}\n({profile})"))
+                    }.get(profile_name, "resource_group")
+                    with Cluster(profile_name.title()):
+                        for _key, display in entries:
+                            app_nodes.append(_icon(icon_type, f"{display}"))
 
-            with Cluster("Cross-Cutting"):
-                cross = [
-                    Policy("Azure Policy"),
-                    MicrosoftDefenderForCloud("Defender"),
-                    Monitor("Monitor"),
-                    CostManagement("Cost Mgmt"),
-                    KeyVaults("Key Vault"),
-                ]
+            with Cluster("Cross-Cutting Services"):
+                policy = Policy("Azure Policy")
+                defender = MicrosoftDefenderForCloud("Defender")
+                monitor = Monitor("Monitor")
+                cost = CostManagement("Cost Mgmt")
+                kv = KeyVaults("Key Vault")
 
             root >> Edge(color="darkblue") >> plat_nodes
             if app_nodes:
