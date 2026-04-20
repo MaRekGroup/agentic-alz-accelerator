@@ -44,7 +44,7 @@ jobs:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     outputs:
       scan_type: ${{ steps.params.outputs.scan_type }}
-      subscriptions: ${{ steps.params.outputs.subscriptions }}
+      scope: ${{ steps.params.outputs.scope }}
     steps:
       - name: Determine scan parameters
         id: params
@@ -64,18 +64,8 @@ jobs:
             SCOPE="${{ inputs.scope }}"
           fi
 
-          # Build subscription list based on scope
-          PLATFORM='["${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}","${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}"]'
-          APP='["${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}","${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}","${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}","${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}","${{ secrets.APP_SAP_SUBSCRIPTION_ID }}","${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}"]'
-
-          case "$SCOPE" in
-            platform-only)     SUBS="$PLATFORM" ;;
-            app-only)          SUBS="$APP" ;;
-            *)                 SUBS=$(echo "$PLATFORM $APP" | python3 -c "import sys,json; a=json.loads(sys.stdin.read().split()[0]); b=json.loads(sys.stdin.read().split()[0]) if False else []; print(json.dumps(a+b))" 2>/dev/null || echo "$PLATFORM") ;;
-          esac
-
           echo "scan_type=$SCAN_TYPE" >> "$GITHUB_OUTPUT"
-          echo "subscriptions=$SUBS" >> "$GITHUB_OUTPUT"
+          echo "scope=$SCOPE" >> "$GITHUB_OUTPUT"
           echo "Scan: $SCAN_TYPE | Scope: $SCOPE"
 
   # =========================================================================
@@ -110,6 +100,18 @@ jobs:
 
       - name: Run compliance scan across subscriptions
         id: scan
+        env:
+          PLATFORM_MGMT_SUB: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+          PLATFORM_CONN_SUB: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
+          PLATFORM_IDTY_SUB: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
+          PLATFORM_SEC_SUB: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+          APP_CORP_ERP_SUB: ${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}
+          APP_CORP_CRM_SUB: ${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}
+          APP_ONLINE_WEB_SUB: ${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}
+          APP_ONLINE_API_SUB: ${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}
+          APP_SAP_SUB: ${{ secrets.APP_SAP_SUBSCRIPTION_ID }}
+          APP_SANDBOX_SUB: ${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}
+          SCAN_SCOPE: ${{ needs.setup.outputs.scope }}
         run: |
           python -c "
           import asyncio, json, os
@@ -118,21 +120,42 @@ jobs:
           from azure.identity import DefaultAzureCredential
           from semantic_kernel import Kernel
 
+          def build_subscription_list():
+              platform = [
+                  os.environ.get('PLATFORM_MGMT_SUB', ''),
+                  os.environ.get('PLATFORM_CONN_SUB', ''),
+                  os.environ.get('PLATFORM_IDTY_SUB', ''),
+                  os.environ.get('PLATFORM_SEC_SUB', ''),
+              ]
+              app = [
+                  os.environ.get('APP_CORP_ERP_SUB', ''),
+                  os.environ.get('APP_CORP_CRM_SUB', ''),
+                  os.environ.get('APP_ONLINE_WEB_SUB', ''),
+                  os.environ.get('APP_ONLINE_API_SUB', ''),
+                  os.environ.get('APP_SAP_SUB', ''),
+                  os.environ.get('APP_SANDBOX_SUB', ''),
+              ]
+              scope = os.environ.get('SCAN_SCOPE', 'all-subscriptions')
+              if scope == 'platform-only':
+                  return [s for s in platform if s]
+              elif scope == 'app-only':
+                  return [s for s in app if s]
+              else:
+                  return [s for s in platform + app if s]
+
           async def main():
               settings = Settings()
               kernel = Kernel()
               cred = DefaultAzureCredential()
               agent = MonitoringAgent(kernel, cred, settings)
 
-              # Scan all subscriptions
               all_violations = []
               total_resources = 0
               compliant_resources = 0
 
-              subscriptions = json.loads('${{ needs.setup.outputs.subscriptions }}' or '[]')
+              subscriptions = build_subscription_list()
+              print(f'Scanning {len(subscriptions)} subscriptions...')
               for sub_id in subscriptions:
-                  if not sub_id:
-                      continue
                   try:
                       settings.azure.subscription_id = sub_id
                       result = await agent.run_compliance_scan()
@@ -141,7 +164,7 @@ jobs:
                       summary = result.get('summary', {})
                       total_resources += summary.get('total_resources', 0)
                       compliant_resources += summary.get('compliant_resources', 0)
-                      print(f'Sub {sub_id[:8]}...: {len(violations)} violations')
+                      print(f'Sub {sub_id[:8]}...: {len(violations)} violations, {summary.get(\"total_resources\", 0)} resources')
                   except Exception as e:
                       print(f'Sub {sub_id[:8]}...: ERROR - {e}')
 
@@ -150,13 +173,12 @@ jobs:
               print(f'Total violations: {len(all_violations)}')
               print(f'Compliance: {pct:.1f}%')
 
-              # Save report
               report = {
                   'scan_type': 'compliance',
                   'subscriptions_scanned': len(subscriptions),
                   'total_violations': len(all_violations),
                   'compliance_percentage': round(pct, 1),
-                  'violations': all_violations[:50]  # Limit for artifact size
+                  'violations': all_violations[:50]
               }
               with open('compliance-report.json', 'w') as f:
                   json.dump(report, f, indent=2, default=str)
@@ -206,6 +228,18 @@ jobs:
 
       - name: Run drift detection
         id: detect
+        env:
+          PLATFORM_MGMT_SUB: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+          PLATFORM_CONN_SUB: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
+          PLATFORM_IDTY_SUB: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
+          PLATFORM_SEC_SUB: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+          APP_CORP_ERP_SUB: ${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}
+          APP_CORP_CRM_SUB: ${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}
+          APP_ONLINE_WEB_SUB: ${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}
+          APP_ONLINE_API_SUB: ${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}
+          APP_SAP_SUB: ${{ secrets.APP_SAP_SUBSCRIPTION_ID }}
+          APP_SANDBOX_SUB: ${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}
+          SCAN_SCOPE: ${{ needs.setup.outputs.scope }}
         run: |
           python -c "
           import asyncio, json, os
@@ -213,6 +247,29 @@ jobs:
           from src.config.settings import Settings
           from azure.identity import DefaultAzureCredential
           from semantic_kernel import Kernel
+
+          def build_subscription_list():
+              platform = [
+                  os.environ.get('PLATFORM_MGMT_SUB', ''),
+                  os.environ.get('PLATFORM_CONN_SUB', ''),
+                  os.environ.get('PLATFORM_IDTY_SUB', ''),
+                  os.environ.get('PLATFORM_SEC_SUB', ''),
+              ]
+              app = [
+                  os.environ.get('APP_CORP_ERP_SUB', ''),
+                  os.environ.get('APP_CORP_CRM_SUB', ''),
+                  os.environ.get('APP_ONLINE_WEB_SUB', ''),
+                  os.environ.get('APP_ONLINE_API_SUB', ''),
+                  os.environ.get('APP_SAP_SUB', ''),
+                  os.environ.get('APP_SANDBOX_SUB', ''),
+              ]
+              scope = os.environ.get('SCAN_SCOPE', 'all-subscriptions')
+              if scope == 'platform-only':
+                  return [s for s in platform if s]
+              elif scope == 'app-only':
+                  return [s for s in app if s]
+              else:
+                  return [s for s in platform + app if s]
 
           async def main():
               settings = Settings()
@@ -223,10 +280,9 @@ jobs:
               total_drifted = 0
               all_drift = []
 
-              subscriptions = json.loads('${{ needs.setup.outputs.subscriptions }}' or '[]')
+              subscriptions = build_subscription_list()
+              print(f'Scanning {len(subscriptions)} subscriptions for drift...')
               for sub_id in subscriptions:
-                  if not sub_id:
-                      continue
                   try:
                       settings.azure.subscription_id = sub_id
                       result = await agent.detect_drift()
