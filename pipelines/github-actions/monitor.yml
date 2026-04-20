@@ -49,17 +49,17 @@ jobs:
       violations: ${{ steps.scan.outputs.violations }}
       total_resources: ${{ steps.scan.outputs.total_resources }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -159,7 +159,7 @@ jobs:
           "
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compliance-management
           path: compliance-management.json
@@ -176,17 +176,17 @@ jobs:
       violations: ${{ steps.scan.outputs.violations }}
       total_resources: ${{ steps.scan.outputs.total_resources }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -283,7 +283,7 @@ jobs:
           "
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compliance-connectivity
           path: compliance-connectivity.json
@@ -300,17 +300,17 @@ jobs:
       violations: ${{ steps.scan.outputs.violations }}
       total_resources: ${{ steps.scan.outputs.total_resources }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -407,7 +407,7 @@ jobs:
           "
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compliance-identity
           path: compliance-identity.json

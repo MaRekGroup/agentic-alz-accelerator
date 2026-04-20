@@ -134,10 +134,10 @@ jobs:
     outputs:
       profile_valid: ${{ steps.check.outputs.valid }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -146,7 +146,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -213,10 +213,10 @@ jobs:
     needs: validate
     runs-on: ${{ inputs.runner_label }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -306,7 +306,7 @@ jobs:
 
       - name: Upload plan artifact
         if: inputs.framework == 'terraform'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ inputs.project_name }}
           path: infra/terraform/tfplan
@@ -323,10 +323,10 @@ jobs:
     outputs:
       deployment_id: ${{ steps.deploy-bicep.outputs.deployment_id || steps.deploy-tf.outputs.deployment_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -391,7 +391,7 @@ jobs:
 
       - name: Download Terraform plan
         if: inputs.framework == 'terraform'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: tfplan-${{ inputs.project_name }}
           path: infra/terraform/
@@ -424,10 +424,10 @@ jobs:
     if: inputs.action == 'deploy'
     runs-on: ${{ inputs.runner_label }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -436,7 +436,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -538,7 +538,7 @@ jobs:
           echo "tdd_path=docs/tdd/" >> "$GITHUB_OUTPUT"
 
       - name: Upload TDD artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: tdd-${{ inputs.project_name }}
           path: |

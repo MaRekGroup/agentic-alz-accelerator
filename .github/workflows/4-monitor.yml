@@ -80,10 +80,10 @@ jobs:
       violations: ${{ steps.scan.outputs.violations }}
       compliance_pct: ${{ steps.scan.outputs.compliance_pct }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -92,7 +92,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -191,7 +191,7 @@ jobs:
           "
 
       - name: Upload compliance report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compliance-report-${{ github.run_number }}
           path: compliance-report.json
@@ -208,10 +208,10 @@ jobs:
     outputs:
       drifted: ${{ steps.detect.outputs.drifted }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -220,7 +220,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -306,7 +306,7 @@ jobs:
           "
 
       - name: Upload drift report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: drift-report-${{ github.run_number }}
           path: drift-report.json
@@ -324,10 +324,10 @@ jobs:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     environment: remediation
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -336,14 +336,14 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
       - name: Download reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: '*-report-${{ github.run_number }}'
           merge-multiple: true
