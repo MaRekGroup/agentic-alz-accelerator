@@ -46,7 +46,7 @@ The following diagram illustrates the as-built architecture of this landing zone
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![sap-s4hana Architecture — As-Built](TDD_sap-s4hana_20260417_architecture.svg)
+![sap-s4hana Architecture — As-Built](TDD_sap-s4hana_20260417_architecture.png)
 
 *Figure 1: sap-s4hana Architecture — As-Built*
 

@@ -33,6 +33,7 @@ from src.tools.azure_diagram_generator import (
     generate_management_diagram,
     generate_security_diagram,
 )
+from src.tools.python_diagram_generator import DiagramEngine
 
 logger = logging.getLogger(__name__)
 
@@ -185,6 +186,44 @@ class TDDGenerator:
                 f"[Diagram could not be rendered: {e}]"
             ).italic = True
 
+    def _insert_png_diagram(self, png_path: str, caption: str = "") -> None:
+        """Insert a pre-rendered PNG diagram into the document."""
+        try:
+            self.doc.add_picture(png_path, width=Inches(6.5))
+            last_paragraph = self.doc.paragraphs[-1]
+            last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            if caption:
+                cap = self.doc.add_paragraph()
+                cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run = cap.add_run(caption)
+                run.font.size = Pt(9)
+                run.font.italic = True
+                run.font.color.rgb = GRAY
+        except Exception as e:
+            logger.warning(f"Failed to insert PNG diagram: {e}")
+            self.doc.add_paragraph(
+                f"[Diagram could not be rendered: {e}]"
+            ).italic = True
+
+    def _generate_png_diagram(self, output_dir: str | None = None) -> str | None:
+        """Generate a PNG architecture diagram using the diagrams library.
+
+        Returns the PNG file path, or None on failure.
+        """
+        try:
+            engine = DiagramEngine(output_dir=output_dir or "docs/tdd")
+            return engine.generate_tdd_diagram(
+                profile=self.profile,
+                project_name=self.project_name,
+                subscription_name=self.subscription_name,
+                location=self.location,
+                output_dir=output_dir,
+            )
+        except Exception as e:
+            logger.warning(f"Failed to generate PNG diagram: {e}")
+            return None
+
     # ─── Cover Page ───────────────────────────────────────────────────────
 
     def _add_cover_page(self):
@@ -313,9 +352,13 @@ class TDDGenerator:
             "Icons follow the official Microsoft Azure Architecture Icon set."
         )
 
-        # Generate profile-specific diagram
-        svg = self._get_profile_diagram()
-        self._insert_diagram(svg, f"Figure 1: {self.project_name} Architecture — As-Built")
+        # Try PNG first (diagrams library with real Azure icons), fall back to SVG
+        png_path = self._generate_png_diagram()
+        if png_path and Path(png_path).exists():
+            self._insert_png_diagram(png_path, f"Figure 1: {self.project_name} Architecture — As-Built")
+        else:
+            svg = self._get_profile_diagram()
+            self._insert_diagram(svg, f"Figure 1: {self.project_name} Architecture — As-Built")
 
     def _get_profile_diagram(self) -> str:
         """Generate the appropriate SVG diagram for this profile."""
@@ -782,11 +825,20 @@ class TDDGenerator:
         """
         logger.info(f"Generating markdown TDD for {self.project_name} ({self.profile})")
 
-        # Save SVG diagram
-        svg_content = self._get_profile_diagram()
         Path(svg_path).parent.mkdir(parents=True, exist_ok=True)
-        Path(svg_path).write_text(svg_content, encoding="utf-8")
-        logger.info(f"Architecture diagram saved to {svg_path}")
+
+        # Generate PNG diagram (diagrams library with real Azure icons)
+        png_filename = svg_filename.replace("_architecture.svg", "_architecture.png")
+        png_path = self._generate_png_diagram(output_dir=str(Path(svg_path).parent))
+        if not png_path or not Path(png_path).exists():
+            png_filename = None
+            # Fall back to SVG
+            svg_content = self._get_profile_diagram()
+            Path(svg_path).write_text(svg_content, encoding="utf-8")
+            logger.info(f"Architecture diagram (SVG fallback) saved to {svg_path}")
+        else:
+            png_filename = Path(png_path).name
+            logger.info(f"Architecture diagram (PNG) saved to {png_path}")
 
         # Also generate the full estate SVG if config exists
         estate_svg_filename = None
@@ -806,8 +858,9 @@ class TDDGenerator:
 
         # Build markdown content
         generated_at = self.generated_at.strftime("%Y-%m-%d %H:%M UTC")
+        diagram_filename = png_filename or svg_filename
         md = self._build_markdown(
-            svg_filename, estate_svg_filename, resource_inventory or {}, generated_at,
+            diagram_filename, estate_svg_filename, resource_inventory or {}, generated_at,
         )
 
         Path(md_path).parent.mkdir(parents=True, exist_ok=True)
@@ -817,7 +870,7 @@ class TDDGenerator:
 
     def _build_markdown(
         self,
-        svg_filename: str,
+        diagram_filename: str,
         estate_svg_filename: Optional[str],
         resource_inventory: dict,
         generated_at: str,
@@ -838,7 +891,7 @@ class TDDGenerator:
         sections = [
             self._md_header(generated_at),
             self._md_executive_summary(desc),
-            self._md_architecture_diagram(svg_filename),
+            self._md_architecture_diagram(diagram_filename),
             self._md_resource_inventory(resource_inventory),
             self._md_network_topology(),
             self._md_security_posture(),
@@ -895,14 +948,14 @@ All resources comply with the CAF enterprise-scale baseline policies.
 ---
 """
 
-    def _md_architecture_diagram(self, svg_filename: str) -> str:
+    def _md_architecture_diagram(self, diagram_filename: str) -> str:
         return f"""## 2. Architecture Diagram
 
 The following diagram illustrates the as-built architecture of this landing zone,
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![{self.project_name} Architecture — As-Built]({svg_filename})
+![{self.project_name} Architecture — As-Built]({diagram_filename})
 
 *Figure 1: {self.project_name} Architecture — As-Built*
 

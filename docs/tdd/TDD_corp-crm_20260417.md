@@ -46,7 +46,7 @@ The following diagram illustrates the as-built architecture of this landing zone
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![corp-crm Architecture — As-Built](TDD_corp-crm_20260417_architecture.svg)
+![corp-crm Architecture — As-Built](TDD_corp-crm_20260417_architecture.png)
 
 *Figure 1: corp-crm Architecture — As-Built*
 

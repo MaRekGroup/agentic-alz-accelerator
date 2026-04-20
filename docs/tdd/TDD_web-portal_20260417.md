@@ -46,7 +46,7 @@ The following diagram illustrates the as-built architecture of this landing zone
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![web-portal Architecture — As-Built](TDD_web-portal_20260417_architecture.svg)
+![web-portal Architecture — As-Built](TDD_web-portal_20260417_architecture.png)
 
 *Figure 1: web-portal Architecture — As-Built*
 

@@ -408,6 +408,176 @@ class DiagramEngine:
 
         return outpath + ".png"
 
+    # ── TDD Profile Diagrams (for Technical Design Documents) ─────────
+
+    def generate_tdd_diagram(
+        self,
+        profile: str,
+        project_name: str,
+        subscription_name: str,
+        location: str,
+        output_dir: str | None = None,
+        filename: str | None = None,
+    ) -> str:
+        """Generate a TDD architecture diagram for a specific LZ profile.
+
+        Returns the PNG file path.
+        """
+        out = Path(output_dir) if output_dir else self.output_dir
+        out.mkdir(parents=True, exist_ok=True)
+        fname = filename or f"TDD_{project_name}_architecture"
+        outpath = str(out / fname)
+
+        dispatch = {
+            "platform-management": self._tdd_management,
+            "platform-connectivity": self._tdd_connectivity,
+            "platform-identity": self._tdd_identity,
+            "platform-security": self._tdd_security,
+        }
+        gen_fn = dispatch.get(profile, self._tdd_app_lz)
+
+        if profile in dispatch:
+            gen_fn(outpath, subscription_name, location)
+        else:
+            display_name = project_name.replace("-", " ").title()
+            self._tdd_app_lz(outpath, subscription_name, location, profile, display_name)
+
+        return outpath + ".png"
+
+    def _tdd_management(self, outpath: str, sub: str, loc: str) -> None:
+        with Diagram(
+            f"Platform Management — {sub}",
+            filename=outpath, show=False, direction="TB",
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+        ):
+            with Cluster(f"Subscription: {sub}\n({loc})"):
+                with Cluster("Monitoring & Analytics"):
+                    law = LogAnalyticsWorkspaces("Log Analytics\n365d retention")
+                    sentinel_node = Sentinel("Microsoft\nSentinel")
+                    mon = Monitor("Azure Monitor")
+                    ai = ApplicationInsights("App Insights")
+                with Cluster("Operations & Continuity"):
+                    auto = AutomationAccounts("Automation\nAccount")
+                    rsv = StorageAccounts("Recovery\nServices Vault")
+                    ag = EventGridDomains("Action Groups")
+                with Cluster("Governance"):
+                    policy = Policy("Azure Policy\nCAF Baseline")
+                    cost = CostManagement("Budget Alerts\n80/100/120%")
+
+            law >> Edge(style="dashed", color="orange") >> sentinel_node
+            mon >> Edge(style="dashed", color="orange") >> law
+            auto >> Edge(style="dashed", color="gray") >> law
+            policy >> Edge(style="dashed", color="purple") >> law
+
+    def _tdd_connectivity(self, outpath: str, sub: str, loc: str) -> None:
+        with Diagram(
+            f"Platform Connectivity — {sub}",
+            filename=outpath, show=False, direction="LR",
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.0"},
+        ):
+            with Cluster(f"Subscription: {sub}\n({loc})"):
+                with Cluster("Hub VNet — 10.0.0.0/16"):
+                    with Cluster("GatewaySubnet"):
+                        gw = VirtualNetworkGateways("VPN/ER\nGateway")
+                    with Cluster("AzureFirewallSubnet"):
+                        fw = Firewall("Azure Firewall\n(Premium)")
+                    with Cluster("AzureBastionSubnet"):
+                        bastion = Bastions("Bastion")
+                    rt = RouteTables("Hub UDR")
+                with Cluster("DNS & Protection"):
+                    dns = DNSZones("Private DNS\nZones")
+                    ddos = NetworkSecurityGroups("DDoS\nProtection")
+                with Cluster("Governance"):
+                    policy = Policy("Network\nPolicies")
+                    cost = CostManagement("Budget")
+
+            gw >> fw >> Edge(label="spoke\npeering") >> bastion
+            fw >> Edge(style="dashed", color="purple") >> dns
+
+    def _tdd_identity(self, outpath: str, sub: str, loc: str) -> None:
+        with Diagram(
+            f"Platform Identity — {sub}",
+            filename=outpath, show=False, direction="TB",
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+        ):
+            with Cluster(f"Subscription: {sub}\n({loc})"):
+                with Cluster("Identity Services"):
+                    entra = ActiveDirectory("Entra ID")
+                    ds = EntraDomainServices("Entra DS")
+                    connect = EntraConnect("Entra\nConnect")
+                    mi = ManagedIdentities("Managed\nIdentities")
+                with Cluster("Access Control"):
+                    pim = ManagedIdentities("PIM / RBAC")
+                    kv = KeyVaults("Key Vault\n(Credentials)")
+                with Cluster("Governance"):
+                    policy = Policy("Identity\nPolicies")
+                    cost = CostManagement("Budget")
+
+            entra >> Edge(color="steelblue") >> [ds, connect, mi]
+            entra >> Edge(color="purple", style="dashed") >> pim
+            kv >> Edge(style="dashed", color="gray") >> entra
+
+    def _tdd_security(self, outpath: str, sub: str, loc: str) -> None:
+        with Diagram(
+            f"Platform Security — {sub}",
+            filename=outpath, show=False, direction="TB",
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+        ):
+            with Cluster(f"Subscription: {sub}\n({loc})"):
+                with Cluster("Security Operations Center"):
+                    sentinel_node = Sentinel("Sentinel\nSIEM/SOAR")
+                    defender = MicrosoftDefenderForCloud("Defender\nfor Cloud")
+                with Cluster("Secrets & Keys"):
+                    kv = KeyVaults("Key Vault")
+                    kv2 = KeyVaults("CMK Vault")
+                with Cluster("Posture & Compliance"):
+                    compliance_node = Compliance("Secure Score")
+                    policy = Policy("Security\nBaseline")
+                with Cluster("Governance"):
+                    cost = CostManagement("Budget")
+
+            defender >> Edge(color="red", label="alerts") >> sentinel_node
+            policy >> Edge(style="dashed", color="purple") >> defender
+            kv >> Edge(style="dashed", color="gray") >> sentinel_node
+
+    def _tdd_app_lz(
+        self, outpath: str, sub: str, loc: str,
+        profile: str = "corp", display_name: str = "Application",
+    ) -> None:
+        with Diagram(
+            f"{display_name} Landing Zone — {sub}",
+            filename=outpath, show=False, direction="TB",
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+        ):
+            with Cluster(f"Subscription: {sub}\n({loc}) — {profile}"):
+                with Cluster("Networking"):
+                    spoke = VirtualNetworks("Spoke VNet")
+                    nsg = NetworkSecurityGroups("NSG")
+                    rt = RouteTables("UDR → FW")
+                with Cluster("Workload"):
+                    if profile == "online":
+                        app = FrontDoors("Public\nEndpoint")
+                        waf = ApplicationGateway("App GW\n+ WAF")
+                    elif profile == "sap":
+                        app = VM("SAP\nWorkload")
+                        waf = LoadBalancers("Internal LB")
+                    else:
+                        app = ContainerApps("Workload")
+                        waf = PrivateEndpoint("Private\nEndpoints")
+                with Cluster("Data"):
+                    if profile == "sap":
+                        db = DatabaseForMysqlServers("SAP HANA DB")
+                    else:
+                        db = CosmosDb("Database")
+                    storage = StorageAccounts("Storage")
+                with Cluster("Governance"):
+                    policy = Policy("LZ Policies")
+                    cost = CostManagement("Budget\n80/100/120%")
+
+            spoke >> nsg >> app
+            app >> waf >> db
+            app >> Edge(style="dashed", color="gray") >> storage
+
     # ── Profile-Based Generation ──────────────────────────────────────
 
     def generate_for_profile(

@@ -46,7 +46,7 @@ The following diagram illustrates the as-built architecture of this landing zone
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![connectivity Architecture — As-Built](TDD_connectivity_20260417_architecture.svg)
+![connectivity Architecture — As-Built](TDD_connectivity_20260417_architecture.png)
 
 *Figure 1: connectivity Architecture — As-Built*
 
