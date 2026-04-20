@@ -36,6 +36,11 @@ on:
           - move-subscriptions-only # Just move subs to MGs
           - register-providers-only # Just register resource providers
           - verify-only             # Verify everything is in place
+          - delete-old-prefix       # Delete old MG hierarchy (requires old_prefix)
+      old_prefix:
+        description: 'Old MG prefix to delete (only used with delete-old-prefix action)'
+        required: false
+        default: ''
 
 permissions:
   id-token: write
@@ -323,11 +328,84 @@ jobs:
           echo "Provider registration initiated. Some may take 5-10 minutes to complete."
 
   # =========================================================================
+  # Delete old MG hierarchy (for prefix migration)
+  # =========================================================================
+  delete-old-prefix:
+    name: Delete Old MG Hierarchy
+    needs: [verify-access]
+    if: inputs.action == 'delete-old-prefix' && inputs.old_prefix != ''
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Delete old management groups (bottom-up)
+        run: |
+          set -euo pipefail
+          OLD="${{ inputs.old_prefix }}"
+
+          echo "============================================"
+          echo "  Deleting old MG hierarchy: ${OLD}-*"
+          echo "============================================"
+
+          # Safety: verify no subscriptions remain under old MGs
+          echo ""
+          echo "── Pre-flight: checking for remaining subscriptions ──"
+          REMAINING=$(az account management-group show \
+            --name "$OLD" --expand --recurse \
+            --query "length([].children[?type=='Microsoft.Management/managementGroups/subscriptions'][])" \
+            -o tsv 2>/dev/null || echo "0")
+
+          if [ "$REMAINING" != "0" ] && [ "$REMAINING" != "" ]; then
+            echo "ERROR: $REMAINING subscription(s) still under ${OLD}-* MGs. Move them first."
+            exit 1
+          fi
+          echo "  No subscriptions found — safe to delete."
+
+          delete_mg() {
+            local name="$1"
+            echo "  Deleting: $name"
+            az account management-group delete --name "$name" --output none 2>/dev/null && echo "    ✅ Deleted" || echo "    ⚠️  Not found or already deleted"
+          }
+
+          # Delete bottom-up: leaves → parents → root
+          echo ""
+          echo "── Leaf MGs (platform children) ──"
+          for mg in "${OLD}-platform-management" "${OLD}-platform-connectivity" "${OLD}-platform-identity" "${OLD}-platform-security"; do
+            delete_mg "$mg"
+          done
+
+          echo ""
+          echo "── Leaf MGs (landing zone children) ──"
+          for mg in "${OLD}-landingzones-corp" "${OLD}-landingzones-online" "${OLD}-landingzones-sap"; do
+            delete_mg "$mg"
+          done
+
+          echo ""
+          echo "── Parent MGs ──"
+          for mg in "${OLD}-platform" "${OLD}-landingzones" "${OLD}-sandbox" "${OLD}-decommissioned"; do
+            delete_mg "$mg"
+          done
+
+          echo ""
+          echo "── Root MG ──"
+          delete_mg "$OLD"
+
+          echo ""
+          echo "Old MG hierarchy deletion complete."
+
+  # =========================================================================
   # Final verification
   # =========================================================================
   verify:
     name: Verify Bootstrap
-    needs: [verify-access, create-management-groups, move-subscriptions, register-providers]
+    needs: [verify-access, create-management-groups, move-subscriptions, register-providers, delete-old-prefix]
     if: always()
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
