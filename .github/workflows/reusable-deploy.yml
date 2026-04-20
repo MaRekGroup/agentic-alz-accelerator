@@ -501,7 +501,7 @@ jobs:
         id: tdd
         continue-on-error: true
         run: |
-          pip install cairosvg python-docx pillow pyyaml 2>/dev/null
+          pip install cairosvg python-docx pillow pyyaml azure-mgmt-resourcegraph azure-identity 2>/dev/null
 
           # Read subscription name from config
           SUB_NAME=$(jq -r '
@@ -511,9 +511,34 @@ jobs:
             | .value.subscription_name // .key
           ' environments/subscriptions.json 2>/dev/null || echo "${{ inputs.project_name }}")
 
-          # Generate both .docx and .md (with SVG diagrams)
+          # Query Azure Resource Graph for live inventory, then generate TDDs
           python -c "
+          import json
           from src.tools.tdd_generator import generate_tdd_for_deployment, generate_tdd_markdown_for_deployment
+
+          # --- Query live resource inventory from Azure Resource Graph ---
+          resource_inventory = {}
+          try:
+              from azure.identity import DefaultAzureCredential
+              from azure.mgmt.resourcegraph import ResourceGraphClient
+              from azure.mgmt.resourcegraph.models import QueryRequest, QueryRequestOptions, ResultFormat
+
+              credential = DefaultAzureCredential()
+              rg_client = ResourceGraphClient(credential)
+              query = 'resources | summarize count() by type | order by count_ desc'
+              request = QueryRequest(
+                  query=query,
+                  subscriptions=['${{ secrets.SUBSCRIPTION_ID }}'],
+                  options=QueryRequestOptions(result_format=ResultFormat.OBJECT_ARRAY),
+              )
+              result = rg_client.resources(request)
+              rows = result.data if isinstance(result.data, list) else []
+              by_type = {r.get('type', ''): r.get('count_', 0) for r in rows}
+              total = sum(by_type.values())
+              resource_inventory = {'total_count': total, 'by_type': by_type}
+              print(f'Resource Graph: {total} resources across {len(by_type)} types')
+          except Exception as e:
+              print(f'Warning: Resource Graph query failed ({e}), using profile defaults')
 
           kwargs = dict(
               project_name='${{ inputs.project_name }}',
@@ -526,6 +551,7 @@ jobs:
               deployment_id='${{ needs.deploy.outputs.deployment_id }}',
               output_dir='docs/tdd',
               config_path='environments/subscriptions.json',
+              resource_inventory=resource_inventory,
           )
 
           docx_path = generate_tdd_for_deployment(**kwargs)

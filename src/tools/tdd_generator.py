@@ -1351,9 +1351,15 @@ def generate_tdd_for_deployment(
     deployment_id: str = "",
     output_dir: str = "docs/tdd",
     config_path: str = "environments/subscriptions.json",
+    resource_inventory: dict | None = None,
 ) -> str:
     """
     Generate a TDD for a specific deployment. Called by CI/CD or CLI.
+
+    Args:
+        resource_inventory: Live data from Azure Resource Graph.
+            Expected shape: {"total_count": int, "by_type": {str: int}}.
+            When provided, replaces the static profile-based resource table.
 
     Returns the path to the generated document.
     """
@@ -1373,7 +1379,7 @@ def generate_tdd_for_deployment(
     filename = f"TDD_{project_name}_{timestamp}.docx"
     output_path = str(Path(output_dir) / filename)
 
-    return generator.generate(output_path)
+    return generator.generate(output_path, resource_inventory=resource_inventory or {})
 
 
 def generate_tdd_markdown_for_deployment(
@@ -1387,9 +1393,15 @@ def generate_tdd_markdown_for_deployment(
     deployment_id: str = "",
     output_dir: str = "docs/tdd",
     config_path: str = "environments/subscriptions.json",
+    resource_inventory: dict | None = None,
 ) -> str:
     """
     Generate a markdown TDD with SVG architecture diagram for a specific deployment.
+
+    Args:
+        resource_inventory: Live data from Azure Resource Graph.
+            Expected shape: {"total_count": int, "by_type": {str: int}}.
+            When provided, replaces the static profile-based resource table.
 
     Returns the path to the generated .md file.
     """
@@ -1415,7 +1427,7 @@ def generate_tdd_markdown_for_deployment(
     md_path = str(out / md_filename)
     svg_path = str(out / svg_filename)
 
-    generator.generate_markdown(md_path, svg_path, svg_filename)
+    generator.generate_markdown(md_path, svg_path, svg_filename, resource_inventory=resource_inventory or {})
     return md_path
 
 
