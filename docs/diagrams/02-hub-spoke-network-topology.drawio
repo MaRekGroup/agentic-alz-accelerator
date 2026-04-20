@@ -5,10 +5,10 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="title" value="<b>Hub-Spoke Network Topology — Connectivity Landing Zone</b>" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontColor=#1a3a5c;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                <mxCell id="title" value="&lt;b&gt;Hub-Spoke Network Topology — Connectivity Landing Zone&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontColor=#1a3a5c;fillColor=none;strokeColor=none;" parent="1" vertex="1">
                     <mxGeometry x="200" y="20" width="700" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="hub" value="<b>Hub VNet — 10.0.0.0/16</b>" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F0FE;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;dashed=1;dashPattern=8 4;" parent="1" vertex="1">
+                <mxCell id="hub" value="&lt;b&gt;Hub VNet — 10.0.0.0/16&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F0FE;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;dashed=1;dashPattern=8 4;" parent="1" vertex="1">
                     <mxGeometry x="300" y="80" width="500" height="320" as="geometry"/>
                 </mxCell>
                 <mxCell id="fw" value="Azure Firewall
@@ -33,19 +33,19 @@ Protection" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;im
                 <mxCell id="udr" value="Hub UDR" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyBpZD0iZWM3MTc2MGQtZWEwNy00MWQ1LTk1MDYtOTRhMGYyNjc3YWE5IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImVjNmFkODI1LTYwMDgtNDRjMC04YzQ2LWQzMTcxMTIxMzgyNyIgeDE9IjEwLjU2IiB5MT0iNy43NyIgeDI9IjEwLjU2IiB5Mj0iMTkuMjQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAuMjIiIHN0b3AtY29sb3I9IiMzMmQ0ZjUiIC8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTk4YWIzIiAvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiMmMyYmU5ZS0wYTcwLTRhODMtYWI4Zi1iZjgwMjJlNjc5MjQiIHgxPSIxMC4yMyIgeTE9IjEuNjMiIHgyPSIxMS4wNyIgeTI9IjEyLjA0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwLjIyIiBzdG9wLWNvbG9yPSIjMzJkNGY1IiAvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzE5OGFiMyIgLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48dGl0bGU+SWNvbi1uZXR3b3JraW5nLTgyPC90aXRsZT48cGF0aCBkPSJNMTYuMjMsMTcuMTdBMS4yMSwxLjIxLDAsMCwwLDE3LjQ2LDE2VjE1LjhjLS40OS0zLjg2LTIuNjktNy02Ljg5LTdzLTYuNDgsMi42Ni02LjkxLDdhMS4yNCwxLjI0LDAsMCwwLDEuMSwxLjM2SDE2LjIzWiIgZmlsbD0idXJsKCNlYzZhZDgyNS02MDA4LTQ0YzAtOGM0Ni1kMzE3MTEyMTM4MjcpIiAvPjxwYXRoIGQ9Ik0xMC41Nyw5LjcxYTMuODYsMy44NiwwLDAsMS0yLjEtLjYxbDIuMDgsNS40MiwyLjA2LTUuMzlBMy44MywzLjgzLDAsMCwxLDEwLjU3LDkuNzFaIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjgiIC8+PGNpcmNsZSBjeD0iMTAuNTciIGN5PSI1Ljg0IiByPSIzLjg3IiBmaWxsPSJ1cmwoI2IyYzJiZTllLTBhNzAtNGE4My1hYjhmLWJmODAyMmU2NzkyNCkiIC8+PHBhdGggZD0iTTYsNS44OFYxQS4xNi4xNiwwLDAsMCw1Ljg0LjgzSDQuNTdBLjE3LjE3LDAsMCwwLDQuMzksMVY1LjcxYS4xOC4xOCwwLDAsMS0uMTcuMTdIMy4xQS4xMi4xMiwwLDAsMSwzLDUuNzZWNC40NWEuMTEuMTEsMCwwLDAtLjE5LS4wOEwuNTksNi41N2EuMTYuMTYsMCwwLDAsMCwuMjRMMi43OSw5QS4xMS4xMSwwLDAsMCwzLDguOTNWNy42MUEuMTEuMTEsMCwwLDEsMy4xLDcuNUg1Ljg0QS4xNy4xNywwLDAsMCw2LDcuMzNWNS44OFoiIGZpbGw9IiMwMDc4ZDQiIC8+PC9zdmc+" parent="1" vertex="1">
                     <mxGeometry x="620" y="260" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="spoke_corp" value="<b>Corp Spoke</b>&lt;br&gt;10.1.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F2E6;fontColor=#107C10;strokeColor=#107C10;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="spoke_corp" value="&lt;b&gt;Corp Spoke&lt;/b&gt;&lt;br&gt;10.1.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F2E6;fontColor=#107C10;strokeColor=#107C10;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="50" y="150" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="spoke_online" value="<b>Online Spoke</b>&lt;br&gt;10.2.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;fontColor=#D13438;strokeColor=#D13438;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="spoke_online" value="&lt;b&gt;Online Spoke&lt;/b&gt;&lt;br&gt;10.2.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;fontColor=#D13438;strokeColor=#D13438;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="50" y="280" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="spoke_sap" value="<b>SAP Spoke</b>&lt;br&gt;10.3.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F5FF;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="spoke_sap" value="&lt;b&gt;SAP Spoke&lt;/b&gt;&lt;br&gt;10.3.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F5FF;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="880" y="150" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="spoke_sb" value="<b>Sandbox Spoke</b>&lt;br&gt;10.99.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#FF8C00;strokeColor=#FF8C00;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="spoke_sb" value="&lt;b&gt;Sandbox Spoke&lt;/b&gt;&lt;br&gt;10.99.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#FF8C00;strokeColor=#FF8C00;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="880" y="280" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="onprem" value="<b>On-Premises</b>&lt;br&gt;ExpressRoute / S2S VPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;fontColor=#333;strokeColor=#999;strokeWidth=1.5;fontSize=11;dashed=1;" parent="1" vertex="1">
+                <mxCell id="onprem" value="&lt;b&gt;On-Premises&lt;/b&gt;&lt;br&gt;ExpressRoute / S2S VPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;fontColor=#333;strokeColor=#999;strokeWidth=1.5;fontSize=11;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="430" y="460" width="240" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="ep1" value="peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#107C10;strokeWidth=1.5;dashed=1;" parent="1" source="spoke_corp" target="fw" edge="1">
