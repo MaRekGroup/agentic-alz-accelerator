@@ -19,7 +19,7 @@ class AzureAISettings(BaseSettings):
 
 
 class AzureSettings(BaseSettings):
-    subscription_id: str = Field(alias="AZURE_SUBSCRIPTION_ID")
+    subscription_id: str = Field(default="", alias="AZURE_SUBSCRIPTION_ID")
     tenant_id: str = Field(default="", alias="AZURE_TENANT_ID")
     management_group_prefix: str = Field(
         default="mrg", alias="AZURE_MANAGEMENT_GROUP_PREFIX"
