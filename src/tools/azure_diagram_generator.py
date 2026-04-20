@@ -29,6 +29,9 @@ class AzureColor(str, Enum):
     LIGHT_GRAY  = "#F2F2F2"    # Background panels
     WHITE       = "#FFFFFF"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 @dataclass
 class DiagramNode:

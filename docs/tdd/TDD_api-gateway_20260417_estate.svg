@@ -26,8 +26,8 @@
     </marker>
   </defs>
   <text x="20" y="30" class="title">Azure Landing Zone — Full Estate Overview</text>
-  <text x="20" y="48" class="subtitle">Management Group Prefix: alz  ·  4 Platform + 6 Application LZs</text>
-  <!-- Group: alz (Azure Landing Zones) -->
+  <text x="20" y="48" class="subtitle">Management Group Prefix: mrg  ·  4 Platform + 6 Application LZs</text>
+  <!-- Group: mrg (Azure Landing Zones) -->
     <rect x="10" y="70" width="960" height="530"
           rx="8" fill="#003B73" fill-opacity="0.06"
           stroke="#003B73" stroke-width="1.5" stroke-dasharray="6 3"/>
@@ -35,7 +35,7 @@
       <rect width="32" height="32" class="icon-bg" fill="#003B73" opacity="0.12"/>
       <path d="M14 2h4v4h-4V2zM8 10h16v4H8v-4zm-6 8h10v4H2v-4zm16 0h10v4H18v-4zM16 6v4M8 14v4m16-4v4" fill="#003B73"/>
     </g>
-    <text x="46" y="90" class="group-label" fill="#003B73">alz (Azure Landing Zones)</text>
+    <text x="46" y="90" class="group-label" fill="#003B73">mrg (Azure Landing Zones)</text>
   <!-- Group: Platform Landing Zones -->
     <rect x="30" y="110" width="920" height="150"
           rx="8" fill="#0078D4" fill-opacity="0.06"
