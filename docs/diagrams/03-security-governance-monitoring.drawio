@@ -63,19 +63,19 @@ Monitor" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;image
                 <mxCell id="baseline" value="&lt;b&gt;Security Baseline (Non-Negotiable)&lt;/b&gt;: TLS 1.2 min · HTTPS-only · No public blob · Managed Identity · AAD-only SQL · Private endpoints (prod)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;fontColor=#333;strokeColor=#999;strokeWidth=1;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="100" y="350" width="900" height="45" as="geometry"/>
                 </mxCell>
-                <mxCell id="es1" value="alerts" style="strokeColor=#D13438;strokeWidth=1.5;" parent="1" source="defender" target="sentinel" edge="1">
+                <mxCell id="es1" value="alerts" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D13438;strokeWidth=1.5;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="defender" target="sentinel" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="es2" style="strokeColor=#0078D4;strokeWidth=1;dashed=1;" parent="1" source="policy" target="defender" edge="1">
+                <mxCell id="es2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0078D4;strokeWidth=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="policy" target="defender" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="es3" style="strokeColor=#FF8C00;strokeWidth=1.5;" parent="1" source="monitor" target="law" edge="1">
+                <mxCell id="es3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF8C00;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="monitor" target="law" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="es4" value="logs" style="strokeColor=#D13438;strokeWidth=1;dashed=1;" parent="1" source="sentinel" target="law" edge="1">
+                <mxCell id="es4" value="logs" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D13438;strokeWidth=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="sentinel" target="law" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="es5" style="strokeColor=#FF8C00;strokeWidth=1;dashed=1;" parent="1" source="auto" target="law" edge="1">
+                <mxCell id="es5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF8C00;strokeWidth=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="auto" target="law" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>
