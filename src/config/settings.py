@@ -22,7 +22,7 @@ class AzureSettings(BaseSettings):
     subscription_id: str = Field(alias="AZURE_SUBSCRIPTION_ID")
     tenant_id: str = Field(default="", alias="AZURE_TENANT_ID")
     management_group_prefix: str = Field(
-        default="alz", alias="AZURE_MANAGEMENT_GROUP_PREFIX"
+        default="mrg", alias="AZURE_MANAGEMENT_GROUP_PREFIX"
     )
     deployment_region: str = Field(
         default="southcentralus", alias="AZURE_DEPLOYMENT_REGION"

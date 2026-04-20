@@ -22,7 +22,7 @@ def mock_credential():
 def mock_settings():
     settings = MagicMock()
     settings.azure.subscription_id = "test-sub-id"
-    settings.azure.management_group_prefix = "alz"
+    settings.azure.management_group_prefix = "mrg"
     return settings
 
 

@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-platform-connectivity |
+| Subscription | mrg-platform-connectivity |
 | Subscription ID | `<SUB-2-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'connectivity' landing zone deployed to subscription
-'alz-platform-connectivity' in southcentralus.
+'mrg-platform-connectivity' in southcentralus.
 This landing zone provides hub networking with Azure Firewall, DNS, DDoS protection, and ExpressRoute/VPN gateways.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | connectivity |
 | Profile | platform-connectivity |
-| Subscription | alz-platform-connectivity (`<SUB-2-ID>`) |
+| Subscription | mrg-platform-connectivity (`<SUB-2-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

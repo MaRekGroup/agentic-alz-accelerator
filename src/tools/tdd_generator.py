@@ -691,7 +691,7 @@ class TDDGenerator:
                 with open(config_file) as f:
                     config = json.load(f)
                 svg = generate_full_estate_diagram(
-                    config.get("management_group_prefix", "alz"), config
+                    config.get("management_group_prefix", "mrg"), config
                 )
                 self._insert_diagram(svg, "Figure 2: Full Azure Landing Zone Estate")
         except Exception as e:
@@ -796,7 +796,7 @@ class TDDGenerator:
                 with open(config_file) as f:
                     config = json.load(f)
                 estate_svg = generate_full_estate_diagram(
-                    config.get("management_group_prefix", "alz"), config
+                    config.get("management_group_prefix", "mrg"), config
                 )
                 estate_svg_filename = svg_filename.replace("_architecture.svg", "_estate.svg")
                 estate_svg_path = str(Path(svg_path).parent / estate_svg_filename)

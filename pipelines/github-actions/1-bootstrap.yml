@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       mg_prefix:
-        description: 'Management group prefix (e.g., alz)'
+        description: 'Management group prefix (e.g., mrg)'
         required: true
-        default: 'alz'
+        default: 'mrg'
       primary_location:
         description: 'Primary Azure region'
         required: true

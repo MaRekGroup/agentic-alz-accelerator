@@ -1407,7 +1407,7 @@ python -m src.agents.orchestrator <span class="flag">--mode</span> monitor</div>
               <tr><td><code>MONITOR_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Compliance scan interval (default: 30)</td></tr>
               <tr><td><code>DRIFT_CHECK_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Drift detection interval (default: 60)</td></tr>
               <tr><td><code>AUTO_REMEDIATE</code></td><td><span class="badge badge-green">Optional</span></td><td>Auto-remediate violations (default: false)</td></tr>
-              <tr><td><code>AZURE_MANAGEMENT_GROUP_PREFIX</code></td><td><span class="badge badge-green">Optional</span></td><td>Root management group prefix (default: alz)</td></tr>
+              <tr><td><code>AZURE_MANAGEMENT_GROUP_PREFIX</code></td><td><span class="badge badge-green">Optional</span></td><td>Root management group prefix (default: mrg)</td></tr>
               <tr><td><code>TERRAFORM_STATE_STORAGE_ACCOUNT</code></td><td><span class="badge badge-green">TF only</span></td><td>Storage account for Terraform state</td></tr>
             </tbody>
           </table>
@@ -2440,7 +2440,7 @@ Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
         <div class="code-block" style="font-size:11px">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 chmod +x scripts/setup-oidc.sh
-./scripts/setup-oidc.sh &lt;your-org&gt; agentic-alz-accelerator alz</div>
+./scripts/setup-oidc.sh &lt;your-org&gt; agentic-alz-accelerator mrg</div>
 
         <h3 style="margin-top:18px">Step 2: Configure App Landing Zones</h3>
         <p style="margin:8px 0;font-size:13px"><strong>App LZ names are fully configurable.</strong> Edit <code>environments/subscriptions.json</code> to rename, add, or remove app LZs. The workflow reads this file dynamically — no YAML changes needed.</p>
@@ -2549,14 +2549,14 @@ gh variable set RUNNER_LABEL <span class="flag">--body</span> <span class="str">
         <div class="code-block" style="font-size:11px">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 gh workflow run <span class="str">"1 · Bootstrap Landing Zone Foundation"</span> \
-  <span class="flag">-f</span> mg_prefix=alz \
+  <span class="flag">-f</span> mg_prefix=mrg \
   <span class="flag">-f</span> primary_location=eastus2 \
   <span class="flag">-f</span> action=all</div>
 
         <div class="card" style="margin-top:14px;padding:16px;background:#f8f9fb">
           <h4 style="margin-bottom:8px">Management Group Hierarchy</h4>
           <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
-alz (Azure Landing Zones)
+mrg (Azure Landing Zones)
 ├── Platform
 │   ├── Management      ← Sub 1
 │   ├── Connectivity    ← Sub 2
@@ -2784,7 +2784,7 @@ python -m src.tools.tdd_generator \
   --project platform-management \
   --profile platform-management \
   --subscription-id &lt;SUB-1-ID&gt; \
-  --subscription-name alz-platform-management</div>
+  --subscription-name mrg-platform-management</div>
 
   <div class="card" style="margin-top:14px;padding:14px;background:#f0fff4;border-left:4px solid #28a745">
     <strong>Automatic in CI/CD:</strong> TDDs are generated in the <em>Verify</em> stage of every deployment and uploaded as pipeline artifacts. No manual steps needed.

@@ -94,7 +94,7 @@ Follow CAF naming conventions. Required tags on all resource groups:
 ### IaC Defaults
 - Default region: `southcentralus` (configurable via `AZURE_DEPLOYMENT_REGION`)
 - IaC framework: Bicep or Terraform (configurable via `IAC_FRAMEWORK`)
-- Management group prefix: `alz` (configurable via `AZURE_MANAGEMENT_GROUP_PREFIX`)
+- Management group prefix: `mrg` (configurable via `AZURE_MANAGEMENT_GROUP_PREFIX`)
 
 ## Key Files
 

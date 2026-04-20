@@ -22,7 +22,7 @@ def mock_credential():
 def mock_settings():
     settings = MagicMock()
     settings.azure.subscription_id = "test-sub-id"
-    settings.azure.management_group_prefix = "alz"
+    settings.azure.management_group_prefix = "mrg"
     settings.iac.framework = "bicep"
     settings.ai.openai_deployment = "gpt-4o"
     settings.ai.openai_endpoint = "https://test.openai.azure.com/"

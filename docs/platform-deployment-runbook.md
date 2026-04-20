@@ -17,10 +17,10 @@
 
 | # | Purpose | Management Group |
 |---|---------|-----------------|
-| 1 | Management (logging, Sentinel, Automation) | `alz-platform-management` |
-| 2 | Connectivity (hub VNet, Firewall, DNS) | `alz-platform-connectivity` |
-| 3 | Identity (AD DS, PIM) | `alz-platform-identity` |
-| 4 | Security (Defender, SOAR, SecOps) | `alz-platform-security` |
+| 1 | Management (logging, Sentinel, Automation) | `mrg-platform-management` |
+| 2 | Connectivity (hub VNet, Firewall, DNS) | `mrg-platform-connectivity` |
+| 3 | Identity (AD DS, PIM) | `mrg-platform-identity` |
+| 4 | Security (Defender, SOAR, SecOps) | `mrg-platform-security` |
 
 ---
 
@@ -216,7 +216,7 @@ The bootstrap creates the management group hierarchy and moves subscriptions.
 ### Verify access first:
 ```bash
 gh workflow run "1-bootstrap.yml" --repo "$REPO" \
-  -f mg_prefix=alz \
+  -f mg_prefix=mrg \
   -f primary_location=southcentralus \
   -f action=verify-only
 ```
@@ -224,7 +224,7 @@ gh workflow run "1-bootstrap.yml" --repo "$REPO" \
 ### Run full bootstrap:
 ```bash
 gh workflow run "1-bootstrap.yml" --repo "$REPO" \
-  -f mg_prefix=alz \
+  -f mg_prefix=mrg \
   -f primary_location=southcentralus \
   -f action=all
 ```
@@ -256,18 +256,18 @@ gh api "repos/${REPO}/actions/runs/${RUN_ID}/jobs" \
 
 ```
 Tenant Root
-└── alz
-    ├── alz-platform
-    │   ├── alz-platform-management       (Sub 1)
-    │   ├── alz-platform-connectivity     (Sub 2)
-    │   ├── alz-platform-identity         (Sub 3)
-    │   └── alz-platform-security         (Sub 4)
-    ├── alz-landing-zones
-    │   ├── alz-landing-zones-corp
-    │   ├── alz-landing-zones-online
-    │   └── alz-landing-zones-sap
-    ├── alz-sandbox
-    └── alz-decommissioned
+└── mrg
+    ├── mrg-platform
+    │   ├── mrg-platform-management       (Sub 1)
+    │   ├── mrg-platform-connectivity     (Sub 2)
+    │   ├── mrg-platform-identity         (Sub 3)
+    │   └── mrg-platform-security         (Sub 4)
+    ├── mrg-landing-zones
+    │   ├── mrg-landing-zones-corp
+    │   ├── mrg-landing-zones-online
+    │   └── mrg-landing-zones-sap
+    ├── mrg-sandbox
+    └── mrg-decommissioned
 ```
 
 ---
@@ -278,7 +278,7 @@ If the bootstrap skipped provider registration due to the app subscription failu
 
 ```bash
 gh workflow run "1-bootstrap.yml" --repo "$REPO" \
-  -f mg_prefix=alz \
+  -f mg_prefix=mrg \
   -f primary_location=southcentralus \
   -f action=register-providers-only
 ```

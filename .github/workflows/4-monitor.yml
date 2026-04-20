@@ -345,7 +345,9 @@ jobs:
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - name: Send Teams notification
-        if: secrets.TEAMS_WEBHOOK_URL != ''
+        if: env.TEAMS_WEBHOOK_URL != ''
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: |
           VIOLATIONS="${{ needs.compliance.outputs.violations || '0' }}"
           COMPLIANCE="${{ needs.compliance.outputs.compliance_pct || 'N/A' }}"
@@ -376,9 +378,7 @@ jobs:
                 ]
               }
             }]
-          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
-        env:
-          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          }' "$TEAMS_WEBHOOK_URL"
 
       - name: Create GitHub issue for critical violations
         if: needs.compliance.outputs.violations > 10

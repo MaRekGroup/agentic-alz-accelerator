@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-platform-identity |
+| Subscription | mrg-platform-identity |
 | Subscription ID | `<SUB-3-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'identity' landing zone deployed to subscription
-'alz-platform-identity' in southcentralus.
+'mrg-platform-identity' in southcentralus.
 This landing zone provides Active Directory Domain Services, Entra ID PIM, and privileged access workstations.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | identity |
 | Profile | platform-identity |
-| Subscription | alz-platform-identity (`<SUB-3-ID>`) |
+| Subscription | mrg-platform-identity (`<SUB-3-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

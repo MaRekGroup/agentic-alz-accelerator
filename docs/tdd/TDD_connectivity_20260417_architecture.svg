@@ -26,8 +26,8 @@
     </marker>
   </defs>
   <text x="20" y="30" class="title">Platform Connectivity Landing Zone — As-Built</text>
-  <text x="20" y="48" class="subtitle">alz-platform-connectivity  ·  southcentralus  ·  Topology: hub-spoke</text>
-  <!-- Group: Subscription: alz-platform-connectivity -->
+  <text x="20" y="48" class="subtitle">mrg-platform-connectivity  ·  southcentralus  ·  Topology: hub-spoke</text>
+  <!-- Group: Subscription: mrg-platform-connectivity -->
     <rect x="10" y="70" width="780" height="520"
           rx="8" fill="AzureColor.GREEN" fill-opacity="0.06"
           stroke="AzureColor.GREEN" stroke-width="1.5" stroke-dasharray="6 3"/>
@@ -35,7 +35,7 @@
       <rect width="32" height="32" class="icon-bg" fill="AzureColor.BLUE" opacity="0.12"/>
       <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm0 3.2L25 9.6v12.8L16 26.8 7 22.4V9.6L16 5.2z" fill="AzureColor.BLUE"/>
     </g>
-    <text x="46" y="90" class="group-label" fill="AzureColor.GREEN">Subscription: alz-platform-connectivity</text>
+    <text x="46" y="90" class="group-label" fill="AzureColor.GREEN">Subscription: mrg-platform-connectivity</text>
   <!-- Group: Hub VNet (10.0.0.0/16) -->
     <rect x="30" y="110" width="740" height="200"
           rx="8" fill="AzureColor.GREEN" fill-opacity="0.06"

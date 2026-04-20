@@ -201,7 +201,7 @@ class AgentOrchestrator:
         """
         from src.tools.azure_diagram_generator import generate_diagrams
 
-        mg_prefix = self.settings.azure.management_group_prefix or "alz"
+        mg_prefix = self.settings.azure.management_group_prefix or "mrg"
         diagram_dir = str(output_dir / "diagrams")
 
         outputs = generate_diagrams(

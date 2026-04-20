@@ -178,7 +178,7 @@ class ProfileLoader:
 
         params = {
             "location": os.environ.get("AZURE_DEPLOYMENT_REGION", "southcentralus"),  # Override via env var or CLI
-            "prefix": profile.get("naming", {}).get("prefix", "alz"),
+            "prefix": profile.get("naming", {}).get("prefix", "mrg"),
             "environment": environment,
             "iac_framework": framework,
             "hub_topology": profile.get("networking", {}).get("hub_topology", "hub-spoke"),
@@ -274,7 +274,7 @@ class ProfileLoader:
             )
 
         # Prefix must be set and short
-        prefix = profile.get("naming", {}).get("prefix", "alz")
+        prefix = profile.get("naming", {}).get("prefix", "mrg")
         if len(prefix) > 10:
             errors.append(f"naming.prefix '{prefix}' exceeds 10 characters")
 

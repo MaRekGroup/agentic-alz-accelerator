@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-platform-security |
+| Subscription | mrg-platform-security |
 | Subscription ID | `<SUB-4-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'security' landing zone deployed to subscription
-'alz-platform-security' in southcentralus.
+'mrg-platform-security' in southcentralus.
 This landing zone provides dedicated SecOps with Sentinel, Defender for Cloud (all plans), SOAR playbooks, and incident response.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | security |
 | Profile | platform-security |
-| Subscription | alz-platform-security (`<SUB-4-ID>`) |
+| Subscription | mrg-platform-security (`<SUB-4-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

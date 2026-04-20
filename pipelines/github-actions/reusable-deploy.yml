@@ -65,10 +65,10 @@ on:
         type: string
         default: ''
       prefix:
-        description: 'Resource naming prefix (e.g. alz, mrg) — used to derive LAW ID and RG names'
+        description: 'Resource naming prefix (e.g. mrg) — used to derive LAW ID and RG names'
         required: false
         type: string
-        default: 'alz'
+        default: 'mrg'
     secrets:
       AZURE_TENANT_ID:
         required: true

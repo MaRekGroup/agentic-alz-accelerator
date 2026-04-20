@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-platform-management |
+| Subscription | mrg-platform-management |
 | Subscription ID | `<SUB-1-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'management' landing zone deployed to subscription
-'alz-platform-management' in southcentralus.
+'mrg-platform-management' in southcentralus.
 This landing zone provides centralized monitoring, logging, Sentinel SIEM, and backup infrastructure.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | management |
 | Profile | platform-management |
-| Subscription | alz-platform-management (`<SUB-1-ID>`) |
+| Subscription | mrg-platform-management (`<SUB-1-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

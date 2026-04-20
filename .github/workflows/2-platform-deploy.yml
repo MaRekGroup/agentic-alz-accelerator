@@ -54,9 +54,9 @@ on:
           - westus2
           - centralus
       prefix:
-        description: 'Resource naming prefix (e.g. alz, mrg)'
+        description: 'Resource naming prefix (e.g. mrg)'
         required: true
-        default: 'alz'
+        default: 'mrg'
         type: string
 
 permissions:

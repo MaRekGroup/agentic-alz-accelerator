@@ -37,7 +37,7 @@ resource_organization:
 
 # ─── Naming Convention ────────────────────────────────────────────────────────
 naming:
-  prefix: "alz"                    # Override with your org abbreviation
+  prefix: "mrg"                    # Override with your org abbreviation
   separator: "-"
   max_length:
     resource_group: 90

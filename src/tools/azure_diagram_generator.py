@@ -840,7 +840,7 @@ def generate_full_estate_diagram(mg_prefix: str, subscriptions_config: dict) -> 
 def generate_diagrams(
     engine: str = "python",
     output_dir: str = "docs/diagrams",
-    mg_prefix: str = "alz",
+    mg_prefix: str = "mrg",
     subscriptions_config: dict | None = None,
 ) -> list[str]:
     """Generate the standard set of ALZ architecture diagrams.

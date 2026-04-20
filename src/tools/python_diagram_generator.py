@@ -147,7 +147,7 @@ class DiagramEngine:
 
     def generate_mg_hierarchy(
         self,
-        mg_prefix: str = "alz",
+        mg_prefix: str = "mrg",
         filename: str = "01-management-group-hierarchy",
     ) -> str:
         """Generate management group hierarchy diagram."""
@@ -335,7 +335,7 @@ class DiagramEngine:
 
     def generate_alz_architecture(
         self,
-        mg_prefix: str = "alz",
+        mg_prefix: str = "mrg",
         filename: str = "alz-architecture",
     ) -> str:
         """Generate the comprehensive ALZ architecture overview."""
@@ -421,7 +421,7 @@ class DiagramEngine:
         Returns list of output file paths (PNGs).
         """
         prefix = output_prefix or profile_name
-        mg_prefix = config.get("management_group_prefix", "alz")
+        mg_prefix = config.get("management_group_prefix", "mrg")
 
         outputs = []
         outputs.append(self.generate_mg_hierarchy(
@@ -505,7 +505,7 @@ class DiagramEngine:
 
 def generate_all_diagrams(
     output_dir: str = "docs/diagrams",
-    mg_prefix: str = "alz",
+    mg_prefix: str = "mrg",
 ) -> list[str]:
     """Generate the standard set of ALZ diagrams. Returns list of PNG paths."""
     engine = DiagramEngine(output_dir=output_dir)

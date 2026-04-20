@@ -409,7 +409,7 @@ Valid profiles: `corp`, `online`, `sandbox`, `sap`
 
 ```bash
 gh workflow run "1 · Bootstrap Landing Zone Foundation" \
-  -f mg_prefix=alz \
+  -f mg_prefix=mrg \
   -f primary_location=eastus2 \
   -f action=all
 ```
@@ -417,7 +417,7 @@ gh workflow run "1 · Bootstrap Landing Zone Foundation" \
 Creates the CAF management group hierarchy and moves subscriptions:
 
 ```
-alz (root)
+mrg (root)
 ├── Platform
 │   ├── Management    ← Sub 1
 │   ├── Connectivity  ← Sub 2
@@ -537,7 +537,7 @@ python -m src.tools.tdd_generator \
   --project platform-management \
   --profile platform-management \
   --subscription-id <SUB-1-ID> \
-  --subscription-name alz-platform-management \
+  --subscription-name mrg-platform-management \
   --location eastus2
 ```
 
