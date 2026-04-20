@@ -84,7 +84,6 @@ class DriftDetector:
         if not self._baseline_state:
             logger.info("No baseline found, capturing initial baseline...")
             await self.capture_baseline(scope)
-            return {"drifted_resources": [], "message": "Baseline captured, no drift to report yet"}
 
         logger.info("Detecting drift against baseline...")
         drifted_resources = []

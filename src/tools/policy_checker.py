@@ -23,14 +23,18 @@ class PolicyChecker:
     def __init__(self, credential: DefaultAzureCredential, settings: Settings):
         self.credential = credential
         self.settings = settings
-        self.client = PolicyInsightsClient(credential, settings.azure.subscription_id)
+
+    def _get_client(self) -> PolicyInsightsClient:
+        """Create a PolicyInsightsClient using the current subscription ID."""
+        return PolicyInsightsClient(self.credential, self.settings.azure.subscription_id)
 
     async def get_compliance_state(self, scope: str) -> dict:
         """Get overall compliance state for a scope."""
         logger.info(f"Checking compliance state at scope: {scope}")
 
         try:
-            summary = self.client.policy_states.summarize_for_subscription(
+            client = self._get_client()
+            summary = client.policy_states.summarize_for_subscription(
                 subscription_id=self.settings.azure.subscription_id,
                 policy_states_summary_resource="latest",
             )
@@ -89,9 +93,10 @@ class PolicyChecker:
         logger.info(f"Fetching policy violations at scope: {scope}")
 
         try:
+            client = self._get_client()
             query_options = QueryOptions(top=top, order_by="timestamp desc")
 
-            states = self.client.policy_states.list_query_results_for_subscription(
+            states = client.policy_states.list_query_results_for_subscription(
                 subscription_id=self.settings.azure.subscription_id,
                 policy_states_resource="latest",
                 query_options=query_options,
@@ -127,7 +132,8 @@ class PolicyChecker:
     ) -> bool:
         """Check if a specific resource is compliant with a policy."""
         try:
-            states = self.client.policy_states.list_query_results_for_resource(
+            client = self._get_client()
+            states = client.policy_states.list_query_results_for_resource(
                 resource_id=resource_id,
                 policy_states_resource="latest",
             )
