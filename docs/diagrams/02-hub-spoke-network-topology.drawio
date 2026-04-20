@@ -1,145 +1,71 @@
-<mxfile host="65bd71144e">
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio-mcp-server" modified="2026-04-20T19:00:00.000Z" type="device" version="24.0">
     <diagram id="hub-spoke" name="Hub-Spoke Network Topology">
-        <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1400" math="0" shadow="0">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="560" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="title" value="&lt;b&gt;Azure Landing Zone — Hub-Spoke Network Topology &amp; Resource Layout&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a3a5c;" parent="1" vertex="1">
-                    <mxGeometry x="376" y="15" width="750" height="40" as="geometry"/>
+                <mxCell id="title" value="<b>Hub-Spoke Network Topology — Connectivity Landing Zone</b>" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontColor=#1a3a5c;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="20" width="700" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="onprem" value="&lt;b&gt;🏠 On-Premises&lt;/b&gt;&lt;br&gt;Corporate Network" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#8b5e3c;fontColor=#ffffff;strokeColor=#5a3d28;fontSize=13;" parent="1" vertex="1">
-                    <mxGeometry x="-4" y="300" width="200" height="120" as="geometry"/>
+                <mxCell id="hub" value="<b>Hub VNet — 10.0.0.0/16</b>" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F0FE;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;dashed=1;dashPattern=8 4;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="80" width="500" height="320" as="geometry"/>
                 </mxCell>
-                <mxCell id="internet" value="&lt;b&gt;☁️ Internet&lt;/b&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#c62828;fontColor=#ffffff;strokeColor=#8e1c1c;fontSize=13;" parent="1" vertex="1">
-                    <mxGeometry x="1426" y="60" width="170" height="100" as="geometry"/>
+                <mxCell id="fw" value="Azure Firewall
+Premium" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImI5ZWRhMTRkLTUwMTgtNDA2OS04NDYxLWU5YzE1MjI3NjVmZiIgeDE9IjEzLjQ1IiB5MT0iNi4zIiB4Mj0iMTMuNDUiIHkyPSIxNi40NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZDcwZiIgLz48c3RvcCBvZmZzZXQ9IjAuMTIiIHN0b3AtY29sb3I9IiNmYzEiIC8+PHN0b3Agb2Zmc2V0PSIwLjQ0IiBzdG9wLWNvbG9yPSIjZmViNTE3IiAvPjxzdG9wIG9mZnNldD0iMC43NSIgc3RvcC1jb2xvcj0iI2ZlYTYxYSIgLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZWExMWIiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGcgaWQ9ImJlMzgyMmNlLWE4NzYtNDk5Mi04YjJjLThmMmJjZWM2OGE0ZSI+PHBvbHlnb24gcG9pbnRzPSIxMy45NSAxNS44MSAxMy45NiAxNS44MSAxMy45NiAxNS44MSAxMy45NSAxNS44MSIgZmlsbD0iIzZiYjlmMiIgLz48Zz48Zz48cGF0aCBkPSJNMTQuNDQsMS41MkguNjFBLjU4LjU4LDAsMCwwLDAsMi4xMVY5LjIyYS41OC41OCwwLDAsMCwuNTkuNThIOC4yNVY3YS40OS40OSwwLDAsMSwuMzQtLjQ3bC4xMywwYTQuODksNC44OSwwLDAsMCwzLjE5LTEuMTYsMi4zMiwyLjMyLDAsMCwxLC42OS0uMjVBNCw0LDAsMCwxLDEzLjQ0LDVhMy45MiwzLjkyLDAsMCwxLC44NC4wOCwyLjQ0LDIuNDQsMCwwLDEsLjc0LjI3VjIuMTFBLjU4LjU4LDAsMCwwLDE0LjQ0LDEuNTJaTTEwLjIyLDcuMTZWOWg0LjA2VjcuMTZaIiBmaWxsPSIjODIxMDEwIiAvPjxyZWN0IHg9IjAuODUiIHk9IjIuMzQiIHdpZHRoPSI0LjA3IiBoZWlnaHQ9IjEuOCIgZmlsbD0iI2U2MjMyMyIgLz48cmVjdCB4PSI1LjUzIiB5PSIyLjM0IiB3aWR0aD0iNC4wNyIgaGVpZ2h0PSIxLjgiIGZpbGw9IiNmZjczODEiIC8+PHJlY3QgeD0iMTAuMjIiIHk9IjIuMzQiIHdpZHRoPSI0LjA3IiBoZWlnaHQ9IjEuOCIgZmlsbD0iI2U2MjMyMyIgLz48cmVjdCB4PSIwLjg1IiB5PSI0Ljc1IiB3aWR0aD0iMS42OSIgaGVpZ2h0PSIxLjgiIGZpbGw9IiNlNjIzMjMiIC8+PHBhdGggZD0iTTE0LjI4LDQuNzV2LjM2QTMuOTIsMy45MiwwLDAsMCwxMy40NCw1YTQsNCwwLDAsMC0uODQuMDhWNC43NVoiIGZpbGw9IiNmZjczODEiIC8+PHJlY3QgeD0iMy4xNiIgeT0iNC43NSIgd2lkdGg9IjQuMDciIGhlaWdodD0iMS44IiBmaWxsPSIjZmY3MzgxIiAvPjxwYXRoIGQ9Ik0xMS45MSw0Ljc1di42MUE0Ljg5LDQuODksMCwwLDEsOC43Miw2LjUybC0uMTMsMEg3Ljg0VjQuNzVaIiBmaWxsPSIjZTYyMzIzIiAvPjxyZWN0IHg9IjAuODUiIHk9IjcuMTciIHdpZHRoPSI0LjA3IiBoZWlnaHQ9IjEuOCIgZmlsbD0iI2U2MjMyMyIgLz48cmVjdCB4PSI1LjUzIiB5PSI3LjE2IiB3aWR0aD0iMi43MiIgaGVpZ2h0PSIxLjgiIGZpbGw9IiNmZjczODEiIC8+PC9nPjxnPjxwYXRoIGQ9Ik0xOCwxMWMwLDMtMy42LDUuMzgtNC4zOCw1Ljg3YS4zMi4zMiwwLDAsMS0uMywwQzEyLjUxLDE2LjM5LDguOTEsMTQsOC45MSwxMVY3LjQzYS4yOS4yOSwwLDAsMSwuMjgtLjI5YzIuOC0uMDcsMi4xNS0xLjMsNC4yNS0xLjNzMS40NSwxLjIzLDQuMjUsMS4zYS4yOS4yOSwwLDAsMSwuMjguMjlaIiBmaWxsPSIjZGZhNTAwIiAvPjxnPjxwYXRoIGQ9Ik0xMy40NCwxMS4zOFY2LjNjMS45MywwLDEuMzMsMS4xMywzLjksMS4yYS4yNi4yNiwwLDAsMSwuMjYuMjZWMTFjMCwuMTIsMCwuMjMsMCwuMzRabTAsMEg5LjNjLjI1LDIuNTcsMy4zMiw0LjYxLDQsNWwuMTIsMGgwWiIgZmlsbD0idXJsKCNiOWVkYTE0ZC01MDE4LTQwNjktODQ2MS1lOWMxNTIyNzY1ZmYpIiAvPjxwYXRoIGQ9Ik05LjU0LDcuNWMyLjU3LS4wNywyLTEuMiwzLjktMS4ydjUuMDhIOS4zYzAtLjExLDAtLjIyLDAtLjM0VjcuNzZBLjI2LjI2LDAsMCwxLDkuNTQsNy41WiIgZmlsbD0iI2ZmZDQwMCIgLz48cGF0aCBkPSJNMTcuNTgsMTEuMzhIMTMuNDR2NS4wOGgwbC4xMSwwQzE0LjI3LDE2LDE3LjMzLDE0LDE3LjU4LDExLjM4WiIgZmlsbD0iI2ZmZDQwMCIgLz48L2c+PC9nPjwvZz48L2c+PC9zdmc+" parent="1" vertex="1">
+                    <mxGeometry x="340" y="140" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="hub-container" value="&lt;b&gt;Connectivity Hub — 10.0.0.0/16&lt;/b&gt;&lt;br&gt;&lt;i&gt;mrg-platform-connectivity&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce8f7;fontColor=#1a3a5c;strokeColor=#2d6a9f;strokeWidth=3;verticalAlign=top;fontSize=13;arcSize=6;" parent="1" vertex="1">
-                    <mxGeometry x="276" y="70" width="700" height="540" as="geometry"/>
+                <mxCell id="bastion" value="Bastion" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImIxZWJhZDMxLTk2ZTgtNDg3ZS05M2Q2LTRhNjhkYTI4YTg5ZSIgeDE9IjEyLjg5NiIgeTE9Ii0wLjU0IiB4Mj0iMTIuODk2IiB5Mj0iNi45MjIiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMS4wNSAxMC4xNjYpIHJvdGF0ZSgtNDQuOTE5KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzVlYTBlZiIgLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDc4ZDQiIC8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9ImZiNmE2OGEyLWUwMmEtNDM4Yi04Y2NmLWFiOTc4NjA5ODQ4MSIgeDE9IjUuMTA0IiB5MT0iNS4wMzUiIHgyPSI1LjEwNCIgeTI9IjEyLjQ5NyIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgyLjYzNiAxOC42OCkgcm90YXRlKC0xMzUuMDgxKSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzVlYTBlZiIgLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDc4ZDQiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBhdGggZD0iTTEyLjMxNSw0LjQzaDEuMTM2YS4zNjMuMzYzLDAsMCwxLC4zNjMuMzYzdjguMzgyYS43MjcuNzI3LDAsMCwxLS43MjcuNzI3SDExLjk1MWEwLDAsMCwwLDEsMCwwVjQuNzkzQS4zNjMuMzYzLDAsMCwxLDEyLjMxNSw0LjQzWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjguNDcgNi41MTUpIHJvdGF0ZSgxMzQuOTE5KSIgZmlsbD0iIzgzYjlmOSIgLz48cGF0aCBkPSJNMTIuMjUzLS44NTZoMS4xMzZhLjM2My4zNjMsMCwwLDEsLjM2My4zNjNWOC40ODNhMCwwLDAsMCwxLDAsMEgxMi42MTZhLjcyNy43MjcsMCwwLDEtLjcyNy0uNzI3Vi0uNDkyYS4zNjMuMzYzLDAsMCwxLC4zNjMtLjM2M1oiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYuNDM1IC03Ljk0KSByb3RhdGUoNDQuOTE5KSIgZmlsbD0idXJsKCNiMWViYWQzMS05NmU4LTQ4N2UtOTNkNi00YTY4ZGEyOGE4OWUpIiAvPjxwYXRoIGQ9Ik00LjE4Niw5LjQxMUg1LjMyMmEuNzI3LjcyNywwLDAsMSwuNzI3LjcyN3Y4LjM4MmEuMzYzLjM2MywwLDAsMS0uMzYzLjM2M0g0LjU0OWEuMzYzLjM2MywwLDAsMS0uMzYzLS4zNjNWOS40MTFhMCwwLDAsMCwxLDAsMFoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExLjUyMSAwLjUzNCkgcm90YXRlKDQ1LjA4MSkiIGZpbGw9IiM4M2I5ZjkiIC8+PHBhdGggZD0iTTQuOTc0LDQuMTI2SDYuMTFhMCwwLDAsMCwxLDAsMFYxMy4xYS4zNjMuMzYzLDAsMCwxLS4zNjMuMzYzSDQuNjExYS4zNjMuMzYzLDAsMCwxLS4zNjMtLjM2M1Y0Ljg1MmEuNzI3LjcyNywwLDAsMSwuNzI3LS43MjdaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNS4wNTYgMTEuMzY2KSByb3RhdGUoMTM1LjA4MSkiIGZpbGw9InVybCgjZmI2YTY4YTItZTAyYS00MzhiLThjY2YtYWI5Nzg2MDk4NDgxKSIgLz48L3N2Zz4=" parent="1" vertex="1">
+                    <mxGeometry x="480" y="140" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="firewall" value="&lt;b&gt;🔥 Azure Firewall Premium&lt;/b&gt;&lt;br&gt;AzureFirewallSubnet /26&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Threat Intel: Deny · TLS Inspect&lt;br&gt;IDPS: Deny · DNS Proxy&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="466" y="120" width="250" height="80" as="geometry"/>
+                <mxCell id="gw" value="VPN/ER
+Gateway" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyBpZD0iYjZmNzRjYTUtM2FlNi00MjZmLTllZjEtOWZmNmJiYWE3ZjFjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJkNzMwNWY4LTg3ODktNDYwMC1hMWYyLTY1OTRlNjBlZWZjYyIgeDE9IjguNTkiIHkxPSItNy43OSIgeDI9IjkuMTIiIHkyPSIyMC4wNSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMC4yMiIgc3RvcC1jb2xvcj0iIzMyZDRmNSIgLz48c3RvcCBvZmZzZXQ9IjAuNDciIHN0b3AtY29sb3I9IiMzMWQxZjMiIC8+PHN0b3Agb2Zmc2V0PSIwLjYzIiBzdG9wLWNvbG9yPSIjMmVjOWViIiAvPjxzdG9wIG9mZnNldD0iMC43NyIgc3RvcC1jb2xvcj0iIzI5YmFkZSIgLz48c3RvcCBvZmZzZXQ9IjAuODkiIHN0b3AtY29sb3I9IiMyMmE1Y2IiIC8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTk4YWIzIiAvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzE5OGFiMyIgLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48dGl0bGU+SWNvbi1uZXR3b3JraW5nLTYzPC90aXRsZT48cGF0aCBkPSJNMTUuMDYsOC42N2gtMVY1LjU5YTUuODEsNS44MSwwLDAsMC0xLjQ5LTMuOTJBNC43OSw0Ljc5LDAsMCwwLDguOTEsMGE0Ljc5LDQuNzksMCwwLDAtMy43LDEuNjdBNS43Myw1LjczLDAsMCwwLDMuNzIsNS41OVY4LjY3SDIuOTFhLjcuNywwLDAsMC0uNjkuNjl2OGEuNy43LDAsMCwwLC42OS42OUgxNS4wNmEuNzEuNzEsMCwwLDAsLjctLjY5VjkuMzZBLjcxLjcxLDAsMCwwLDE1LjA2LDguNjdabS0zLjM3LDBINi4xM1Y1LjU0QTMuMTgsMy4xOCwwLDAsMSw3LDMuMzlhMi41MSwyLjUxLDAsMCwxLDEuODgtLjg2LDIuNTQsMi41NCwwLDAsMSwxLjg5Ljg2LDMuMTksMy4xOSwwLDAsMSwuMzIuNDNoMGEzLDMsMCwwLDEsLjYxLDEuNzFaIiBmaWxsPSJ1cmwoI2JkNzMwNWY4LTg3ODktNDYwMC1hMWYyLTY1OTRlNjBlZWZjYykiIC8+PHBhdGggZD0iTTE1LjA5LDguNjdIMi45MmEuNjYuNjYsMCwwLDAtLjQ0LjE3bDEzLjA1LDlhLjY3LjY3LDAsMCwwLC4yNS0uNTJ2LThBLjcxLjcxLDAsMCwwLDE1LjA5LDguNjdaIiBmaWxsPSIjNTBlNmZmIiAvPjxwYXRoIGQ9Ik0yLjk0LDguNjdIMTUuMWEuNy43LDAsMCwxLC40NS4xN2wtMTMuMDYsOWEuNy43LDAsMCwxLS4yNS0uNTJ2LThBLjcyLjcyLDAsMCwxLDIuOTQsOC42N1oiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMiIgLz48cGF0aCBkPSJNNy44LDEwLjYsOSw5LjRhLjA3LjA3LDAsMCwxLC4wOSwwbDEuMTksMS4yYS4wNi4wNiwwLDAsMSwwLC4xaC0uN2EuMDYuMDYsMCwwLDAtLjA2LjA2VjEyLjNhLjA2LjA2LDAsMCwxLS4wNi4wNkg4LjY3YS4wNS4wNSwwLDAsMS0uMDYtLjA2VjEwLjc2YS4wNy4wNywwLDAsMC0uMDctLjA2aC0uN0EuMDYuMDYsMCwwLDEsNy44LDEwLjZabTIuNDcsNS40OEw5LjA4LDE3LjI3YS4wNi4wNiwwLDAsMS0uMDksMEw3LjgsMTYuMDhhLjA2LjA2LDAsMCwxLDAtLjFoLjdhLjA3LjA3LDAsMCwwLC4wNy0uMDZWMTQuMzdhLjA2LjA2LDAsMCwxLC4wNi0uMDZoLjc0YS4wNi4wNiwwLDAsMSwuMDYuMDZ2MS41NWEuMDYuMDYsMCwwLDAsLjA2LjA2aC43QS4wNi4wNiwwLDAsMSwxMC4yNywxNi4wOFptLTQuNy0xLjU1di0uN2EuMDYuMDYsMCwwLDAtLjA2LS4wNkg0YS4wNi4wNiwwLDAsMS0uMDYtLjA2VjEzQS4wNi4wNiwwLDAsMSw0LDEyLjkxSDUuNTFhLjA2LjA2LDAsMCwwLC4wNi0uMDZ2LS43YS4wNy4wNywwLDAsMSwuMTEtLjA1bDEuMTksMS4yYS4wNi4wNiwwLDAsMSwwLC4wOGwtMS4xOSwxLjJBLjA3LjA3LDAsMCwxLDUuNTcsMTQuNTNabTYuOTMtMi4zOHYuN2EuMDYuMDYsMCwwLDAsLjA2LjA2SDE0LjFzLjA3LDAsLjA3LjA2di43NGEuMDcuMDcsMCwwLDEtLjA3LjA2SDEyLjU2YS4wNi4wNiwwLDAsMC0uMDYuMDZ2LjdhLjA2LjA2LDAsMCwxLS4xLjA1bC0xLjE5LTEuMmEwLDAsMCwwLDEsMC0uMDhsMS4xOS0xLjJTMTIuNSwxMi4wOSwxMi41LDEyLjE1WiIgZmlsbD0iI2ZmZiIgLz48L3N2Zz4=" parent="1" vertex="1">
+                    <mxGeometry x="620" y="140" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="ergw" value="&lt;b&gt;⚡ ExpressRoute GW&lt;/b&gt;&lt;br&gt;ErGw1AZ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="306" y="240" width="160" height="50" as="geometry"/>
+                <mxCell id="dns" value="Private DNS
+Zones" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyBpZD0iYTU0MmNmMzktMmJhNi00MjA2LTgyNzgtNmE0ZjFjMjQ1MmY1IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImU3NTc5ZjRkLTM2YTMtNDY5My1hNzI2LTdhNjA1MGFjNTY3MSIgY3g9Ii02ODExLjQiIGN5PSI2NzI5LjY5IiByPSIxNyIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgwLjUsIDAsIDAsIC0wLjUsIDM0MTQuOTEsIDMzNzQuMDUpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwLjE4IiBzdG9wLWNvbG9yPSIjNWVhMGVmIiAvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNzhkNCIgLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48dGl0bGU+SWNvbi1uZXR3b3JraW5nLTY0PC90aXRsZT48cGF0aCBpZD0iZjU3ZTEwNWQtNmQyZC00YWQ3LWI4YzMtYzEwNjg0YzlmOWI4IiBkPSJNMTQuMjEsMTUuNzJBOC41LDguNSwwLDAsMSwzLjc5LDIuMjhsLjA5LS4wNmE4LjUsOC41LDAsMCwxLDEwLjMzLDEzLjUiIGZpbGw9InVybCgjZTc1NzlmNGQtMzZhMy00NjkzLWE3MjYtN2E2MDUwYWM1NjcxKSIgLz48cGF0aCBkPSJNOSwxLjMxQTcuNjksNy42OSwwLDEsMCwxNi42OSw5LDcuNyw3LjcsMCwwLDAsOSwxLjMxWk0xNC4xNSwzLjlBNy4zNyw3LjM3LDAsMCwxLDEyLDQuNyw4LjgzLDguODMsMCwwLDAsMTAuNzUsMiw3LjIsNy4yLDAsMCwxLDE0LjE1LDMuOVpNOSwxLjc0YTYuNTksNi41OSwwLDAsMSwxLjA5LjA5aDBhNy40OCw3LjQ4LDAsMCwxLDEuNTMsMywxNS4xMiwxNS4xMiwwLDAsMS01LjQ1LDBBNy4zOCw3LjM4LDAsMCwxLDcuNjgsMS44OWwwLDBBNy4zNCw3LjM0LDAsMCwxLDksMS43NFpNNywyQTguNzIsOC43MiwwLDAsMCw1LjczLDQuNjhhNS41OCw1LjU4LDAsMCwxLTEuOS0uNzdBNy4zNSw3LjM1LDAsMCwxLDcsMlpNMy43MiwxNGE1LjI3LDUuMjcsMCwwLDEsMS43OC0uNzYsNy4wOCw3LjA4LDAsMCwwLDEuMzUsMi43MkE3LjI1LDcuMjUsMCwwLDEsMy43MiwxNFptNi40MSwyLjJBNy4wOCw3LjA4LDAsMCwxLDksMTYuMjZhNi44Myw2LjgzLDAsMCwxLTEuNDQtLjE1bDAsMGE2LDYsMCwwLDEtMS42Ny0zLDE0LjczLDE0LjczLDAsMCwxLDUuODgsMCw2LDYsMCwwLDEtMS42OSwzWm0uNzMtLjE2YTcuMTMsNy4xMywwLDAsMCwxLjM4LTIuOCw2LjY4LDYuNjgsMCwwLDEsMiwuODNBNy4xMyw3LjEzLDAsMCwxLDEwLjg2LDE2Wm0xLjQ4LTMuMjJjLjA4LS4zNi4xNS0uNzMuMi0xLjEybC0uNDYuMTFjLS4wNS4zMS0uMS42Mi0uMTcuOTFhMTUuMjMsMTUuMjMsMCwwLDAtNi4wOSwwYy0uMDctLjI3LS4xMi0uNTYtLjE3LS44NmEuMjguMjgsMCwwLDEsMC0uMDlsLS40Ni0uMTNhMi4zNiwyLjM2LDAsMCwwLDAsLjI4YzAsLjMyLjExLjYyLjE3LjkxYTUuOSw1LjksMCwwLDAtMiwuODUsNy4yNCw3LjI0LDAsMCwxLC4xMS05LjQsNi4yOSw2LjI5LDAsMCwwLDIuMDguODZjLS4wNy4yNC0uMTMuNS0uMTguNzZzMCwuMjUtLjA4LjM3bC40Ny0uMTEsMC0uMTdjLjA2LS4yNi4xMi0uNTEuMTktLjc1QTE0Ljg5LDE0Ljg5LDAsMCwwLDksNS40OGExNSwxNSwwLDAsMCwyLjc4LS4yNmMuMDcuMjcuMTQuNTYuMi44NWwuNDYuMTFxLS4xMS0uNTQtLjI0LTFhNy43Myw3LjczLDAsMCwwLDIuMy0uOTEsNy4yMiw3LjIyLDAsMCwxLC4wNiw5LjQ5QTcuMjgsNy4yOCwwLDAsMCwxMi4zNCwxMi43OVoiIGZpbGw9IiM1ZWEwZWYiIC8+PHBhdGggZD0iTTMuNjksN2E3LjkyLDcuOTIsMCwwLDEsMS4xNi0uMDgsMi40NCwyLjQ0LDAsMCwxLDEuNzEuNTJBMiwyLDAsMCwxLDcuMTUsOC45YTIuMjEsMi4yMSwwLDAsMS0uNjEsMS42NCwyLjYsMi42LDAsMCwxLTEuODYuNjEsOS4xNyw5LjE3LDAsMCwxLTEtLjA1Wm0uNTUsMy43M2E0LDQsMCwwLDAsLjU1LDBBMS42MiwxLjYyLDAsMCwwLDYuNTgsOC45MiwxLjUsMS41LDAsMCwwLDQuODcsNy4zYTMuMTcsMy4xNywwLDAsMC0uNjMsMFoiIGZpbGw9IiNmZmYiIC8+PHBhdGggZD0iTTcuODYsMTEuMTFWNi45aC41OUw5LjgsOWExMi4xOCwxMi4xOCwwLDAsMSwuNzYsMS4zN2gwYy0uMDUtLjU2LS4wNi0xLjA3LS4wNi0xLjczVjYuOUgxMXY0LjIxaC0uNTVMOS4xMyw5Yy0uMjktLjQ3LS41Ny0xLS43OS0xLjRoMGMwLC41MywwLDEsMCwxLjc0djEuOFoiIGZpbGw9IiNmZmYiIC8+PHBhdGggZD0iTTExLjg5LDEwLjQ1YTIsMiwwLDAsMCwxLC4yN2MuNTYsMCwuODgtLjI5Ljg4LS43MnMtLjIyLS42Mi0uNzktLjgzLTEuMTItLjYtMS4xMi0xLjJhMS4yMiwxLjIyLDAsMCwxLDEuMzctMS4xNCwyLDIsMCwwLDEsLjkzLjJMMTQsNy40OGExLjYzLDEuNjMsMCwwLDAtLjgtLjJjLS41OCwwLS44LjM0LS44LjYzcy4yNi41OS44NC44MSwxLjA4LjYyLDEuMDgsMS4yNC0uNDgsMS4yMS0xLjQ4LDEuMjFhMi4xNiwyLjE2LDAsMCwxLTEuMDctLjI3WiIgZmlsbD0iI2ZmZiIgLz48L3N2Zz4=" parent="1" vertex="1">
+                    <mxGeometry x="340" y="260" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="vpngw" value="&lt;b&gt;🔒 VPN Gateway&lt;/b&gt;&lt;br&gt;VpnGw2AZ Active-Active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="306" y="310" width="160" height="50" as="geometry"/>
+                <mxCell id="ddos" value="DDoS
+Protection" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyBpZD0iYWJkMGYyMDMtYmIzZi00MGIxLWFhNzAtZDNjNDUyM2I2OWU5IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJmMzRmZDE1LTJhYjItNDliZi04MGQyLTczMWMxOWIyMGRjMyIgeDE9IjkiIHkxPSIxLjM2IiB4Mj0iOSIgeTI9IjE3Ljg3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwLjE4IiBzdG9wLWNvbG9yPSIjNWVhMGVmIiAvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNzhkNCIgLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48dGl0bGU+SWNvbi1uZXR3b3JraW5nLTcyPC90aXRsZT48cGF0aCBkPSJNMTYuMzYsOC40YzAsNC44NC01Ljg1LDguNzQtNy4xMiw5LjUzYS40Ni40NiwwLDAsMS0uNDgsMGMtMS4yNy0uNzktNy4xMi00LjY5LTcuMTItOS41M1YyLjU4YS40Ni40NiwwLDAsMSwuNDUtLjQ2QzYuNjQsMiw1LjU5LDAsOSwwczIuMzYsMiw2LjkxLDIuMTJhLjQ2LjQ2LDAsMCwxLC40NS40NloiIGZpbGw9IiMwMDc4ZDQiIC8+PHBhdGggZD0iTTE1Ljc1LDguNDVjMCw0LjQ0LTUuMzYsOC02LjUzLDguNzRhLjQzLjQzLDAsMCwxLS40NCwwYy0xLjE3LS43Mi02LjUzLTQuMy02LjUzLTguNzRWMy4xMWEuNDIuNDIsMCwwLDEsLjQxLS40MkM2LjgzLDIuNTgsNS44Ny43NSw5LC43NXMyLjE3LDEuODMsNi4zNCwxLjk0YS40Mi40MiwwLDAsMSwuNDEuNDJaIiBmaWxsPSJ1cmwoI2JmMzRmZDE1LTJhYjItNDliZi04MGQyLTczMWMxOWIyMGRjMykiIC8+PHBhdGggZD0iTTExLjgsMTIuNTJhLjQ4LjQ4LDAsMCwxLS40OC40OEg2LjY4YS40OC40OCwwLDAsMS0uNDgtLjQ4VjMuOTRhLjQ4LjQ4LDAsMCwxLC40OC0uNDloNC42NGEuNDguNDgsMCwwLDEsLjQ4LjQ5WiIgZmlsbD0iI2U2ZTZlNiIgLz48cGF0aCBkPSJNNyw1YS42LjYsMCwwLDEsLjYtLjZoMi44QS42LjYsMCwwLDEsMTEsNWgwYS42LjYsMCwwLDEtLjYuNjFINy42QS42LjYsMCwwLDEsNyw1WiIgZmlsbD0iIzAwMzA2NyIgLz48Y2lyY2xlIGN4PSI3LjYzIiBjeT0iNC45OSIgcj0iMC40MSIgZmlsbD0iIzUwZTZmZiIgLz48cGF0aCBkPSJNNyw2LjlhLjYxLjYxLDAsMCwxLC42LS42MWgyLjhhLjYxLjYxLDAsMCwxLC42LjYxaDBhLjYuNiwwLDAsMS0uNi42MUg3LjZBLjYuNiwwLDAsMSw3LDYuOVoiIGZpbGw9IiMwMDMwNjciIC8+PGNpcmNsZSBjeD0iNy42MyIgY3k9IjYuOSIgcj0iMC40MSIgZmlsbD0iIzUwZTZmZiIgLz48L3N2Zz4=" parent="1" vertex="1">
+                    <mxGeometry x="480" y="260" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="bastion-hub" value="&lt;b&gt;🖥️ Azure Bastion&lt;/b&gt;&lt;br&gt;Standard · 2 Units" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="306" y="380" width="160" height="50" as="geometry"/>
+                <mxCell id="udr" value="Hub UDR" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,PHN2ZyBpZD0iZWM3MTc2MGQtZWEwNy00MWQ1LTk1MDYtOTRhMGYyNjc3YWE5IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImVjNmFkODI1LTYwMDgtNDRjMC04YzQ2LWQzMTcxMTIxMzgyNyIgeDE9IjEwLjU2IiB5MT0iNy43NyIgeDI9IjEwLjU2IiB5Mj0iMTkuMjQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAuMjIiIHN0b3AtY29sb3I9IiMzMmQ0ZjUiIC8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTk4YWIzIiAvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiMmMyYmU5ZS0wYTcwLTRhODMtYWI4Zi1iZjgwMjJlNjc5MjQiIHgxPSIxMC4yMyIgeTE9IjEuNjMiIHgyPSIxMS4wNyIgeTI9IjEyLjA0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwLjIyIiBzdG9wLWNvbG9yPSIjMzJkNGY1IiAvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzE5OGFiMyIgLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48dGl0bGU+SWNvbi1uZXR3b3JraW5nLTgyPC90aXRsZT48cGF0aCBkPSJNMTYuMjMsMTcuMTdBMS4yMSwxLjIxLDAsMCwwLDE3LjQ2LDE2VjE1LjhjLS40OS0zLjg2LTIuNjktNy02Ljg5LTdzLTYuNDgsMi42Ni02LjkxLDdhMS4yNCwxLjI0LDAsMCwwLDEuMSwxLjM2SDE2LjIzWiIgZmlsbD0idXJsKCNlYzZhZDgyNS02MDA4LTQ0YzAtOGM0Ni1kMzE3MTEyMTM4MjcpIiAvPjxwYXRoIGQ9Ik0xMC41Nyw5LjcxYTMuODYsMy44NiwwLDAsMS0yLjEtLjYxbDIuMDgsNS40MiwyLjA2LTUuMzlBMy44MywzLjgzLDAsMCwxLDEwLjU3LDkuNzFaIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjgiIC8+PGNpcmNsZSBjeD0iMTAuNTciIGN5PSI1Ljg0IiByPSIzLjg3IiBmaWxsPSJ1cmwoI2IyYzJiZTllLTBhNzAtNGE4My1hYjhmLWJmODAyMmU2NzkyNCkiIC8+PHBhdGggZD0iTTYsNS44OFYxQS4xNi4xNiwwLDAsMCw1Ljg0LjgzSDQuNTdBLjE3LjE3LDAsMCwwLDQuMzksMVY1LjcxYS4xOC4xOCwwLDAsMS0uMTcuMTdIMy4xQS4xMi4xMiwwLDAsMSwzLDUuNzZWNC40NWEuMTEuMTEsMCwwLDAtLjE5LS4wOEwuNTksNi41N2EuMTYuMTYsMCwwLDAsMCwuMjRMMi43OSw5QS4xMS4xMSwwLDAsMCwzLDguOTNWNy42MUEuMTEuMTEsMCwwLDEsMy4xLDcuNUg1Ljg0QS4xNy4xNywwLDAsMCw2LDcuMzNWNS44OFoiIGZpbGw9IiMwMDc4ZDQiIC8+PC9zdmc+" parent="1" vertex="1">
+                    <mxGeometry x="620" y="260" width="48" height="48" as="geometry"/>
                 </mxCell>
-                <mxCell id="ddos" value="&lt;b&gt;🛡️ DDoS Protection Plan&lt;/b&gt;&lt;br&gt;Global scope" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d6a9f;fontColor=#ffffff;strokeColor=#1a4e7a;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="306" y="450" width="160" height="50" as="geometry"/>
+                <mxCell id="spoke_corp" value="<b>Corp Spoke</b>&lt;br&gt;10.1.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F2E6;fontColor=#107C10;strokeColor=#107C10;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="150" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="dns-resolver" value="&lt;b&gt;🔍 Private DNS Resolver&lt;/b&gt;&lt;br&gt;Inbound: 10.0.3.0/28&lt;br&gt;Outbound: 10.0.3.16/28" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7b1fa2;fontColor=#ffffff;strokeColor=#4a148c;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="506" y="240" width="200" height="65" as="geometry"/>
+                <mxCell id="spoke_online" value="<b>Online Spoke</b>&lt;br&gt;10.2.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;fontColor=#D13438;strokeColor=#D13438;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="280" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="pdns" value="&lt;b&gt;📋 20 Private DNS Zones&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;blob · sql · vault · acr · openai&lt;br&gt;servicebus · cognitive · webapp ...&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7b1fa2;fontColor=#ffffff;strokeColor=#4a148c;fontSize=11;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="506" y="330" width="200" height="65" as="geometry"/>
+                <mxCell id="spoke_sap" value="<b>SAP Spoke</b>&lt;br&gt;10.3.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F5FF;fontColor=#0078D4;strokeColor=#0078D4;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="150" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="fw-policy" value="&lt;b&gt;📜 Firewall Policy&lt;/b&gt;&lt;br&gt;Rule Collections · IDPS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a7fbf;fontColor=#ffffff;strokeColor=#2d6a9f;fontSize=10;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="746" y="120" width="180" height="50" as="geometry"/>
+                <mxCell id="spoke_sb" value="<b>Sandbox Spoke</b>&lt;br&gt;10.99.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#FF8C00;strokeColor=#FF8C00;strokeWidth=1.5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="280" width="170" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="nsgs" value="&lt;b&gt;🔐 NSGs x5&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;FW · GW · Bastion · DNS subnets&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a7fbf;fontColor=#ffffff;strokeColor=#2d6a9f;fontSize=10;arcSize=10;" parent="1" vertex="1">
-                    <mxGeometry x="746" y="190" width="180" height="45" as="geometry"/>
+                <mxCell id="onprem" value="<b>On-Premises</b>&lt;br&gt;ExpressRoute / S2S VPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;fontColor=#333;strokeColor=#999;strokeWidth=1.5;fontSize=11;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="460" width="240" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-onprem-er" value="ExpressRoute" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#8b5e3c;strokeWidth=2;fontStyle=1;fontSize=10;" parent="1" source="onprem" target="ergw" edge="1"/>
-                <mxCell id="e-onprem-vpn" value="S2S VPN" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#8b5e3c;strokeWidth=2;dashed=1;fontSize=10;" parent="1" source="onprem" target="vpngw" edge="1"/>
-                <mxCell id="e-er-fw" style="strokeColor=#2d6a9f;strokeWidth=1.5;" parent="1" source="ergw" target="firewall" edge="1"/>
-                <mxCell id="e-vpn-fw" style="strokeColor=#2d6a9f;strokeWidth=1.5;" parent="1" source="vpngw" target="firewall" edge="1"/>
-                <mxCell id="e-dns-onprem" value="Hybrid DNS" style="strokeColor=#7b1fa2;strokeWidth=1.5;dashed=1;fontSize=9;" parent="1" source="dns-resolver" target="onprem" edge="1"/>
-                <mxCell id="spoke-mgmt" value="&lt;b&gt;Management&lt;/b&gt;&lt;br&gt;10.100.0.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2e3;fontColor=#1a1a1a;strokeColor=#3d8b37;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="-4" y="680" width="240" height="190" as="geometry"/>
+                <mxCell id="ep1" value="peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#107C10;strokeWidth=1.5;dashed=1;" parent="1" source="spoke_corp" target="fw" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="law" value="📊 Log Analytics Workspace&lt;br&gt;365-day retention" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="11" y="720" width="210" height="35" as="geometry"/>
+                <mxCell id="ep2" value="peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D13438;strokeWidth=1.5;dashed=1;" parent="1" source="spoke_online" target="fw" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="automation" value="⚙️ Automation Account" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="11" y="760" width="210" height="30" as="geometry"/>
+                <mxCell id="ep3" value="peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0078D4;strokeWidth=1.5;dashed=1;" parent="1" source="spoke_sap" target="fw" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="sentinel-mgmt" value="🔭 Sentinel · 🔔 Action Group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="11" y="795" width="210" height="30" as="geometry"/>
+                <mxCell id="ep4" value="peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF8C00;strokeWidth=1.5;dashed=1;" parent="1" source="spoke_sb" target="fw" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rsv" value="🗄️ Recovery Services Vault" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="11" y="830" width="210" height="30" as="geometry"/>
+                <mxCell id="ep5" value="ER/VPN" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#666;strokeWidth=2;" parent="1" source="gw" target="onprem" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="spoke-id" value="&lt;b&gt;Identity&lt;/b&gt;&lt;br&gt;10.101.0.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2e3;fontColor=#1a1a1a;strokeColor=#3d8b37;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="266" y="680" width="240" height="190" as="geometry"/>
+                <mxCell id="ep6" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0078D4;strokeWidth=1;dashed=1;" parent="1" source="fw" target="dns" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="dc1" value="🖥️ DC-01 (Zone 1 · 10.101.0.4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="281" y="720" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="dc2" value="🖥️ DC-02 (Zone 2 · 10.101.0.5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="281" y="755" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="paw" value="🔐 PAW VMs x2 · 🖥️ Bastion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="281" y="790" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="kv-id" value="🔑 Key Vault (AD Secrets)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="281" y="825" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="spoke-sec" value="&lt;b&gt;Security&lt;/b&gt;&lt;br&gt;Dedicated SecOps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;fontColor=#1a1a1a;strokeColor=#c62828;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="536" y="680" width="240" height="190" as="geometry"/>
-                </mxCell>
-                <mxCell id="sentinel-sec" value="🔭 Sentinel Dedicated (730d)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#c62828;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="551" y="720" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="defender" value="🛡️ Defender for Cloud (12 Plans)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#c62828;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="551" y="755" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="soar" value="🤖 SOAR Playbooks x4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#c62828;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="551" y="790" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="kv-sec" value="🔑 Security Key Vault (PE only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#c62828;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="551" y="825" width="210" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="spoke-corp" value="&lt;b&gt;Corp Landing Zone&lt;/b&gt;&lt;br&gt;10.2.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2e3;fontColor=#1a1a1a;strokeColor=#3d8b37;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="806" y="680" width="240" height="155" as="geometry"/>
-                </mxCell>
-                <mxCell id="app-corp" value="💼 App Tier VMs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="821" y="720" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="sql-corp" value="🗄️ Azure SQL (Private Endpoint)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="821" y="753" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="stor-corp" value="📦 Storage (Private Endpoint)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="821" y="786" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="spoke-online" value="&lt;b&gt;Online Landing Zone&lt;/b&gt;&lt;br&gt;10.1.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;fontColor=#1a1a1a;strokeColor=#f57f17;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1076" y="680" width="240" height="155" as="geometry"/>
-                </mxCell>
-                <mxCell id="waf" value="🌐 WAF (OWASP 3.1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#f57f17;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1091" y="720" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="app-online" value="🌍 App Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#f57f17;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1091" y="753" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="sql-online" value="🗄️ Azure SQL (Private Endpoint)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#f57f17;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1091" y="786" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="spoke-sap" value="&lt;b&gt;SAP Landing Zone&lt;/b&gt;&lt;br&gt;10.5.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2e3;fontColor=#1a1a1a;strokeColor=#3d8b37;strokeWidth=2;verticalAlign=top;fontSize=12;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1346" y="680" width="240" height="155" as="geometry"/>
-                </mxCell>
-                <mxCell id="sap-app" value="⚙️ SAP App (Accel Net)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1361" y="720" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="hana" value="🗄️ HANA DB (M-series · Ultra)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1361" y="753" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="anf" value="📦 Azure NetApp Files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#4285f4;fontSize=10;arcSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="1361" y="786" width="210" height="28" as="geometry"/>
-                </mxCell>
-                <mxCell id="spoke-sandbox" value="&lt;b&gt;🧪 Sandbox&lt;/b&gt;&lt;br&gt;10.10.0.0/16 (Isolated)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Test VMs · No peering&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;fontColor=#1a1a1a;strokeColor=#ffc107;strokeWidth=2;fontSize=11;arcSize=8;dashed=1;" parent="1" vertex="1">
-                    <mxGeometry x="1346" y="900" width="200" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="e-fw-mgmt" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-mgmt" edge="1"/>
-                <mxCell id="e-fw-id" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-id" edge="1"/>
-                <mxCell id="e-fw-sec" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c62828;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-sec" edge="1"/>
-                <mxCell id="e-fw-corp" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-corp" edge="1"/>
-                <mxCell id="e-fw-online" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f57f17;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-online" edge="1"/>
-                <mxCell id="e-fw-sap" value="Peering" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#3d8b37;strokeWidth=2;fontSize=9;fontStyle=1;" parent="1" source="firewall" target="spoke-sap" edge="1"/>
-                <mxCell id="e-inet-waf" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c62828;strokeWidth=2;fontSize=10;fontStyle=1;" parent="1" source="internet" target="waf" edge="1"/>
-                <mxCell id="e-logs" value="All Logs" style="strokeColor=#999999;strokeWidth=1;dashed=1;fontSize=9;fontColor=#666666;" parent="1" source="firewall" target="law" edge="1"/>
             </root>
         </mxGraphModel>
     </diagram>
