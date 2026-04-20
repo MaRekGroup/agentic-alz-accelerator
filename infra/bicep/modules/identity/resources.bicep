@@ -28,7 +28,7 @@ resource agentIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01
   name: '${prefix}-agent-identity'
   location: location
   tags: union(tags, {
-    purpose: 'alz-agent-operations'
+    purpose: 'mrg-agent-operations'
   })
 }
 

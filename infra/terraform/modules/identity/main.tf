@@ -25,7 +25,7 @@ resource "azurerm_user_assigned_identity" "agent" {
   location            = var.location
   resource_group_name = var.resource_group_name
   tags = merge(var.tags, {
-    purpose = "alz-agent-operations"
+    purpose = "mrg-agent-operations"
   })
 }
 

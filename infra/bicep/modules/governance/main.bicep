@@ -36,13 +36,13 @@ var initiativeIds = {
 
 resource initiativeAssignments 'Microsoft.Authorization/policyAssignments@2024-04-01' = [
   for initiative in policyInitiatives: if (contains(initiativeIds, initiative)) {
-    name: 'alz-${toLower(replace(initiative, ' ', '-'))}'
+    name: 'mrg-${toLower(replace(initiative, ' ', '-'))}'
     location: deployment().location
     identity: {
       type: 'SystemAssigned'
     }
     properties: {
-      displayName: '${initiative} - ALZ ${managementGroupName}'
+      displayName: '${initiative} - ${managementGroupName}'
       policyDefinitionId: initiativeIds[initiative]
       enforcementMode: 'Default'
     }
@@ -54,7 +54,7 @@ resource initiativeAssignments 'Microsoft.Authorization/policyAssignments@2024-0
 // =============================================================================
 
 resource denyPublicIpPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-deny-public-ip-on-nic'
+  name: 'mrg-deny-public-ip-on-nic'
   properties: {
     displayName: 'Deny Public IP addresses on NICs'
     policyType: 'Custom'
@@ -85,7 +85,7 @@ resource denyPublicIpPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-0
 // =============================================================================
 
 resource requireTlsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-require-tls-1-2'
+  name: 'mrg-require-tls-1-2'
   properties: {
     displayName: 'Require minimum TLS version 1.2'
     policyType: 'Custom'
@@ -115,7 +115,7 @@ resource requireTlsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01'
 // =============================================================================
 
 resource enforceHttpsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-enforce-https'
+  name: 'mrg-enforce-https'
   properties: {
     displayName: 'Enforce HTTPS for web applications'
     policyType: 'Custom'
@@ -137,7 +137,7 @@ resource enforceHttpsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-0
 // =============================================================================
 
 resource denyPublicBlobPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-deny-public-blob-access'
+  name: 'mrg-deny-public-blob-access'
   properties: {
     displayName: 'Deny public blob access on storage accounts'
     policyType: 'Custom'
@@ -159,7 +159,7 @@ resource denyPublicBlobPolicy 'Microsoft.Authorization/policyDefinitions@2024-05
 // =============================================================================
 
 resource requireTagsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-require-mandatory-tags'
+  name: 'mrg-require-mandatory-tags'
   properties: {
     displayName: 'Require mandatory tags on resource groups'
     policyType: 'Custom'

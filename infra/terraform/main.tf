@@ -107,7 +107,7 @@ variable "budget_alert_emails" {
 # =============================================================================
 
 locals {
-  prefix = "alz-${var.management_group_name}"
+  prefix = "mrg-${var.management_group_name}"
 
   default_tags = merge({
     environment = "production"

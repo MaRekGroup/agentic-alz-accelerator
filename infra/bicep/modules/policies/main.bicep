@@ -25,13 +25,13 @@ var initiativeIds = {
 
 resource initiativeAssignments 'Microsoft.Authorization/policyAssignments@2024-04-01' = [
   for initiative in policyInitiatives: if (contains(initiativeIds, initiative)) {
-    name: 'alz-${toLower(replace(initiative, ' ', '-'))}'
+    name: 'mrg-${toLower(replace(initiative, ' ', '-'))}'
     location: deployment().location
     identity: {
       type: 'SystemAssigned'
     }
     properties: {
-      displayName: '${initiative} - ALZ ${managementGroupName}'
+      displayName: '${initiative} - ${managementGroupName}'
       policyDefinitionId: initiativeIds[initiative]
       enforcementMode: 'Default'
       parameters: {}
@@ -44,7 +44,7 @@ resource initiativeAssignments 'Microsoft.Authorization/policyAssignments@2024-0
 // ============================================================================
 
 resource denyPublicIpPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-deny-public-ip-on-nic'
+  name: 'mrg-deny-public-ip-on-nic'
   properties: {
     displayName: 'Deny Public IP addresses on NICs'
     description: 'Prevents association of public IP addresses with network interfaces'
@@ -82,7 +82,7 @@ resource denyPublicIpPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-0
 // ============================================================================
 
 resource requireTlsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-require-tls-1-2'
+  name: 'mrg-require-tls-1-2'
   properties: {
     displayName: 'Require minimum TLS version 1.2'
     description: 'Ensures all supported resources use TLS 1.2 or higher'
@@ -126,7 +126,7 @@ resource requireTlsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01'
 // ============================================================================
 
 resource enforceHttpsPolicy 'Microsoft.Authorization/policyDefinitions@2024-05-01' = {
-  name: 'alz-enforce-https'
+  name: 'mrg-enforce-https'
   properties: {
     displayName: 'Enforce HTTPS for web applications'
     description: 'Ensures web applications are only accessible via HTTPS'

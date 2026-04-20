@@ -64,7 +64,7 @@ param now string = utcNow('yyyy-MM-01')
 // Variables
 // ============================================================================
 
-var prefix = 'alz-${managementGroupName}'
+var prefix = 'mrg-${managementGroupName}'
 var rgNames = {
   networking: '${prefix}-networking-rg'
   security: '${prefix}-security-rg'

@@ -10,10 +10,10 @@ data "azurerm_subscription" "current" {}
 # =============================================================================
 
 resource "azurerm_subscription_policy_assignment" "azure_security_benchmark" {
-  name                 = "alz-azure-security-benchmark"
+  name                 = "mrg-azure-security-benchmark"
   subscription_id      = data.azurerm_subscription.current.id
   policy_definition_id = "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8"
-  display_name         = "Azure Security Benchmark - ALZ ${var.management_group_name}"
+  display_name         = "Azure Security Benchmark - ${var.management_group_name}"
   location             = var.location
 
   identity {
@@ -26,7 +26,7 @@ resource "azurerm_subscription_policy_assignment" "azure_security_benchmark" {
 # =============================================================================
 
 resource "azurerm_policy_definition" "deny_public_ip" {
-  name         = "alz-deny-public-ip-on-nic"
+  name         = "mrg-deny-public-ip-on-nic"
   policy_type  = "Custom"
   mode         = "All"
   display_name = "Deny Public IP addresses on NICs"
@@ -62,7 +62,7 @@ resource "azurerm_policy_definition" "deny_public_ip" {
 # =============================================================================
 
 resource "azurerm_policy_definition" "require_tls" {
-  name         = "alz-require-tls-1-2"
+  name         = "mrg-require-tls-1-2"
   policy_type  = "Custom"
   mode         = "All"
   display_name = "Require minimum TLS version 1.2"
@@ -99,7 +99,7 @@ resource "azurerm_policy_definition" "require_tls" {
 # =============================================================================
 
 resource "azurerm_policy_definition" "enforce_https" {
-  name         = "alz-enforce-https"
+  name         = "mrg-enforce-https"
   policy_type  = "Custom"
   mode         = "All"
   display_name = "Enforce HTTPS for web applications"
