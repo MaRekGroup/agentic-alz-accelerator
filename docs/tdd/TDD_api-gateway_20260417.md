@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-lz-online-api |
+| Subscription | mrg-lz-online-api |
 | Subscription ID | `<SUB-8-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'api-gateway' landing zone deployed to subscription
-'alz-lz-online-api' in southcentralus.
+'mrg-lz-online-api' in southcentralus.
 This landing zone provides internet-facing workloads with WAF, DDoS Standard, and public endpoint protection.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | api-gateway |
 | Profile | online |
-| Subscription | alz-lz-online-api (`<SUB-8-ID>`) |
+| Subscription | mrg-lz-online-api (`<SUB-8-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

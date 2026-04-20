@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-lz-sandbox |
+| Subscription | mrg-lz-sandbox |
 | Subscription ID | `<SUB-10-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'dev-sandbox' landing zone deployed to subscription
-'alz-lz-sandbox' in southcentralus.
+'mrg-lz-sandbox' in southcentralus.
 This landing zone provides development and testing with budget enforcement, relaxed policies, and standalone networking.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | dev-sandbox |
 | Profile | sandbox |
-| Subscription | alz-lz-sandbox (`<SUB-10-ID>`) |
+| Subscription | mrg-lz-sandbox (`<SUB-10-ID>`) |
 | Region | southcentralus |
 | Environment | dev |
 | IaC Framework | Bicep |

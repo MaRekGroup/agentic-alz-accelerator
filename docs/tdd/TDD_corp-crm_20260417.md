@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-lz-corp-crm |
+| Subscription | mrg-lz-corp-crm |
 | Subscription ID | `<SUB-6-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'corp-crm' landing zone deployed to subscription
-'alz-lz-corp-crm' in southcentralus.
+'mrg-lz-corp-crm' in southcentralus.
 This landing zone provides internal corporate workloads with private connectivity, ExpressRoute peering, and on-prem DNS integration.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | corp-crm |
 | Profile | corp |
-| Subscription | alz-lz-corp-crm (`<SUB-6-ID>`) |
+| Subscription | mrg-lz-corp-crm (`<SUB-6-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |

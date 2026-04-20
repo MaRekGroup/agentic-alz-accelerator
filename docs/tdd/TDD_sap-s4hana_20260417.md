@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| Subscription | alz-lz-sap |
+| Subscription | mrg-lz-sap |
 | Subscription ID | `<SUB-9-ID>` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
@@ -19,7 +19,7 @@
 
 This Technical Design Document (TDD) describes the as-built state of the
 'sap-s4hana' landing zone deployed to subscription
-'alz-lz-sap' in southcentralus.
+'mrg-lz-sap' in southcentralus.
 This landing zone provides SAP S/4HANA workloads with accelerated networking, Azure NetApp Files, and proximity placement groups.
 
 The deployment was executed using Bicep via the GitHub Actions
@@ -32,7 +32,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 |-----------|-------|
 | Landing Zone | sap-s4hana |
 | Profile | sap |
-| Subscription | alz-lz-sap (`<SUB-9-ID>`) |
+| Subscription | mrg-lz-sap (`<SUB-9-ID>`) |
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |
