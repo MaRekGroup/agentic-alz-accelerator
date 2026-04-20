@@ -7,7 +7,7 @@
     "iac_tool": "bicep",
     "management_group_prefix": "mrg",
     "created": "2026-04-16",
-    "updated": "2026-04-17T21:40:00Z"
+    "updated": "2026-04-20T17:00:00Z"
   },
   "platform_landing_zones": {
     "management": {
@@ -75,8 +75,11 @@
       "status": "deployed",
       "design": "CAF enterprise-scale",
       "prefix": "mrg",
-      "bootstrap_run": 24425155175,
+      "bootstrap_run": 24678228929,
+      "cleanup_run": 24679168823,
       "deployed_date": "2026-04-14",
+      "migrated_date": "2026-04-20",
+      "migration_notes": "Migrated from alz-* to mrg-* prefix. Old alz-* MGs deleted (run 24679168823). Subs moved to mrg-* MGs (run 24678228929).",
       "management_groups": [
         "mrg", "mrg-platform", "mrg-landingzones", "mrg-sandbox", "mrg-decommissioned",
         "mrg-platform-management", "mrg-platform-connectivity", "mrg-platform-identity", "mrg-platform-security",
@@ -143,6 +146,22 @@
       "status": "success",
       "timestamp": "2026-04-17T21:40:00Z",
       "notes": "TI connector disabled pending permissions; Sentinel onboarding successful"
+    },
+    {
+      "run_id": 24678228929,
+      "lz": "bootstrap",
+      "action": "mg-create-and-move-subs",
+      "status": "success",
+      "timestamp": "2026-04-20T16:33:00Z",
+      "notes": "Created mrg-* MG hierarchy, moved 4 platform subs from alz-* to mrg-*"
+    },
+    {
+      "run_id": 24679168823,
+      "lz": "bootstrap",
+      "action": "delete-old-prefix",
+      "status": "success",
+      "timestamp": "2026-04-20T16:54:00Z",
+      "notes": "Deleted all 12 old alz-* management groups (bottom-up)"
     }
   ]
 }
