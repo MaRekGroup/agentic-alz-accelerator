@@ -65,3 +65,30 @@ Each workflow step produces a numbered artifact that feeds into the next step:
 
 All artifacts are stored in `agent-output/{project}/` with estate-level
 state tracked in `agent-output/00-estate-state.json`.
+
+## Architecture Layers
+
+The system has 6 layers from user interface to Azure resources:
+
+| Layer | Components |
+|-------|------------|
+| **Presentation** | VS Code Copilot Chat, CLI, Azure Portal |
+| **Orchestrator** | Conductor (DAG Workflow), Approval Gates, Session State, Artifact Handoffs |
+| **Agent Layer** | 📜 Scribe, 🏛️ Oracle, 🎨 Artisan, 🛡️ Warden, 📐 Strategist, ⚒️ Forge, 🚀 Envoy, 📚 Chronicler, 🔭 Sentinel, 🔧 Mender, ⚔️ Challenger |
+| **MCP Servers** | Azure Pricing (cost estimation), Azure Platform (Resource Graph, Policy, Deploy, Monitor), Draw.io (diagrams) |
+| **IaC Modules** | Bicep (AVM), Terraform (AVM-TF), 8 CAF Design Areas, 4 Platform + N App LZs |
+| **Azure** | Management Groups, Subscriptions, Networking, Identity, Security, Governance |
+
+## MCP Server Details
+
+3 Model Context Protocol servers connect agents to live Azure data:
+
+| MCP Server | Key Tools | Used By |
+|-----------|-----------|----------|
+| **Azure Pricing** | Cost estimation, region comparison, RI pricing, budget calculation | Oracle, Strategist, Chronicler |
+| **Azure Platform** | Resource Graph queries & inventory, Azure Policy discovery & compliance, Bicep/TF deploy & what-if, Defender secure score, Activity log & drift detection | All agents |
+| **Draw.io Diagrams** | Architecture diagram generation, shape search, diagram export, Azure icon library | Artisan, Chronicler |
+
+:::tip
+MCP servers are configured in `mcp/mcp-config.json`. The Azure Platform server consolidates 22 tools into a single server.
+:::

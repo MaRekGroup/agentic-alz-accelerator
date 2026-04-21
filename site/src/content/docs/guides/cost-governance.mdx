@@ -52,3 +52,54 @@ python scripts/validators/validate_cost_governance.py infra/
 # Check a specific file
 python scripts/validators/validate_cost_governance.py infra/bicep/main.bicep
 ```
+
+## Per-Environment Budget Amounts
+
+| Environment | Budget (USD/month) | Rationale |
+|-------------|-------------------|----------|
+| Sandbox | $500 | Hard cap via policy — dev/test only |
+| Dev / Non-prod | $2,000 | Limited resources, short-lived workloads |
+| Production | As specified in requirements | Production workload capacity |
+
+:::caution
+Budget amounts are **always parameterized** per environment via `.bicepparam` or `terraform.tfvars`. Never hardcode dollar amounts in templates.
+:::
+
+## Bicep Budget Resource Example
+
+```bicep
+resource budget 'Microsoft.Consumption/budgets@2023-05-01' = {
+  name: '${prefix}-monthly-budget'
+  properties: {
+    category: 'Cost'
+    amount: budgetAmountUSD   // Parameterized — never hardcoded
+    timeGrain: 'Monthly'
+    timePeriod: { startDate: '2025-01-01' }
+    notifications: {
+      forecast80: {
+        enabled: true
+        operator: 'GreaterThan'
+        threshold: 80
+        thresholdType: 'Forecasted'
+        contactEmails: contactEmails
+      }
+      forecast100: {
+        enabled: true
+        operator: 'GreaterThan'
+        threshold: 100
+        thresholdType: 'Forecasted'
+        contactEmails: contactEmails
+        contactGroups: [actionGroupId]
+      }
+      forecast120: {
+        enabled: true
+        operator: 'GreaterThan'
+        threshold: 120
+        thresholdType: 'Forecasted'
+        contactEmails: contactEmails
+        contactGroups: [actionGroupId]
+      }
+    }
+  }
+}
+```

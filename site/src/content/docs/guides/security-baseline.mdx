@@ -47,3 +47,21 @@ python scripts/validators/validate_security_baseline.py infra/
 # Check a specific file
 python scripts/validators/validate_security_baseline.py infra/bicep/main.bicep
 ```
+
+## Blocking vs Warning Behavior
+
+:::caution[Blocking Violations]
+Any of the 6 baseline rules missing from your IaC code will **block the pipeline**. The validator returns a non-zero exit code that fails the CI job.
+:::
+
+The 7 extended checks are warnings by default but **escalate to blocking in production environments**. This is configurable via agent settings.
+
+## Enforcement Summary
+
+| Stage | Mechanism | Blocking? |
+|-------|-----------|----------|
+| Pre-commit | Lefthook hook → `validate_security_baseline.py` | Yes |
+| Code Generation (Step 5) | Forge agent enforces baseline at generation time | Yes |
+| Gate 5 / Challenger | Adversarial review scans generated IaC | Yes |
+| CI Pipeline | GitHub Actions / ADO pipeline step | Yes |
+| Continuous Monitoring (Step 8) | Sentinel scans deployed resources via Resource Graph | Triggers Remediation |
