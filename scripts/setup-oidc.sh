@@ -57,6 +57,16 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
   "description": "GitHub Actions - main branch"
 }' --output none
 
+# Federated credential for pull requests (needed for PR validation what-if)
+echo "   Adding credential for pull requests..."
+az ad app federated-credential create --id "$APP_ID" --parameters '{
+  "name": "github-pull-request",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:'"${REPO_FULL}"':pull_request",
+  "audiences": ["api://AzureADTokenExchange"],
+  "description": "GitHub Actions - pull request validation"
+}' --output none
+
 # Federated credential for GitHub environments
 for env_name in platform-management platform-connectivity platform-identity \
                 platform-security app-prod app-dev remediation; do
