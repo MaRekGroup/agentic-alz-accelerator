@@ -1,30 +1,49 @@
 # CODEOWNERS — Define code ownership for review requirements
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Teams must exist in the MaRekGroup org. Create them before enabling
+# "Require review from Code Owners" in branch protection.
 
 # Default owner for everything
-*                               @ytesfaye
+*                                           @ytesfaye
 
-# Agent definitions require careful review
-.github/agents/                 @ytesfaye
-.github/instructions/           @ytesfaye
-.github/prompts/                @ytesfaye
-.github/skills/                 @ytesfaye
+# ── Workflows & Pipelines (platform team only) ──
+.github/workflows/                          @ytesfaye
+pipelines/                                  @ytesfaye
 
-# Workflow changes require review
-.github/workflows/              @ytesfaye
-pipelines/                      @ytesfaye
+# ── Infrastructure — Platform LZs ──
+infra/bicep/modules/management/             @ytesfaye
+infra/bicep/modules/logging/                @ytesfaye
+infra/bicep/modules/connectivity/           @ytesfaye
+infra/bicep/modules/networking/             @ytesfaye
+infra/bicep/modules/identity/               @ytesfaye
+infra/bicep/modules/security/               @ytesfaye
+infra/bicep/modules/platform-security/      @ytesfaye
+infra/bicep/parameters/                     @ytesfaye
+infra/terraform/modules/                    @ytesfaye
 
-# Infrastructure code
-infra/                          @ytesfaye
+# ── Infrastructure — Governance & Policy ──
+infra/bicep/modules/governance/             @ytesfaye
+infra/bicep/modules/policies/               @ytesfaye
+infra/terraform/modules/policies/           @ytesfaye
 
-# MCP server code
-mcp/                            @ytesfaye
+# ── Environment & Subscription Config ──
+environments/                               @ytesfaye
 
-# Agent and tool implementations
-src/                            @ytesfaye
+# ── Agent definitions & skills ──
+.github/agents/                             @ytesfaye
+.github/instructions/                       @ytesfaye
+.github/prompts/                            @ytesfaye
+.github/skills/                             @ytesfaye
 
-# Scripts and validators
-scripts/                        @ytesfaye
+# ── MCP server code ──
+mcp/                                        @ytesfaye
 
-# Documentation (lower barrier)
-docs/                           @ytesfaye
+# ── Agent and tool implementations ──
+src/                                        @ytesfaye
+
+# ── Scripts and validators ──
+scripts/                                    @ytesfaye
+
+# ── Documentation (lower barrier) ──
+docs/                                       @ytesfaye

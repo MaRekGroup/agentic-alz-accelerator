@@ -12,7 +12,12 @@ on:
       - 'infra/**'
       - 'src/config/**'
       - 'src/agents/**'
+      - 'src/tools/**'
       - 'tests/**'
+      - 'environments/**'
+      - '.github/workflows/**'
+      - 'pipelines/**'
+      - 'scripts/**'
 
 permissions:
   id-token: write

@@ -1,0 +1,288 @@
+# ============================================================================
+# Deploy on Merge — Trunk-Based Development
+# Triggers when a PR merges to main. Detects which LZs changed and deploys
+# only the affected ones via the reusable deploy pipeline.
+# ============================================================================
+name: "Deploy on Merge"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'environments/subscriptions.json'
+      - 'src/config/**'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  # =========================================================================
+  # Detect which landing zones were affected by the merge
+  # =========================================================================
+  detect-changes:
+    name: Detect Changed LZs
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      platform_management: ${{ steps.detect.outputs.platform_management }}
+      platform_connectivity: ${{ steps.detect.outputs.platform_connectivity }}
+      platform_identity: ${{ steps.detect.outputs.platform_identity }}
+      platform_security: ${{ steps.detect.outputs.platform_security }}
+      app_matrix: ${{ steps.detect.outputs.app_matrix }}
+      has_platform: ${{ steps.detect.outputs.has_platform }}
+      has_app: ${{ steps.detect.outputs.has_app }}
+      framework: ${{ steps.detect.outputs.framework }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed LZ profiles
+        id: detect
+        run: |
+          set -euo pipefail
+
+          # Get files changed in the merge commit
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          echo "=== Changed files ==="
+          echo "$CHANGED"
+          echo ""
+
+          # --- Platform LZ detection ---
+          # Map paths to platform LZ names
+          detect_platform() {
+            local lz="$1"
+            shift
+            for pattern in "$@"; do
+              if echo "$CHANGED" | grep -qE "$pattern"; then
+                echo "true"
+                return
+              fi
+            done
+            echo "false"
+          }
+
+          MGMT=$(detect_platform management \
+            'infra/bicep/modules/management/' \
+            'infra/bicep/modules/logging/' \
+            'infra/bicep/parameters/platform-management' \
+            'infra/terraform/modules/platform-management/' \
+            'infra/terraform/modules/logging/' \
+            'infra/terraform/environments/.*/management')
+
+          CONN=$(detect_platform connectivity \
+            'infra/bicep/modules/connectivity/' \
+            'infra/bicep/modules/networking/' \
+            'infra/bicep/parameters/platform-connectivity' \
+            'infra/terraform/modules/connectivity/' \
+            'infra/terraform/modules/networking/' \
+            'infra/terraform/environments/.*/connectivity')
+
+          IDTY=$(detect_platform identity \
+            'infra/bicep/modules/identity/' \
+            'infra/bicep/parameters/platform-identity' \
+            'infra/terraform/modules/identity/' \
+            'infra/terraform/environments/.*/identity')
+
+          SEC=$(detect_platform security \
+            'infra/bicep/modules/security/' \
+            'infra/bicep/modules/platform-security/' \
+            'infra/bicep/parameters/platform-security' \
+            'infra/terraform/modules/platform-security/' \
+            'infra/terraform/modules/security/' \
+            'infra/terraform/environments/.*/security')
+
+          echo "platform_management=$MGMT" >> "$GITHUB_OUTPUT"
+          echo "platform_connectivity=$CONN" >> "$GITHUB_OUTPUT"
+          echo "platform_identity=$IDTY" >> "$GITHUB_OUTPUT"
+          echo "platform_security=$SEC" >> "$GITHUB_OUTPUT"
+
+          HAS_PLATFORM="false"
+          [[ "$MGMT" == "true" || "$CONN" == "true" || "$IDTY" == "true" || "$SEC" == "true" ]] && HAS_PLATFORM="true"
+          echo "has_platform=$HAS_PLATFORM" >> "$GITHUB_OUTPUT"
+
+          # --- App LZ detection ---
+          # Shared modules trigger all app LZs; profile-specific changes trigger only that profile
+          APP_PROFILES=""
+          if echo "$CHANGED" | grep -qE 'infra/bicep/modules/governance/|infra/bicep/modules/policies/|infra/terraform/modules/policies/|src/config/landing_zone_profiles'; then
+            APP_PROFILES="all"
+          else
+            for profile in corp online sandbox sap; do
+              if echo "$CHANGED" | grep -qiE "modules/.*${profile}|parameters/.*${profile}|environments/.*${profile}"; then
+                APP_PROFILES="${APP_PROFILES:+$APP_PROFILES,}$profile"
+              fi
+            done
+          fi
+
+          # Also trigger if subscriptions.json changed (env config)
+          if echo "$CHANGED" | grep -qE 'environments/subscriptions.json'; then
+            APP_PROFILES="all"
+          fi
+
+          HAS_APP="false"
+          [ -n "$APP_PROFILES" ] && HAS_APP="true"
+          echo "has_app=$HAS_APP" >> "$GITHUB_OUTPUT"
+          echo "app_matrix=$APP_PROFILES" >> "$GITHUB_OUTPUT"
+
+          # Detect framework from changed files
+          if echo "$CHANGED" | grep -q 'infra/terraform/'; then
+            echo "framework=terraform" >> "$GITHUB_OUTPUT"
+          else
+            echo "framework=bicep" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo ""
+          echo "=== Detection Results ==="
+          echo "Platform: mgmt=$MGMT conn=$CONN idty=$IDTY sec=$SEC"
+          echo "App profiles: ${APP_PROFILES:-none}"
+          echo "Has platform changes: $HAS_PLATFORM"
+          echo "Has app changes: $HAS_APP"
+
+  # =========================================================================
+  # Platform LZ deploys (sequential — respects dependency order)
+  # =========================================================================
+  platform-management:
+    name: "Deploy · Platform Management"
+    needs: detect-changes
+    if: needs.detect-changes.outputs.platform_management == 'true'
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-management
+      project_name: platform-management
+      environment: prod
+      github_environment: platform-management
+      framework: ${{ needs.detect-changes.outputs.framework }}
+      location: southcentralus
+      action: deploy
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: mrg
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      MGMT_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  platform-connectivity:
+    name: "Deploy · Platform Connectivity"
+    needs: [detect-changes, platform-management]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.platform_connectivity == 'true' &&
+      (needs.platform-management.result == 'success' || needs.platform-management.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-connectivity
+      project_name: platform-connectivity
+      environment: prod
+      github_environment: platform-connectivity
+      framework: ${{ needs.detect-changes.outputs.framework }}
+      location: southcentralus
+      action: deploy
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: mrg
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_CONN_SUBSCRIPTION_ID }}
+      MGMT_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  platform-identity:
+    name: "Deploy · Platform Identity"
+    needs: [detect-changes, platform-connectivity]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.platform_identity == 'true' &&
+      (needs.platform-connectivity.result == 'success' || needs.platform-connectivity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-identity
+      project_name: platform-identity
+      environment: prod
+      github_environment: platform-identity
+      framework: ${{ needs.detect-changes.outputs.framework }}
+      location: southcentralus
+      action: deploy
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: mrg
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_IDTY_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  platform-security:
+    name: "Deploy · Platform Security"
+    needs: [detect-changes, platform-identity]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.platform_security == 'true' &&
+      (needs.platform-identity.result == 'success' || needs.platform-identity.result == 'skipped')
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      profile: platform-security
+      project_name: platform-security
+      environment: prod
+      github_environment: platform-security
+      framework: ${{ needs.detect-changes.outputs.framework }}
+      location: southcentralus
+      action: deploy
+      runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: mrg
+    secrets:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      SUBSCRIPTION_ID: ${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}
+      MGMT_SUBSCRIPTION_ID: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+      TF_STATE_STORAGE_ACCOUNT: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # =========================================================================
+  # App LZ deploy (triggers 3-app-deploy for affected profiles)
+  # =========================================================================
+  app-deploy:
+    name: "Deploy · Application LZs"
+    needs: [detect-changes, platform-security]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.has_app == 'true' &&
+      (needs.platform-security.result == 'success' || needs.platform-security.result == 'skipped')
+    uses: ./.github/workflows/3-app-deploy.yml
+    with:
+      target: ${{ needs.detect-changes.outputs.app_matrix == 'all' && 'all' || needs.detect-changes.outputs.app_matrix }}
+      framework: ${{ needs.detect-changes.outputs.framework }}
+      action: deploy
+    secrets: inherit
+
+  # =========================================================================
+  # Summary
+  # =========================================================================
+  summary:
+    name: Deployment Summary
+    needs: [detect-changes, platform-management, platform-connectivity, platform-identity, platform-security, app-deploy]
+    if: always()
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - name: Report
+        run: |
+          echo "=========================================="
+          echo "  Merge-Triggered Deployment Summary"
+          echo "=========================================="
+          echo ""
+          echo "Trigger:    push to main (PR merge)"
+          echo "Commit:     ${{ github.sha }}"
+          echo "Framework:  ${{ needs.detect-changes.outputs.framework }}"
+          echo ""
+          echo "--- Platform LZs ---"
+          echo "Management:   ${{ needs.detect-changes.outputs.platform_management }} → ${{ needs.platform-management.result }}"
+          echo "Connectivity: ${{ needs.detect-changes.outputs.platform_connectivity }} → ${{ needs.platform-connectivity.result }}"
+          echo "Identity:     ${{ needs.detect-changes.outputs.platform_identity }} → ${{ needs.platform-identity.result }}"
+          echo "Security:     ${{ needs.detect-changes.outputs.platform_security }} → ${{ needs.platform-security.result }}"
+          echo ""
+          echo "--- App LZs ---"
+          echo "Profiles:     ${{ needs.detect-changes.outputs.app_matrix || 'none' }} → ${{ needs.app-deploy.result }}"

@@ -9,6 +9,11 @@ name: "2 · Deploy Platform Landing Zones"
 on:
   workflow_dispatch:
     inputs:
+      emergency_override:
+        description: '⚠️ Emergency bypass — normal deploys go through PR merge. Set true only for emergencies.'
+        required: true
+        type: boolean
+        default: false
       framework:
         description: 'IaC framework'
         required: true
@@ -65,10 +70,27 @@ permissions:
 
 jobs:
   # =========================================================================
+  # Guard — block manual dispatch unless emergency_override is true
+  # =========================================================================
+  guard:
+    name: "Emergency Override Check"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - name: Verify emergency override
+        run: |
+          if [[ "${{ inputs.emergency_override }}" != "true" ]]; then
+            echo "::error::Manual dispatch blocked. Normal deployments go through PR merge to main."
+            echo "::error::Set emergency_override=true if this is a genuine emergency."
+            exit 1
+          fi
+          echo "::warning::⚠️ EMERGENCY OVERRIDE — deploying outside normal PR flow."
+
+  # =========================================================================
   # 1. Management — centralized logging (everything depends on this)
   # =========================================================================
   platform-management:
     name: "1 · Platform Management"
+    needs: guard
     if: |
       (inputs.deploy_only == '' && inputs.start_from == 'management') ||
       inputs.deploy_only == 'management'
