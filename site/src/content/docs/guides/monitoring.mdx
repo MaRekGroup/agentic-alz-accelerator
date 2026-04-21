@@ -1,0 +1,47 @@
+---
+title: Monitoring
+description: Continuous compliance scanning, drift detection, and security posture monitoring.
+---
+
+The Sentinel agent (Step 8) runs continuous monitoring across all deployed landing zones. It combines Azure Policy compliance, Resource Graph change tracking, and Defender for Cloud posture into a unified view — routing violations to the Mender agent by severity.
+
+## Check Types
+
+| Check Type | Frequency | Source | On Violation |
+|------------|-----------|--------|--------------|
+| Compliance scan | Every 30 min | Azure Policy via Resource Graph | Route to Mender by severity |
+| Drift detection | Every hour | Resource Graph change tracking | Alert + Mender for critical |
+| Security posture | Every 30 min | Defender for Cloud | Recommendations → Mender |
+| Full audit | Daily 6 AM | All sources combined | `08-compliance-report.md` generated |
+
+## Alert Thresholds
+
+| Severity | Response Time | Action |
+|----------|---------------|--------|
+| 🔴 Critical | Immediate | Auto-routed to Mender. Teams + email alert |
+| 🟠 High | 15 minutes | Grace period then Mender. Teams alert |
+| 🟡 Medium | Daily report | Aggregated in compliance report. Human approval required |
+| 🟢 Low | Weekly review | Logged in compliance report only |
+
+:::caution
+Critical and high severity violations trigger automatic remediation. Ensure your Mender remediation strategies are tested before enabling continuous monitoring in production.
+:::
+
+## Running Scans
+
+Trigger scans manually via GitHub Actions:
+
+```bash
+# Run compliance scan across all platform subscriptions
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+
+# Scan a single landing zone
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=security
+
+# View scan results
+gh run view <run-id> --log 2>/dev/null | grep "compliance_pct"
+```
+
+:::tip
+Each scan job reports: total resources, compliant count, non-compliant count, compliance percentage, and up to 20 detailed violations.
+:::

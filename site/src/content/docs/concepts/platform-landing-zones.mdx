@@ -4,72 +4,265 @@ description: The 4 platform subscriptions that form the shared foundation for al
 ---
 
 Platform Landing Zones are the shared foundation that all Application Landing
-Zones depend on. They must be deployed before any workload subscription.
+Zones depend on. They must be deployed **in strict order** before any workload subscription.
 
 ## Deployment Order
 
 ```
 [1] Management    ← Deploy first (all other LZs log here)
-       |
+       │
 [2] Connectivity  ← Deploy second (all workloads network here)
-       |
+       │
 [3] Identity      ← Deploy third (workloads that need domain join)
-       |
+       │
 [4] Security      ← Deploy fourth (SecOps, Sentinel, Defender)
-       |
+       │
 [5+] App LZs      ← corp, online, sandbox, sap ...
 ```
 
-## Management (`platform-management`)
+:::tip[Why this order?]
+Management deploys the central Log Analytics workspace that every other subscription forwards diagnostics to. Connectivity creates the hub network that spokes peer into. Identity extends AD DS into Azure (requires network). Security stands up Sentinel and Defender (requires logging + network).
+:::
+
+---
+
+## Platform Landing Zone Profiles
+
+### Management (`platform-management`)
 
 Centralized observability and operations for the entire Azure estate.
+Deploy this **first** — every other landing zone sends logs here.
 
-| Resource | Details |
-|---------|---------|
-| Log Analytics Workspace | PerGB2018, 365-day retention, central for all subs |
-| Automation Account | Linked to Log Analytics; start/stop runbooks |
-| Budget | 80/100/120% forecast alerts |
+| Attribute | Value |
+|-----------|-------|
+| Deploy Order | **1** — deploy first |
+| Management Group | Platform |
+| Subscription Purpose | Centralized logging, monitoring, automation |
+| Key Resources | Log Analytics (365-day retention), Microsoft Sentinel, Automation Account, Recovery Services Vault |
+| Policy Initiatives | Azure Security Benchmark, NIST SP 800-53, ISO 27001 |
+| Microsoft Sentinel | ✅ Centralized workspace |
+| Budget | 80 / 100 / 120 % forecast alerts |
+| Profile | `platform-management` |
 
-## Connectivity (`platform-connectivity`)
+:::note
+The Log Analytics workspace uses `PerGB2018` pricing tier. Retention is 365 days in production and 90 days in dev. The Automation Account is linked to the workspace for Update Management and Change Tracking.
+:::
 
-Hub networking with selectable topology (Hub-Spoke or Virtual WAN).
+---
 
-| Resource | Details |
-|---------|---------|
-| Hub Virtual Network | Configurable address space and subnets |
-| Azure Bastion | Secure RDP/SSH without public IPs |
-| Azure Firewall | Optional — Premium SKU for TLS inspection |
-| Budget | 80/100/120% forecast alerts |
+### Connectivity (`platform-connectivity`)
 
-### Hub-Spoke Topology (Default)
+Hub networking with selectable topology — **Hub-Spoke** (default) or **Azure Virtual WAN**.
+
+| Attribute | Value |
+|-----------|-------|
+| Deploy Order | **2** — after management |
+| Management Group | Platform |
+| Hub Topology | Hub-spoke (default) or Azure Virtual WAN — selectable |
+| Key Resources | Azure Firewall Premium, DDoS Protection Plan, 20+ Private DNS Zones, ExpressRoute/VPN Gateway, Azure Bastion |
+| DNS Resolver | Azure Private DNS Resolver with on-prem forwarding rules |
+| Budget | 80 / 100 / 120 % forecast alerts |
+| Profile | `platform-connectivity` |
+
+#### Hub-Spoke Topology (Default)
 
 ```
-                    ┌─────────────────────┐
-                    │      Hub VNet       │
-                    │  ┌───────────────┐  │
-                    │  │ Azure Bastion │  │
-                    │  └───────────────┘  │
-                    └─────────┬───────────┘
-                    Peering   │   Peering
-              ┌───────────────┼──────────────┐
-              │               │              │
-        ┌─────▼──────┐ ┌─────▼──────┐ ┌─────▼──────┐
-        │ Corp Spoke │ │Online Spoke│ │ SAP Spoke  │
-        └────────────┘ └────────────┘ └────────────┘
+                    ┌─────────────────────────┐
+                    │      Hub VNet            │
+                    │  ┌─────────────────────┐ │
+                    │  │  Azure Firewall Prem │ │ ← All traffic inspected
+                    │  └─────────────────────┘ │
+                    │  ┌──────┐ ┌───────────┐  │
+                    │  │  ER  │ │ VPN GW    │  │ ← On-prem connectivity
+                    │  │  GW  │ │           │  │
+                    │  └──────┘ └───────────┘  │
+                    │  ┌────────────────────┐   │
+                    │  │ Azure Bastion      │   │
+                    │  └────────────────────┘   │
+                    └───────────┬───────────────┘
+                    Peering     │     Peering
+              ┌─────────────────┼────────────────┐
+              │                 │                 │
+        ┌─────▼──────┐  ┌──────▼─────┐  ┌───────▼────┐
+        │ Corp Spoke │  │Online Spoke│  │  SAP Spoke │
+        └────────────┘  └────────────┘  └────────────┘
 ```
 
-## Identity (`platform-identity`)
+#### Pre-configured Private DNS Zones (20+)
 
-| Resource | Details |
-|---------|---------|
-| User-Assigned Managed Identities | For workload authentication |
-| RBAC Role Assignments | Least-privilege access |
-| Budget | 80/100/120% forecast alerts |
+| Zone | Service |
+|------|---------|
+| `privatelink.database.windows.net` | Azure SQL |
+| `privatelink.blob.core.windows.net` | Blob Storage |
+| `privatelink.file.core.windows.net` | File Storage |
+| `privatelink.vaultcore.azure.net` | Key Vault |
+| `privatelink.azurewebsites.net` | App Service |
+| `privatelink.azurecr.io` | Container Registry |
+| `privatelink.openai.azure.com` | Azure OpenAI |
+| `privatelink.servicebus.windows.net` | Service Bus |
+| `privatelink.cognitiveservices.azure.com` | Cognitive Services |
+| `privatelink.search.windows.net` | AI Search |
+| `privatelink.monitor.azure.com` | Azure Monitor |
+| `privatelink.ods.opinsights.azure.com` | Log Analytics |
+| + 8 more | Storage queue, table, DFS, Synapse, Event Grid, API Management |
 
-## Security (`platform-security`)
+---
 
-| Resource | Details |
-|---------|---------|
-| Microsoft Defender for Cloud | Servers, Storage, Key Vaults, DNS, ARM plans |
-| Key Vault | RBAC access model, soft delete enabled |
-| Budget | 80/100/120% forecast alerts |
+### Identity (`platform-identity`)
+
+Active Directory Domain Services with three deployment modes.
+
+| Attribute | Value |
+|-----------|-------|
+| Deploy Order | **3** — after connectivity |
+| Management Group | Platform |
+| Identity Modes | `adds` · `aadds` · `hybrid` (recommended) |
+| Key Resources | Domain Controller VMs (HA across 2 AZs), PAWs, Key Vault (AD secrets), PIM |
+| NSG Rules | AD DS ports — 389, 636, 88, 445, 3268, 3269 |
+| Budget | 80 / 100 / 120 % forecast alerts |
+| Profile | `platform-identity` |
+
+| Mode | When to Use |
+|------|------------|
+| `adds` | New Azure-only environment with no existing AD |
+| `aadds` | Small deployments, no need for GPO or schema extensions |
+| `hybrid` | Existing on-prem AD — extend with replica DCs **(recommended)** |
+
+:::caution
+Domain Controller VMs require static private IPs for DNS resolution. Ensure these are reserved in the hub VNet address plan **before** deploying identity.
+:::
+
+---
+
+### Security (`platform-security`)
+
+Dedicated security operations subscription — enforces **separation of duties** between SecOps and platform operations.
+
+| Attribute | Value |
+|-----------|-------|
+| Deploy Order | **4** — after identity |
+| Management Group | Platform |
+| Subscription Purpose | Dedicated security operations (separation of duties from Ops) |
+| Sentinel | ✅ Dedicated workspace, 730-day retention, 10 data connectors, Fusion ML |
+| Defender for Cloud | All 12 plans enabled, auto-provisioning, MDE integration |
+| SOAR Playbooks | Block-IP, Isolate-VM, Revoke-Session, Enrich-ThreatIntel |
+| Threat Intelligence | Microsoft TI + STIX/TAXII (prod), 3 watchlists |
+| Key Vault | Private endpoint only, purge protection, RBAC |
+| Compliance | CIS 2.0, ASB v3, NIST 800-53, ISO 27001, SOC 2, PCI DSS (prod) |
+| Budget | 80 / 100 / 120 % forecast alerts |
+| Profile | `platform-security` |
+
+#### SOAR Playbook Approval Gates
+
+| Playbook | Auto in Dev? | Auto in Prod? | Rationale |
+|----------|-------------|--------------|-----------|
+| Block-SuspiciousIP | Simulation only | ✅ Auto | Low user impact, fast containment |
+| Isolate-CompromisedVM | Simulation only | ❌ Human approval | High impact — takes VM offline |
+| Revoke-EntraIDSession | Simulation only | ❌ Human approval | Direct user impact |
+| Enrich-ThreatIntel | ✅ Auto | ✅ Auto | Read-only enrichment |
+
+:::danger[Non-negotiable]
+The security subscription must **never** share a Sentinel workspace with the management subscription in production. Use `workspace_mode: dedicated` for full separation of duties and independent retention policies.
+:::
+
+---
+
+## Application Landing Zone Profiles
+
+Application Landing Zones are workload subscriptions placed under the **Landing Zones** management group. Each uses a profile that determines its networking, security, compliance, and monitoring posture.
+
+```
+Landing Zones
+├── Corp          ← corp, sap profiles
+├── Online        ← online profile
+└── Sandbox       ← sandbox profile
+```
+
+### Online (internet-facing)
+
+For internet-facing web applications, APIs, and e-commerce workloads protected by WAF.
+
+| Attribute | Value |
+|-----------|-------|
+| Management Group | Online |
+| Networking | Hub-spoke with WAF (Application Gateway) |
+| DDoS Protection | ✅ Enabled |
+| Private DNS Zones | Not required (public endpoints) |
+| Policy Initiatives | Azure Security Benchmark, CIS Azure Foundations |
+| Defender Plans | VMs, App Services, SQL, Storage, Key Vaults |
+| Log Retention | 90 days |
+| Microsoft Sentinel | ❌ Not required |
+| Key Vault | ✅ Required |
+| Use Case | Internet-facing web apps, APIs, e-commerce |
+
+:::tip
+Online landing zones route inbound traffic through Application Gateway with WAF v2 in Prevention mode. Outbound traffic is inspected by the hub Azure Firewall.
+:::
+
+---
+
+### Corp (internal private)
+
+For internal corporate workloads with private connectivity to on-premises via ExpressRoute or VPN.
+
+| Attribute | Value |
+|-----------|-------|
+| Management Group | Corp |
+| Networking | Hub-spoke with ExpressRoute/VPN peering |
+| DDoS Protection | ✅ Enabled |
+| DNS Servers | On-premises DNS |
+| Private DNS Zones | SQL, Blob, Key Vault, and more |
+| Policy Initiatives | Azure Security Benchmark, ISO 27001, NIST SP 800-53 |
+| Custom Policies | `deny-public-ip`, `enforce-private-endpoints`, `deny-public-storage`, `require-encryption` |
+| Defender Plans | VMs, SQL, Storage, Key Vaults, DNS, ARM |
+| Log Retention | 365 days |
+| Microsoft Sentinel | ✅ Required |
+
+:::caution
+Corp landing zones enforce **no public IP addresses** and **mandatory private endpoints** for all PaaS services via Azure Policy. Workloads that require public ingress should use the **Online** profile instead.
+:::
+
+---
+
+### Sandbox (dev/test)
+
+For developer experimentation and proof-of-concept workloads with relaxed policies and hard budget caps.
+
+| Attribute | Value |
+|-----------|-------|
+| Management Group | Sandbox |
+| Networking | Standalone VNet (no hub peering) |
+| DDoS Protection | ❌ Not required |
+| Policy Initiatives | Azure Security Benchmark (audit only) |
+| Custom Policies | `allowed-vm-skus`, `budget-enforcement` |
+| Defender Plans | VMs only |
+| Log Retention | 30 days |
+| Microsoft Sentinel | ❌ Not required |
+| Budget | $500/month (hard cap via policy) |
+
+:::note
+Sandbox subscriptions have **no connectivity** to the hub network or on-premises. They are fully isolated. The $500/month budget is enforced by a `deny` policy that blocks resource creation when the budget is exceeded.
+:::
+
+---
+
+### SAP (SAP workloads)
+
+For SAP S/4HANA and related workloads requiring high-performance networking, proximity placement groups, and Azure NetApp Files.
+
+| Attribute | Value |
+|-----------|-------|
+| Management Group | Corp |
+| Networking | Hub-spoke + ExpressRoute + ANF subnet |
+| DDoS Protection | ✅ Enabled |
+| Proximity Placement Groups | ✅ Required for HANA performance |
+| ANF Delegation | `Microsoft.NetApp/volumes` |
+| Policy Initiatives | Azure Security Benchmark, SAP on Azure Best Practices |
+| Accelerated Networking | ✅ Required on SAP app + DB subnets |
+| Defender Plans | VMs, SQL, Storage, Key Vaults, DNS |
+| Log Retention | 365 days |
+| Microsoft Sentinel | ✅ Required |
+
+:::caution
+SAP landing zones require **Accelerated Networking** on all VM NICs in the app and database subnets. The ANF subnet must be delegated to `Microsoft.NetApp/volumes` and sized for the expected HANA data + log volumes.
+:::

@@ -72,3 +72,95 @@ outputs at gates 1, 2, 4, and 5 with adversarial depth proportional to complexit
 | **Simple** | ≤3 resource types, single region, no custom policy | 1× at each gate |
 | **Standard** | 4–8 types, multi-region OR multi-env, ≤3 custom policies | 2× at arch + code |
 | **Complex** | >8 types, multi-region + multi-env, >3 custom policies | 3× at arch + code |
+
+## Step Details
+
+### Step 1 — Requirements (📜 Scribe)
+
+- Conversational gathering of landing zone requirements through structured interview
+- Maps responses to all 8 CAF design areas systematically (billing, identity, resource org, networking, security, management, governance, platform automation)
+- Validates completeness — missing design areas are flagged before Gate 1
+- Classifies complexity: **Simple** / **Standard** / **Complex** based on resource count, regions, environments, and custom policies
+- Complexity classification drives Challenger review depth at all subsequent gates
+- Outputs structured `01-requirements.md` document for Oracle handoff
+
+### Step 2 — Architecture (🏛️ Oracle + ⚔️ Challenger)
+
+- WAF pillar assessment across all five pillars: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency
+- CAF design area mapping with specific recommendations per area
+- Real-time cost estimation via the Azure Pricing MCP server for proposed resources
+- Challenger performs adversarial review with depth proportional to the complexity tier
+- Challenger checks: CAF coverage gaps, WAF trade-off analysis, security posture weaknesses, cost reasonableness vs. budget
+- Outputs `02-architecture-assessment.md` with pillar scores and design area recommendations
+
+### Step 3 — Design (🎨 Artisan)
+
+- Generates architecture diagrams using the Python `diagrams` library (PNG output with Azure provider icons)
+- Also supports the Draw.io MCP server for interactive `.drawio` files
+- Produces 4 standard diagrams: management group hierarchy, hub-spoke network topology, security/governance/monitoring, full ALZ overview
+- Generates Architecture Decision Records (ADRs) for key design choices
+- Diagram engine is selectable: `python` (Graphviz-based), `svg` (custom renderer), or `drawio` (MCP server)
+- Outputs stored in `docs/diagrams/` for Chronicler handoff in Step 7
+
+### Step 3.5 — Governance (🛡️ Warden)
+
+- Discovers all Azure Policy assignments at the target management group scope via the Azure Platform MCP server
+- Classifies policy effects: **Deny**, **Audit**, **Modify**, **DeployIfNotExists**
+- Produces governance constraints file (`04-governance-constraints.md` / `.json`) for Strategist handoff
+- Enforces the 6 non-negotiable security baseline rules (TLS 1.2, HTTPS-only, no public blob, managed identity, AAD-only SQL, no public network in prod)
+- Runs 7 extended anti-pattern checks beyond the core baseline
+- IaC planner in Step 4 must satisfy all **Deny** policies or explicitly flag items for exception requests
+
+### Step 4 — Planning (📐 Strategist + ⚔️ Challenger)
+
+- Takes requirements document + governance constraints as combined input
+- Selects Azure Verified Modules (AVM) for each resource type — falls back to native resources only when no AVM module exists
+- Maps resources to CAF design area IaC modules (identity, connectivity, governance, management, security)
+- Validates CAF naming conventions and ensures all required tags are present (`Environment`, `Owner`, `CostCenter`, `Project`, `ManagedBy`)
+- Builds a resource dependency graph to determine deployment ordering
+- Challenger adversarial review covers: AVM compliance, naming convention adherence, cost alignment with budget, security baseline satisfaction
+
+### Step 5 — Code Generation (⚒️ Forge + ⚔️ Challenger)
+
+- Generates Bicep or Terraform from the approved implementation plan (framework selected via `IAC_FRAMEWORK` variable)
+- AVM-first approach: uses Azure Verified Modules from the public Bicep registry or Terraform registry where available
+- Security baseline enforced at generation time — rules are baked into templates, not applied as a post-generation patch
+- Cost governance: budget alert resources with 80%/100%/120% forecast thresholds included in every template
+- Subagent runs lint (`az bicep build` / `terraform validate`) and what-if/plan before Gate 5
+- Challenger reviews: security baseline compliance, anti-pattern detection, policy alignment with Warden constraints
+
+### Step 6 — Deployment (🚀 Envoy)
+
+- Pre-deploy security review via Challenger + the `validate_security_baseline.py` validator script
+- Runs what-if (Bicep) or plan (Terraform) preview for human review at Gate 6
+- Executes deployment via the GitHub Actions `2-platform-deploy.yml` workflow
+- Post-deployment validation: confirms resource existence and runs policy compliance checks
+- Generates `06-deployment-summary.md` with resource IDs, deployment duration, and next steps
+
+### Step 7 — Documentation (📚 Chronicler)
+
+- As-built design document reflecting actual deployed state
+- Operations runbook with Day-2 procedures and escalation paths
+- Resource inventory queried from Azure Resource Graph
+- Actual cost estimate from the Azure Pricing MCP server based on deployed SKUs
+- Compliance matrix mapping policy assignments to deployed resources
+- Backup and disaster recovery plan with RPO/RTO targets
+
+### Step 8 — Monitoring (🔭 Sentinel)
+
+- Compliance scan every 30 minutes via Azure Policy + Resource Graph queries
+- Drift detection every hour via Resource Graph change tracking
+- Security posture assessment from Microsoft Defender for Cloud secure score
+- Full audit daily at 6 AM — generates `08-compliance-report.md`
+- **Critical** violations → triggers Mender immediately
+- **High** violations → triggers Mender after 15-minute grace period
+- **Medium/Low** violations → included in daily report for human review
+
+### Step 9 — Remediation (🔧 Mender)
+
+- Triggered automatically by Sentinel on violation detection
+- Snapshots current resource state before any remediation action
+- 8 built-in remediation strategies for common policy violations (TLS upgrade, HTTPS enforcement, public access disable, etc.)
+- Rolls back automatically if the post-remediation compliance check fails
+- Appends every action to `09-remediation-log.md` with a full audit trail (timestamp, resource, violation, action, result)
+- Escalates non-automatable violations to Teams/email for human intervention

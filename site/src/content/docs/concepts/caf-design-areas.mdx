@@ -38,3 +38,37 @@ Selects AVM modules for each design area and plans the deployment order.
 ### Step 5 — Code Generation (Forge)
 Generates IaC templates organized by design area, with cross-references
 to governance constraints.
+
+## Design Area Details
+
+### A — Billing & Active Directory Tenant
+
+Enterprise enrollment, management group root, tenant setup. Foundation of the entire hierarchy. The Scribe agent captures tenant and billing requirements, and Oracle validates against CAF guidance.
+
+### B — Identity & Access Management
+
+Entra ID, Managed Identity, RBAC assignments, PIM, conditional access policies. The Warden agent discovers existing IAM policies and Forge generates compliant identity resources.
+
+### C — Resource Organization
+
+Management group hierarchy, subscription vending, resource groups, naming conventions, tagging. Oracle maps the organization structure and Strategist plans resource group layout following CAF naming.
+
+### D — Network Topology & Connectivity
+
+Hub-spoke, VNet, NSG, DDoS protection, Azure Firewall, Private DNS, ExpressRoute/VPN. Oracle designs the topology and Forge generates the networking modules.
+
+### E — Security
+
+Defender for Cloud, Microsoft Sentinel, Key Vault, security baseline enforcement, SOAR playbooks. Warden enforces security policies and Sentinel monitors security posture continuously.
+
+### F — Management
+
+Log Analytics, Azure Monitor, Automation Account, Update Management, Backup, Action Groups. Chronicler documents the management configuration and Sentinel uses it for ongoing monitoring.
+
+### G — Governance
+
+Azure Policy (custom + built-in), budget alerts, Cost Management, compliance reporting, RBAC governance. Warden discovers policies and Sentinel scans for compliance continuously.
+
+### H — Platform Automation & DevOps
+
+CI/CD pipelines, GitOps, IaC validation, deployment automation, agent-driven operations. Envoy manages deployments and Forge generates the IaC that pipelines consume.

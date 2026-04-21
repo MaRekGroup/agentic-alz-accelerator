@@ -1,0 +1,69 @@
+---
+title: Estate Status
+description: Multi-landing-zone estate tracking with per-subscription deployment state.
+---
+
+The accelerator manages the full landing zone estate — tracking deployment state, resource inventory, and governance posture across all platform and application landing zones.
+
+## Platform Deployment Order
+
+Platform landing zones deploy in a strict dependency chain:
+
+```
+Management ──▶ Connectivity ──▶ Identity ──▶ Security
+ (LAW, AA)      (Hub, Bastion)   (DC, RBAC)   (Sentinel, Defender, KV, SOAR)
+
+Each LZ follows: Resolve → Validate → Plan → Deploy → Verify
+```
+
+## Platform LZ Details
+
+| Platform LZ | Key Resources | Resource Groups | Depends On |
+|-------------|---------------|-----------------|------------|
+| Management | Log Analytics Workspace, Automation Account, Action Groups | `{prefix}-management-{region}-rg` | — |
+| Connectivity | Hub VNet, Bastion, Private DNS Zones (9), optional Firewall & VPN/ER Gateways | `{prefix}-conn-hub-{region}-rg`, `-gateways-`, `-dns-` | Management |
+| Identity | Domain Controllers, Managed Identities, RBAC assignments | `{prefix}-identity-{region}-rg` | Connectivity |
+| Security | Microsoft Sentinel, Defender for Cloud (11 plans), Key Vault, 4 SOAR Playbooks | `{prefix}-sec-soc-`, `-posture-`, `-automation-`, `-governance-` | Identity |
+
+:::tip
+The `{prefix}` defaults to `mrg` (configurable via the `AZURE_MANAGEMENT_GROUP_PREFIX` variable) and `{region}` defaults to `southcentralus` (configurable via `AZURE_DEPLOYMENT_REGION`).
+:::
+
+## State Tracking
+
+### Estate State
+
+The file `agent-output/00-estate-state.json` tracks the full estate:
+
+- All platform + application LZ statuses (`not_started`, `in_progress`, `deployed`, `failed`)
+- Deploy history with GitHub Actions run IDs
+- Key resources per landing zone
+- Cross-cutting governance state (policy assignments, budgets, diagnostic settings)
+
+This file is updated after every deployment.
+
+### Per-LZ Session State
+
+Each landing zone maintains its own session state at `agent-output/{lz-name}/00-session-state.json`, tracking:
+
+- Workflow step progress (which steps are complete)
+- Gate approvals and challenger findings
+- Decisions made (IaC tool, complexity tier, region)
+- Artifact inventory (generated files and their paths)
+
+## Deploy Commands
+
+```bash
+# Deploy all platform LZs in cascade order
+gh workflow run "2-platform-deploy.yml" -f framework=bicep -f action=deploy \
+  -f location=southcentralus -f prefix=mrg
+
+# Deploy only the security LZ
+gh workflow run "2-platform-deploy.yml" -f framework=bicep -f action=deploy \
+  -f start_from=security -f deploy_only=security \
+  -f location=southcentralus -f prefix=mrg
+```
+
+:::note
+Use `gh run list --workflow=2-platform-deploy.yml` to check deployment history and `gh run view <run-id> --log` to inspect results. Never use `az` CLI locally — all Azure interactions go through GitHub Actions workflows.
+:::

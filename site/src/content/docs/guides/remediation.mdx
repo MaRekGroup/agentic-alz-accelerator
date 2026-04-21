@@ -1,0 +1,36 @@
+---
+title: Remediation
+description: Auto-remediation strategies with snapshot/rollback support for policy violations.
+---
+
+The Mender agent (Step 9) provides 8 built-in remediation strategies that fix common policy violations. Every remediation takes a snapshot before acting, enabling rollback if the fix introduces issues.
+
+## Remediation Strategies
+
+| Strategy | Violation | Action | Rollback |
+|----------|-----------|--------|----------|
+| `deny-public-ip` | Public IP on NIC | Detach and delete public IP | ✅ Snapshot |
+| `enforce-https-ingress` | HTTP allowed | Enable HTTPS-only flag | ✅ Snapshot |
+| `require-tls-1-2` | TLS below 1.2 | Set `minimumTlsVersion` to `TLS1_2` | ✅ Snapshot |
+| `deny-public-storage-access` | Public blob enabled | Set `allowBlobPublicAccess: false` | ✅ Snapshot |
+| `enforce-private-endpoints` | Missing private endpoint | Deploy private endpoint + DNS record | ✅ Delete on rollback |
+| `require-encryption-at-rest` | Encryption disabled | Enable CMK or platform-managed encryption | ✅ Snapshot |
+| `nsg-missing` | Subnet without NSG | Deploy default-deny NSG and attach | ✅ Delete on rollback |
+| `diagnostic-settings-missing` | No diagnostic settings | Deploy diagnostic settings → Log Analytics | ✅ Delete on rollback |
+
+## Severity Routing
+
+Violations are routed based on severity:
+
+- **Critical + High** → auto-remediate (snapshot → fix → verify → log)
+- **Medium + Low** → escalate to human approval before any action
+
+:::caution
+Auto-remediation for critical and high severity runs without human approval. Review your remediation strategies carefully and validate them in a non-production environment first.
+:::
+
+## Audit Trail
+
+:::note
+Every remediation action is logged in `09-remediation-log.md` with resource ID, strategy used, before/after state, and rollback availability. This log provides a full audit trail for compliance reporting and incident review.
+:::

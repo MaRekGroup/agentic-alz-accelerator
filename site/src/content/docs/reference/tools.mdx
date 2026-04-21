@@ -1,0 +1,34 @@
+---
+title: Agent Tools
+description: Azure SDK integrations and utilities that agents invoke during workflow execution.
+---
+
+Agents automatically invoke tools during workflow steps to interact with Azure, generate artifacts, and validate infrastructure. Each tool is a Python module in `src/tools/` that wraps an Azure SDK, CLI, or diagram library.
+
+## Tool Inventory
+
+| Tool | Module | Purpose |
+|------|--------|---------|
+| Bicep Deployer | `bicep_deployer.py` | ARM deployment via Azure SDK — what-if analysis + deployment execution |
+| Terraform Deployer | `terraform_deployer.py` | Terraform CLI wrapper — init, plan, apply, destroy with Azure backend |
+| Policy Checker | `policy_checker.py` | Azure Policy compliance checks, violation scanning, effect classification |
+| Resource Graph | `resource_graph.py` | Azure Resource Graph queries for inventory, topology, and drift detection |
+| Drift Detector | `drift_detector.py` | Configuration drift detection by comparing desired vs actual state |
+| Diagram Generator | `azure_diagram_generator.py` | Architecture diagram facade — engine selector (Python, SVG, or Draw.io MCP) |
+| Python Diagram Engine | `python_diagram_generator.py` | Graphviz-based PNG diagrams using `diagrams` library with official Azure icons |
+| TDD Generator | `tdd_generator.py` | Technical Design Document generation with as-built resource details |
+
+:::note
+All tool modules live in the `src/tools/` directory. Agents select and invoke tools based on the current workflow step — you do not need to call them manually.
+:::
+
+## How Tools Are Invoked
+
+During each workflow step, the responsible agent determines which tools it needs:
+
+- **Forge** (Step 5) calls the Bicep Deployer or Terraform Deployer depending on the configured `IAC_FRAMEWORK`.
+- **Sentinel** (Step 8) calls the Policy Checker, Resource Graph, and Drift Detector on scheduled intervals.
+- **Artisan** (Step 3) calls the Diagram Generator, which delegates to the Python Diagram Engine or the Draw.io MCP server based on the requested output format.
+- **Mender** (Step 9) calls the Policy Checker to verify remediation success after applying fixes.
+
+Tools return structured results that agents parse to produce workflow artifacts (deployment summaries, compliance reports, diagrams, and TDDs).

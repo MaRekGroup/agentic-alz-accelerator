@@ -50,3 +50,41 @@ description: All 12 agents in the ALZ Accelerator multi-agent system.
 - **Strategist, Forge** — Planning and code generation
 - **Envoy, Chronicler** — Deployment and documentation
 - **Challenger** — Reviews at gate boundaries
+
+## Artifacts by Agent
+
+| Agent | Step | Artifact |
+|-------|------|----------|
+| 📜 Scribe | 1 | `01-requirements.md` |
+| 🏛️ Oracle | 2 | `02-architecture-assessment.md` |
+| 🎨 Artisan | 3 | `03-design-*.{drawio,png,md}` |
+| 🛡️ Warden | 3.5 | `04-governance-constraints.md/.json` |
+| 📐 Strategist | 4 | `04-implementation-plan.md` |
+| ⚒️ Forge | 5 | `infra/{bicep,terraform}/{project}/` |
+| 🚀 Envoy | 6 | `06-deployment-summary.md` |
+| 📚 Chronicler | 7 | `07-*.md` suite |
+| 🔭 Sentinel | 8 | `08-compliance-report.md` |
+| 🔧 Mender | 9 | `09-remediation-log.md` |
+| ⚔️ Challenger | Gates | Review annotations at gates 1, 2, 4, 5 |
+
+All artifacts are stored in `agent-output/{project}/` with estate-level state in `agent-output/00-estate-state.json`.
+
+## Agent Invocation
+
+| Agent | Delegation | Mode |
+|-------|-----------|------|
+| Scribe | Interactive handoff | Needs user Q&A |
+| Oracle | Autonomous (`runSubagent`) | Runs to completion |
+| Artisan | Autonomous (`runSubagent`) | Runs to completion |
+| Warden | Autonomous (`runSubagent`) | Estate-scoped |
+| Strategist | Interactive handoff | Needs user Q&A |
+| Forge | Autonomous (`runSubagent`) | Runs to completion |
+| Envoy | Autonomous (`runSubagent`) | Runs to completion |
+| Chronicler | Autonomous (`runSubagent`) | Runs to completion |
+| Sentinel | Autonomous (`runSubagent`) | Estate-scoped |
+| Mender | Autonomous (`runSubagent`) | Estate-scoped |
+| Challenger | Autonomous (`runSubagent`) | Gate reviews |
+
+:::note
+**Max 3 subagent calls** before the Conductor checkpoints with the user. This ensures human oversight during complex multi-step workflows.
+:::

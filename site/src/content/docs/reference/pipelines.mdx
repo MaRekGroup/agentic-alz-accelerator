@@ -5,15 +5,36 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 
 ## Workflow Overview
 
-| Workflow | Trigger | Scope |
-|----------|---------|-------|
-| `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
-| `2-platform-deploy.yml` | Manual | 4 platform LZs with cascade or targeted deploy |
-| `3-app-deploy.yml` | Manual + `workflow_call` | Config-driven app LZs from `subscriptions.json` |
-| `deploy-on-merge.yml` | Push to `main` | Auto-deploy changed LZs on merge |
-| `5-pr-validate.yml` | PR to `main` | Lint, security, cost, tests, what-if preview |
-| `monitor.yml` | Cron + Manual | Compliance scan across all platform subscriptions |
-| `reusable-deploy.yml` | Called by others | DRY: resolve → validate → plan → deploy → verify |
+8 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
+
+| Workflow | Trigger | Scope | Key Feature |
+|----------|---------|-------|-------------|
+| `1-bootstrap.yml` | Manual (one-time) | Tenant-wide | Creates 11 management groups, moves 10 subs, registers 20 providers |
+| `2-platform-deploy.yml` | Manual | 4 platform subs | Sequential with approval gate per LZ, `start_from` for resume |
+| `3-app-deploy.yml` | Manual | Config-driven | Reads app LZs from `subscriptions.json`, dynamic matrix, parallel deployment |
+| `monitor.yml` | Cron + Manual | All 4 platform subs | Parallel compliance scan per subscription using PolicyInsights SDK v2+ |
+| `5-pr-validate.yml` | PR to `main` | Changed files | Lint, security, cost, tests, what-if preview posted as PR comment |
+| `deploy-docs.yml` | Push to `main` | GitHub Pages | Builds & deploys docs site when `site/**` changes |
+| `deploy-on-merge.yml` | Push to `main` | Changed LZs | Auto-deploy changed landing zones on merge |
+| `reusable-deploy.yml` | Called by 2 & 3 | Single sub | DRY: resolve → validate → plan → deploy → verify |
+
+## Full Deployment Sequence
+
+```
+Step 0  Gather bootstrap inputs (see Prerequisites → Bootstrap Settings Checklist)
+Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
+Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
+Step 3  1-bootstrap.yml          →  Management groups + subscription placement
+Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
+Step 5  assign-role.yml          →  (if needed) Add RBAC roles for Sentinel/Defender
+Step 6  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
+Step 7  monitor.yml              →  Compliance scan across all 4 platform subscriptions
+Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR
+```
+
+:::note
+All workflows support self-hosted runners via `vars.RUNNER_LABEL` — defaults to `ubuntu-latest` if not set.
+:::
 
 ## Reusable Deploy Pipeline
 
@@ -25,30 +46,301 @@ Resolve → Validate → Plan (what-if) → Deploy → Verify
 
 ### Stages
 
-| Stage | What It Does |
-|-------|-------------|
-| **Resolve** | Resolve profile, parameters, subscription from `subscriptions.json` |
-| **Validate** | Lint IaC, run security baseline validator |
-| **Plan** | `az deployment sub what-if` (Bicep) or `terraform plan` |
-| **Deploy** | `az deployment sub create` or `terraform apply` |
-| **Verify** | Compliance scan + generate TDD (Technical Design Document) |
+| Stage | What Happens | Gate |
+|-------|-------------|------|
+| **Resolve** | Resolve subscription ID from secret name, validate Azure access via OIDC | Fails if secret not found |
+| **Validate** | Profile config, security baseline, cost governance, IaC lint | Fails pipeline on violation |
+| **Plan** | Bicep what-if or Terraform plan (continue-on-error for resources requiring live state) | Output saved for review |
+| **Deploy** | Runs if not cancelled → apply changes with timestamped deployment name | Requires reviewer approval |
+| **Verify** | Drift baseline capture, compliance scan, generate As-Built TDD, Teams notification | Fails if compliance < 80% |
+
+## OIDC & Secrets Setup
+
+### Step 1: Run the OIDC Setup Script
+
+Creates Entra ID app registration with federated credentials — no client secrets stored.
+
+```bash
+chmod +x scripts/setup-oidc.sh
+./scripts/setup-oidc.sh <your-org> agentic-alz-accelerator mrg
+```
+
+### Step 2: Configure App Landing Zones
+
+**App LZ names are fully configurable.** Edit `environments/subscriptions.json` to rename, add, or remove app LZs. The workflow reads this file dynamically — no YAML changes needed.
+
+```json
+// environments/subscriptions.json → "application" section
+// Rename keys, change profiles, add or remove entries to match YOUR workloads.
+{
+  "application": {
+    "corp-erp": {
+      "display_name": "Corp ERP",
+      "subscription_id": "<SUB-5-ID>",
+      "profile": "corp",
+      "management_group": "landingzones-corp",
+      "github_secret": "APP_CORP_ERP_SUBSCRIPTION_ID"
+    }
+  }
+}
+```
+
+### Step 3: Set Subscription Secrets
+
+Platform secrets (always required) + one secret per app LZ matching the `github_secret` field in your config.
+
+| Secret Name | Subscription | Profile |
+|-------------|-------------|---------|
+| **Platform (fixed)** | | |
+| `PLATFORM_MGMT_SUBSCRIPTION_ID` | Sub 1 | platform-management |
+| `PLATFORM_CONN_SUBSCRIPTION_ID` | Sub 2 | platform-connectivity |
+| `PLATFORM_IDTY_SUBSCRIPTION_ID` | Sub 3 | platform-identity |
+| `PLATFORM_SEC_SUBSCRIPTION_ID` | Sub 4 | platform-security |
+| **Application (from subscriptions.json)** | | |
+| `APP_CORP_ERP_SUBSCRIPTION_ID` | Sub 5 | corp |
+| `APP_CORP_CRM_SUBSCRIPTION_ID` | Sub 6 | corp |
+| `APP_ONLINE_WEB_SUBSCRIPTION_ID` | Sub 7 | online |
+| `APP_ONLINE_API_SUBSCRIPTION_ID` | Sub 8 | online |
+| `APP_SAP_SUBSCRIPTION_ID` | Sub 9 | sap |
+| `APP_SANDBOX_SUBSCRIPTION_ID` | Sub 10 | sandbox |
+
+```bash
+# Platform secrets (always required)
+gh secret set PLATFORM_MGMT_SUBSCRIPTION_ID --body "<Sub-1-ID>"
+gh secret set PLATFORM_CONN_SUBSCRIPTION_ID --body "<Sub-2-ID>"
+gh secret set PLATFORM_IDTY_SUBSCRIPTION_ID --body "<Sub-3-ID>"
+gh secret set PLATFORM_SEC_SUBSCRIPTION_ID  --body "<Sub-4-ID>"
+
+# App secrets (one per entry in subscriptions.json)
+gh secret set APP_CORP_ERP_SUBSCRIPTION_ID   --body "<Sub-5-ID>"
+gh secret set APP_CORP_CRM_SUBSCRIPTION_ID   --body "<Sub-6-ID>"
+gh secret set APP_ONLINE_WEB_SUBSCRIPTION_ID --body "<Sub-7-ID>"
+gh secret set APP_ONLINE_API_SUBSCRIPTION_ID --body "<Sub-8-ID>"
+gh secret set APP_SAP_SUBSCRIPTION_ID        --body "<Sub-9-ID>"
+gh secret set APP_SANDBOX_SUBSCRIPTION_ID    --body "<Sub-10-ID>"
+```
+
+### Step 4: Configure Environment Protection Rules
+
+In GitHub repo **Settings → Environments**, create these environments:
+
+| Environment | Required Reviewers | Purpose |
+|-------------|-------------------|---------|
+| `platform-management` | platform-team | Centralized logging & monitoring |
+| `platform-connectivity` | platform-team, network-team | Hub networking, Firewall, DNS |
+| `platform-identity` | platform-team, identity-team | AD DS, PIM, PAWs |
+| `platform-security` | platform-team, security-team | SecOps — Sentinel, Defender, SOAR |
+| `app-corp-erp` | platform-team | Corp ERP production |
+| `app-corp-crm` | platform-team | Corp CRM production |
+| `app-web-portal` | platform-team | Online Web Portal production |
+| `app-api-gateway` | platform-team | Online API Gateway production |
+| `app-sap-s4hana` | platform-team | SAP S/4HANA production |
+| `app-dev-sandbox` | _(none — auto-approve)_ | Sandbox / dev environments |
+
+## Bootstrap
+
+Run **once** before any deployment. Creates the CAF management group hierarchy, moves all 10 subscriptions, and registers resource providers.
+
+:::caution
+Complete the **OIDC & Secrets Setup** section before running this workflow. If using a self-hosted runner, set `vars.RUNNER_LABEL` first.
+:::
+
+### Management Group Hierarchy
+
+```
+mrg (Azure Landing Zones)
+├── Platform
+│   ├── Management      ← Sub 1
+│   ├── Connectivity    ← Sub 2
+│   ├── Identity        ← Sub 3
+│   └── Security        ← Sub 4
+├── Landing Zones
+│   ├── Corp            ← Sub 5, Sub 6
+│   ├── Online          ← Sub 7, Sub 8
+│   └── SAP             ← Sub 9
+├── Sandbox             ← Sub 10
+└── Decommissioned
+```
+
+### Bootstrap Jobs
+
+| Job | What It Does |
+|-----|-------------|
+| **Verify Access** | Confirms OIDC login, lists available subscriptions, checks MG access |
+| **Create MG Hierarchy** | Creates 11 management groups in CAF enterprise-scale structure |
+| **Move Subscriptions** | Places all 10 subscriptions into their assigned management groups |
+| **Register Providers** | Registers 20 resource providers across all 10 subscriptions |
+| **Verify** | Generates bootstrap verification report |
+
+```bash
+gh workflow run "1 · Bootstrap Landing Zone Foundation" \
+  -f mg_prefix=mrg \
+  -f primary_location=eastus2 \
+  -f action=all
+```
+
+:::tip
+Use `action: verify-only` to check the current state without making changes. Use `action: move-subscriptions-only` to re-run just the subscription placement step.
+:::
+
+## Platform Deploy
+
+Deploys the 4 CAF platform subscriptions in strict dependency order with an approval gate at each step.
+
+### Pipeline Flow
+
+```
+Management ──[approve]──→ Connectivity ──[approve]──→ Identity ──[approve]──→ Security
+   (Sub 1)                   (Sub 2)                   (Sub 3)                (Sub 4)
+    ↓                          ↓                          ↓                      ↓
+ validate                   validate                   validate              validate
+ plan                       plan                       plan                  plan
+ deploy                     deploy                     deploy                deploy
+ verify                     verify                     verify                verify
+```
+
+The `start_from` input allows resuming from any point. If Connectivity fails, fix it and re-run with `start_from=connectivity` — Management won't re-deploy.
+
+### Per-LZ Approval
+
+| Order | LZ | GitHub Environment | Reviewers |
+|-------|----|--------------------|-----------|
+| 1 | Management | `platform-management` | platform-team |
+| 2 | Connectivity | `platform-connectivity` | platform-team, network-team |
+| 3 | Identity | `platform-identity` | platform-team, identity-team |
+| 4 | Security | `platform-security` | platform-team, security-team |
+
+```bash
+# Plan first (preview what-if output)
+gh workflow run "2 · Deploy Platform Landing Zones" \
+  -f framework=bicep -f action=plan \
+  -f start_from=management -f location=eastus2
+
+# Deploy (each LZ gets its own approval gate)
+gh workflow run "2 · Deploy Platform Landing Zones" \
+  -f framework=bicep -f action=deploy \
+  -f start_from=management -f location=eastus2
+
+# Resume from a specific LZ (skip earlier ones)
+gh workflow run "2 · Deploy Platform Landing Zones" \
+  -f framework=bicep -f action=deploy \
+  -f start_from=security -f location=eastus2
+```
+
+## App Deploy
+
+Reads app LZ definitions from `environments/subscriptions.json` and builds a **dynamic deployment matrix**. Add, rename, or remove app LZs by editing the JSON — no workflow YAML changes needed.
+
+### How It Works
+
+```
+subscriptions.json  →  build-matrix job  →  dynamic GitHub Actions matrix
+                                              │
+Pre-flight check (verify platform LZs exist)  │
+     │                                        │
+     ├── [app-lz-1]  ──→ approve ──→ deploy   │  ← names come from your config
+     ├── [app-lz-2]  ──→ approve ──→ deploy   │
+     ├── ...                                   │
+     └── [app-lz-N]  ──→ auto or approve      │
+```
+
+### Default App LZs
+
+| Config Key | Display Name | Profile | MG Placement | Environment |
+|-----------|-------------|---------|-------------|-------------|
+| `corp-erp` | Corp ERP | corp | landingzones-corp | app-prod (approval) |
+| `corp-crm` | Corp CRM | corp | landingzones-corp | app-prod (approval) |
+| `web-portal` | Online Web Portal | online | landingzones-online | app-prod (approval) |
+| `api-gateway` | Online API Gateway | online | landingzones-online | app-prod (approval) |
+| `sap-s4hana` | SAP S/4HANA | sap | landingzones-sap | app-prod (approval) |
+| `dev-sandbox` | Dev Sandbox | sandbox | sandbox | app-dev (auto) |
+
+```bash
+# Deploy ALL app LZs defined in subscriptions.json
+gh workflow run "3 · Deploy Application Landing Zones" \
+  -f target=all -f framework=bicep \
+  -f action=deploy -f location=eastus2
+
+# Deploy a single app LZ by its config key
+gh workflow run "3 · Deploy Application Landing Zones" \
+  -f target=corp-erp -f framework=bicep \
+  -f action=deploy -f location=eastus2
+
+# Deploy multiple (comma-separated)
+gh workflow run "3 · Deploy Application Landing Zones" \
+  -f target=corp-erp,web-portal -f framework=bicep \
+  -f action=deploy
+```
+
+:::tip
+**Adding a new App LZ:** Add an entry to `subscriptions.json`, create a matching GitHub secret, and run the workflow. That's it.
+:::
 
 ## PR Validation
 
-The `5-pr-validate.yml` workflow runs 4 parallel checks on every PR:
+The `5-pr-validate.yml` workflow runs automatically on every pull request that touches IaC, config, or test files. All checks must pass before merge.
 
-1. **Lint & Format** — Bicep lint, Terraform fmt, Python lint
-2. **Security & Cost Checks** — `validate_security_baseline.py` + `validate_cost_governance.py`
-3. **Unit Tests** — `pytest tests/`
-4. **IaC Plan Preview** — What-if/plan against the target subscription
+| Check | What It Validates | On Failure |
+|-------|------------------|------------|
+| **Lint & Format** | Python (ruff), YAML (yamllint), Bicep (`az bicep build`), Terraform (`fmt -check`) | PR blocked |
+| **Security Baseline** | `validate_security_baseline.py` — checks all IaC modules | PR blocked |
+| **Cost Governance** | `validate_cost_governance.py` — ensures budget alerts present | PR blocked |
+| **Unit Tests** | `pytest tests/ -v` — full test suite with JUnit output | PR blocked |
+| **What-If Preview** | Bicep what-if on changed profiles → summary posted as PR comment | Informational only |
+
+:::note
+Triggered by changes to: `infra/**`, `src/config/**`, `src/agents/**`, `tests/**`
+:::
+
+## As-Built Technical Design Document (TDD)
+
+After every successful deployment, the pipeline automatically generates an as-built TDD for the deployed landing zone. TDDs are uploaded as pipeline artifacts (90-day retention).
+
+| TDD Section | Contents |
+|------------|----------|
+| **Cover Page** | Deployment metadata — subscription, profile, timestamp, deployment ID |
+| **Architecture Diagram** | SVG diagram with official Azure icons, converted to PNG (profile-specific) |
+| **Resource Inventory** | Complete resource listing from Azure Resource Graph |
+| **Network Topology** | VNet CIDRs, subnets, peering status, DNS configuration |
+| **Security Posture** | 6 non-negotiable rules, Defender plans, Azure Policy assignments |
+| **Compliance Status** | Live compliance scan results from post-deployment verification |
+| **Cost Governance** | Budgets, alert thresholds, tag requirements |
+| **Operational Model** | Monitoring schedules, change management, disaster recovery |
+| **Full Estate Diagram** | Overview showing all platform + application landing zones |
+
+```bash
+# Generate TDDs for ALL landing zones
+python -m src.tools.tdd_generator --all \
+  --config environments/subscriptions.json \
+  --output-dir docs/tdd --framework bicep
+
+# Generate TDD for a single landing zone
+python -m src.tools.tdd_generator \
+  --project platform-management \
+  --profile platform-management \
+  --subscription-id <SUB-1-ID> \
+  --subscription-name mrg-platform-management
+```
+
+:::tip
+**Automatic in CI/CD:** TDDs are generated in the *Verify* stage of every deployment and uploaded as pipeline artifacts. No manual steps needed.
+:::
 
 ## Self-Hosted Runner Support
 
-All workflows use `vars.RUNNER_LABEL`:
+All workflows use `vars.RUNNER_LABEL`. By default, workflows run on GitHub-hosted runners (`ubuntu-latest`). To use a private self-hosted runner:
+
+1. [Register a self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners) on your GitHub repo or organization
+2. Go to **Settings → Secrets and variables → Actions → Variables**
+3. Create variable: **Name** = `RUNNER_LABEL`, **Value** = `self-hosted` (or your custom label)
 
 ```bash
-# Use a self-hosted runner
+# Set via GitHub CLI
 gh variable set RUNNER_LABEL --body "self-hosted"
 
 # Default: ubuntu-latest (GitHub-hosted)
 ```
+
+:::note
+One variable controls all jobs across all workflows. No YAML changes needed — the reusable deploy workflow receives the runner label as an input from the calling workflow, and all other workflows read `vars.RUNNER_LABEL` directly, falling back to `ubuntu-latest` if not set.
+:::
