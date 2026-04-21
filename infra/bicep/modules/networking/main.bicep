@@ -1,4 +1,5 @@
-// Networking Module - VNet, Subnets, NSGs, DDoS Protection, Bastion
+// Networking Module - VNet, Subnets, NSGs, DDoS Protection
+// AVM-first: uses Azure Verified Modules from the public Bicep registry
 
 @description('Azure region')
 param location string
@@ -43,39 +44,7 @@ resource ddosPlan 'Microsoft.Network/ddosProtectionPlans@2024-01-01' = if (enabl
 }
 
 // ============================================================================
-// Virtual Network
-// ============================================================================
-
-resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
-  name: '${prefix}-vnet'
-  location: location
-  tags: tags
-  properties: {
-    addressSpace: {
-      addressPrefixes: [vnetAddressSpace]
-    }
-    ddosProtectionPlan: enableDdos ? { id: ddosPlan.id } : null
-    enableDdosProtection: enableDdos
-    subnets: [
-      for subnet in subnets: {
-        name: subnet.name
-        properties: {
-          addressPrefix: subnet.addressPrefix
-          networkSecurityGroup: subnet.name != 'AzureBastionSubnet' ? {
-            id: resourceId('Microsoft.Network/networkSecurityGroups', '${prefix}-${subnet.name}-nsg')
-          } : null
-          // CHANGED: Use map() instead of nested for-expression to avoid BCP142
-          serviceEndpoints: map(contains(subnet, 'serviceEndpoints') ? subnet.serviceEndpoints : [], se => { service: se })
-          privateEndpointNetworkPolicies: contains(subnet, 'privateEndpointPolicies') && subnet.privateEndpointPolicies ? 'Enabled' : 'Disabled'
-        }
-      }
-    ]
-  }
-  dependsOn: [nsgs]
-}
-
-// ============================================================================
-// Network Security Groups
+// Network Security Groups (native — simple resources, no AVM needed)
 // ============================================================================
 
 resource nsgs 'Microsoft.Network/networkSecurityGroups@2024-01-01' = [
@@ -104,24 +73,35 @@ resource nsgs 'Microsoft.Network/networkSecurityGroups@2024-01-01' = [
 ]
 
 // ============================================================================
-// VNet Diagnostic Settings
+// Virtual Network (AVM)
 // ============================================================================
 
-resource vnetDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: '${prefix}-vnet-diag'
-  scope: vnet
-  properties: {
-    workspaceId: logAnalyticsWorkspaceId
-    logs: [
-      {
-        categoryGroup: 'allLogs'
-        enabled: true
+module vnet 'br/public:avm/res/network/virtual-network:0.5.2' = {
+  name: '${prefix}-vnet-deployment'
+  params: {
+    name: '${prefix}-vnet'
+    location: location
+    tags: tags
+    addressPrefixes: [vnetAddressSpace]
+    ddosProtectionPlanResourceId: enableDdos ? ddosPlan.id : ''
+    subnets: [
+      for (subnet, i) in subnets: {
+        name: subnet.name
+        addressPrefix: subnet.addressPrefix
+        networkSecurityGroupResourceId: (subnet.name != 'AzureBastionSubnet' && contains(subnet, 'nsg') && subnet.nsg) ? nsgs[i].id : ''
+        serviceEndpoints: subnet.?serviceEndpoints ?? []
+        privateEndpointNetworkPolicies: contains(subnet, 'privateEndpointPolicies') && subnet.privateEndpointPolicies ? 'Enabled' : 'Disabled'
       }
     ]
-    metrics: [
+    diagnosticSettings: [
       {
-        category: 'AllMetrics'
-        enabled: true
+        workspaceResourceId: logAnalyticsWorkspaceId
+        logCategoriesAndGroups: [
+          { categoryGroup: 'allLogs' }
+        ]
+        metricCategories: [
+          { category: 'AllMetrics' }
+        ]
       }
     ]
   }
@@ -170,6 +150,6 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 // Outputs
 // ============================================================================
 
-output vnetId string = vnet.id
-output vnetName string = vnet.name
-output subnetIds array = [for (subnet, i) in subnets: vnet.properties.subnets[i].id]
+output vnetId string = vnet.outputs.resourceId
+output vnetName string = vnet.outputs.name
+output subnetIds array = [for (subnet, i) in subnets: vnet.outputs.subnetResourceIds[i]]

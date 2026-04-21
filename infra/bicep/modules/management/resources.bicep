@@ -1,4 +1,5 @@
 // Management resources — deployed at resource group scope
+// AVM-first: uses Azure Verified Modules from the public Bicep registry
 // Called from main.bicep (subscription-scoped)
 
 @description('Azure region')
@@ -14,42 +15,35 @@ param retentionDays int
 param tags object
 
 // =============================================================================
-// Log Analytics Workspace (Centralized)
+// Log Analytics Workspace (AVM — Centralized)
 // =============================================================================
 
-resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: '${prefix}-law'
-  location: location
-  tags: tags
-  properties: {
-    sku: { name: 'PerGB2018' }
-    retentionInDays: retentionDays
-    features: {
-      enableLogAccessUsingOnlyResourcePermissions: true
-    }
+module workspace 'br/public:avm/res/operational-insights/workspace:0.9.1' = {
+  name: '${prefix}-law-deployment'
+  params: {
+    name: '${prefix}-law'
+    location: location
+    tags: tags
+    skuName: 'PerGB2018'
+    dataRetention: retentionDays
+    useResourcePermissions: true
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'
   }
 }
 
 // =============================================================================
-// Automation Account
+// Automation Account (AVM)
 // =============================================================================
 
-resource automationAccount 'Microsoft.Automation/automationAccounts@2023-11-01' = {
-  name: '${prefix}-automation'
-  location: location
-  tags: tags
-  properties: {
-    sku: { name: 'Basic' }
-  }
-}
-
-resource linkedService 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-08-01' = {
-  parent: workspace
-  name: 'Automation'
-  properties: {
-    resourceId: automationAccount.id
+module automationAccount 'br/public:avm/res/automation/automation-account:0.11.0' = {
+  name: '${prefix}-automation-deployment'
+  params: {
+    name: '${prefix}-automation'
+    location: location
+    tags: tags
+    skuName: 'Basic'
+    linkedWorkspaceResourceId: workspace.outputs.resourceId
   }
 }
 
@@ -72,8 +66,8 @@ resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
 // Outputs
 // =============================================================================
 
-output workspaceId string = workspace.id
-output workspaceName string = workspace.name
-output workspaceCustomerId string = workspace.properties.customerId
-output automationAccountId string = automationAccount.id
+output workspaceId string = workspace.outputs.resourceId
+output workspaceName string = workspace.outputs.name
+output workspaceCustomerId string = workspace.outputs.logAnalyticsWorkspaceId
+output automationAccountId string = automationAccount.outputs.resourceId
 output actionGroupId string = actionGroup.id
