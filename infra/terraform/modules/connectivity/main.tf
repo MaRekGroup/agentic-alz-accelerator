@@ -59,7 +59,11 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
-
+variable "managed_by" {
+  description = "Value for the ManagedBy tag"
+  type        = string
+  default     = "agentic-alz-accelerator"
+}
 # ─── Locals ───────────────────────────────────────────────────────────────────
 
 locals {
@@ -90,7 +94,7 @@ locals {
     Owner       = "platform-team"
     CostCenter  = "platform"
     Project     = "platform-connectivity"
-    ManagedBy   = "agentic-alz-accelerator"
+    ManagedBy   = var.managed_by
   }, var.tags)
 
   # Hub-Spoke subnet layout

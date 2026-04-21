@@ -91,6 +91,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "managed_by" {
+  description = "Value for the ManagedBy tag — identifies the deploying tool/accelerator"
+  type        = string
+  default     = "agentic-alz-accelerator"
+}
+
 variable "budget_amount_usd" {
   description = "Monthly budget amount in USD"
   type        = number
@@ -114,7 +120,7 @@ locals {
     Owner       = "platform-team"
     CostCenter  = "platform"
     Project     = var.profile_name
-    ManagedBy   = "agentic-alz-accelerator"
+    ManagedBy   = var.managed_by
   }, var.tags)
 
   resource_group_names = {

@@ -153,10 +153,10 @@ jobs:
       environment: prod
       github_environment: platform-management
       framework: ${{ needs.detect-changes.outputs.framework }}
-      location: southcentralus
+      location: ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }}
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-      prefix: mrg
+      prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -179,10 +179,10 @@ jobs:
       environment: prod
       github_environment: platform-connectivity
       framework: ${{ needs.detect-changes.outputs.framework }}
-      location: southcentralus
+      location: ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }}
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-      prefix: mrg
+      prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -205,10 +205,10 @@ jobs:
       environment: prod
       github_environment: platform-identity
       framework: ${{ needs.detect-changes.outputs.framework }}
-      location: southcentralus
+      location: ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }}
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-      prefix: mrg
+      prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -230,10 +230,10 @@ jobs:
       environment: prod
       github_environment: platform-security
       framework: ${{ needs.detect-changes.outputs.framework }}
-      location: southcentralus
+      location: ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }}
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
-      prefix: mrg
+      prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

@@ -71,13 +71,16 @@ param budgetAmountUsd int
 @description('Budget alert email addresses')
 param budgetAlertEmails array = []
 
+@description('Value for the ManagedBy tag')
+param managedBy string = 'agentic-alz-accelerator'
+
 @description('Resource tags')
 param tags object = {
   Environment: environment
   Owner: 'platform-team'
   CostCenter: 'security'
   Project: 'platform-security'
-  ManagedBy: 'agentic-alz-accelerator'
+  ManagedBy: managedBy
 }
 
 // ─── Variables ──────────────────────────────────────────────────────────────

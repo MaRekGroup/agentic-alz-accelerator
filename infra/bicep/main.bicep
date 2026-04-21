@@ -38,13 +38,16 @@ param logRetentionDays int = 90
 @description('Policy initiative names to assign')
 param policyInitiatives array = ['Azure Security Benchmark']
 
+@description('Value for the ManagedBy tag — identifies the deploying tool/accelerator')
+param managedBy string = 'agentic-alz-accelerator'
+
 @description('Tags applied to all resources')
 param tags object = {
   Environment: 'production'
   Owner: 'platform-team'
   CostCenter: 'platform'
   Project: profileName
-  ManagedBy: 'agentic-alz-accelerator'
+  ManagedBy: managedBy
 }
 
 @description('Monthly budget amount in USD')

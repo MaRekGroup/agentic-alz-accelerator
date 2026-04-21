@@ -34,6 +34,7 @@ variable "security_contact_email"       { type = string }
 variable "budget_amount_usd"            { type = number }
 variable "budget_alert_emails"          { type = list(string), default = [] }
 variable "tags"                         { type = map(string), default = {} }
+variable "managed_by"                    { type = string, default = "agentic-alz-accelerator" }
 
 variable "defender_plans" {
   type    = list(string)
@@ -68,7 +69,7 @@ locals {
     Owner       = "platform-team"
     CostCenter  = "security"
     Project     = "platform-security"
-    ManagedBy   = "agentic-alz-accelerator"
+    ManagedBy   = var.managed_by
   }, var.tags)
 }
 
