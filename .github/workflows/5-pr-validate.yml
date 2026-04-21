@@ -31,6 +31,8 @@ jobs:
   lint:
     name: Lint & Format
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    env:
+      IAC_FRAMEWORK: ${{ vars.IAC_FRAMEWORK || 'bicep' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -52,14 +54,22 @@ jobs:
         run: yamllint -c .yamllint.yml src/config/ .github/workflows/
 
       - name: Bicep lint
-        if: hashFiles('infra/bicep/**/*.bicep') != ''
+        if: env.IAC_FRAMEWORK == 'bicep' && hashFiles('infra/bicep/**/*.bicep') != ''
         run: |
           az bicep install
           find infra/bicep -name "*.bicep" -exec az bicep build --file {} \;
 
+      - name: Bicep lint skipped
+        if: env.IAC_FRAMEWORK != 'bicep'
+        run: echo "::notice::Bicep lint skipped — IAC_FRAMEWORK=${{ env.IAC_FRAMEWORK }}"
+
       - name: Terraform format check
-        if: hashFiles('infra/terraform/**/*.tf') != ''
+        if: env.IAC_FRAMEWORK == 'terraform' && hashFiles('infra/terraform/**/*.tf') != ''
         run: terraform fmt -check -recursive infra/terraform/
+
+      - name: Terraform lint skipped
+        if: env.IAC_FRAMEWORK != 'terraform'
+        run: echo "::notice::Terraform fmt skipped — IAC_FRAMEWORK=${{ env.IAC_FRAMEWORK }}"
 
   # =========================================================================
   # Security & Cost Validation
