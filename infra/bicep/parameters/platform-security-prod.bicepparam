@@ -15,7 +15,9 @@ param budgetAlertEmails = [
   'ytesfaye@MngEnvMCAP084543.onmicrosoft.com'
 ]
 param tags = {
-  environment: 'prod'
-  managedBy: 'agentic-alz-accelerator'
-  platform: 'security'
+  Environment: 'prod'
+  Owner: 'platform-team'
+  CostCenter: 'security'
+  Project: 'platform-security'
+  ManagedBy: 'agentic-alz-accelerator'
 }

@@ -7,7 +7,6 @@ resources that have been modified outside of the IaC pipeline.
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from azure.identity import DefaultAzureCredential
 

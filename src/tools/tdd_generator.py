@@ -9,7 +9,6 @@ Runs automatically after each successful deployment in the CI/CD pipeline.
 Can also be invoked manually via CLI or the agentic workflow.
 """
 
-import asyncio
 import io
 import json
 import logging
@@ -19,7 +18,6 @@ from typing import Optional
 
 import cairosvg
 from docx import Document
-from docx.enum.section import WD_ORIENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
@@ -28,7 +26,6 @@ from docx.shared import Cm, Inches, Pt, RGBColor
 from src.tools.azure_diagram_generator import (
     generate_app_lz_diagram,
     generate_connectivity_diagram,
-    generate_full_estate_diagram,
     generate_identity_diagram,
     generate_management_diagram,
     generate_security_diagram,

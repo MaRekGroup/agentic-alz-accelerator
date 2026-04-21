@@ -6,7 +6,7 @@ Diagrams use Microsoft's official Azure Architecture Icon set colors and groupin
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from html import escape as xml_escape
 
@@ -880,8 +880,8 @@ def generate_diagrams(
         out.mkdir(parents=True, exist_ok=True)
         outputs = []
         for name, gen_func in [
-            ("management-group-hierarchy.svg", generate_management_subscription_diagram),
-            ("hub-spoke-network.svg", lambda: generate_hub_spoke_diagram("hub_spoke")),
+            ("management-group-hierarchy.svg", lambda: generate_management_diagram("management", "southcentralus")),
+            ("hub-spoke-network.svg", lambda: generate_connectivity_diagram("connectivity", "southcentralus")),
             ("full-estate.svg", lambda: generate_full_estate_diagram(
                 mg_prefix, subscriptions_config or {})),
         ]:

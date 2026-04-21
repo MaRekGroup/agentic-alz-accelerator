@@ -189,7 +189,7 @@ class RemediationAgent:
             template_path = action.parameters.get("template", "")
 
             if framework == "bicep":
-                result = await self.bicep.deploy_template(
+                await self.bicep.deploy_template(
                     template_path=template_path,
                     parameters={
                         "resourceId": action.violation.get("resource_id", ""),
@@ -197,7 +197,7 @@ class RemediationAgent:
                     },
                 )
             else:
-                result = await self.terraform.apply_targeted(
+                await self.terraform.apply_targeted(
                     target_resource=action.violation.get("resource_id", ""),
                 )
 

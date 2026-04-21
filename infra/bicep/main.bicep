@@ -40,9 +40,11 @@ param policyInitiatives array = ['Azure Security Benchmark']
 
 @description('Tags applied to all resources')
 param tags object = {
-  environment: 'production'
-  managedBy: 'agentic-alz-accelerator'
-  profile: profileName
+  Environment: 'production'
+  Owner: 'platform-team'
+  CostCenter: 'platform'
+  Project: profileName
+  ManagedBy: 'agentic-alz-accelerator'
 }
 
 @description('Monthly budget amount in USD')

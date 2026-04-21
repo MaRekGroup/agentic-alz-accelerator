@@ -64,9 +64,11 @@ locals {
   rg_governance = "${var.prefix}-sec-governance-${local.region_code}-rg"
 
   common_tags = merge({
-    environment = var.environment
-    managed_by  = "agentic-alz-accelerator"
-    cost_center = "security"
+    Environment = var.environment
+    Owner       = "platform-team"
+    CostCenter  = "security"
+    Project     = "platform-security"
+    ManagedBy   = "agentic-alz-accelerator"
   }, var.tags)
 }
 

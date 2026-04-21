@@ -1,4 +1,5 @@
-// Logging Module - Log Analytics Workspace, Diagnostic Settings
+// Logging Module - Log Analytics Workspace, Automation Account
+// AVM-first: uses Azure Verified Modules from the public Bicep registry
 
 @description('Azure region')
 param location string
@@ -24,59 +25,37 @@ param environment string
 param now string = utcNow('yyyy-MM-01')
 
 // ============================================================================
-// Log Analytics Workspace
+// Log Analytics Workspace (AVM)
 // ============================================================================
 
-resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: '${prefix}-law'
-  location: location
-  tags: tags
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: retentionDays
-    features: {
-      enableLogAccessUsingOnlyResourcePermissions: true
-    }
+module workspace 'br/public:avm/res/operational-insights/workspace:0.9.1' = {
+  name: '${prefix}-law-deployment'
+  params: {
+    name: '${prefix}-law'
+    location: location
+    tags: tags
+    skuName: 'PerGB2018'
+    dataRetention: retentionDays
+    useResourcePermissions: true
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'
   }
 }
 
 // ============================================================================
-// Automation Account (for Log Analytics solutions)
+// Automation Account (AVM)
 // ============================================================================
 
-resource automationAccount 'Microsoft.Automation/automationAccounts@2023-11-01' = {
-  name: '${prefix}-automation'
-  location: location
-  tags: tags
-  properties: {
-    sku: {
-      name: 'Basic'
-    }
+module automationAccount 'br/public:avm/res/automation/automation-account:0.11.0' = {
+  name: '${prefix}-automation-deployment'
+  params: {
+    name: '${prefix}-automation'
+    location: location
+    tags: tags
+    skuName: 'Basic'
+    linkedWorkspaceResourceId: workspace.outputs.resourceId
   }
 }
-
-// ============================================================================
-// Link Automation Account to Log Analytics
-// ============================================================================
-
-resource linkedService 'Microsoft.OperationalInsights/workspaces/linkedServices@2020-08-01' = {
-  parent: workspace
-  name: 'Automation'
-  properties: {
-    resourceId: automationAccount.id
-  }
-}
-
-// ============================================================================
-// Activity Log Diagnostic Settings (subscription level - deployed separately)
-// ============================================================================
-
-// Note: Activity Log diagnostics require subscription-scope deployment.
-// Use the subscription-level module for this.
 
 // ============================================================================
 // Cost Governance
@@ -121,6 +100,6 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 // Outputs
 // ============================================================================
 
-output workspaceId string = workspace.id
-output workspaceName string = workspace.name
-output workspaceCustomerId string = workspace.properties.customerId
+output workspaceId string = workspace.outputs.resourceId
+output workspaceName string = workspace.outputs.name
+output workspaceCustomerId string = workspace.outputs.logAnalyticsWorkspaceId

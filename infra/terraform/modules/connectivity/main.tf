@@ -86,9 +86,11 @@ locals {
   rg_ddos     = "${var.prefix}-conn-ddos-rg"
 
   common_tags = merge({
-    environment = var.environment
-    managed_by  = "agentic-alz-accelerator"
-    cost_center = "platform"
+    Environment = var.environment
+    Owner       = "platform-team"
+    CostCenter  = "platform"
+    Project     = "platform-connectivity"
+    ManagedBy   = "agentic-alz-accelerator"
   }, var.tags)
 
   # Hub-Spoke subnet layout

@@ -1,4 +1,5 @@
-// Security Module - Key Vault, Defender for Cloud, Sentinel
+// Security Module - Key Vault, Defender for Cloud
+// AVM-first: uses Azure Verified Modules from the public Bicep registry
 
 @description('Azure region')
 param location string
@@ -7,9 +8,11 @@ param location string
 param prefix string
 
 @description('Enable Defender for Cloud')
+#disable-next-line no-unused-params
 param enableDefender bool
 
 @description('Defender plan names')
+#disable-next-line no-unused-params
 param defenderPlans array
 
 @description('Log Analytics Workspace ID')
@@ -30,19 +33,15 @@ param environment string
 param now string = utcNow('yyyy-MM-01')
 
 // ============================================================================
-// Key Vault
+// Key Vault (AVM)
 // ============================================================================
 
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: '${prefix}-kv'
-  location: location
-  tags: tags
-  properties: {
-    tenantId: subscription().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
+module keyVault 'br/public:avm/res/key-vault/vault:0.11.0' = {
+  name: '${prefix}-kv-deployment'
+  params: {
+    name: '${prefix}-kv'
+    location: location
+    tags: tags
     enableRbacAuthorization: true
     enableSoftDelete: true
     softDeleteRetentionInDays: 90
@@ -51,6 +50,17 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
       defaultAction: 'Deny'
       bypass: 'AzureServices'
     }
+    diagnosticSettings: [
+      {
+        workspaceResourceId: logAnalyticsWorkspaceId
+        logCategoriesAndGroups: [
+          { categoryGroup: 'allLogs' }
+        ]
+        metricCategories: [
+          { category: 'AllMetrics' }
+        ]
+      }
+    ]
   }
 }
 
@@ -59,66 +69,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 // ============================================================================
 
 // TODO: Defender resources are subscription-scoped — move to a subscription-level deployment
-// Commented out: BCP135 - cannot deploy subscription-scoped resources from RG-scoped module
-// resource defenderPricing 'Microsoft.Security/pricings@2024-01-01' = [
-//   for plan in defenderPlans: if (enableDefender) {
-//     name: plan
-//     properties: {
-//       pricingTier: 'Standard'
-//     }
-//   }
-// ]
-
-// ============================================================================
-// Security Center Auto Provisioning
-// ============================================================================
-
-
-// TODO: autoProvisioning is subscription-scoped — move to subscription-level deployment
-// resource autoProvisioning 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = if (enableDefender) {
-//   name: 'default'
-//   properties: {
-//     autoProvision: 'On'
-//   }
-// }
-
-// ============================================================================
-// Security Center Workspace Settings
-// ============================================================================
-
-
-// TODO: workspaceSettings is subscription-scoped — move to subscription-level deployment
-// resource workspaceSettings 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = if (enableDefender) {
-//   name: 'default'
-//   properties: {
-//     workspaceId: logAnalyticsWorkspaceId
-//     scope: subscription().id
-//   }
-// }
-
-// ============================================================================
-// Key Vault Diagnostic Settings
-// ============================================================================
-
-resource kvDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: '${prefix}-kv-diag'
-  scope: keyVault
-  properties: {
-    workspaceId: logAnalyticsWorkspaceId
-    logs: [
-      {
-        categoryGroup: 'allLogs'
-        enabled: true
-      }
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-      }
-    ]
-  }
-}
 
 // ============================================================================
 // Cost Governance
@@ -163,6 +113,6 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 // Outputs
 // ============================================================================
 
-output keyVaultId string = keyVault.id
-output keyVaultName string = keyVault.name
-output keyVaultUri string = keyVault.properties.vaultUri
+output keyVaultId string = keyVault.outputs.resourceId
+output keyVaultName string = keyVault.outputs.name
+output keyVaultUri string = keyVault.outputs.uri

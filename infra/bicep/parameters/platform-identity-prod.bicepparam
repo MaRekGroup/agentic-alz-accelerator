@@ -6,7 +6,9 @@ param environment = 'prod'
 param budgetAmount = 200
 param technicalContact = 'ytesfaye@MngEnvMCAP084543.onmicrosoft.com'
 param tags = {
-  environment: 'prod'
-  managedBy: 'agentic-alz-accelerator'
-  platform: 'identity'
+  Environment: 'prod'
+  Owner: 'platform-team'
+  CostCenter: 'platform'
+  Project: 'platform-identity'
+  ManagedBy: 'agentic-alz-accelerator'
 }

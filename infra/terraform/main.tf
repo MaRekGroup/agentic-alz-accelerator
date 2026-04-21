@@ -110,9 +110,11 @@ locals {
   prefix = "mrg-${var.management_group_name}"
 
   default_tags = merge({
-    environment = "production"
-    managed_by  = "agentic-alz-accelerator"
-    profile     = var.profile_name
+    Environment = "production"
+    Owner       = "platform-team"
+    CostCenter  = "platform"
+    Project     = var.profile_name
+    ManagedBy   = "agentic-alz-accelerator"
   }, var.tags)
 
   resource_group_names = {
