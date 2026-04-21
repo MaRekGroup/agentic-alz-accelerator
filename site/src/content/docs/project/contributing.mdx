@@ -1,0 +1,61 @@
+---
+title: Contributing
+description: How to contribute to the Agentic ALZ Accelerator.
+---
+
+## Branch Naming
+
+```
+feature/<description>     # New features
+fix/<description>          # Bug fixes
+docs/<description>         # Documentation changes
+```
+
+## Commit Convention
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>[optional scope]: <description>
+```
+
+| Type | Purpose |
+|------|---------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `refactor` | Code refactor (no feature/fix) |
+| `ci` | CI/config changes |
+| `chore` | Maintenance/misc |
+
+**Scopes:** `agents`, `skills`, `bicep`, `terraform`, `ci`, `docs`, `mcp`
+
+## Pull Request Process
+
+1. Create a feature branch from `main`
+2. Make changes and commit with conventional commits
+3. Push and create a PR targeting `main`
+4. PR validation runs automatically (lint, security, cost, tests, what-if)
+5. All 4 checks must pass before merge
+6. After merge, `deploy-on-merge.yml` auto-deploys changed LZs
+
+## Validation Commands
+
+```bash
+# Security baseline
+python scripts/validators/validate_security_baseline.py infra/
+
+# Cost governance
+python scripts/validators/validate_cost_governance.py infra/
+
+# Python tests
+python -m pytest tests/ -v
+```
+
+## Adding a New Platform LZ Module
+
+1. Create module under `infra/bicep/modules/<name>/` and/or `infra/terraform/modules/<name>/`
+2. Add parameters to `infra/bicep/parameters/` or `infra/terraform/environments/`
+3. Add subscription entry to `environments/subscriptions.json`
+4. Add deployment job to `2-platform-deploy.yml`
+5. Add GitHub environment and OIDC federated credential

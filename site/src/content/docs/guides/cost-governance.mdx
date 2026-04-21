@@ -1,0 +1,54 @@
+---
+title: Cost Governance
+description: Budget alerts, forecast notifications, and cost validation for every deployment.
+---
+
+Every IaC deployment must include cost monitoring resources.
+The rule is simple: **no budget, no merge.**
+
+## Budget Alert Thresholds
+
+| Threshold | Type | Action |
+|-----------|------|--------|
+| 80% | Forecast | Email notification to owner |
+| 100% | Forecast | Email notification + action group |
+| 120% | Forecast | Email notification + action group |
+
+:::note
+This project uses **forecast alerts exclusively** because they provide advance
+warning. By the time an actual-spend alert triggers, the budget is already blown.
+:::
+
+## Per-Environment Budgets
+
+Use parameterized budgets that scale by environment:
+
+| Environment | Typical Budget | Rationale |
+|-------------|---------------|-----------|
+| dev | Low | Minimal resources, short-lived |
+| staging | Medium | Production-like but limited use |
+| prod | Full | Production workload capacity |
+
+Set the budget amount via `.bicepparam` or `terraform.tfvars` — never hardcode it.
+
+## MCP Pricing Integration
+
+The Architect agent (Step 2) uses the Azure Pricing MCP server for real-time cost estimation:
+
+| Tool | Purpose |
+|------|---------|
+| `azure_cost_estimate` | Estimate costs based on usage patterns |
+| `azure_bulk_estimate` | Multi-resource estimate in one call |
+| `azure_price_compare` | Compare prices across regions and SKUs |
+| `azure_ri_pricing` | Reserved Instance pricing and savings |
+| `azure_region_recommend` | Find cheapest regions for a service |
+
+## Running the Validator
+
+```bash
+# Check all IaC files
+python scripts/validators/validate_cost_governance.py infra/
+
+# Check a specific file
+python scripts/validators/validate_cost_governance.py infra/bicep/main.bicep
+```

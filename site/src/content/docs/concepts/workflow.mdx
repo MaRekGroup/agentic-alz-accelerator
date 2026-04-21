@@ -1,0 +1,74 @@
+---
+title: Agent Workflow
+description: The multi-step APEX workflow with approval gates and artifact handoffs.
+---
+
+## Workflow Diagram
+
+```
+┌─────────┐    ┌────────────┐    ┌────────┐    ┌────────────┐
+│ Step 1   │───▶│  Step 2     │───▶│ Step 3 │───▶│ Step 3.5   │
+│ Require- │    │ Architect  │    │ Design │    │ Governance │
+│ ments    │    │ (WAF+CAF)  │    │        │    │ (Policy)   │
+└─────────┘    └────────────┘    └────────┘    └────────────┘
+     🛑              🛑                              🛑
+  GATE 1          GATE 2                          GATE 3
+                                                      │
+                    ┌─────────────────────────────────┘
+                    ▼
+             ┌────────────┐    ┌────────────┐    ┌────────────┐
+             │  Step 4     │───▶│  Step 5     │───▶│  Step 6     │
+             │ IaC Plan   │    │ Code Gen   │    │ Deploy     │
+             │ (Bicep/TF) │    │ (AVM-first)│    │ (what-if)  │
+             └────────────┘    └────────────┘    └────────────┘
+                  🛑                 🛑                 🛑
+               GATE 4            GATE 5             GATE 6
+                                                      │
+             ┌────────────────────────────────────────┘
+             ▼
+      ┌────────────┐    ┌────────────┐    ┌────────────┐
+      │  Step 7     │    │  Step 8     │    │  Step 9     │
+      │ As-Built   │    │ Monitor    │◀──▶│ Remediate  │
+      │ Docs       │    │ (Sentinel) │    │ (Mender)   │
+      └────────────┘    └────────────┘    └────────────┘
+                         Continuous Loop
+```
+
+## Steps
+
+| Step | Agent | Codename | Artifact |
+|------|-------|----------|----------|
+| 1 | Requirements | 📜 Scribe | `01-requirements.md` |
+| 2 | Architect | 🏛️ Oracle | `02-architecture-assessment.md` |
+| 3 | Design | 🎨 Artisan | `03-design-*.{drawio,png,md}` |
+| 3.5 | Governance | 🛡️ Warden | `04-governance-constraints.md/.json` |
+| 4 | IaC Planner | 📐 Strategist | `04-implementation-plan.md` |
+| 5 | Code Gen | ⚒️ Forge | `infra/{bicep,terraform}/{project}/` |
+| 6 | Deploy | 🚀 Envoy | `06-deployment-summary.md` |
+| 7 | Documentation | 📚 Chronicler | `07-*.md` |
+| 8 | Monitor | 🔭 Sentinel | `08-compliance-report.md` |
+| 9 | Remediate | 🔧 Mender | `09-remediation-log.md` |
+
+## Approval Gates
+
+| Gate | After Step | Challenger? | Action |
+|------|-----------|------------|--------|
+| Gate 1 | Requirements | Yes | Confirm requirements complete |
+| Gate 2 | Architecture | Yes | Approve WAF/CAF assessment |
+| Gate 3 | Governance | No | Approve governance constraints |
+| Gate 4 | Plan | Yes | Approve implementation plan |
+| Gate 5 | Code | Yes | Approve lint/review/what-if results |
+| Gate 6 | Deploy | No | Verify deployed resources |
+
+:::caution
+**Never skip gates.** Gates are non-negotiable. The Challenger agent reviews
+outputs at gates 1, 2, 4, and 5 with adversarial depth proportional to complexity.
+:::
+
+## Complexity Classification
+
+| Tier | Criteria | Challenger Passes |
+|------|----------|-------------------|
+| **Simple** | ≤3 resource types, single region, no custom policy | 1× at each gate |
+| **Standard** | 4–8 types, multi-region OR multi-env, ≤3 custom policies | 2× at arch + code |
+| **Complex** | >8 types, multi-region + multi-env, >3 custom policies | 3× at arch + code |

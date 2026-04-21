@@ -1,0 +1,54 @@
+---
+title: CI/CD Pipelines
+description: GitHub Actions workflows for the full deployment lifecycle.
+---
+
+## Workflow Overview
+
+| Workflow | Trigger | Scope |
+|----------|---------|-------|
+| `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
+| `2-platform-deploy.yml` | Manual | 4 platform LZs with cascade or targeted deploy |
+| `3-app-deploy.yml` | Manual + `workflow_call` | Config-driven app LZs from `subscriptions.json` |
+| `deploy-on-merge.yml` | Push to `main` | Auto-deploy changed LZs on merge |
+| `5-pr-validate.yml` | PR to `main` | Lint, security, cost, tests, what-if preview |
+| `monitor.yml` | Cron + Manual | Compliance scan across all platform subscriptions |
+| `reusable-deploy.yml` | Called by others | DRY: resolve → validate → plan → deploy → verify |
+
+## Reusable Deploy Pipeline
+
+All deployment workflows delegate to `reusable-deploy.yml` which runs 5 stages:
+
+```
+Resolve → Validate → Plan (what-if) → Deploy → Verify
+```
+
+### Stages
+
+| Stage | What It Does |
+|-------|-------------|
+| **Resolve** | Resolve profile, parameters, subscription from `subscriptions.json` |
+| **Validate** | Lint IaC, run security baseline validator |
+| **Plan** | `az deployment sub what-if` (Bicep) or `terraform plan` |
+| **Deploy** | `az deployment sub create` or `terraform apply` |
+| **Verify** | Compliance scan + generate TDD (Technical Design Document) |
+
+## PR Validation
+
+The `5-pr-validate.yml` workflow runs 4 parallel checks on every PR:
+
+1. **Lint & Format** — Bicep lint, Terraform fmt, Python lint
+2. **Security & Cost Checks** — `validate_security_baseline.py` + `validate_cost_governance.py`
+3. **Unit Tests** — `pytest tests/`
+4. **IaC Plan Preview** — What-if/plan against the target subscription
+
+## Self-Hosted Runner Support
+
+All workflows use `vars.RUNNER_LABEL`:
+
+```bash
+# Use a self-hosted runner
+gh variable set RUNNER_LABEL --body "self-hosted"
+
+# Default: ubuntu-latest (GitHub-hosted)
+```

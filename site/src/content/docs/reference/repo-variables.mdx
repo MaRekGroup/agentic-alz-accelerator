@@ -1,0 +1,60 @@
+---
+title: Repository Variables
+description: GitHub repository variables and secrets used by the accelerator.
+---
+
+## Repository Variables
+
+Set via `gh variable set <name> --body '<value>'` or in **Settings > Variables**.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `AZURE_DEPLOYMENT_REGION` | `southcentralus` | Target Azure region for all deployments |
+| `AZURE_MANAGEMENT_GROUP_PREFIX` | `alz` | Prefix for resource naming (CAF convention) |
+| `IAC_FRAMEWORK` | `bicep` | `bicep` or `terraform` — used by deploy-on-merge |
+| `RUNNER_LABEL` | `ubuntu-latest` | GitHub Actions runner label |
+
+## Repository Secrets
+
+Set via `gh secret set <name> --body '<value>'` or in **Settings > Secrets**.
+
+### Required
+
+| Secret | Purpose |
+|--------|---------|
+| `AZURE_TENANT_ID` | Entra ID tenant for OIDC authentication |
+| `AZURE_CLIENT_ID` | App registration client ID for OIDC |
+| `PLATFORM_MGMT_SUBSCRIPTION_ID` | Management platform subscription |
+| `PLATFORM_CONN_SUBSCRIPTION_ID` | Connectivity platform subscription |
+| `PLATFORM_IDTY_SUBSCRIPTION_ID` | Identity platform subscription |
+| `PLATFORM_SEC_SUBSCRIPTION_ID` | Security platform subscription |
+
+### Optional (Application LZs)
+
+| Secret | Purpose |
+|--------|---------|
+| `APP_CORP_ERP_SUBSCRIPTION_ID` | Corp ERP app subscription |
+| `APP_CORP_CRM_SUBSCRIPTION_ID` | Corp CRM app subscription |
+| `APP_ONLINE_WEB_SUBSCRIPTION_ID` | Online web portal subscription |
+| `APP_ONLINE_API_SUBSCRIPTION_ID` | Online API gateway subscription |
+| `APP_SAP_SUBSCRIPTION_ID` | SAP workload subscription |
+| `APP_SANDBOX_SUBSCRIPTION_ID` | Dev/sandbox subscription |
+
+### Optional (Integrations)
+
+| Secret | Purpose |
+|--------|---------|
+| `TF_STATE_STORAGE_ACCOUNT` | Terraform state backend storage account |
+| `TEAMS_WEBHOOK_URL` | Microsoft Teams notifications |
+
+## GitHub Environments
+
+| Environment | Purpose | Protection |
+|-------------|---------|-----------|
+| `platform-management` | Management LZ deploys | Required reviewers |
+| `platform-connectivity` | Connectivity LZ deploys | Required reviewers |
+| `platform-identity` | Identity LZ deploys | Required reviewers |
+| `platform-security` | Security LZ deploys | Required reviewers |
+| `app-prod` | Production app LZ deploys | Required reviewers |
+| `app-dev` | Development app LZ deploys | None |
+| `remediation` | Auto-remediation actions | Required reviewers |

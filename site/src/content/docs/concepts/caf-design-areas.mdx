@@ -1,0 +1,40 @@
+---
+title: CAF Design Areas
+description: How every agent and IaC module maps to Cloud Adoption Framework design areas.
+---
+
+Every agent and IaC module maps to an official Azure Landing Zone design area
+from the [Cloud Adoption Framework](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-areas).
+
+## Design Area Mapping
+
+| CAF Design Area | Bicep Module | Terraform Module | Agent(s) |
+|-----------------|-------------|-----------------|----------|
+| Billing & Tenant | `billing-and-tenant/` | — | Scribe, Oracle |
+| Identity & Access | `identity/` | `identity/` | Warden, Forge |
+| Resource Organization | `governance/`, `policies/` | `policies/` | Oracle, Strategist |
+| Network Topology | `connectivity/`, `networking/` | `connectivity/` | Oracle, Forge |
+| Security | `security/`, `platform-security/` | `platform-security/` | Warden, Sentinel |
+| Management | `management/`, `logging/` | `platform-management/` | Chronicler, Sentinel |
+| Governance | `governance/`, `policies/` | `policies/` | Warden, Sentinel |
+| Platform Automation | CI/CD pipelines | CI/CD pipelines | Envoy, Forge |
+
+## How Agents Use Design Areas
+
+### Step 1 — Requirements (Scribe)
+Maps user requirements to all 8 design areas, ensuring nothing is missed.
+
+### Step 2 — Architecture (Oracle)
+Assesses each design area against the Well-Architected Framework (WAF) pillars
+and provides recommendations.
+
+### Step 3.5 — Governance (Warden)
+Discovers Azure Policies applicable to each design area and generates
+governance constraints.
+
+### Step 4 — Planning (Strategist)
+Selects AVM modules for each design area and plans the deployment order.
+
+### Step 5 — Code Generation (Forge)
+Generates IaC templates organized by design area, with cross-references
+to governance constraints.
