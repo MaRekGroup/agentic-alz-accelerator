@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.agents.remediation_agent import RemediationAgent, REMEDIATION_STRATEGIES
+from src.agents.remediation_agent import RemediationAgent
 
 
 @pytest.fixture

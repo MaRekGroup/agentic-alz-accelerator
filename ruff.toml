@@ -1,0 +1,6 @@
+[lint]
+select = ["F"]
+
+[lint.per-file-ignores]
+# diagrams library uses variable assignment to create nodes in context managers
+"src/tools/python_diagram_generator.py" = ["F841"]

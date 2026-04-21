@@ -26,7 +26,7 @@ from src.agents.governance_agent import GovernanceAgent
 from src.agents.monitoring_agent import MonitoringAgent
 from src.agents.remediation_agent import RemediationAgent
 from src.agents.requirements_agent import RequirementsAgent
-from src.agents.workflow_engine import ComplexityTier, StepStatus, WorkflowEngine, WorkflowState
+from src.agents.workflow_engine import StepStatus, WorkflowEngine, WorkflowState
 from src.config.settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ class AgentOrchestrator:
         # Step 1: Requirements (Scribe)
         logger.info("Step 1: Gathering requirements...")
         state.steps["step-1-requirements"] = StepStatus.IN_PROGRESS
-        requirements = await self._run_requirements_step(state, output_dir)
+        await self._run_requirements_step(state, output_dir)
         state.steps["step-1-requirements"] = StepStatus.COMPLETED
 
         # Gate 1: Approval
@@ -145,7 +145,7 @@ class AgentOrchestrator:
         # Step 3.5: Governance (Warden)
         logger.info("Step 3.5: Governance discovery...")
         state.steps["step-3.5-governance"] = StepStatus.IN_PROGRESS
-        governance = await self.governance_agent.discover_policy_constraints()
+        await self.governance_agent.discover_policy_constraints()
         state.artifacts["04-governance-constraints.json"] = str(output_dir / "04-governance-constraints.json")
         state.steps["step-3.5-governance"] = StepStatus.COMPLETED
 
@@ -160,7 +160,7 @@ class AgentOrchestrator:
 
         # Steps 4-6: Plan → Code → Deploy
         logger.info("Steps 4-6: Plan, generate, deploy...")
-        deploy_result = await self.deployment_agent.run_interactive()
+        await self.deployment_agent.run_interactive()
         state.steps["step-4-plan"] = StepStatus.COMPLETED
         state.steps["step-5-code"] = StepStatus.COMPLETED
         state.steps["step-6-deploy"] = StepStatus.COMPLETED
