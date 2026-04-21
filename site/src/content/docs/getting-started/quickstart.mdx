@@ -1,0 +1,166 @@
+---
+title: Quickstart
+description: Get from fork to deployed platform landing zones in under 30 minutes.
+---
+
+Get from fork to deployed platform landing zones in under 30 minutes.
+
+## Prerequisites
+
+| Requirement | Notes |
+|-------------|-------|
+| Azure tenant | With at least 4 subscriptions (one per platform LZ) |
+| Azure CLI | Authenticated with **Global Admin** or **Application Admin** |
+| GitHub CLI | Authenticated (`gh auth login`) |
+| Entra ID permissions | Create app registrations + federated credentials |
+| Management group | Pre-created root MG (e.g., `alz`) with Owner role |
+
+## Step 1 — Fork and Clone
+
+```bash
+# Fork via GitHub UI or CLI
+gh repo fork MaRekGroup/agentic-alz-accelerator --clone
+cd agentic-alz-accelerator
+```
+
+## Step 2 — Run OIDC Setup
+
+The setup script creates an Entra ID app registration with federated credentials
+for GitHub Actions (no stored secrets), assigns RBAC roles, and sets GitHub secrets.
+
+```bash
+chmod +x scripts/setup-oidc.sh
+./scripts/setup-oidc.sh <your-github-org> <your-repo-name> <mg-prefix>
+```
+
+**Example:**
+
+```bash
+./scripts/setup-oidc.sh contoso agentic-alz-accelerator alz
+```
+
+This creates:
+
+- Entra ID app `alz-github-actions-oidc` with federated credentials for `main`,
+  `pull_request`, and 7 GitHub environments
+- Owner + User Access Administrator on your root management group
+- GitHub secrets: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`
+
+## Step 3 — Set Subscription Secrets
+
+The OIDC script prints these commands — fill in your actual subscription IDs:
+
+```bash
+# Platform subscriptions (required)
+gh secret set PLATFORM_MGMT_SUBSCRIPTION_ID --body '<management-sub-id>'
+gh secret set PLATFORM_CONN_SUBSCRIPTION_ID --body '<connectivity-sub-id>'
+gh secret set PLATFORM_IDTY_SUBSCRIPTION_ID --body '<identity-sub-id>'
+gh secret set PLATFORM_SEC_SUBSCRIPTION_ID  --body '<security-sub-id>'
+
+# Application subscriptions (optional — set when deploying app LZs)
+gh secret set APP_CORP_ERP_SUBSCRIPTION_ID   --body '<sub-id>'
+gh secret set APP_CORP_CRM_SUBSCRIPTION_ID   --body '<sub-id>'
+gh secret set APP_ONLINE_WEB_SUBSCRIPTION_ID --body '<sub-id>'
+gh secret set APP_ONLINE_API_SUBSCRIPTION_ID --body '<sub-id>'
+gh secret set APP_SAP_SUBSCRIPTION_ID        --body '<sub-id>'
+gh secret set APP_SANDBOX_SUBSCRIPTION_ID    --body '<sub-id>'
+```
+
+## Step 4 — Configure Repository Variables
+
+Set these GitHub repository variables to customize the deployment for your org.
+All have sensible defaults — only set what you need to override.
+
+```bash
+# Azure region (default: southcentralus)
+gh variable set AZURE_DEPLOYMENT_REGION --body 'westeurope'
+
+# Resource naming prefix (default: alz)
+gh variable set AZURE_MANAGEMENT_GROUP_PREFIX --body 'contoso'
+
+# IaC framework (default: bicep)
+gh variable set IAC_FRAMEWORK --body 'bicep'
+
+# GitHub Actions runner (default: ubuntu-latest)
+gh variable set RUNNER_LABEL --body 'self-hosted'
+```
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `AZURE_DEPLOYMENT_REGION` | `southcentralus` | Target Azure region |
+| `AZURE_MANAGEMENT_GROUP_PREFIX` | `alz` | Prefix for all resource names |
+| `IAC_FRAMEWORK` | `bicep` | `bicep` or `terraform` |
+| `RUNNER_LABEL` | `ubuntu-latest` | GitHub-hosted or self-hosted runner label |
+
+## Step 5 — Create GitHub Environments
+
+Create protection rules for deployment approvals in **Settings > Environments**:
+
+| Environment | Purpose | Recommended Protection |
+|-------------|---------|----------------------|
+| `platform-management` | Central logging, automation | Required reviewers |
+| `platform-connectivity` | Hub networking, Bastion | Required reviewers |
+| `platform-identity` | Managed identities, RBAC | Required reviewers |
+| `platform-security` | Defender, Key Vault, Sentinel | Required reviewers |
+| `app-prod` | Production app LZs | Required reviewers |
+| `app-dev` | Development app LZs | None (auto-approve) |
+| `remediation` | Auto-remediation actions | Required reviewers |
+
+The OIDC script creates these environments automatically, but protection rules
+must be configured manually in the GitHub UI.
+
+## Step 6 — Deploy Platform Landing Zones
+
+Deploy all 4 platform LZs in cascade (Management → Connectivity → Identity → Security):
+
+```bash
+gh workflow run "2-platform-deploy.yml" \
+  -f framework=bicep \
+  -f action=deploy \
+  -f prefix=contoso \
+  -f location=westeurope
+```
+
+Or deploy a single platform LZ:
+
+```bash
+gh workflow run "2-platform-deploy.yml" \
+  -f framework=bicep \
+  -f action=deploy \
+  -f deploy_only=management \
+  -f prefix=contoso \
+  -f location=westeurope
+```
+
+Monitor the run:
+
+```bash
+gh run watch --repo <your-org>/<your-repo>
+```
+
+## Step 7 — Verify
+
+Run a compliance scan across all deployed subscriptions:
+
+```bash
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+```
+
+## What Gets Deployed
+
+| Platform LZ | Resources |
+|-------------|-----------|
+| **Management** | Log Analytics Workspace, Automation Account, Budget alerts |
+| **Connectivity** | Hub VNet, subnets, Azure Bastion, optional Firewall, Budget alerts |
+| **Identity** | User-Assigned Managed Identities, RBAC role assignments, Budget alerts |
+| **Security** | Microsoft Defender for Cloud, Key Vault (RBAC), Budget alerts |
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| OIDC auth fails in Actions | Verify federated credentials match your repo name and branch |
+| `contents: write` error on TDD push | Ensure caller workflows have `contents: write` permission |
+| Deployment skipped | Check that the GitHub environment exists and has no pending reviewers |
+| Wrong region | Set `AZURE_DEPLOYMENT_REGION` repo variable |
+| `prefix` mismatch | Ensure `AZURE_MANAGEMENT_GROUP_PREFIX` matches your MG hierarchy |

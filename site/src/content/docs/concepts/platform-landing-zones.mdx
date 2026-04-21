@@ -1,0 +1,75 @@
+---
+title: Platform Landing Zones
+description: The 4 platform subscriptions that form the shared foundation for all workloads.
+---
+
+Platform Landing Zones are the shared foundation that all Application Landing
+Zones depend on. They must be deployed before any workload subscription.
+
+## Deployment Order
+
+```
+[1] Management    ← Deploy first (all other LZs log here)
+       |
+[2] Connectivity  ← Deploy second (all workloads network here)
+       |
+[3] Identity      ← Deploy third (workloads that need domain join)
+       |
+[4] Security      ← Deploy fourth (SecOps, Sentinel, Defender)
+       |
+[5+] App LZs      ← corp, online, sandbox, sap ...
+```
+
+## Management (`platform-management`)
+
+Centralized observability and operations for the entire Azure estate.
+
+| Resource | Details |
+|---------|---------|
+| Log Analytics Workspace | PerGB2018, 365-day retention, central for all subs |
+| Automation Account | Linked to Log Analytics; start/stop runbooks |
+| Budget | 80/100/120% forecast alerts |
+
+## Connectivity (`platform-connectivity`)
+
+Hub networking with selectable topology (Hub-Spoke or Virtual WAN).
+
+| Resource | Details |
+|---------|---------|
+| Hub Virtual Network | Configurable address space and subnets |
+| Azure Bastion | Secure RDP/SSH without public IPs |
+| Azure Firewall | Optional — Premium SKU for TLS inspection |
+| Budget | 80/100/120% forecast alerts |
+
+### Hub-Spoke Topology (Default)
+
+```
+                    ┌─────────────────────┐
+                    │      Hub VNet       │
+                    │  ┌───────────────┐  │
+                    │  │ Azure Bastion │  │
+                    │  └───────────────┘  │
+                    └─────────┬───────────┘
+                    Peering   │   Peering
+              ┌───────────────┼──────────────┐
+              │               │              │
+        ┌─────▼──────┐ ┌─────▼──────┐ ┌─────▼──────┐
+        │ Corp Spoke │ │Online Spoke│ │ SAP Spoke  │
+        └────────────┘ └────────────┘ └────────────┘
+```
+
+## Identity (`platform-identity`)
+
+| Resource | Details |
+|---------|---------|
+| User-Assigned Managed Identities | For workload authentication |
+| RBAC Role Assignments | Least-privilege access |
+| Budget | 80/100/120% forecast alerts |
+
+## Security (`platform-security`)
+
+| Resource | Details |
+|---------|---------|
+| Microsoft Defender for Cloud | Servers, Storage, Key Vaults, DNS, ARM plans |
+| Key Vault | RBAC access model, soft delete enabled |
+| Budget | 80/100/120% forecast alerts |

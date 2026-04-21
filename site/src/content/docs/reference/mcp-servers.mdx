@@ -1,0 +1,57 @@
+---
+title: MCP Servers
+description: Model Context Protocol servers used by the accelerator agents.
+---
+
+The accelerator includes 3 MCP servers that provide agents with real-time
+Azure data and diagram generation capabilities.
+
+## Azure Pricing MCP
+
+Cost estimation and pricing lookups for architecture decisions.
+
+| Tool | Purpose |
+|------|---------|
+| `azure_cost_estimate` | Estimate costs based on usage patterns |
+| `azure_bulk_estimate` | Multi-resource estimate in one call |
+| `azure_price_compare` | Compare prices across regions and SKUs |
+| `azure_ri_pricing` | Reserved Instance pricing and savings |
+| `azure_region_recommend` | Find cheapest regions for a service |
+
+**Used by:** Oracle (Step 2), Strategist (Step 4)
+
+**Location:** `mcp/azure-pricing-mcp/`
+
+## Azure Platform MCP
+
+Consolidated 22-tool server for Azure resource operations.
+
+| Category | Tools |
+|----------|-------|
+| Resource Graph | Query resources, compliance state |
+| Policy | List assignments, check compliance |
+| Deployment | What-if, create, status |
+| Monitor | Metrics, alerts, logs |
+| RBAC | Role assignments, definitions |
+
+**Used by:** All agents
+
+**Location:** `mcp/azure-platform/`
+
+## Draw.io MCP
+
+Architecture diagram generation with Azure icon support.
+
+| Tool | Purpose |
+|------|---------|
+| `create_diagram` | Generate `.drawio` files with Azure topology |
+| `export_png` | Export diagrams as PNG images |
+
+**Used by:** Artisan (Step 3)
+
+**Location:** `mcp/drawio-mcp-server/`
+
+## Configuration
+
+MCP servers are configured in `mcp/mcp-config.json` and referenced
+by the VS Code `.vscode/mcp.json` configuration.

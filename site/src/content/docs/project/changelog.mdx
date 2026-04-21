@@ -1,0 +1,33 @@
+---
+title: Changelog
+description: Notable changes to the ALZ Accelerator.
+---
+
+## 2026-04-21
+
+### Added
+- Astro Starlight documentation site
+- Quickstart guide for fork-to-deploy onboarding
+- `vars.IAC_FRAMEWORK` repo variable for framework detection in deploy-on-merge
+
+### Changed
+- Parameterized all hardcoded values for multi-tenant reusability:
+  - `deploy-on-merge.yml`: location and prefix use repo variables with fallbacks
+  - `5-pr-validate.yml`: location uses `vars.AZURE_DEPLOYMENT_REGION`
+  - `reusable-deploy.yml`: `managedBy` tag derived from `project_name` input
+  - All Bicep/Terraform modules: `managedBy`/`managed_by` as configurable parameter
+- Framework detection in deploy-on-merge now respects `vars.IAC_FRAMEWORK`
+
+### Fixed
+- Deploy-on-merge selected `terraform` when both Bicep and Terraform files changed
+- `3-app-deploy.yml` missing `workflow_call` trigger
+- Caller workflows missing `contents: write` permission for TDD git push
+
+## 2026-04-20
+
+### Added
+- Initial platform landing zone deployment (Management, Connectivity, Identity, Security)
+- OIDC federated identity setup script
+- PR validation workflow with 4 parallel checks
+- AVM module replacements for Bicep modules
+- Required tags enforcement (Environment, Owner, CostCenter, Project, ManagedBy)

@@ -1,0 +1,52 @@
+---
+title: Agent Roster
+description: All 12 agents in the ALZ Accelerator multi-agent system.
+---
+
+## Primary Orchestrator
+
+| Agent | Codename | Role |
+|-------|----------|------|
+| `orchestrator` | 🧠 **Conductor** | Master orchestrator — routes workflow, enforces gates, maintains state |
+
+## Core Agents (Steps 1-7)
+
+| Step | Agent | Codename | Role |
+|------|-------|----------|------|
+| 1 | `requirements` | 📜 **Scribe** | Captures LZ requirements through conversation |
+| 2 | `architect` | 🏛️ **Oracle** | WAF assessment, CAF mapping, cost estimation |
+| 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs |
+| 3.5 | `governance` | 🛡️ **Warden** | Policy discovery, compliance, security baseline |
+| 4 | `iac-planner` | 📐 **Strategist** | Implementation planning with AVM module selection |
+| 5 | `bicep-code` / `terraform-code` | ⚒️ **Forge** | IaC template generation (AVM-first) |
+| 6 | `deploy` | 🚀 **Envoy** | Deployment with what-if/plan preview |
+| 7 | `documentation` | 📚 **Chronicler** | Post-deployment documentation suite |
+
+## Day-2 Operations Agents
+
+| Agent | Codename | Role |
+|-------|----------|------|
+| `monitor` | 🔭 **Sentinel** | Continuous compliance monitoring, drift detection |
+| `remediate` | 🔧 **Mender** | Auto-remediation with snapshot/rollback |
+
+## Adversarial Review Agent
+
+| Agent | Codename | Role |
+|-------|----------|------|
+| `challenger` | ⚔️ **Challenger** | Adversarial reviewer at gates 1, 2, 4, 5 |
+
+## Agent Scopes
+
+### Estate-Scoped (operate across all LZs)
+
+- **Conductor** — Orchestrates the full estate
+- **Warden** — Cross-cutting governance and policy
+- **Sentinel** — Monitors all deployed subscriptions
+- **Mender** — Remediates violations across the estate
+
+### Per-LZ Scoped (operate on one landing zone)
+
+- **Scribe, Oracle, Artisan** — Requirements through design
+- **Strategist, Forge** — Planning and code generation
+- **Envoy, Chronicler** — Deployment and documentation
+- **Challenger** — Reviews at gate boundaries

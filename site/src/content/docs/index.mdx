@@ -1,0 +1,42 @@
+---
+title: Agentic ALZ Accelerator
+description: AI-orchestrated Azure Landing Zone deployment — from requirements to governed infrastructure.
+template: splash
+hero:
+  tagline: AI Orchestrates · Humans Decide · Azure Executes
+  actions:
+    - text: Quickstart
+      link: /agentic-alz-accelerator/getting-started/quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/MaRekGroup/agentic-alz-accelerator
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## What Is This?
+
+A multi-agent workflow that transforms Azure Landing Zone requirements into deployed,
+governed, and continuously monitored infrastructure — aligned with the
+Cloud Adoption Framework (CAF) design areas.
+
+<CardGrid stagger>
+  <Card title="11 Specialized Agents" icon="puzzle">
+    Requirements, Architecture, Governance, Code Generation, Deployment, Monitoring,
+    and Remediation — each with defined responsibilities and artifact handoffs.
+  </Card>
+  <Card title="AVM-First IaC" icon="setting">
+    Bicep and Terraform modules built on Azure Verified Modules (AVM).
+    Security baseline and cost governance enforced at every stage.
+  </Card>
+  <Card title="6 Approval Gates" icon="approve-check">
+    Human-in-the-loop at every critical decision point. Adversarial Challenger
+    reviews at gates 1, 2, 4, and 5.
+  </Card>
+  <Card title="Day-2 Operations" icon="rocket">
+    Continuous compliance monitoring, drift detection, and auto-remediation
+    with snapshot/rollback.
+  </Card>
+</CardGrid>

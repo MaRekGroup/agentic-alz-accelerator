@@ -32,3 +32,8 @@ htmlcov/
 
 # Copilot hook logs
 logs/copilot/
+
+# Node / Astro docs site
+node_modules/
+site/dist/
+site/.astro/

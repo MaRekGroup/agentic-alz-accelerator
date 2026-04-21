@@ -1,0 +1,67 @@
+---
+title: How It Works
+description: Architecture overview of the Agentic ALZ Accelerator multi-agent system.
+---
+
+## Philosophy
+
+**AI Orchestrates · Humans Decide · Azure Executes**
+
+The accelerator uses specialized AI agents that collaborate through a structured
+multi-step workflow. Each agent has a defined responsibility, produces specific
+artifacts, and hands off to the next agent in the pipeline.
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  🧠 Conductor                        │
+│              (Master Orchestrator)                    │
+│  Routes workflow · Enforces gates · Tracks state     │
+└──────────────────────┬──────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+   ┌────▼────┐   ┌────▼────┐   ┌────▼────┐
+   │ Per-LZ  │   │ Estate  │   │ Day-2   │
+   │ Agents  │   │ Agents  │   │ Agents  │
+   │ (1-7)   │   │ (Gov)   │   │ (8-9)   │
+   └─────────┘   └─────────┘   └─────────┘
+```
+
+### Per-LZ Agents (Steps 1-7)
+
+Execute the full APEX workflow for a single landing zone — from requirements
+gathering through deployment and documentation.
+
+### Estate Agents
+
+Operate across all landing zones for cross-cutting governance, policy
+enforcement, and RBAC management.
+
+### Day-2 Agents (Steps 8-9)
+
+Continuous operations — compliance monitoring, drift detection, and
+auto-remediation with rollback capability.
+
+## Key Principles
+
+1. **Human-in-the-Loop** — 6 approval gates where humans review and approve
+2. **AVM-First** — Azure Verified Modules for standardization
+3. **Security by Default** — 6 non-negotiable security rules enforced everywhere
+4. **Cost Governance** — Budget alerts mandatory on every deployment
+5. **No Local Azure CLI** — All Azure operations through GitHub Actions
+6. **Prefix-Based Naming** — Everything parameterized for multi-tenant reuse
+
+## Artifact Flow
+
+Each workflow step produces a numbered artifact that feeds into the next step:
+
+```
+01-requirements.md → 02-architecture-assessment.md → 03-design-*.md
+    → 04-governance-constraints.md → 04-implementation-plan.md
+    → infra/{bicep,terraform}/ → 06-deployment-summary.md → 07-*.md
+```
+
+All artifacts are stored in `agent-output/{project}/` with estate-level
+state tracked in `agent-output/00-estate-state.json`.

@@ -1,0 +1,45 @@
+---
+title: Troubleshooting
+description: Common issues and fixes for the ALZ Accelerator.
+---
+
+## GitHub Actions
+
+| Issue | Fix |
+|-------|-----|
+| OIDC auth fails | Verify federated credentials match repo name, branch, and environment |
+| `contents: write` error on TDD push | Caller workflows need `contents: write` permission |
+| Deployment skipped | Check that the GitHub environment exists and has no pending reviewers |
+| Wrong framework selected | Set `vars.IAC_FRAMEWORK` repo variable to `bicep` or `terraform` |
+| Wrong region | Set `vars.AZURE_DEPLOYMENT_REGION` repo variable |
+| `prefix` mismatch | Ensure `vars.AZURE_MANAGEMENT_GROUP_PREFIX` matches your MG hierarchy |
+| `terraform` command not found (exit 127) | Self-hosted runner missing Terraform — install it or use `ubuntu-latest` |
+
+## Azure
+
+| Issue | Fix |
+|-------|-----|
+| Subscription not found | Verify the subscription secret is set correctly in GitHub |
+| Role assignment failed | OIDC service principal needs Owner on the management group |
+| Resource provider not registered | Run `az provider register --namespace Microsoft.xxx` |
+| Budget creation fails | Ensure the subscription has a billing account associated |
+
+## Local Development
+
+| Issue | Fix |
+|-------|-----|
+| Dev Container won't start | Check Docker Desktop is running |
+| `az login` fails | Use `--use-device-code` for headless environments |
+| Python validators fail | Activate `.venv` and install `requirements.txt` |
+| Bicep build fails | Run `az bicep upgrade` to get the latest version |
+
+## Deploy-on-Merge
+
+The `deploy-on-merge.yml` workflow uses file-path heuristics to detect which
+LZs changed. If both `infra/bicep/` and `infra/terraform/` files change in the
+same PR, set `vars.IAC_FRAMEWORK` to disambiguate.
+
+Framework detection priority:
+1. `vars.IAC_FRAMEWORK` repo variable (if set)
+2. File-path detection (if only one framework's files changed)
+3. Default: `bicep` (when both or neither changed)

@@ -1,0 +1,85 @@
+---
+title: Platform Deployment
+description: Deploy the 4 platform landing zones via GitHub Actions.
+---
+
+## Deploy All Platform LZs
+
+Deploy in cascade (Management → Connectivity → Identity → Security):
+
+```bash
+gh workflow run "2-platform-deploy.yml" \
+  -f framework=bicep \
+  -f action=deploy \
+  -f prefix=alz \
+  -f location=southcentralus
+```
+
+## Deploy a Single LZ
+
+```bash
+gh workflow run "2-platform-deploy.yml" \
+  -f framework=bicep \
+  -f action=deploy \
+  -f deploy_only=management \
+  -f prefix=alz \
+  -f location=southcentralus
+```
+
+## Plan Only (What-If)
+
+Preview changes without deploying:
+
+```bash
+gh workflow run "2-platform-deploy.yml" \
+  -f framework=bicep \
+  -f action=plan \
+  -f prefix=alz \
+  -f location=southcentralus
+```
+
+## Monitor a Run
+
+```bash
+gh run watch --repo <your-org>/<your-repo>
+```
+
+## Pipeline Architecture
+
+The `2-platform-deploy.yml` workflow calls `reusable-deploy.yml` for each
+platform LZ. The reusable pipeline follows 5 stages:
+
+```
+Resolve → Validate → Plan (what-if) → Deploy → Verify (compliance + TDD)
+```
+
+Each stage runs in a separate job with its own Azure login context scoped
+to the target subscription.
+
+## Post-Deployment Verification
+
+After deployment, run a compliance scan:
+
+```bash
+gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+```
+
+## Customizing Parameters
+
+### Bicep
+
+Override parameters in `.bicepparam` files under `infra/bicep/parameters/`:
+
+```bicep
+param managedBy = 'my-org-tooling'
+param prefix = 'contoso'
+```
+
+### Terraform
+
+Override via `terraform.tfvars`:
+
+```hcl
+managed_by = "my-org-tooling"
+prefix     = "contoso"
+```
