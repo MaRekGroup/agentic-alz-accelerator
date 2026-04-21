@@ -40,6 +40,8 @@ jobs:
 
       - name: Detect changed LZ profiles
         id: detect
+        env:
+          IAC_FRAMEWORK: ${{ vars.IAC_FRAMEWORK }}
         run: |
           set -euo pipefail
 
@@ -125,12 +127,18 @@ jobs:
           echo "has_app=$HAS_APP" >> "$GITHUB_OUTPUT"
           echo "app_matrix=$APP_PROFILES" >> "$GITHUB_OUTPUT"
 
-          # Detect framework from changed files
-          if echo "$CHANGED" | grep -q 'infra/terraform/'; then
-            echo "framework=terraform" >> "$GITHUB_OUTPUT"
-          else
-            echo "framework=bicep" >> "$GITHUB_OUTPUT"
+          # Detect framework: repo variable > file-path heuristic > default bicep
+          FRAMEWORK="${IAC_FRAMEWORK:-}"
+          if [ -z "$FRAMEWORK" ]; then
+            if echo "$CHANGED" | grep -q 'infra/terraform/' && ! echo "$CHANGED" | grep -q 'infra/bicep/'; then
+              FRAMEWORK="terraform"
+            elif echo "$CHANGED" | grep -q 'infra/bicep/' && ! echo "$CHANGED" | grep -q 'infra/terraform/'; then
+              FRAMEWORK="bicep"
+            else
+              FRAMEWORK="bicep"  # default when both or neither changed
+            fi
           fi
+          echo "framework=$FRAMEWORK" >> "$GITHUB_OUTPUT"
 
           echo ""
           echo "=== Detection Results ==="
