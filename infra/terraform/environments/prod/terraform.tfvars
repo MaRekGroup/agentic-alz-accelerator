@@ -10,6 +10,9 @@ enable_defender       = true
 log_retention_days    = 365
 
 tags = {
-  environment = "production"
-  cost_center = "platform"
+  Environment = "production"
+  Owner       = "platform-team"
+  CostCenter  = "platform"
+  Project     = "corp"
+  ManagedBy   = "agentic-alz-accelerator"
 }

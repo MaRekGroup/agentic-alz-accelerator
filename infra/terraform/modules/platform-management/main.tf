@@ -28,7 +28,7 @@ locals {
   rg_monitoring = "${var.prefix}-mgmt-monitoring-${local.region_code}-rg"
   rg_security   = "${var.prefix}-mgmt-security-${local.region_code}-rg"
   rg_governance = "${var.prefix}-mgmt-governance-${local.region_code}-rg"
-  common_tags = merge({ environment = var.environment, managed_by = "agentic-alz-accelerator" }, var.tags)
+  common_tags = merge({ Environment = var.environment, Owner = "platform-team", CostCenter = "platform", Project = "platform-management", ManagedBy = "agentic-alz-accelerator" }, var.tags)
 }
 
 resource "azurerm_resource_group" "monitoring" {

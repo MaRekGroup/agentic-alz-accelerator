@@ -88,9 +88,11 @@ param budgetAlertEmails array = []
 
 @description('Resource tags')
 param tags object = {
-  environment: environment
-  managed_by: 'agentic-alz-accelerator'
-  cost_center: 'platform'
+  Environment: environment
+  Owner: 'platform-team'
+  CostCenter: 'platform'
+  Project: 'platform-connectivity'
+  ManagedBy: 'agentic-alz-accelerator'
 }
 
 // ─── Variables ────────────────────────────────────────────────────────────────
