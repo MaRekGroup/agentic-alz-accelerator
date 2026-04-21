@@ -189,6 +189,13 @@ jobs:
           subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
       - name: Move subscriptions to management groups
+        env:
+          APP_CORP_ERP_SUBSCRIPTION_ID: ${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}
+          APP_CORP_CRM_SUBSCRIPTION_ID: ${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}
+          APP_ONLINE_WEB_SUBSCRIPTION_ID: ${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}
+          APP_ONLINE_API_SUBSCRIPTION_ID: ${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}
+          APP_SAP_SUBSCRIPTION_ID: ${{ secrets.APP_SAP_SUBSCRIPTION_ID }}
+          APP_SANDBOX_SUBSCRIPTION_ID: ${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}
         run: |
           set -euo pipefail
           PREFIX="${{ env.PREFIX }}"
@@ -214,14 +221,24 @@ jobs:
           echo ""
           echo "=== Application Subscriptions (from subscriptions.json) ==="
           CONFIG="environments/subscriptions.json"
-          ALL_SECRETS='${{ toJson(secrets) }}'
+
+          # OPS-1 fix: Pass only the known app subscription secrets explicitly
+          # instead of toJson(secrets) which leaked ALL secrets to the runner.
+          declare -A SECRET_MAP=(
+            ["APP_CORP_ERP_SUBSCRIPTION_ID"]="${APP_CORP_ERP_SUBSCRIPTION_ID:-}"
+            ["APP_CORP_CRM_SUBSCRIPTION_ID"]="${APP_CORP_CRM_SUBSCRIPTION_ID:-}"
+            ["APP_ONLINE_WEB_SUBSCRIPTION_ID"]="${APP_ONLINE_WEB_SUBSCRIPTION_ID:-}"
+            ["APP_ONLINE_API_SUBSCRIPTION_ID"]="${APP_ONLINE_API_SUBSCRIPTION_ID:-}"
+            ["APP_SAP_SUBSCRIPTION_ID"]="${APP_SAP_SUBSCRIPTION_ID:-}"
+            ["APP_SANDBOX_SUBSCRIPTION_ID"]="${APP_SANDBOX_SUBSCRIPTION_ID:-}"
+          )
 
           # Read app LZs dynamically from config
           jq -r '.application | to_entries[] | select(.key | startswith("_") | not) | "\(.value.management_group) \(.value.github_secret) \(.value.display_name)"' "$CONFIG" | \
           while IFS=' ' read -r mg secret_name display_rest; do
             # Reconstruct display name (may contain spaces)
             display_name=$(jq -r --arg k "$(echo "$mg" | head -1)" '.application | to_entries[] | select(.value.management_group == $k) | .value.display_name' "$CONFIG" 2>/dev/null | head -1)
-            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$secret_name" '.[$k] // "skip"')
+            SUB_ID="${SECRET_MAP[$secret_name]:-skip}"
             move_sub "${PREFIX}-${mg}" "$SUB_ID" "$display_rest"
           done
 
@@ -265,6 +282,13 @@ jobs:
           subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
 
       - name: Register providers on all subscriptions
+        env:
+          APP_CORP_ERP_SUBSCRIPTION_ID: ${{ secrets.APP_CORP_ERP_SUBSCRIPTION_ID }}
+          APP_CORP_CRM_SUBSCRIPTION_ID: ${{ secrets.APP_CORP_CRM_SUBSCRIPTION_ID }}
+          APP_ONLINE_WEB_SUBSCRIPTION_ID: ${{ secrets.APP_ONLINE_WEB_SUBSCRIPTION_ID }}
+          APP_ONLINE_API_SUBSCRIPTION_ID: ${{ secrets.APP_ONLINE_API_SUBSCRIPTION_ID }}
+          APP_SAP_SUBSCRIPTION_ID: ${{ secrets.APP_SAP_SUBSCRIPTION_ID }}
+          APP_SANDBOX_SUBSCRIPTION_ID: ${{ secrets.APP_SANDBOX_SUBSCRIPTION_ID }}
         run: |
           set -euo pipefail
 
@@ -300,11 +324,18 @@ jobs:
             "${{ secrets.PLATFORM_SEC_SUBSCRIPTION_ID }}"
           )
 
-          # App subscription IDs (read dynamically from config)
+          # App subscription IDs (explicit — no toJson(secrets))
           CONFIG="environments/subscriptions.json"
-          ALL_SECRETS='${{ toJson(secrets) }}'
+          declare -A SECRET_MAP=(
+            ["APP_CORP_ERP_SUBSCRIPTION_ID"]="${APP_CORP_ERP_SUBSCRIPTION_ID:-}"
+            ["APP_CORP_CRM_SUBSCRIPTION_ID"]="${APP_CORP_CRM_SUBSCRIPTION_ID:-}"
+            ["APP_ONLINE_WEB_SUBSCRIPTION_ID"]="${APP_ONLINE_WEB_SUBSCRIPTION_ID:-}"
+            ["APP_ONLINE_API_SUBSCRIPTION_ID"]="${APP_ONLINE_API_SUBSCRIPTION_ID:-}"
+            ["APP_SAP_SUBSCRIPTION_ID"]="${APP_SAP_SUBSCRIPTION_ID:-}"
+            ["APP_SANDBOX_SUBSCRIPTION_ID"]="${APP_SANDBOX_SUBSCRIPTION_ID:-}"
+          )
           while read -r secret_name; do
-            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$secret_name" '.[$k] // empty')
+            SUB_ID="${SECRET_MAP[$secret_name]:-}"
             [ -n "$SUB_ID" ] && SUBS+=("$SUB_ID")
           done < <(jq -r '.application | to_entries[] | select(.key | startswith("_") | not) | .value.github_secret' "$CONFIG")
 

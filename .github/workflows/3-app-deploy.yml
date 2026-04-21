@@ -167,7 +167,6 @@ jobs:
     with:
       profile: ${{ matrix.profile }}
       project_name: ${{ matrix.name }}
-      subscription_id_secret: ${{ matrix.github_secret }}
       environment: ${{ matrix.environment }}
       github_environment: ${{ matrix.github_environment }}
       framework: ${{ inputs.framework }}

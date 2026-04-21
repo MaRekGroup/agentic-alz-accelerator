@@ -21,11 +21,9 @@ on:
         required: false
         type: string
         default: ''
-      subscription_id_secret:
-        description: 'Name of the GitHub secret holding the subscription ID (used by app-deploy)'
-        required: false
-        type: string
-        default: ''
+      # REMOVED: subscription_id_secret (OPS-1 fix — toJson(secrets) leaked all secrets)
+      # App LZ callers now set SUBSCRIPTION_ID as an environment-level secret
+      # so secrets.SUBSCRIPTION_ID resolves per-environment automatically.
       environment:
         description: 'Target environment (dev/prod)'
         required: true
@@ -89,11 +87,12 @@ permissions:
 
 jobs:
   # =========================================================================
-  # Resolve subscription ID from either direct input or secret name
+  # Resolve subscription ID from direct input or environment secret
   # =========================================================================
   resolve:
     name: "Resolve · ${{ inputs.project_name }}"
     runs-on: ${{ inputs.runner_label }}
+    environment: ${{ inputs.github_environment }}
     outputs:
       sub_id: ${{ steps.resolve.outputs.sub_id }}
     steps:
@@ -102,8 +101,6 @@ jobs:
         env:
           DIRECT_ID: ${{ inputs.subscription_id }}
           SECRET_ID: ${{ secrets.SUBSCRIPTION_ID }}
-          SECRET_NAME: ${{ inputs.subscription_id_secret }}
-          ALL_SECRETS: ${{ toJson(secrets) }}
         run: |
           if [ -n "$DIRECT_ID" ]; then
             echo "sub_id=$DIRECT_ID" >> "$GITHUB_OUTPUT"
@@ -111,16 +108,10 @@ jobs:
           elif [ -n "$SECRET_ID" ]; then
             echo "sub_id=$SECRET_ID" >> "$GITHUB_OUTPUT"
             echo "Resolved from SUBSCRIPTION_ID secret: ${SECRET_ID:0:8}..."
-          elif [ -n "$SECRET_NAME" ]; then
-            SUB_ID=$(echo "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
-            if [ -z "$SUB_ID" ]; then
-              echo "ERROR: Secret '$SECRET_NAME' not found. Set it in GitHub repo Settings > Secrets."
-              exit 1
-            fi
-            echo "sub_id=$SUB_ID" >> "$GITHUB_OUTPUT"
-            echo "Resolved from secret '$SECRET_NAME': ${SUB_ID:0:8}..."
           else
-            echo "ERROR: Either subscription_id or subscription_id_secret must be provided"
+            echo "ERROR: No subscription ID found."
+            echo "Set SUBSCRIPTION_ID as an environment secret in GitHub environment '${{ inputs.github_environment }}',"
+            echo "or pass it directly via the subscription_id input."
             exit 1
           fi
 

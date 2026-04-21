@@ -54,7 +54,7 @@
   },
 
   "application": {
-    "_readme": "CONFIGURABLE: Rename keys, change profiles, add or remove entries. The workflow reads this file dynamically — no code changes needed. Each key becomes a deployment target name. Valid profiles: corp, online, sandbox, sap. Valid management_groups: landingzones-corp, landingzones-online, landingzones-sap, sandbox.",
+    "_readme": "CONFIGURABLE: Rename keys, change profiles, add or remove entries. The workflow reads this file dynamically — no code changes needed. Each key becomes a deployment target name. Valid profiles: corp, online, sandbox, sap. Valid management_groups: landingzones-corp, landingzones-online, landingzones-sap, sandbox. Each app LZ has its own GitHub environment — set SUBSCRIPTION_ID as an environment secret there.",
 
     "corp-erp": {
       "display_name": "Corp ERP",
@@ -64,7 +64,7 @@
       "profile": "corp",
       "management_group": "landingzones-corp",
       "environment": "prod",
-      "github_environment": "app-prod",
+      "github_environment": "app-corp-erp",
       "github_secret": "APP_CORP_ERP_SUBSCRIPTION_ID",
       "description": "Internal ERP system (private connectivity)"
     },
@@ -76,7 +76,7 @@
       "profile": "corp",
       "management_group": "landingzones-corp",
       "environment": "prod",
-      "github_environment": "app-prod",
+      "github_environment": "app-corp-crm",
       "github_secret": "APP_CORP_CRM_SUBSCRIPTION_ID",
       "description": "Internal CRM system (private connectivity)"
     },
@@ -88,7 +88,7 @@
       "profile": "online",
       "management_group": "landingzones-online",
       "environment": "prod",
-      "github_environment": "app-prod",
+      "github_environment": "app-web-portal",
       "github_secret": "APP_ONLINE_WEB_SUBSCRIPTION_ID",
       "description": "Public-facing web portal"
     },
@@ -100,7 +100,7 @@
       "profile": "online",
       "management_group": "landingzones-online",
       "environment": "prod",
-      "github_environment": "app-prod",
+      "github_environment": "app-api-gateway",
       "github_secret": "APP_ONLINE_API_SUBSCRIPTION_ID",
       "description": "Public-facing API gateway"
     },
@@ -112,7 +112,7 @@
       "profile": "sap",
       "management_group": "landingzones-sap",
       "environment": "prod",
-      "github_environment": "app-prod",
+      "github_environment": "app-sap-s4hana",
       "github_secret": "APP_SAP_SUBSCRIPTION_ID",
       "description": "SAP S/4HANA workloads"
     },
@@ -124,18 +124,23 @@
       "profile": "sandbox",
       "management_group": "sandbox",
       "environment": "dev",
-      "github_environment": "app-dev",
+      "github_environment": "app-dev-sandbox",
       "github_secret": "APP_SANDBOX_SUBSCRIPTION_ID",
       "description": "Dev/test sandbox ($500/mo cap)"
     }
   },
 
   "github_environments": {
-    "platform-management":  { "requires_approval": true,  "reviewers": ["platform-team"] },
-    "platform-connectivity": { "requires_approval": true,  "reviewers": ["platform-team", "network-team"] },
-    "platform-identity":    { "requires_approval": true,  "reviewers": ["platform-team", "identity-team"] },
-    "platform-security":    { "requires_approval": true,  "reviewers": ["platform-team", "security-team"] },
-    "app-prod":             { "requires_approval": true,  "reviewers": ["platform-team"] },
-    "app-dev":              { "requires_approval": false, "reviewers": [] }
+    "_readme": "Each environment needs a SUBSCRIPTION_ID secret set in GitHub Settings > Environments.",
+    "platform-management":    { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "platform-connectivity":  { "requires_approval": true,  "reviewers": ["platform-team", "network-team"] },
+    "platform-identity":      { "requires_approval": true,  "reviewers": ["platform-team", "identity-team"] },
+    "platform-security":      { "requires_approval": true,  "reviewers": ["platform-team", "security-team"] },
+    "app-corp-erp":           { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-corp-crm":           { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-web-portal":         { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-api-gateway":        { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-sap-s4hana":         { "requires_approval": true,  "reviewers": ["platform-team"] },
+    "app-dev-sandbox":        { "requires_approval": false, "reviewers": [] }
   }
 }
