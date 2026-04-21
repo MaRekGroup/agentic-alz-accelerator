@@ -6,6 +6,26 @@
 name: "3 · Deploy Application Landing Zones"
 
 on:
+  workflow_call:
+    inputs:
+      target:
+        description: 'Which application LZ to deploy (use key from subscriptions.json, or "all")'
+        required: true
+        type: string
+      framework:
+        description: 'IaC framework (bicep/terraform)'
+        required: true
+        type: string
+      action:
+        description: 'Plan (preview) or Deploy (apply)'
+        required: true
+        type: string
+      location:
+        description: 'Primary Azure region (overrides per-LZ config if set)'
+        required: false
+        default: ''
+        type: string
+
   workflow_dispatch:
     inputs:
       emergency_override:
