@@ -32,7 +32,7 @@ resource_organization:
   resource_group_naming: "{prefix}-{purpose}-{region}-rg"
   tags:
     environment: "platform"
-    managed_by: "agentic-alz-accelerator"
+    managed_by: "agentic-alz-accelerator"  # Override with your org/tool name
     cost_center: "platform"        # Override per deployment
 
 # ─── Naming Convention ────────────────────────────────────────────────────────

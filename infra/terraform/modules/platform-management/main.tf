@@ -21,6 +21,7 @@ variable "enable_backup"      { type = bool, default = true }
 variable "budget_amount_usd"  { type = number }
 variable "budget_alert_emails" { type = list(string), default = [] }
 variable "tags"               { type = map(string), default = {} }
+variable "managed_by"          { type = string, default = "agentic-alz-accelerator" }
 
 locals {
   region_shortcodes = { eastus2 = "eus2", westus2 = "wus2", westeurope = "weu", uksouth = "uks", southcentralus = "scus" }
@@ -28,7 +29,7 @@ locals {
   rg_monitoring = "${var.prefix}-mgmt-monitoring-${local.region_code}-rg"
   rg_security   = "${var.prefix}-mgmt-security-${local.region_code}-rg"
   rg_governance = "${var.prefix}-mgmt-governance-${local.region_code}-rg"
-  common_tags = merge({ Environment = var.environment, Owner = "platform-team", CostCenter = "platform", Project = "platform-management", ManagedBy = "agentic-alz-accelerator" }, var.tags)
+  common_tags = merge({ Environment = var.environment, Owner = "platform-team", CostCenter = "platform", Project = "platform-management", ManagedBy = var.managed_by }, var.tags)
 }
 
 resource "azurerm_resource_group" "monitoring" {

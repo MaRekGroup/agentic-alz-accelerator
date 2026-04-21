@@ -220,7 +220,7 @@ jobs:
             --name ${{ inputs.resource_group }} \
             --location ${{ inputs.location }} \
             --subscription ${{ secrets.SUBSCRIPTION_ID }} \
-            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
+            --tags environment=${{ inputs.environment }} managedBy=${{ inputs.project_name }} platform=${{ inputs.project_name }}
 
       - name: Bicep What-If
         if: inputs.framework == 'bicep'
@@ -330,7 +330,7 @@ jobs:
             --name ${{ inputs.resource_group }} \
             --location ${{ inputs.location }} \
             --subscription ${{ secrets.SUBSCRIPTION_ID }} \
-            --tags environment=${{ inputs.environment }} managedBy=agentic-alz-accelerator platform=${{ inputs.project_name }}
+            --tags environment=${{ inputs.environment }} managedBy=${{ inputs.project_name }} platform=${{ inputs.project_name }}
 
       - name: Deploy with Bicep
         id: deploy-bicep

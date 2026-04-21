@@ -141,7 +141,7 @@ jobs:
           for profile in "${PROFILES[@]}"; do
             echo "=== What-If: $profile ==="
             az deployment sub what-if \
-              --location southcentralus \
+              --location ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }} \
               --template-file infra/bicep/main.bicep \
               --parameters profileName="$profile" \
               --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
