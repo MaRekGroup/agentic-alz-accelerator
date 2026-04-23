@@ -802,10 +802,10 @@
       📐 CAF Design Areas <span class="nav-badge">8</span>
     </a>
     <a class="nav-item" onclick="showSection('agents')">
-      🤖 Agent Roster <span class="nav-badge">11</span>
+      🤖 Agent Roster <span class="nav-badge">12</span>
     </a>
     <a class="nav-item" onclick="showSection('tools')">
-      🛠️ Agent Tools <span class="nav-badge">8</span>
+      🛠️ Agent Tools <span class="nav-badge">11</span>
     </a>
 
     <div class="nav-section">Get Started</div>
@@ -821,7 +821,7 @@
 
     <div class="nav-section">Workflow Guide</div>
     <a class="nav-item" onclick="showSection('workflow')">
-      🔄 9-Step Workflow
+      🔄 10-Step Workflow
     </a>
     <a class="nav-item" onclick="showSection('security')">
       🛡️ Security Baseline
@@ -844,7 +844,7 @@
       🔧 Remediation
     </a>
     <a class="nav-item" onclick="showSection('cicd')">
-      🚀 CI/CD Pipelines <span class="nav-badge">7</span>
+      🚀 CI/CD Pipelines <span class="nav-badge">8</span>
     </a>
   </nav>
 
@@ -876,7 +876,7 @@
         <p>A multi-agent workflow that transforms Azure Landing Zone requirements into deployed, governed, and continuously monitored infrastructure — aligned with the Cloud Adoption Framework and APEX agentic infrastructure patterns.</p>
         <div class="hero-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
         <div class="hero-stats">
-          <div class="hero-stat"><div class="num">11</div><div class="lbl">Specialized Agents</div></div>
+          <div class="hero-stat"><div class="num">12</div><div class="lbl">Specialized Agents</div></div>
           <div class="hero-stat"><div class="num">8</div><div class="lbl">CAF Design Areas</div></div>
           <div class="hero-stat"><div class="num">6</div><div class="lbl">Approval Gates</div></div>
           <div class="hero-stat"><div class="num">2</div><div class="lbl">IaC Frameworks</div></div>
@@ -937,6 +937,10 @@
           <h3>🤝 Human-in-the-Loop</h3>
           <p>6 approval gates ensure humans decide at every critical juncture. Agents orchestrate and prepare — humans validate before anything runs against production Azure.</p>
         </div>
+        <div class="card">
+          <h3>🔍 Greenfield &amp; Brownfield</h3>
+          <p>Supports both new (greenfield) and existing (brownfield) environments. Brownfield scenarios start with a WAF-aligned assessment (Step 0) that discovers existing resources, evaluates reliability across 28 checks, and generates a gap analysis before the standard workflow begins.</p>
+        </div>
       </div>
     </div>
 
@@ -971,7 +975,8 @@
         <div class="arch-layer">
           <div class="arch-layer-label">🤖 Agent Layer</div>
           <div class="arch-layer-items">
-            <div class="arch-chip">📜 Scribe</div>
+            <div class="arch-chip">� Assessor</div>
+            <div class="arch-chip">�📜 Scribe</div>
             <div class="arch-chip">🏛️ Oracle</div>
             <div class="arch-chip">🎨 Artisan</div>
             <div class="arch-chip">🛡️ Warden</div>
@@ -1025,7 +1030,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>MCP Server</th><th>Key Tools (22 total)</th><th>Used By</th></tr>
+            <tr><th>MCP Server</th><th>Key Tools (27 total)</th><th>Used By</th></tr>
           </thead>
           <tbody>
             <tr><td><strong>Azure Pricing</strong><br/><span style="font-size:11px;color:var(--muted)">mcp/azure-pricing-mcp/</span></td><td>Cost estimation, region comparison, RI pricing, budget calculation</td><td>Oracle, Strategist, Chronicler</td></tr>
@@ -1230,6 +1235,9 @@
             <tr><td><strong>Diagram Generator</strong></td><td><code>azure_diagram_generator.py</code></td><td>Architecture diagram facade — engine selector (Python, SVG, or Draw.io MCP)</td></tr>
             <tr><td><strong>Python Diagram Engine</strong></td><td><code>python_diagram_generator.py</code></td><td>Graphviz-based PNG diagrams using <code>diagrams</code> library with official Azure icons</td></tr>
             <tr><td><strong>TDD Generator</strong></td><td><code>tdd_generator.py</code></td><td>Technical Design Document generation with as-built resource details</td></tr>
+            <tr><td><strong>Discovery Collector</strong></td><td><code>discovery_collector.py</code></td><td>Brownfield environment discovery via Azure Resource Graph — inventories resources, networking, IAM, and policies</td></tr>
+            <tr><td><strong>WARA Engine</strong></td><td><code>wara_engine.py</code></td><td>WAF Reliability Assessment with 28-check catalog — scores existing resources against Well-Architected best practices</td></tr>
+            <tr><td><strong>Report Generator</strong></td><td><code>report_generator.py</code></td><td>Generates 6 assessment artifacts: architecture docs, gap analysis, Mermaid diagrams, ADRs, and migration roadmap</td></tr>
           </tbody>
         </table>
       </div>
@@ -1485,13 +1493,15 @@ agents:
     <!-- ═══ WORKFLOW ═══ -->
     <div id="section-workflow" class="section">
       <div class="section-header">
-        <h2>9-Step APEX Workflow</h2>
+        <h2>10-Step APEX Workflow</h2>
         <p>Click any step to see details. Gates require human approval before proceeding.</p>
       </div>
 
       <div class="progress-tracker">
         <h3>Workflow Progress</h3>
         <div class="progress-steps">
+          <div class="prog-step"><div class="prog-dot" data-tip="Assessment (Brownfield)">0</div><div class="prog-label">Assess</div></div>
+          <div class="prog-arrow">→</div>
           <div class="prog-step"><div class="prog-dot current" data-tip="Requirements">1</div><div class="prog-label">Requirements</div></div>
           <div class="prog-arrow">→</div>
           <div class="prog-gate" data-tip="Approval Gate 1">🛑</div>
@@ -1527,6 +1537,47 @@ agents:
       </div>
 
       <div class="step-container">
+
+        <div class="card" style="margin-bottom:18px;padding:16px;background:linear-gradient(90deg,#E3F2FD,#F0F6FF);border:1px solid #90CAF9;border-radius:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:18px">📌</span>
+            <strong style="color:var(--ms-blue)">Greenfield vs. Brownfield</strong>
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin:0"><strong>Greenfield</strong> (new environment): Start at Step 1 — the full APEX workflow from requirements to deployment.<br/><strong>Brownfield</strong> (existing environment): Start at Step 0 — run a WAF-aligned assessment of your existing resources, then continue from Step 1 with brownfield context informing every subsequent step.</p>
+        </div>
+
+        <div class="step-item">
+          <div class="step-left">
+            <div class="step-number" style="background:var(--ms-purple)">0</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-body" onclick="toggleStep(this)">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-emoji">🔍</span>
+                <div>
+                  <div class="step-agent">🔍 ASSESSOR (Brownfield Only)</div>
+                  <div class="step-name">Environment Assessment</div>
+                </div>
+              </div>
+              <span class="step-chevron">▼</span>
+            </div>
+            <div class="step-detail">
+              <div class="step-meta">
+                <span class="badge badge-purple">Brownfield Only</span>
+                <span class="badge badge-blue">Artifacts: 00-assessment-*.{md,json,mmd}</span>
+              </div>
+              <ul>
+                <li>Discovers all existing resources via Azure Resource Graph — compute, networking, storage, identity, policies</li>
+                <li>Runs WAF Reliability Assessment with 28-check catalog (availability zones, redundancy, backup, DR, monitoring, scaling)</li>
+                <li>Scores each resource against Well-Architected best practices (pass/fail/not-applicable)</li>
+                <li>Generates 6 artifacts: current-state architecture, target-state with migration roadmap, WAF assessment report (MD + JSON), architecture diagram (Mermaid), and ADR</li>
+                <li>Gap analysis feeds into Step 1 requirements — Scribe uses assessment findings to pre-populate known gaps</li>
+                <li>Triggered via GitHub Actions: <code>gh workflow run assess.yml -f scope=/subscriptions/&lt;id&gt; -f mode=full</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         <div class="step-item">
           <div class="step-left">
@@ -2303,6 +2354,10 @@ Each LZ follows: Resolve → Validate → Plan → Deploy → Verify</pre>
           <h3>📋 Per-LZ Session State</h3>
           <p style="margin-top:6px"><code>agent-output/{lz-name}/00-session-state.json</code> — Tracks workflow step progress, gate approvals, challenger findings, decisions (IaC tool, complexity, region), and artifact inventory for each individual landing zone.</p>
         </div>
+        <div class="card">
+          <h3>🔍 Assessment Artifacts (Brownfield)</h3>
+          <p style="margin-top:6px"><code>agent-output/assessment/&lt;scope&gt;/</code> — Stores brownfield assessment results: current-state architecture, target-state with migration roadmap, WAF assessment report (MD + JSON), Mermaid architecture diagram, and ADR. Generated by <code>assess.yml</code> workflow.</p>
+        </div>
       </div>
 
       <div class="section-header" style="margin-top:14px">
@@ -2380,7 +2435,7 @@ asyncio.run(main())
     <div id="section-cicd" class="section">
       <div class="section-header">
         <h2>CI/CD Pipelines</h2>
-        <p>7 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 Platform + configurable Application Landing Zones. App LZ names, profiles, and subscriptions are defined in <code>environments/subscriptions.json</code> — no workflow YAML changes needed.</p>
+        <p>8 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 Platform + configurable Application Landing Zones. App LZ names, profiles, and subscriptions are defined in <code>environments/subscriptions.json</code> — no workflow YAML changes needed.</p>
       </div>
 
       <div class="tabs">
@@ -2391,6 +2446,7 @@ asyncio.run(main())
         <button class="tab-btn" onclick="showTab(this,'pipe','app')">3 · App Deploy</button>
         <button class="tab-btn" onclick="showTab(this,'pipe','monitor')">4 · Monitor</button>
         <button class="tab-btn" onclick="showTab(this,'pipe','pr')">5 · PR Validation</button>
+        <button class="tab-btn" onclick="showTab(this,'pipe','assess')">6 · Assessment</button>
       </div>
 
       <!-- ── Pipeline Overview ── -->
@@ -2399,6 +2455,7 @@ asyncio.run(main())
           <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Full Deployment Sequence</h3>
           <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
 Step 0  Gather bootstrap inputs (see Prerequisites → Bootstrap Settings Checklist)
+Step 0b assess.yml               →  (brownfield only) WAF-aligned environment assessment
 Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
 Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
 Step 3  1-bootstrap.yml          →  Management groups + subscription placement
@@ -2421,6 +2478,7 @@ Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
               <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
               <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: resolve → validate → plan → deploy → verify; self-hosted runner via <code>runner_label</code> input</td></tr>
               <tr><td><strong>assign-role.yml</strong></td><td>Manual (utility)</td><td>Single sub</td><td>Assign/remove RBAC roles (e.g., Sentinel Contributor) to the OIDC service principal</td></tr>
+              <tr><td><strong>assess.yml</strong></td><td>Manual</td><td>Per subscription/RG</td><td>Brownfield WAF assessment: discover → WARA → generate reports (6 artifacts)</td></tr>
             </tbody>
           </table>
         </div>
@@ -2758,6 +2816,61 @@ gh workflow run <span class="str">"4 · Landing Zone Monitoring"</span> \
         <p style="margin-top:12px;font-size:12px;color:var(--muted)">Triggered by changes to: <code>infra/**</code>, <code>src/config/**</code>, <code>src/agents/**</code>, <code>tests/**</code></p>
       </div>
 
+      <!-- ── 6 · Assessment (Brownfield) ── -->
+      <div id="pipe-assess" class="tab-panel">
+        <h3>6 · Brownfield Assessment <span style="font-size:12px;color:var(--ms-purple);font-weight:normal">(brownfield only)</span></h3>
+        <p style="margin:8px 0">Run a WAF-aligned assessment of an existing Azure environment before onboarding it to the accelerator. Discovers resources, evaluates reliability, and generates gap analysis reports.</p>
+
+        <div class="card" style="margin:14px 0;padding:16px;background:linear-gradient(90deg,#F3E5F5,#FFF9FE);border-left:4px solid var(--ms-purple)">
+          <h4 style="margin-bottom:8px;color:var(--ms-purple)">Assessment Pipeline</h4>
+          <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
+Discover (Resource Graph)  →  Assess (28 WARA checks)  →  Generate Reports (6 artifacts)
+     ↓                              ↓                              ↓
+  Resources, networking,      Pass/Fail/N-A per check,      Current-state architecture,
+  identity, policies          reliability score              target-state + roadmap,
+                                                             WAF report (MD + JSON),
+                                                             architecture diagram (Mermaid),
+                                                             ADR</pre>
+        </div>
+
+        <div class="code-block" style="font-size:11px">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Full assessment of a subscription</span>
+gh workflow run <span class="str">"assess.yml"</span> \
+  <span class="flag">-f</span> scope=/subscriptions/&lt;subscription-id&gt; \
+  <span class="flag">-f</span> scope_type=subscription \
+  <span class="flag">-f</span> mode=full
+
+<span class="comment"># Discovery only (skip WARA scoring)</span>
+gh workflow run <span class="str">"assess.yml"</span> \
+  <span class="flag">-f</span> scope=/subscriptions/&lt;subscription-id&gt; \
+  <span class="flag">-f</span> scope_type=subscription \
+  <span class="flag">-f</span> mode=discovery
+
+<span class="comment"># Assess a specific resource group</span>
+gh workflow run <span class="str">"assess.yml"</span> \
+  <span class="flag">-f</span> scope=/subscriptions/&lt;sub-id&gt;/resourceGroups/&lt;rg-name&gt; \
+  <span class="flag">-f</span> scope_type=resource_group \
+  <span class="flag">-f</span> mode=full</div>
+
+        <h4 style="margin-top:14px">Assessment Artifacts</h4>
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead><tr><th>Artifact</th><th>Contents</th></tr></thead>
+            <tbody>
+              <tr><td><code>00-current-state-architecture.md</code></td><td>As-is environment documentation — resources, networking, identity, policies</td></tr>
+              <tr><td><code>00-target-state-architecture.md</code></td><td>Recommended target state with migration roadmap and effort estimates</td></tr>
+              <tr><td><code>00-assessment-report.md</code></td><td>Human-readable WAF Reliability Assessment — scores, findings, recommendations</td></tr>
+              <tr><td><code>00-assessment-report.json</code></td><td>Machine-readable assessment data for downstream agent consumption</td></tr>
+              <tr><td><code>00-architecture-diagram.mmd</code></td><td>Mermaid diagram of discovered resource topology</td></tr>
+              <tr><td><code>00-ADR-assessment-findings.md</code></td><td>Architecture Decision Record documenting key findings and trade-offs</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin-top:10px;font-size:12px;color:var(--muted)">Artifacts are stored in <code>agent-output/assessment/&lt;scope&gt;/</code>. After assessment, proceed to Step 1 (Requirements) — the Scribe agent uses assessment findings to pre-populate known gaps.</p>
+      </div>
+
 <div style="margin-top:28px;border-top:2px solid var(--ms-blue);padding-top:18px">
   <h3 style="color:var(--ms-blue)">As-Built Technical Design Document (TDD)</h3>
   <p style="margin:8px 0">After every successful deployment, the pipeline automatically generates an as-built TDD Word document for the deployed landing zone. TDDs are uploaded as pipeline artifacts (90-day retention).</p>
@@ -2817,7 +2930,7 @@ const SECTION_LABELS = {
   prereqs: 'Prerequisites',
   install: 'Installation',
   config: 'Configuration',
-  workflow: '9-Step Workflow',
+  workflow: '10-Step Workflow',
   security: 'Security Baseline',
   cost: 'Cost Governance',
   profiles: 'Landing Zone Profiles',

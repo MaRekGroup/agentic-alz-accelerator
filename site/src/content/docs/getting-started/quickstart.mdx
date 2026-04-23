@@ -164,3 +164,23 @@ gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
 | Deployment skipped | Check that the GitHub environment exists and has no pending reviewers |
 | Wrong region | Set `AZURE_DEPLOYMENT_REGION` repo variable |
 | `prefix` mismatch | Ensure `AZURE_MANAGEMENT_GROUP_PREFIX` matches your MG hierarchy |
+
+## Brownfield? Start Here
+
+If you're onboarding an **existing Azure environment** (brownfield), run a
+WAF-aligned assessment before deploying platform landing zones:
+
+```bash
+# Assess your existing subscription
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<your-subscription-id> \
+  -f scope_type=subscription \
+  -f mode=full
+```
+
+This discovers your current resources, evaluates them against 28 WAF Reliability
+checks, and generates a gap analysis. Review the artifacts in
+`agent-output/assessment/` before proceeding with Step 1 (Requirements).
+
+See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/)
+for full details on scoping, modes, and troubleshooting.

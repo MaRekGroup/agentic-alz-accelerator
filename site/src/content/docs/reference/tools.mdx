@@ -17,6 +17,9 @@ Agents automatically invoke tools during workflow steps to interact with Azure, 
 | Diagram Generator | `azure_diagram_generator.py` | Architecture diagram facade — engine selector (Python, SVG, or Draw.io MCP) |
 | Python Diagram Engine | `python_diagram_generator.py` | Graphviz-based PNG diagrams using `diagrams` library with official Azure icons |
 | TDD Generator | `tdd_generator.py` | Technical Design Document generation with as-built resource details |
+| Discovery Collector | `discovery_collector.py` | Brownfield environment discovery via Azure Resource Graph — inventories resources, networking, IAM, and policies |
+| WARA Engine | `wara_engine.py` | WAF Reliability Assessment with 28-check catalog — scores resources against Well-Architected best practices |
+| Report Generator | `report_generator.py` | Generates 6 assessment artifacts: architecture docs, gap analysis, Mermaid diagrams, ADRs, and migration roadmap |
 
 :::note
 All tool modules live in the `src/tools/` directory. Agents select and invoke tools based on the current workflow step — you do not need to call them manually.
@@ -26,6 +29,7 @@ All tool modules live in the `src/tools/` directory. Agents select and invoke to
 
 During each workflow step, the responsible agent determines which tools it needs:
 
+- **Assessor** (Step 0) calls the Discovery Collector, WARA Engine, and Report Generator to assess brownfield environments.
 - **Forge** (Step 5) calls the Bicep Deployer or Terraform Deployer depending on the configured `IAC_FRAMEWORK`.
 - **Sentinel** (Step 8) calls the Policy Checker, Resource Graph, and Drift Detector on scheduled intervals.
 - **Artisan** (Step 3) calls the Diagram Generator, which delegates to the Python Diagram Engine or the Draw.io MCP server based on the requested output format.

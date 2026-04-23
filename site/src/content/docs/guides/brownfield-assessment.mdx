@@ -1,0 +1,150 @@
+---
+title: Brownfield Assessment
+description: Assess an existing Azure environment before onboarding it to the ALZ Accelerator.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Brownfield assessment (Step 0) is for **existing Azure environments** that you want
+to onboard to the ALZ Accelerator. It discovers your current resources, evaluates
+them against Well-Architected best practices, and generates a gap analysis that
+feeds into the standard workflow.
+
+:::tip[When to use]
+- You have an existing Azure subscription with deployed resources
+- You want to understand your current compliance and reliability posture
+- You need a migration roadmap before applying CAF landing zone patterns
+
+Skip this step entirely for **greenfield** (new, empty) environments.
+:::
+
+## How It Works
+
+The assessment runs as a three-stage pipeline:
+
+```
+Discover (Resource Graph)  →  Assess (28 WARA checks)  →  Generate Reports (6 artifacts)
+```
+
+| Stage | Tool | What It Does |
+|-------|------|-------------|
+| **Discover** | `discovery_collector.py` | Queries Azure Resource Graph for all resources, networking topology, IAM assignments, and policy state |
+| **Assess** | `wara_engine.py` | Runs 28 WAF Reliability Assessment checks — availability zones, redundancy, backup, DR, monitoring, scaling |
+| **Report** | `report_generator.py` | Generates 6 structured artifacts for human review and downstream agent consumption |
+
+## Prerequisites
+
+| Requirement | Details |
+|-------------|---------|
+| Azure subscription | With existing deployed resources to assess |
+| OIDC authentication | The same setup used for platform deployment (see [Quickstart](/agentic-alz-accelerator/getting-started/quickstart/)) |
+| Reader role | On the target subscription or resource group scope |
+| Resource Graph access | The OIDC service principal needs `Reader` on the scope being assessed |
+
+## Running an Assessment
+
+<Tabs>
+<TabItem label="Full Assessment">
+
+Discover resources **and** run WAF Reliability Assessment:
+
+```bash
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<subscription-id> \
+  -f scope_type=subscription \
+  -f mode=full
+```
+
+</TabItem>
+<TabItem label="Discovery Only">
+
+Discover resources without scoring (faster, useful for initial inventory):
+
+```bash
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<subscription-id> \
+  -f scope_type=subscription \
+  -f mode=discovery
+```
+
+</TabItem>
+<TabItem label="Resource Group Scope">
+
+Assess a specific resource group instead of the full subscription:
+
+```bash
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<sub-id>/resourceGroups/<rg-name> \
+  -f scope_type=resource_group \
+  -f mode=full
+```
+
+</TabItem>
+</Tabs>
+
+Monitor the run:
+
+```bash
+gh run list --workflow=assess.yml --limit 3
+gh run view <run-id> --log
+```
+
+## Assessment Artifacts
+
+All outputs land in `agent-output/assessment/<scope>/`:
+
+| Artifact | Purpose |
+|----------|---------|
+| `00-current-state-architecture.md` | As-is environment documentation — resources, networking, identity, policies |
+| `00-target-state-architecture.md` | Recommended target state with migration roadmap and effort estimates |
+| `00-assessment-report.md` | Human-readable WAF Reliability Assessment — scores, findings, recommendations |
+| `00-assessment-report.json` | Machine-readable assessment data for downstream agent consumption |
+| `00-architecture-diagram.mmd` | Mermaid diagram of discovered resource topology |
+| `00-ADR-assessment-findings.md` | Architecture Decision Record documenting key findings and trade-offs |
+
+## WARA Check Catalog (28 checks)
+
+The WAF Reliability Assessment evaluates resources across 6 categories:
+
+| Category | Checks | Examples |
+|----------|--------|---------|
+| **Availability Zones** | 5 | VMs in zone-redundant config, zone-aware load balancers |
+| **Redundancy** | 5 | Multi-instance deployments, geo-redundant storage |
+| **Backup** | 5 | Backup policies enabled, Recovery Services Vault configured |
+| **Disaster Recovery** | 5 | Cross-region replication, failover groups |
+| **Monitoring** | 4 | Diagnostic settings, alert rules, Log Analytics integration |
+| **Scaling** | 4 | Autoscale rules, appropriate SKU tiers |
+
+Each check returns **Pass**, **Fail**, or **Not Applicable** with a recommendation
+for remediation.
+
+## What Happens After Assessment
+
+After reviewing the assessment artifacts:
+
+1. **Proceed to Step 1 (Requirements)** — the Scribe agent uses assessment findings
+   to pre-populate known gaps and brownfield context
+2. The Architecture step (Step 2) references the current-state and target-state
+   documents for informed design decisions
+3. The Governance step (Step 3.5) compares discovered policies against the
+   accelerator's security baseline
+
+```
+Assessment → Requirements → Architecture → Design → Governance → Plan → Code → Deploy
+   (Step 0)    (Step 1)      (Step 2)     (Step 3)  (Step 3.5)  (Step 4) (Step 5) (Step 6)
+```
+
+:::caution
+Assessment artifacts are **informational** — they do not modify your existing
+environment. All changes happen later through the standard IaC deployment workflow
+with approval gates.
+:::
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| `scope` not found | Verify the subscription ID or resource group path is correct |
+| Resource Graph returns empty | Ensure the OIDC principal has `Reader` role on the target scope |
+| WARA checks all "not applicable" | The scope may not contain the resource types being checked |
+| Workflow fails at discovery | Check that `Microsoft.ResourceGraph` provider is registered |

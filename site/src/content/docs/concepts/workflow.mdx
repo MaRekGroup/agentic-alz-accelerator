@@ -82,6 +82,22 @@ outputs at gates 1, 2, 4, and 5 with adversarial depth proportional to complexit
 
 ## Step Details
 
+### Step 0 — Assessment (🔍 Assessor) — Brownfield Only
+
+:::note
+Step 0 runs **only for brownfield scenarios** — existing Azure environments with deployed resources. Skip entirely for greenfield (new, empty) environments.
+:::
+
+- Discovers all existing resources via Azure Resource Graph — compute, networking, storage, identity, policies
+- Runs WAF Reliability Assessment with a 28-check catalog covering availability zones, redundancy, backup, DR, monitoring, and scaling
+- Scores each resource against Well-Architected best practices (Pass / Fail / Not Applicable)
+- Generates 6 artifacts: current-state architecture, target-state with migration roadmap, WAF assessment report (MD + JSON), architecture diagram (Mermaid), and ADR
+- Gap analysis feeds into Step 1 — the Scribe agent uses assessment findings to pre-populate known gaps
+- Triggered via GitHub Actions: `gh workflow run assess.yml -f scope=/subscriptions/<id> -f mode=full`
+- Outputs stored in `agent-output/assessment/<scope>/`
+
+See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/) for full details.
+
 ### Step 1 — Requirements (📜 Scribe)
 
 - Conversational gathering of landing zone requirements through structured interview
