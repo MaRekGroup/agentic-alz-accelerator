@@ -1,0 +1,508 @@
+# WARA Assessment Check Catalog
+# Declarative rules evaluated by src/tools/wara_engine.py
+# Add new checks here — no code changes needed.
+#
+# Fields:
+#   id            - Unique. Prefix: REL- SEC- COS- OPE- PER-
+#   title         - Short human-readable name
+#   pillar        - reliability | security | cost_optimization | operational_excellence | performance
+#   caf_area      - billing_tenant | identity_access | resource_org | network | security | management | governance | platform_automation
+#   alz_area      - billing_tenant | identity | management_groups | policy | networking | logging | security | platform_devops
+#   severity      - critical | high | medium | low
+#   confidence    - high | medium | low
+#   scope         - tenant | management_group | subscription | resource_group
+#   query_type    - resource_graph | policy | discovery_field
+#   query         - KQL for resource_graph, or dotted path for discovery_field
+#   match         - "any" means findings are the non-compliant rows returned by query
+#   recommendation - Short fix guidance
+#   remediation_steps - Ordered list of fix steps
+#   references    - Links to Microsoft docs
+#   mappings:
+#     waf_pillar  - list of WAF pillars this maps to
+#     caf_lifecycle - list of CAF lifecycle stages (strategy, plan, ready, adopt, govern, manage)
+
+checks:
+  # ── Security Pillar ───────────────────────────────────────────────────
+
+  - id: SEC-001
+    title: "TLS 1.2 minimum on storage accounts"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.minimumTlsVersion != 'TLS1_2'
+      | project id, name, resourceGroup, subscriptionId,
+                minTls=properties.minimumTlsVersion
+    match: any
+    recommendation: "Set minimumTlsVersion to TLS1_2 on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --min-tls-version TLS1_2"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/transport-layer-security"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-002
+    title: "HTTPS-only on storage accounts"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.supportsHttpsTrafficOnly != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable HTTPS-only traffic on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --https-only true"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-003
+    title: "No public blob access on storage"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.allowBlobPublicAccess == true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Disable public blob access on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --allow-blob-public-access false"
+    references:
+      - "https://learn.microsoft.com/azure/storage/blobs/anonymous-read-access-prevent"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-004
+    title: "Key Vault soft delete enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enableSoftDelete != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable soft delete on all Key Vaults."
+    remediation_steps:
+      - "Soft delete is enabled by default on new vaults; re-create or update existing vaults"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-005
+    title: "Key Vault purge protection enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enablePurgeProtection != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable purge protection on all Key Vaults."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --enable-purge-protection true"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview#purge-protection"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-006
+    title: "Key Vault RBAC authorization enabled"
+    pillar: security
+    caf_area: identity_access
+    alz_area: identity
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enableRbacAuthorization != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Use RBAC authorization instead of access policies for Key Vaults."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --enable-rbac-authorization true"
+      - "Migrate access policies to RBAC role assignments"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/rbac-guide"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-007
+    title: "Key Vault network ACLs deny by default"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.networkAcls.defaultAction =~ 'Allow'
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Set Key Vault network ACLs default action to Deny."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --default-action Deny"
+      - "Add required network rules for permitted access"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/network-security"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-008
+    title: "Public IP addresses detected"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/publicipaddresses'
+      | project id, name, resourceGroup, subscriptionId,
+                ipAddress=properties.ipAddress
+    match: any
+    recommendation: "Review public IP addresses — remove unnecessary public exposure."
+    remediation_steps:
+      - "Audit each public IP for necessity"
+      - "Replace with Private Endpoints where possible"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  # ── Reliability Pillar ────────────────────────────────────────────────
+
+  - id: REL-001
+    title: "VMs without availability zones"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | where isnull(zones) or array_length(zones) == 0
+      | project id, name, resourceGroup, subscriptionId, location
+    match: any
+    recommendation: "Deploy VMs across availability zones for high availability."
+    remediation_steps:
+      - "Redeploy VMs into availability zones (requires VM recreate)"
+    references:
+      - "https://learn.microsoft.com/azure/reliability/availability-zones-overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+
+  - id: REL-002
+    title: "Single-instance resources without redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          'microsoft.operationalinsights/workspaces',
+          'microsoft.automation/automationaccounts',
+          'microsoft.keyvault/vaults'
+        )
+      | summarize count=count() by type
+      | where count == 1
+      | project type, count
+    match: any
+    recommendation: "Consider redundancy for single-instance critical resources."
+    remediation_steps:
+      - "Evaluate if cross-region replication or secondary instances are needed"
+    references:
+      - "https://learn.microsoft.com/azure/reliability/overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+
+  # ── Operational Excellence Pillar ─────────────────────────────────────
+
+  - id: OPE-001
+    title: "Log Analytics workspace retention under 90 days"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.operationalinsights/workspaces'
+      | where toint(properties.retentionInDays) < 90
+      | project id, name, resourceGroup, subscriptionId,
+                retentionDays=properties.retentionInDays
+    match: any
+    recommendation: "Set LAW retention to at least 90 days for compliance."
+    remediation_steps:
+      - "Update workspace: az monitor log-analytics workspace update --retention-time 90"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [manage]
+
+  - id: OPE-002
+    title: "No policy assignments found"
+    pillar: operational_excellence
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: discovery_field
+    query: "policy_assignments"
+    match: empty
+    recommendation: "Assign Azure Policy initiatives (e.g., ASB, CIS) for governance enforcement."
+    remediation_steps:
+      - "Assign Azure Security Benchmark initiative at MG or subscription scope"
+    references:
+      - "https://learn.microsoft.com/azure/governance/policy/overview"
+    mappings:
+      waf_pillar: [operational_excellence, security]
+      caf_lifecycle: [govern, manage]
+
+  - id: OPE-003
+    title: "No automation accounts found"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "logging_config.automation_accounts"
+    match: empty
+    recommendation: "Deploy an Automation Account for runbook-based operations."
+    remediation_steps:
+      - "Create automation account in management subscription"
+    references:
+      - "https://learn.microsoft.com/azure/automation/overview"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [manage]
+
+  # ── Cost Optimization Pillar ──────────────────────────────────────────
+
+  - id: COS-001
+    title: "No budget resources found"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.consumption/budgets'
+      | project id, name
+    match: empty
+    recommendation: "Create budget resources with 80/100/120% forecast alerts."
+    remediation_steps:
+      - "Deploy budget resource via IaC with parameterized thresholds"
+    references:
+      - "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-002
+    title: "Unattached managed disks"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/disks'
+      | where properties.diskState =~ 'Unattached'
+      | project id, name, resourceGroup, subscriptionId,
+                diskSizeGB=properties.diskSizeGB, sku=sku.name
+    match: any
+    recommendation: "Review and delete unattached managed disks to reduce cost."
+    remediation_steps:
+      - "Verify disk is not needed, then delete: az disk delete --ids <disk-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disks-find-unattached-portal"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  # ── Performance Pillar ────────────────────────────────────────────────
+
+  - id: PER-001
+    title: "Storage accounts using legacy SKU"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where sku.name =~ 'Standard_LRS'
+      | project id, name, resourceGroup, subscriptionId, sku=sku.name
+    match: any
+    recommendation: "Evaluate if ZRS or GRS replication is appropriate for production workloads."
+    remediation_steps:
+      - "Assess replication needs per workload; upgrade to ZRS/GRS where needed"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-redundancy"
+    mappings:
+      waf_pillar: [performance, reliability]
+      caf_lifecycle: [ready, adopt]
+
+  # ── Governance (CAF-specific) ─────────────────────────────────────────
+
+  - id: OPE-004
+    title: "Management group hierarchy not CAF-aligned"
+    pillar: operational_excellence
+    caf_area: resource_org
+    alz_area: management_groups
+    severity: high
+    confidence: medium
+    scope: management_group
+    query_type: discovery_field
+    query: "management_groups"
+    match: custom
+    evaluation: "check_caf_mg_hierarchy"
+    recommendation: "Adopt CAF enterprise-scale MG hierarchy: platform, landing zones, sandbox, decommissioned."
+    remediation_steps:
+      - "Run bootstrap workflow to create CAF-aligned MG hierarchy"
+      - "Move subscriptions to appropriate MGs"
+    references:
+      - "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-management-groups"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [ready, govern]
+
+  - id: OPE-005
+    title: "Resources missing required tags"
+    pillar: operational_excellence
+    caf_area: resource_org
+    alz_area: policy
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resourcecontainers
+      | where type =~ 'microsoft.resources/subscriptions/resourcegroups'
+      | where isnull(tags.Environment) or isnull(tags.Owner) or isnull(tags.CostCenter)
+      | project id, name, subscriptionId, tags
+    match: any
+    recommendation: "Apply required tags (Environment, Owner, CostCenter) to all resource groups."
+    remediation_steps:
+      - "Assign tagging policy at MG scope to enforce required tags"
+      - "Remediate existing resources with tagging task"
+    references:
+      - "https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources"
+    mappings:
+      waf_pillar: [operational_excellence, cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-009
+    title: "No Sentinel workspace detected"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "security_posture.sentinel"
+    match: empty
+    recommendation: "Enable Microsoft Sentinel for SIEM/SOAR capabilities."
+    remediation_steps:
+      - "Onboard Sentinel to the management Log Analytics workspace"
+    references:
+      - "https://learn.microsoft.com/azure/sentinel/quickstart-onboard"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: OPE-006
+    title: "No hub VNet or firewall detected"
+    pillar: operational_excellence
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "network_topology.firewalls"
+    match: empty
+    recommendation: "Deploy a hub VNet with Azure Firewall for centralized network governance."
+    remediation_steps:
+      - "Deploy connectivity landing zone with hub-spoke topology"
+    references:
+      - "https://learn.microsoft.com/azure/architecture/networking/architecture/hub-spoke"
+    mappings:
+      waf_pillar: [security, operational_excellence]
+      caf_lifecycle: [ready, adopt]
