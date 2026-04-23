@@ -20,6 +20,7 @@ from azure.identity import DefaultAzureCredential
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 
+from src.agents.assessment_agent import AssessmentAgent
 from src.agents.challenger_agent import ChallengerAgent
 from src.agents.deployment_agent import DeploymentAgent
 from src.agents.governance_agent import GovernanceAgent
@@ -37,6 +38,7 @@ class RunMode(str, Enum):
     DEPLOY = "deploy"      # Deploy only (Steps 4-6)
     MONITOR = "monitor"    # Continuous monitoring (Step 8-9)
     FULL = "full"          # Deploy + Monitor
+    ASSESS = "assess"      # Brownfield assessment (Step 0 only)
 
 
 class AgentOrchestrator:
@@ -50,6 +52,9 @@ class AgentOrchestrator:
         self.workflow_engine = WorkflowEngine()
 
         # Initialize agent roster
+        self.assessment_agent = AssessmentAgent(
+            kernel=self.kernel, credential=self.credential, settings=self.settings,
+        )
         self.requirements_agent = RequirementsAgent(
             kernel=self.kernel, credential=self.credential, settings=self.settings,
         )
@@ -100,6 +105,9 @@ class AgentOrchestrator:
         project_name: str,
         iac_tool: str = "bicep",
         diagram_engine: str = "python",
+        brownfield: bool = False,
+        scope: Optional[str] = None,
+        scope_type: str = "subscription",
     ) -> WorkflowState:
         """Execute the full APEX-aligned workflow with approval gates.
 
@@ -108,12 +116,29 @@ class AgentOrchestrator:
             iac_tool: "bicep" or "terraform".
             diagram_engine: "python" (PNG via diagrams lib, default),
                             "svg" (custom inline SVG), or "drawio" (MCP).
+            brownfield: If True, run Step 0 (assessment) before Step 1.
+            scope: Azure scope for brownfield assessment (e.g. subscription ID).
+            scope_type: "subscription" or "management_group".
         """
         state = WorkflowState(project_name=project_name, iac_tool=iac_tool)
         output_dir = Path("agent-output") / project_name
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Starting APEX workflow for project '{project_name}' ({iac_tool})")
+        logger.info("Starting APEX workflow for project '%s' (%s, brownfield=%s)", project_name, iac_tool, brownfield)
+
+        # Step 0: Brownfield Assessment (Assessor) — only if brownfield
+        if brownfield:
+            logger.info("Step 0: Running brownfield assessment...")
+            state.steps["step-0-assess"] = StepStatus.IN_PROGRESS
+            assessment_result = await self.run_assessment(
+                scope=scope or self.settings.azure.subscription_id,
+                scope_type=scope_type,
+            )
+            state.artifacts["00-assessment"] = assessment_result
+            state.steps["step-0-assess"] = StepStatus.COMPLETED
+            logger.info("Step 0 complete — %d findings, scores: %s",
+                        assessment_result.get("total_findings", 0),
+                        assessment_result.get("pillar_scores", {}))
 
         # Step 1: Requirements (Scribe)
         logger.info("Step 1: Gathering requirements...")
@@ -292,6 +317,34 @@ class AgentOrchestrator:
         logger.info(f"Deployment complete: {deploy_result}")
         await self.run_monitoring()
 
+    async def run_assessment(
+        self,
+        scope: Optional[str] = None,
+        scope_type: str = "subscription",
+        mode: str = "full",
+    ) -> dict:
+        """Run brownfield assessment (Step 0).
+
+        Args:
+            scope: Azure scope (subscription ID or MG name). Falls back to settings.
+            scope_type: "subscription" or "management_group".
+            mode: Assessment mode — "full", "quick", or "security-only".
+
+        Returns:
+            Assessment summary dict with findings, scores, and report paths.
+        """
+        resolved_scope = scope or self.settings.azure.subscription_id
+        logger.info("Step 0: Brownfield assessment (scope=%s, type=%s, mode=%s)",
+                    resolved_scope, scope_type, mode)
+
+        result = await self.assessment_agent.run_assessment(
+            scope=resolved_scope,
+            scope_type=scope_type,
+            mode=mode,
+        )
+        logger.info("Assessment complete — %d findings", result.get("total_findings", 0))
+        return result
+
 
 # =============================================================================
 # CLI Entry Point
@@ -306,6 +359,10 @@ def main(
     project: str = typer.Option("default", help="Project name for artifact output"),
     iac_tool: str = typer.Option("bicep", help="IaC framework: bicep or terraform"),
     profile: Optional[str] = typer.Option(None, help="Landing zone profile"),
+    brownfield: bool = typer.Option(False, "--brownfield", help="Enable Step 0 brownfield assessment"),
+    scope: Optional[str] = typer.Option(None, help="Azure scope for brownfield assessment"),
+    scope_type: str = typer.Option("subscription", help="Scope type: subscription or management_group"),
+    assess_mode: str = typer.Option("full", "--assess-mode", help="Assessment mode: full, quick, or security-only"),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ):
     """Run the Agentic ALZ Accelerator."""
@@ -317,11 +374,18 @@ def main(
     orchestrator = AgentOrchestrator()
 
     if mode == RunMode.WORKFLOW:
-        asyncio.run(orchestrator.run_workflow(project, iac_tool))
+        asyncio.run(orchestrator.run_workflow(
+            project, iac_tool, brownfield=brownfield,
+            scope=scope, scope_type=scope_type,
+        ))
     elif mode == RunMode.DEPLOY:
         asyncio.run(orchestrator.run_deployment(profile))
     elif mode == RunMode.MONITOR:
         asyncio.run(orchestrator.run_monitoring())
+    elif mode == RunMode.ASSESS:
+        asyncio.run(orchestrator.run_assessment(
+            scope=scope, scope_type=scope_type, mode=assess_mode,
+        ))
     elif mode == RunMode.FULL:
         asyncio.run(orchestrator.run_full_lifecycle(profile))
 
