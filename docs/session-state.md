@@ -7,7 +7,7 @@
 - **MG Hierarchy**: Added subscriptions under each management group
 
 ## Key Files Modified
-- `mcp/azure-platform/server.py` — consolidated 22-tool MCP server
+- `mcp/azure-platform/server.py` — consolidated 27-tool MCP server
 - `mcp/azure-pricing-mcp/` — git submodule (APEX v4.0.0)
 - `mcp/mcp-config.json` — 3-server config
 - `src/tools/python_diagram_generator.py` — DiagramEngine with 7 methods, proper Azure icons
@@ -38,7 +38,7 @@
 ## Guide HTML Fixes (Round 3)
 - MCP count 5→3 (hero stat, description card, architecture chips, MCP table)
 - Added Step 3 Design/Artisan (progress tracker, workflow step card, agent roster row)
-- Agent count 10→11 (hero stat, sidebar badge, roster header)
+- Agent count 10→11→12 (hero stat, sidebar badge, roster header)
 - Tools count 7→8 (sidebar badge, added python_diagram_generator.py row)
 - MCP architecture layer: 5 chips → 3 (Pricing, Platform consolidated, Draw.io)
 - MCP table: 5 rows → 3 rows with module paths

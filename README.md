@@ -15,7 +15,7 @@ current estate before the standard workflow begins.
 
 | Component | Description |
 |-----------|-------------|
-| **Agent Definitions** | 11 specialized agents with Semantic Kernel function calling |
+| **Agent Definitions** | 12 specialized agents with Semantic Kernel function calling |
 | **Workflow Engine** | DAG-based orchestration with approval gates and artifact handoffs |
 | **IaC Modules** | Bicep + Terraform organized by CAF design area |
 | **MCP Servers** | Azure Pricing, Azure Platform (consolidated), Draw.io |

@@ -6,6 +6,12 @@ description: The multi-step APEX workflow with approval gates and artifact hando
 ## Workflow Diagram
 
 ```
+ ┌────────────┐
+ │  Step 0     │  ◄── Brownfield only
+ │ Assessment │
+ │ (Assessor) │
+ └─────┬──────┘
+       ▼
 ┌─────────┐    ┌────────────┐    ┌────────┐    ┌────────────┐
 │ Step 1   │───▶│  Step 2     │───▶│ Step 3 │───▶│ Step 3.5   │
 │ Require- │    │ Architect  │    │ Design │    │ Governance │
@@ -38,6 +44,7 @@ description: The multi-step APEX workflow with approval gates and artifact hando
 
 | Step | Agent | Codename | Artifact |
 |------|-------|----------|----------|
+| 0 | Assessment | 🔍 Assessor | `00-assessment-*.{md,json,mmd}` (brownfield only) |
 | 1 | Requirements | 📜 Scribe | `01-requirements.md` |
 | 2 | Architect | 🏛️ Oracle | `02-architecture-assessment.md` |
 | 3 | Design | 🎨 Artisan | `03-design-*.{drawio,png,md}` |

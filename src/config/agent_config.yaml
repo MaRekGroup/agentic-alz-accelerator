@@ -8,6 +8,21 @@ orchestrator:
   state_store: "azure_table"  # azure_table | cosmos_db | local_file
 
 agents:
+  assessment:
+    name: "Brownfield Assessment Agent"
+    description: >
+      Discovers existing Azure environments and runs WAF-aligned assessment
+      with 28-check catalog. Brownfield scenarios only.
+    model: "gpt-4o"
+    temperature: 0.0
+    max_tokens: 4096
+    tools:
+      - resource_graph
+      - discovery_collector
+      - wara_engine
+      - report_generator
+    brownfield_only: true
+
   deployment:
     name: "Landing Zone Deployment Agent"
     description: >

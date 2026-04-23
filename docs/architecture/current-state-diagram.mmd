@@ -1,0 +1,133 @@
+%% Agentic ALZ Accelerator — Current-State Architecture
+%% System context + execution flow diagram
+%% Renders in GitHub Markdown
+
+graph TB
+    subgraph Operator["👤 Operator / Engineer"]
+        CLI["VS Code + Copilot Chat"]
+    end
+
+    subgraph GitHub["GitHub Repository"]
+        direction TB
+        Repo["agentic-alz-accelerator"]
+        Actions["GitHub Actions Workflows"]
+        Secrets["GitHub Secrets<br/>(OIDC credentials,<br/>subscription IDs)"]
+        Environments["GitHub Environments<br/>(7: platform × 4,<br/>app × 2, remediation)"]
+    end
+
+    subgraph Agents["Agent Layer (src/agents/)"]
+        direction TB
+        Conductor["🧠 Conductor<br/>Orchestrator"]
+        Scribe["📜 Scribe<br/>Requirements"]
+        Warden["🛡️ Warden<br/>Governance"]
+        Envoy["🚀 Envoy<br/>Deployment"]
+        Sentinel["🔭 Sentinel<br/>Monitoring"]
+        Mender["🔧 Mender<br/>Remediation"]
+        Challenger["⚔️ Challenger<br/>Adversarial Review"]
+    end
+
+    subgraph Tools["Tool Layer (src/tools/)"]
+        direction TB
+        RG["ResourceGraphClient"]
+        Policy["PolicyChecker"]
+        Drift["DriftDetector"]
+        BicepDeploy["BicepDeployer"]
+        TFDeploy["TerraformDeployer"]
+        DiagramGen["DiagramEngine"]
+        TDDGen["TDDGenerator"]
+    end
+
+    subgraph MCP["MCP Servers (mcp/)"]
+        direction TB
+        Pricing["azure-pricing<br/>(cost estimation)"]
+        Platform["azure-platform<br/>(Resource Graph, Policy,<br/>Monitor, Deploy, Security)"]
+        DrawIO["drawio<br/>(diagram generation)"]
+    end
+
+    subgraph IaC["IaC Modules"]
+        direction TB
+        BicepMods["Bicep Modules<br/>infra/bicep/modules/"]
+        TFMods["Terraform Modules<br/>infra/terraform/modules/"]
+    end
+
+    subgraph Azure["Azure Platform"]
+        direction TB
+        ARM["Azure Resource Manager"]
+        ARG["Azure Resource Graph"]
+        AzPolicy["Azure Policy"]
+        Defender["Defender for Cloud"]
+        Monitor["Azure Monitor"]
+        subgraph Scopes["Azure Scopes"]
+            Tenant["Tenant"]
+            MGs["Management Groups<br/>(mrg × 12)"]
+            Subs["Subscriptions<br/>(4 platform)"]
+            RGs["Resource Groups"]
+        end
+    end
+
+    subgraph Artifacts["Artifacts (agent-output/)"]
+        direction TB
+        Estate["00-estate-state.json"]
+        Session["Per-LZ session state"]
+        Reports["Compliance reports"]
+        TDDs["Technical Design Docs"]
+        Diagrams["Architecture diagrams"]
+    end
+
+    %% Flows
+    CLI -->|"chat commands"| Conductor
+    CLI -->|"gh workflow run"| Actions
+
+    Conductor -->|"delegate"| Scribe
+    Conductor -->|"delegate"| Warden
+    Conductor -->|"delegate"| Envoy
+    Conductor -->|"delegate"| Sentinel
+    Conductor -->|"delegate"| Mender
+    Conductor -->|"gate review"| Challenger
+
+    Scribe -->|"produce"| Artifacts
+    Warden --> Policy
+    Envoy --> BicepDeploy
+    Envoy --> TFDeploy
+    Sentinel --> RG
+    Sentinel --> Policy
+    Sentinel --> Drift
+    Mender --> BicepDeploy
+
+    Actions -->|"OIDC auth"| ARM
+    Actions -->|"validate → plan → deploy → verify"| IaC
+
+    BicepDeploy --> ARM
+    TFDeploy --> ARM
+    RG --> ARG
+    Policy --> AzPolicy
+    Drift --> ARG
+
+    Platform --> ARG
+    Platform --> AzPolicy
+    Platform --> Monitor
+    Platform --> Defender
+
+    BicepMods -->|"compiled + deployed"| ARM
+    TFMods -->|"planned + applied"| ARM
+
+    ARM --> Scopes
+
+    Sentinel -->|"write"| Reports
+    Envoy -->|"update"| Estate
+    Conductor -->|"update"| Estate
+
+    %% Styling
+    classDef agent fill:#4a90d9,stroke:#2c5f8a,color:#fff
+    classDef tool fill:#7ab648,stroke:#4a7a2e,color:#fff
+    classDef azure fill:#0078d4,stroke:#005a9e,color:#fff
+    classDef artifact fill:#f5a623,stroke:#c7851a,color:#fff
+    classDef github fill:#24292e,stroke:#1b1f23,color:#fff
+    classDef mcp fill:#9b59b6,stroke:#7d3c98,color:#fff
+
+    class Conductor,Scribe,Warden,Envoy,Sentinel,Mender,Challenger agent
+    class RG,Policy,Drift,BicepDeploy,TFDeploy,DiagramGen,TDDGen tool
+    class ARM,ARG,AzPolicy,Defender,Monitor,Tenant,MGs,Subs,RGs azure
+    class Estate,Session,Reports,TDDs,Diagrams artifact
+    class Repo,Actions,Secrets,Environments github
+    class Pricing,Platform,DrawIO mcp

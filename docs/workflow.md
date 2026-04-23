@@ -14,7 +14,17 @@ architecture, design, and governance steps (1–3.5) then diverging into track-s
 planning, code generation, and deployment (steps 4–6) before converging for
 documentation (step 7) and continuous operations (steps 8–9).
 
+The accelerator supports both **greenfield** (new environment) and **brownfield**
+(existing environment) scenarios. For brownfield, an optional Step 0 runs a
+WAF-aligned assessment of the current estate before the standard workflow begins.
+
 ## Workflow Steps
+
+### Step 0: Assessment (🔍 Assessor) [Brownfield Only]
+- Discover existing Azure environment via Resource Graph
+- Run WAF Reliability Assessment (WARA) against 28-check catalog
+- Generate current-state and target-state architecture documentation
+- Output: `00-assessment-*.{md,json,mmd}` in `agent-output/assessment/<scope>/`
 
 ### Step 1: Requirements (📜 Scribe)
 - Gather landing zone requirements through interactive conversation
@@ -95,7 +105,7 @@ Agents connect to Azure services via 3 MCP servers:
 | MCP Server | Tools | Used By |
 |-----------|-------|---------|
 | Azure Pricing | Cost estimation, region comparison, SKU pricing (18 tools) | Architect, Planner, Chronicler |
-| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC (22 tools, consolidated) | All agents |
+| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC, WARA Assessment (27 tools, consolidated) | All agents |
 | Draw.io | Architecture diagram generation with Azure icons | Artisan |
 
 ## Agent Tools (`src/tools/`)
@@ -112,6 +122,10 @@ Agents invoke these Azure SDK integrations during workflow execution:
 | Diagram Generator | `azure_diagram_generator.py` | Artisan, Chronicler |
 | Python Diagrams | `python_diagram_generator.py` | Artisan |
 | TDD Generator | `tdd_generator.py` | Chronicler |
+| Discovery Collector | `discovery_collector.py` | Assessor |
+| WARA Engine | `wara_engine.py` | Assessor |
+| Report Generator | `report_generator.py` | Assessor, Chronicler |
+| Assessment CLI | `assess_cli.py` | Assessor (via GitHub Actions) |
 
 ## Profile Configuration
 
@@ -125,10 +139,13 @@ See `src/config/profile_loader.py` for the merge logic.
 
 ## Test Coverage
 
-18 tests validate agent workflows across 3 test files:
+107 tests validate agent workflows across 6 test files:
 
 | Test File | Covers |
 |-----------|--------|
 | `test_deployment_agent.py` | Profile loading, what-if, deploy, validation |
 | `test_monitoring_agent.py` | Compliance scan, drift detection, security posture |
 | `test_remediation_agent.py` | Strategies, single/multi remediation, history |
+| `test_assess_cli.py` | CLI summary, fallback subscription, exit codes |
+| `test_assessment_agent.py` | Init, full pipeline, defaults, fallback, discovery-only |
+| `test_integration_assessment.py` | E2E pipeline, check catalog integrity |
