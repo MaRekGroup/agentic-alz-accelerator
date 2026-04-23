@@ -37,7 +37,7 @@ All operations are **read-only** — no resources are created, modified, or dele
 - **Module:** `src/tools/discovery.py`
 - **Class:** `DiscoveryCollector`
 - **Data model:** `DiscoveryResult`
-- **Output:** `agent-output/assessment/00-discovery.json`
+- **Output:** `agent-output/{customer}/assessment/00-discovery.json`
 
 ## KQL Query Patterns
 

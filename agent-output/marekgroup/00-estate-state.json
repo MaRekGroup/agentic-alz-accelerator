@@ -20,7 +20,7 @@
         "automation_account": "mrg-automation"
       },
       "last_deploy_run": 24577574981,
-      "session_state": "agent-output/platform-management/00-session-state.json"
+      "session_state": "agent-output/marekgroup/platform-management/00-session-state.json"
     },
     "connectivity": {
       "status": "deployed",
@@ -38,7 +38,7 @@
       },
       "depends_on": ["management"],
       "last_deploy_run": 24580922365,
-      "session_state": "agent-output/platform-connectivity/00-session-state.json"
+      "session_state": "agent-output/marekgroup/platform-connectivity/00-session-state.json"
     },
     "identity": {
       "status": "deployed",
@@ -47,7 +47,7 @@
       "resource_group": "mrg-identity-scus-rg",
       "depends_on": ["connectivity"],
       "last_deploy_run": 24576179090,
-      "session_state": "agent-output/platform-identity/00-session-state.json"
+      "session_state": "agent-output/marekgroup/platform-identity/00-session-state.json"
     },
     "security": {
       "status": "deployed",
@@ -66,7 +66,7 @@
       },
       "depends_on": ["identity"],
       "last_deploy_run": 24587738074,
-      "session_state": "agent-output/platform-security/00-session-state.json"
+      "session_state": "agent-output/marekgroup/platform-security/00-session-state.json"
     }
   },
   "application_landing_zones": {},

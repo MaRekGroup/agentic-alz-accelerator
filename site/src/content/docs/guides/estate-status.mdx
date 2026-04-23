@@ -33,7 +33,7 @@ The `{prefix}` defaults to `mrg` (configurable via the `AZURE_MANAGEMENT_GROUP_P
 
 ### Estate State
 
-The file `agent-output/00-estate-state.json` tracks the full estate:
+The file `agent-output/{customer}/00-estate-state.json` tracks the full estate:
 
 - All platform + application LZ statuses (`not_started`, `in_progress`, `deployed`, `failed`)
 - Deploy history with GitHub Actions run IDs
@@ -44,7 +44,7 @@ This file is updated after every deployment.
 
 ### Per-LZ Session State
 
-Each landing zone maintains its own session state at `agent-output/{lz-name}/00-session-state.json`, tracking:
+Each landing zone maintains its own session state at `agent-output/{customer}/{lz-name}/00-session-state.json`, tracking:
 
 - Workflow step progress (which steps are complete)
 - Gate approvals and challenger findings
@@ -53,7 +53,7 @@ Each landing zone maintains its own session state at `agent-output/{lz-name}/00-
 
 ### Assessment Artifacts (Brownfield)
 
-Brownfield assessment results are stored in `agent-output/assessment/<scope>/`:
+Brownfield assessment results are stored in `agent-output/{customer}/assessment/<scope>/`:
 
 - `00-current-state-architecture.md` — As-is environment documentation
 - `00-target-state-architecture.md` — Recommended target state with migration roadmap

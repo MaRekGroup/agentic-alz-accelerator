@@ -15,7 +15,7 @@ Restore context from a previous workflow session.
 
 ## How to Resume
 
-1. Check `agent-output/{project}/` for existing artifacts
+1. Check `agent-output/{customer}/{project}/` for existing artifacts
 2. Map artifacts to completed steps:
 
 | Artifact Present | Step Completed |

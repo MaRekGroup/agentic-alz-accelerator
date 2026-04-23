@@ -32,6 +32,10 @@ on:
         required: false
         type: string
         default: ''
+      customer:
+        description: 'Customer name for output directory (agent-output/{customer}/assessment/)'
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -83,7 +87,7 @@ jobs:
             --mode "$ASSESS_MODE"
 
           # Parse output JSON for step outputs
-          OUTPUT_DIR="agent-output/assessment/$(echo "$ASSESS_SCOPE" | tr '/' '-')"
+          OUTPUT_DIR="agent-output/${{ inputs.customer }}/assessment/$(echo "$ASSESS_SCOPE" | tr '/' '-')"
           if [[ -f "$OUTPUT_DIR/assessment-report.json" ]]; then
             SCORE=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(d['overall_score'])")
             FINDINGS=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(len(d.get('findings',[])))")
@@ -106,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: assessment-report-${{ inputs.scope_type }}-${{ inputs.scope }}
-          path: agent-output/assessment/
+          path: agent-output/${{ inputs.customer }}/assessment/
           retention-days: 90
 
   publish:
@@ -121,7 +125,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: assessment-report-${{ inputs.scope_type }}-${{ inputs.scope }}
-          path: agent-output/assessment/
+          path: agent-output/${{ inputs.customer }}/assessment/
 
       - name: Commit Results to Branch
         env:
@@ -132,7 +136,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git checkout -b "$BRANCH" || git checkout "$BRANCH"
-          git add agent-output/assessment/
+          git add agent-output/${{ inputs.customer }}/assessment/
           git commit -m "assessment: ${{ inputs.scope_type }}/${{ inputs.scope }} — score ${{ needs.assess.outputs.overall_score }}/100
 
           Findings: ${{ needs.assess.outputs.findings_count }} (critical: ${{ needs.assess.outputs.critical_count }}, high: ${{ needs.assess.outputs.high_count }})

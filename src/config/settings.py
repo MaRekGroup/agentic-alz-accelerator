@@ -81,6 +81,10 @@ class AssessSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    customer_name: str = Field(
+        default="", alias="CUSTOMER_NAME",
+        description="Customer/engagement name for per-customer output directories",
+    )
     ai: AzureAISettings = Field(default_factory=AzureAISettings)
     azure: AzureSettings = Field(default_factory=AzureSettings)
     iac: IaCSettings = Field(default_factory=IaCSettings)
@@ -89,3 +93,10 @@ class Settings(BaseSettings):
     assess: AssessSettings = Field(default_factory=AssessSettings)
 
     model_config = _BASE_CONFIG
+
+    @property
+    def agent_output_dir(self) -> str:
+        """Base output directory for this customer's agent artifacts."""
+        if self.customer_name:
+            return f"agent-output/{self.customer_name}"
+        return "agent-output"

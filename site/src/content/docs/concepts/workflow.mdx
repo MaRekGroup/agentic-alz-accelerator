@@ -94,7 +94,7 @@ Step 0 runs **only for brownfield scenarios** — existing Azure environments wi
 - Generates 6 artifacts: current-state architecture, target-state with migration roadmap, WAF assessment report (MD + JSON), architecture diagram (Mermaid), and ADR
 - Gap analysis feeds into Step 1 — the Scribe agent uses assessment findings to pre-populate known gaps
 - Triggered via GitHub Actions: `gh workflow run assess.yml -f scope=/subscriptions/<id> -f mode=full`
-- Outputs stored in `agent-output/assessment/<scope>/`
+- Outputs stored in `agent-output/{customer}/assessment/<scope>/`
 
 See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/) for full details.
 
@@ -123,7 +123,7 @@ See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield
 - Produces 4 standard diagrams: management group hierarchy, hub-spoke network topology, security/governance/monitoring, full ALZ overview
 - Generates Architecture Decision Records (ADRs) for key design choices
 - Diagram engine is selectable: `python` (Graphviz-based), `svg` (custom renderer), or `drawio` (MCP server)
-- Outputs stored in `docs/diagrams/` for Chronicler handoff in Step 7
+- Outputs stored in `agent-output/{customer}/diagrams/` for Chronicler handoff in Step 7
 
 ### Step 3.5 — Governance (🛡️ Warden)
 

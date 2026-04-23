@@ -8,6 +8,10 @@ on:
         required: false
         default: mrg
         type: string
+      customer:
+        description: 'Customer name for output directory'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -36,7 +40,7 @@ jobs:
           python -c "
           from src.tools.python_diagram_generator import generate_all_diagrams
           paths = generate_all_diagrams(
-              output_dir='docs/diagrams',
+              output_dir='agent-output/${{ inputs.customer }}/diagrams',
               mg_prefix='${{ inputs.mg_prefix }}',
           )
           for p in paths:
@@ -47,7 +51,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/diagrams/*.png
+          git add agent-output/${{ inputs.customer }}/diagrams/*.png
           if git diff --cached --quiet; then
             echo "No diagram changes to commit."
           else

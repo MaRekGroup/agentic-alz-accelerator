@@ -9,7 +9,7 @@ Resume a previously interrupted APEX workflow session.
 
 ## Process
 
-1. Check `agent-output/{project}/` for existing artifacts
+1. Check `agent-output/{customer}/{project}/` for existing artifacts
 2. Determine the last completed step based on artifact presence:
    - `01-requirements.md` → Step 1 done
    - `02-architecture-assessment.md` → Step 2 done

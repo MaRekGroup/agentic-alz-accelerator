@@ -177,15 +177,15 @@ The accelerator **generates** these artifacts for the assessed environment:
 
 | Artifact | Format | Path | Description |
 |----------|--------|------|-------------|
-| Discovery inventory | JSON | `agent-output/assessment/00-discovery.json` | Raw inventory from Azure APIs |
-| Assessment report | Markdown | `agent-output/assessment/00-assessment.md` | WAF/CAF scored findings |
-| Findings (machine-readable) | JSON | `agent-output/assessment/00-assessment.json` | Structured findings for tooling |
-| Current-state architecture | Markdown | `agent-output/assessment/00-current-state-architecture.md` | Generated doc describing the customer's environment as-is |
-| Current-state diagram | Mermaid | `agent-output/assessment/00-current-state-diagram.mmd` | Generated topology from live Azure state |
-| Target-state architecture | Markdown | `agent-output/assessment/00-target-state-architecture.md` | Generated doc describing ALZ-aligned target |
-| ADR(s) | Markdown | `agent-output/assessment/adr/` | Generated decision records for recommended changes |
-| Recommendations | JSON | `agent-output/assessment/00-recommendations.json` | Prioritized remediation list |
-| SARIF (optional) | SARIF | `agent-output/assessment/00-assessment.sarif` | GitHub code scanning integration |
+| Discovery inventory | JSON | `agent-output/{customer}/assessment/00-discovery.json` | Raw inventory from Azure APIs |
+| Assessment report | Markdown | `agent-output/{customer}/assessment/00-assessment.md` | WAF/CAF scored findings |
+| Findings (machine-readable) | JSON | `agent-output/{customer}/assessment/00-assessment.json` | Structured findings for tooling |
+| Current-state architecture | Markdown | `agent-output/{customer}/assessment/00-current-state-architecture.md` | Generated doc describing the customer's environment as-is |
+| Current-state diagram | Mermaid | `agent-output/{customer}/assessment/00-current-state-diagram.mmd` | Generated topology from live Azure state |
+| Target-state architecture | Markdown | `agent-output/{customer}/assessment/00-target-state-architecture.md` | Generated doc describing ALZ-aligned target |
+| ADR(s) | Markdown | `agent-output/{customer}/assessment/adr/` | Generated decision records for recommended changes |
+| Recommendations | JSON | `agent-output/{customer}/assessment/00-recommendations.json` | Prioritized remediation list |
+| SARIF (optional) | SARIF | `agent-output/{customer}/assessment/00-assessment.sarif` | GitHub code scanning integration |
 
 These are generated per-assessment-run, not static. The current-state and
 target-state docs are populated from discovery data and rules evaluation.

@@ -48,7 +48,7 @@ Architecture Decision Record for critical/high findings:
 
 All artifacts are written to:
 ```
-agent-output/assessment/<scope-label>/
+agent-output/{customer}/assessment/<scope-label>/
 ```
 
 Where `<scope-label>` is derived from the assessment scope, sanitized to be
@@ -59,7 +59,7 @@ filesystem-safe (alphanumeric, hyphens, underscores only).
 ```python
 from src.tools.report_generator import ReportGenerator
 
-reporter = ReportGenerator(output_dir="agent-output/assessment")
+reporter = ReportGenerator(output_dir="agent-output/{customer}/assessment")
 outputs = reporter.generate_all(discovery_result, assessment_result)
 # Returns: {"current_state": Path, "target_state": Path, ...}
 ```

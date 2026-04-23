@@ -44,7 +44,7 @@ engine.generate_hub_spoke()
 
 ## Output Location
 
-Diagrams are saved to `docs/diagrams/` as PNG files:
+Diagrams are saved to `agent-output/{customer}/diagrams/` as PNG files:
 - `01-management-group-hierarchy.png`
 - `02-hub-spoke-network-topology.png`
 - `03-security-governance-monitoring.png`

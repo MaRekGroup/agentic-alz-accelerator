@@ -37,7 +37,7 @@ tools:
 handoffs:
   - label: "▶ Deploy Platform Landing Zones"
     agent: orchestrator
-    prompt: "Deploy platform landing zones. Check agent-output/00-estate-state.json for current state. Deploy the next pending platform LZ in order: Management → Connectivity → Identity → Security."
+    prompt: "Deploy platform landing zones. Check agent-output/{customer}/00-estate-state.json for current state. Deploy the next pending platform LZ in order: Management → Connectivity → Identity → Security."
     send: true
   - label: "▶ Deploy Single Platform LZ"
     agent: orchestrator
@@ -49,15 +49,15 @@ handoffs:
     send: false
   - label: "▶ Resume Workflow"
     agent: orchestrator
-    prompt: "Resume the workflow from where we left off. Read agent-output/00-estate-state.json for estate state and per-LZ session state files."
+    prompt: "Resume the workflow from where we left off. Read agent-output/{customer}/00-estate-state.json for estate state and per-LZ session state files."
     send: true
   - label: "▶ Estate Status"
     agent: orchestrator
-    prompt: "Show the current state of ALL landing zones in the estate. Read agent-output/00-estate-state.json and summarize."
+    prompt: "Show the current state of ALL landing zones in the estate. Read agent-output/{customer}/00-estate-state.json and summarize."
     send: true
   - label: "🔍 Run Brownfield Assessment"
     agent: orchestrator
-    prompt: "Run a brownfield assessment on an existing Azure environment. Ask the user for the scope (subscription ID or management group), scope type, and assessment mode (full, quick, or security-only). Then trigger the assess.yml workflow via: gh workflow run assess.yml -f scope=<scope> -f scope_type=<type> -f mode=<mode>. Report results from agent-output/assessment/."
+    prompt: "Run a brownfield assessment on an existing Azure environment. Ask the user for the scope (subscription ID or management group), scope type, and assessment mode (full, quick, or security-only). Then trigger the assess.yml workflow via: gh workflow run assess.yml -f scope=<scope> -f scope_type=<type> -f mode=<mode>. Report results from agent-output/{customer}/assessment/."
     send: false
   - label: "▶ Run Compliance Scan"
     agent: monitoring
@@ -94,7 +94,7 @@ This accelerator deploys and manages:
 ## State Management
 
 ### Estate State (source of truth for the whole estate)
-`agent-output/00-estate-state.json` — tracks:
+`agent-output/{customer}/00-estate-state.json` — tracks:
 - All platform LZ statuses (deployed/pending/failed)
 - All application LZs
 - Cross-cutting governance state
@@ -102,7 +102,7 @@ This accelerator deploys and manages:
 - Deploy history
 
 ### Per-LZ Session State
-`agent-output/{lz-name}/00-session-state.json` — tracks:
+`agent-output/{customer}/{lz-name}/00-session-state.json` — tracks:
 - Current workflow step for this specific LZ
 - Gate approvals and challenger findings
 - Decisions (IaC tool, complexity, region)
@@ -159,7 +159,7 @@ gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscr
 
 The assessment pipeline: **Discover → Assess (WARA) → Generate Reports**
 
-Outputs land in `agent-output/assessment/<scope>/`:
+Outputs land in `agent-output/{customer}/assessment/<scope>/`:
 - `00-current-state-architecture.md` — As-is environment documentation
 - `00-target-state-architecture.md` — Recommended target state with migration roadmap
 - `00-assessment-report.md` / `.json` — WAF scores and findings
@@ -232,9 +232,9 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 
 ## Resume Protocol
 
-1. Read `agent-output/00-estate-state.json`
+1. Read `agent-output/{customer}/00-estate-state.json`
 2. Identify which LZs are deployed, pending, or failed
-3. For the target LZ, read `agent-output/{lz-name}/00-session-state.json`
+3. For the target LZ, read `agent-output/{customer}/{lz-name}/00-session-state.json`
 4. Present status summary and offer to continue from next step
 5. If mid-step, delegate to the appropriate agent with checkpoint context
 
@@ -255,8 +255,8 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 
 | File | Purpose |
 |------|---------|
-| `agent-output/00-estate-state.json` | Estate-level state (all LZs) |
-| `agent-output/{lz}/00-session-state.json` | Per-LZ workflow state |
+| `agent-output/{customer}/00-estate-state.json` | Estate-level state (all LZs) |
+| `agent-output/{customer}/{lz}/00-session-state.json` | Per-LZ workflow state |
 | `.github/agent-registry.json` | Agent → definition, skills, scope mapping |
 | `.github/skills/workflow-engine/templates/workflow-graph.json` | DAG workflow definition |
 | `.github/workflows/2-platform-deploy.yml` | Platform LZ deployment pipeline |
@@ -264,4 +264,4 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 | `environments/subscriptions.json` | Subscription mapping |
 | `src/config/landing_zone_profiles.yaml` | LZ profile configurations |
 | `.github/workflows/assess.yml` | Brownfield assessment pipeline (discover → WARA → reports) |
-| `agent-output/assessment/` | Assessment artifacts by scope |
+| `agent-output/{customer}/assessment/` | Assessment artifacts by scope |

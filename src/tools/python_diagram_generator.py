@@ -138,7 +138,7 @@ class DiagramEngine:
     Graphviz handles layout automatically — no manual x/y needed.
     """
 
-    def __init__(self, output_dir: str = "docs/diagrams") -> None:
+    def __init__(self, output_dir: str = "agent-output/diagrams") -> None:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -679,7 +679,7 @@ class DiagramEngine:
 
 
 def generate_all_diagrams(
-    output_dir: str = "docs/diagrams",
+    output_dir: str = "agent-output/diagrams",
     mg_prefix: str = "mrg",
 ) -> list[str]:
     """Generate the standard set of ALZ diagrams. Returns list of PNG paths."""

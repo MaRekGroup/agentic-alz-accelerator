@@ -17,7 +17,7 @@ Act as the Chronicler (📚). Generate comprehensive post-deployment documentati
 
 ## Output
 
-Produce in `agent-output/{project}/`:
+Produce in `agent-output/{customer}/{project}/`:
 - `07-design-document.md` — Full as-built architecture document
 - `07-operational-runbook.md` — Day-2 operations procedures
 - `07-security-posture.md` — Security baseline compliance report

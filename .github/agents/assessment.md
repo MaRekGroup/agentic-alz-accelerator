@@ -32,7 +32,7 @@ Discover → Assess → Report
 | `architecture-diagram.mmd` | Mermaid diagram of current architecture |
 | `ADR-assessment-findings.md` | Decision record for critical/high findings |
 
-All outputs are written to `agent-output/assessment/<scope>/`.
+All outputs are written to `agent-output/{customer}/assessment/<scope>/`.
 
 ## Assessment Modes
 

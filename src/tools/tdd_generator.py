@@ -209,7 +209,7 @@ class TDDGenerator:
         Returns the PNG file path, or None on failure.
         """
         try:
-            engine = DiagramEngine(output_dir=output_dir or "docs/tdd")
+            engine = DiagramEngine(output_dir=output_dir or "agent-output/tdd")
             return engine.generate_tdd_diagram(
                 profile=self.profile,
                 project_name=self.project_name,
@@ -1346,7 +1346,7 @@ def generate_tdd_for_deployment(
     environment: str = "prod",
     framework: str = "bicep",
     deployment_id: str = "",
-    output_dir: str = "docs/tdd",
+    output_dir: str = "agent-output/tdd",
     config_path: str = "environments/subscriptions.json",
     resource_inventory: dict | None = None,
 ) -> str:
@@ -1388,7 +1388,7 @@ def generate_tdd_markdown_for_deployment(
     environment: str = "prod",
     framework: str = "bicep",
     deployment_id: str = "",
-    output_dir: str = "docs/tdd",
+    output_dir: str = "agent-output/tdd",
     config_path: str = "environments/subscriptions.json",
     resource_inventory: dict | None = None,
 ) -> str:
@@ -1430,7 +1430,7 @@ def generate_tdd_markdown_for_deployment(
 
 def generate_all_tdds(
     config_path: str = "environments/subscriptions.json",
-    output_dir: str = "docs/tdd",
+    output_dir: str = "agent-output/tdd",
     framework: str = "bicep",
     fmt: str = "both",
 ) -> list[str]:
@@ -1490,7 +1490,7 @@ if __name__ == "__main__":
     parser.add_argument("--environment", default="prod")
     parser.add_argument("--framework", default="bicep")
     parser.add_argument("--deployment-id", default="")
-    parser.add_argument("--output-dir", default="docs/tdd")
+    parser.add_argument("--output-dir", default="agent-output/tdd")
     parser.add_argument("--config", default="environments/subscriptions.json")
     parser.add_argument("--all", action="store_true", help="Generate TDDs for all LZs")
     parser.add_argument(
