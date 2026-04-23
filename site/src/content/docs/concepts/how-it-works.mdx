@@ -25,14 +25,14 @@ artifacts, and hands off to the next agent in the pipeline.
    ┌────▼────┐   ┌────▼────┐   ┌────▼────┐
    │ Per-LZ  │   │ Estate  │   │ Day-2   │
    │ Agents  │   │ Agents  │   │ Agents  │
-   │ (1-7)   │   │ (Gov)   │   │ (8-9)   │
+   │ (0-7)   │   │ (Gov)   │   │ (8-9)   │
    └─────────┘   └─────────┘   └─────────┘
 ```
 
-### Per-LZ Agents (Steps 1-7)
+### Per-LZ Agents (Steps 0-7)
 
-Execute the full APEX workflow for a single landing zone — from requirements
-gathering through deployment and documentation.
+Execute the full APEX workflow for a single landing zone — from assessment
+(brownfield) or requirements (greenfield) through deployment and documentation.
 
 ### Estate Agents
 
@@ -58,13 +58,15 @@ auto-remediation with rollback capability.
 Each workflow step produces a numbered artifact that feeds into the next step:
 
 ```
-01-requirements.md → 02-architecture-assessment.md → 03-design-*.md
+00-assessment-*.{md,json,mmd} (brownfield only)
+    → 01-requirements.md → 02-architecture-assessment.md → 03-design-*.md
     → 04-governance-constraints.md → 04-implementation-plan.md
     → infra/{bicep,terraform}/ → 06-deployment-summary.md → 07-*.md
 ```
 
 All artifacts are stored in `agent-output/{project}/` with estate-level
-state tracked in `agent-output/00-estate-state.json`.
+state tracked in `agent-output/00-estate-state.json`. Brownfield assessment
+artifacts are stored separately in `agent-output/assessment/<scope>/`.
 
 ## Architecture Layers
 

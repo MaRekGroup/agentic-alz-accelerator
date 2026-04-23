@@ -24,6 +24,15 @@ description: Common issues and fixes for the ALZ Accelerator.
 | Resource provider not registered | Run `az provider register --namespace Microsoft.xxx` |
 | Budget creation fails | Ensure the subscription has a billing account associated |
 
+## Brownfield Assessment
+
+| Issue | Fix |
+|-------|-----|
+| `scope` not found | Verify the subscription ID or resource group path is correct |
+| Resource Graph returns empty | Ensure the OIDC principal has `Reader` role on the target scope |
+| WARA checks all "not applicable" | The scope may not contain the resource types being checked |
+| Workflow fails at discovery | Check that `Microsoft.ResourceGraph` provider is registered |
+
 ## Local Development
 
 | Issue | Fix |

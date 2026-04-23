@@ -51,6 +51,18 @@ Each landing zone maintains its own session state at `agent-output/{lz-name}/00-
 - Decisions made (IaC tool, complexity tier, region)
 - Artifact inventory (generated files and their paths)
 
+### Assessment Artifacts (Brownfield)
+
+Brownfield assessment results are stored in `agent-output/assessment/<scope>/`:
+
+- `00-current-state-architecture.md` — As-is environment documentation
+- `00-target-state-architecture.md` — Recommended target state with migration roadmap
+- `00-assessment-report.md` / `.json` — WAF Reliability Assessment findings
+- `00-architecture-diagram.mmd` — Mermaid diagram of discovered resources
+- `00-ADR-assessment-findings.md` — Architecture Decision Record
+
+See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/) for details.
+
 ## Deploy Commands
 
 ```bash

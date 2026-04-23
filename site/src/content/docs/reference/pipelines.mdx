@@ -5,13 +5,14 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 
 ## Workflow Overview
 
-8 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
+9 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
 
 | Workflow | Trigger | Scope | Key Feature |
 |----------|---------|-------|-------------|
 | `1-bootstrap.yml` | Manual (one-time) | Tenant-wide | Creates 11 management groups, moves 10 subs, registers 20 providers |
 | `2-platform-deploy.yml` | Manual | 4 platform subs | Sequential with approval gate per LZ, `start_from` for resume |
 | `3-app-deploy.yml` | Manual | Config-driven | Reads app LZs from `subscriptions.json`, dynamic matrix, parallel deployment |
+| `assess.yml` | Manual | Per subscription/RG | Brownfield WAF assessment: discover → WARA → generate reports (6 artifacts) |
 | `monitor.yml` | Cron + Manual | All 4 platform subs | Parallel compliance scan per subscription using PolicyInsights SDK v2+ |
 | `5-pr-validate.yml` | PR to `main` | Changed files | Lint, security, cost, tests, what-if preview posted as PR comment |
 | `deploy-docs.yml` | Push to `main` | GitHub Pages | Builds & deploys docs site when `site/**` changes |
@@ -22,6 +23,7 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 
 ```
 Step 0  Gather bootstrap inputs (see Prerequisites → Bootstrap Settings Checklist)
+Step 0b assess.yml               →  (brownfield only) WAF-aligned environment assessment
 Step 1  ./scripts/setup-oidc.sh  →  OIDC + GitHub secrets + environments
 Step 2  Set vars.RUNNER_LABEL    →  (optional) Configure self-hosted runner
 Step 3  1-bootstrap.yml          →  Management groups + subscription placement
@@ -324,6 +326,52 @@ python -m src.tools.tdd_generator \
 
 :::tip
 **Automatic in CI/CD:** TDDs are generated in the *Verify* stage of every deployment and uploaded as pipeline artifacts. No manual steps needed.
+:::
+
+## Brownfield Assessment Pipeline
+
+The `assess.yml` workflow runs a WAF-aligned assessment of an existing Azure environment. Use this **before onboarding brownfield environments** to the accelerator.
+
+### Pipeline Stages
+
+```
+Discover (Resource Graph)  →  Assess (28 WARA checks)  →  Generate Reports (6 artifacts)
+```
+
+| Stage | What Happens |
+|-------|-------------|
+| **Discover** | Queries Azure Resource Graph for all resources, networking, IAM, and policies |
+| **Assess** | Runs 28 WAF Reliability Assessment checks (availability, redundancy, backup, DR, monitoring, scaling) |
+| **Report** | Generates 6 artifacts: current-state, target-state, WAF report (MD + JSON), Mermaid diagram, ADR |
+
+### Usage
+
+```bash
+# Full assessment of a subscription
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<subscription-id> \
+  -f scope_type=subscription \
+  -f mode=full
+
+# Discovery only (skip WARA scoring)
+gh workflow run "assess.yml" \
+  -f scope=/subscriptions/<subscription-id> \
+  -f scope_type=subscription \
+  -f mode=discovery
+```
+
+### Inputs
+
+| Input | Required | Options | Description |
+|-------|----------|---------|-------------|
+| `scope` | Yes | Azure resource ID | Subscription or resource group to assess |
+| `scope_type` | Yes | `subscription` / `resource_group` | Scope level |
+| `mode` | Yes | `full` / `discovery` | Full assessment or discovery only |
+
+Artifacts are stored in `agent-output/assessment/<scope>/`. After assessment, proceed to the standard APEX workflow starting at Step 1 (Requirements).
+
+:::tip
+See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/) for detailed usage, prerequisites, and troubleshooting.
 :::
 
 ## Self-Hosted Runner Support

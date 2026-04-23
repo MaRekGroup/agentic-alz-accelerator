@@ -59,6 +59,10 @@ export default defineConfig({
           collapsed: true,
           items: [
             {
+              label: "Brownfield Assessment",
+              slug: "guides/brownfield-assessment",
+            },
+            {
               label: "Platform Deployment",
               slug: "guides/platform-deployment",
             },
