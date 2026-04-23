@@ -9,6 +9,10 @@ This repo implements a multi-agent APEX workflow that turns Azure Landing Zone
 requirements into deployed, governed, and continuously monitored infrastructure —
 aligned with all 8 CAF design areas.
 
+The accelerator supports both **greenfield** (new environment) and **brownfield**
+(existing environment) scenarios. For brownfield, an optional Step 0 runs a
+WAF-aligned assessment before the standard workflow begins.
+
 Enable subagents: In VS Code Copilot Chat, prefix with `@workspace` and use
 the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 
@@ -16,6 +20,7 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 
 | Step | Agent | Codename | Artifact |
 |------|-------|----------|----------|
+| 0 | `assessment` | 🔍 Assessor | `00-assessment-*.{md,json,mmd}` (brownfield only) |
 | 1 | `requirements` | 📜 Scribe | `01-requirements.md` |
 | 2 | `architect` | 🏛️ Oracle | `02-architecture-assessment.md` |
 | 3 | `design` | 🎨 Artisan | `03-design-*.{drawio,png,md}` |
@@ -62,6 +67,14 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `drawio` | `.github/skills/drawio/` | Artisan |
 | `github-operations` | `.github/skills/github-operations/` | Envoy, Conductor |
 
+### Assessment Skills (Brownfield)
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `brownfield-discovery` | `.github/skills/brownfield-discovery/` | Assessor |
+| `wara-assessment` | `.github/skills/wara-assessment/` | Assessor, Oracle |
+| `assessment-report` | `.github/skills/assessment-report/` | Assessor, Chronicler |
+
 ## Approval Gates
 
 6 non-negotiable gates (1, 2, 3, 4, 5, 6). Challenger reviews at gates 1, 2, 4, 5.
@@ -101,11 +114,11 @@ Follow CAF naming conventions. Required tags on all resource groups:
 | File/Dir | Purpose |
 |----------|---------|
 | `AGENTS.md` | Full agent spec, workflow diagram, security rules |
-| `.github/agents/` | Agent definition files (7 agents) |
-| `.github/skills/` | Skill SKILL.md entry points (17 skills) |
-| `.github/workflows/` | CI/CD pipelines (6 workflows) |
+| `.github/agents/` | Agent definition files (8 agents) |
+| `.github/skills/` | Skill SKILL.md entry points (20 skills) |
+| `.github/workflows/` | CI/CD pipelines (8 workflows) |
 | `src/agents/` | Agent Python implementations |
-| `src/tools/` | Tool implementations (8 tools) |
+| `src/tools/` | Tool implementations (11 tools) |
 | `src/config/` | Settings, profiles, agent config |
 | `infra/bicep/` | Bicep modules and parameters |
 | `infra/terraform/` | Terraform modules and environments |
@@ -130,13 +143,16 @@ cd infra/terraform && terraform init && terraform validate
 
 # Python tests
 python -m pytest tests/ -v
+
+# Brownfield assessment (via GitHub Actions)
+gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscription -f mode=full
 ```
 
 ## MCP Servers
 
 3 MCP servers configured in `mcp/mcp-config.json`:
 1. **azure-pricing** — Cost estimation and pricing lookups
-2. **azure-platform** — Consolidated 22-tool Azure platform server
+2. **azure-platform** — Consolidated 27-tool Azure platform server
 3. **drawio** — Architecture diagram generation
 
 ## CAF Design Areas → IaC Module Mapping

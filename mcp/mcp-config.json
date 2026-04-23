@@ -35,7 +35,7 @@
     },
     "azure-platform": {
       "name": "Azure Platform MCP Server",
-      "description": "Consolidated server for Azure platform operations: Resource Graph, Policy, Monitor, and Deployment. 22 tools via the official MCP Python SDK.",
+      "description": "Consolidated server for Azure platform operations: Resource Graph, Policy, Monitor, Deployment, and WARA Assessment. 27 tools via the official MCP Python SDK.",
       "command": "python",
       "args": ["mcp/azure-platform/server.py"],
       "env": {
@@ -64,9 +64,14 @@
         {"name": "terraform_plan", "description": "Run Terraform plan"},
         {"name": "terraform_apply", "description": "Apply Terraform configuration"},
         {"name": "get_deployment_status", "description": "Get deployment status and outputs"},
-        {"name": "validate_deployment", "description": "Post-deployment resource validation"}
+        {"name": "validate_deployment", "description": "Post-deployment resource validation"},
+        {"name": "discover_environment", "description": "Discover existing Azure environment for brownfield assessment"},
+        {"name": "get_discovery_summary", "description": "Get summary of discovered environment resources"},
+        {"name": "run_wara_assessment", "description": "Run WAF Reliability Assessment against discovered environment"},
+        {"name": "generate_assessment_reports", "description": "Generate assessment report artifacts from discovery and WARA results"},
+        {"name": "list_wara_checks", "description": "List available WARA check catalog entries"}
       ],
-      "used_by_agents": ["governance", "monitor", "remediate", "deploy", "challenger", "documentation"]
+      "used_by_agents": ["governance", "monitor", "remediate", "deploy", "challenger", "documentation", "assessment"]
     },
     "drawio": {
       "name": "Draw.io MCP Server",
@@ -78,6 +83,7 @@
   },
   "agent_tool_mapping": {
     "requirements": [],
+    "assessment": ["azure-platform"],
     "architect": ["azure-pricing"],
     "design": ["drawio"],
     "governance": ["azure-platform"],

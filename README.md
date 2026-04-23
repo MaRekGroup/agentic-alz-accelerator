@@ -7,6 +7,10 @@ governed, and continuously monitored infrastructure — aligned with the
 [Cloud Adoption Framework](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-areas)
 design areas and the [APEX](https://github.com/jonathan-vella/azure-agentic-infraops) agentic infrastructure patterns.
 
+Supports both **greenfield** (new environment) and **brownfield** (existing environment)
+scenarios. For brownfield, an optional Step 0 runs a WAF-aligned assessment of the
+current estate before the standard workflow begins.
+
 ## What This Repository Contains
 
 | Component | Description |
@@ -37,7 +41,11 @@ Every IaC module maps to an official Azure Landing Zone design area:
 ## Agent Workflow (APEX-Aligned)
 
 ```
-📜 Requirements  →  🏛️ Architecture  →  🛡️ Governance  →  📐 Plan
+� Assessment   (brownfield only — Step 0)
+    (Assessor)
+       │
+       ▼
+�📜 Requirements  →  🏛️ Architecture  →  🛡️ Governance  →  📐 Plan
     (Scribe)          (Oracle)           (Warden)        (Strategist)
        🛑                🛑                 🛑               🛑
     GATE 1            GATE 2             GATE 3           GATE 4
@@ -53,6 +61,7 @@ Every IaC module maps to an official Azure Landing Zone design area:
 | Agent | Codename | Step | Purpose |
 |-------|----------|------|---------|
 | Orchestrator | 🧠 Conductor | — | Master workflow orchestration |
+| Assessment | 🔍 Assessor | 0 | Brownfield discovery + WAF assessment (brownfield only) |
 | Requirements | 📜 Scribe | 1 | Gather LZ requirements mapped to CAF |
 | Architect | 🏛️ Oracle | 2 | WAF assessment + cost estimation |
 | Design | 🎨 Artisan | 3 | Architecture diagrams and ADRs |
@@ -70,7 +79,7 @@ Every IaC module maps to an official Azure Landing Zone design area:
 | MCP Server | Tools | Used By |
 |-----------|-------|---------|
 | Azure Pricing | Cost estimation, region comparison, SKU pricing (18 tools) | Oracle, Strategist |
-| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC (22 tools, consolidated) | All agents |
+| Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC, WARA Assessment (27 tools, consolidated) | All agents |
 | Draw.io | Architecture diagram generation with Azure icons | Artisan |
 
 ## Security Baseline
@@ -109,6 +118,7 @@ Every deployment includes budget alerts — **no budget, no merge**:
 | `5-pr-validate.yml` | PR to main | Lint, security, cost, tests, what-if preview |
 | `reusable-deploy.yml` | Called by 2 & 3 | DRY: resolve → validate → plan → deploy → verify |
 | `assign-role.yml` | Manual (utility) | Assign/remove RBAC roles on platform subscriptions |
+| `assess.yml` | Manual | Brownfield WAF-aligned assessment (discovery + WARA + reports) |
 
 ### Self-Hosted Runner Support
 
@@ -208,6 +218,9 @@ python -m src.agents.orchestrator --mode monitor
 
 # Deploy + Monitor
 python -m src.agents.orchestrator --mode full --profile corp
+
+# Brownfield assessment (via GitHub Actions)
+gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscription -f mode=full
 ```
 
 ### Run Validators
@@ -231,6 +244,7 @@ python scripts/validators/validate_cost_governance.py infra/
 │   ├── agents/                # Agent implementations
 │   │   ├── orchestrator.py          # 🧠 Conductor (APEX workflow)
 │   │   ├── requirements_agent.py    # 📜 Scribe (CAF requirements)
+│   │   ├── assessment_agent.py      # 🔍 Assessor (brownfield discovery + WARA)
 │   │   ├── governance_agent.py      # 🛡️ Warden (policy + baseline)
 │   │   ├── challenger_agent.py      # ⚔️ Challenger (adversarial review)
 │   │   ├── deployment_agent.py      # 🚀 Envoy (deploy)
@@ -243,12 +257,17 @@ python scripts/validators/validate_cost_governance.py infra/
 │   │   ├── policy_checker.py        # Policy compliance checks
 │   │   ├── resource_graph.py        # Azure Resource Graph queries
 │   │   ├── drift_detector.py        # Configuration drift detection
+│   │   ├── discovery_collector.py   # Brownfield environment discovery
+│   │   ├── wara_engine.py           # WAF Reliability Assessment engine
+│   │   ├── report_generator.py      # Assessment report generation
+│   │   ├── assess_cli.py            # Assessment CLI entry point
 │   │   ├── azure_diagram_generator.py # Architecture diagrams (engine selector)
 │   │   ├── python_diagram_generator.py # Python diagrams library engine
 │   │   └── tdd_generator.py         # Technical Design Documents
 │   └── config/                # Agent and profile configs
 │       ├── settings.py              # pydantic-settings from .env
 │       ├── profile_loader.py        # 3-tier YAML profile inheritance
+│       ├── wara_checks.yaml         # 28 WAF reliability assessment checks
 │       └── profiles/                # base → child → env overrides
 ├── infra/
 │   ├── bicep/modules/         # Bicep by CAF design area
@@ -273,25 +292,26 @@ python scripts/validators/validate_cost_governance.py infra/
 │       └── security/
 ├── mcp/                       # MCP servers
 │   ├── mcp-config.json        # 3-server configuration
-│   ├── azure-platform/        # Consolidated platform server (22 tools, MCP SDK)
+│   ├── azure-platform/        # Consolidated platform server (27 tools, MCP SDK)
 │   ├── azure-pricing-mcp/     # APEX pricing submodule (18 tools)
 │   └── drawio-mcp-server/     # Diagram generation (Deno/TypeScript)
 ├── .github/
-│   ├── workflows/             # CI/CD (7 workflows)
+│   ├── workflows/             # CI/CD (8 workflows)
 │   │   ├── 1-bootstrap.yml          # One-time MG hierarchy setup
 │   │   ├── 2-platform-deploy.yml    # Platform LZ deployments
 │   │   ├── 3-app-deploy.yml         # Application LZ deployments
+│   │   ├── assess.yml               # Brownfield WAF-aligned assessment
 │   │   ├── 5-pr-validate.yml        # PR validation (lint, security, what-if)
 │   │   ├── monitor.yml              # Multi-subscription compliance scanning
 │   │   ├── reusable-deploy.yml      # Shared: resolve → validate → plan → deploy → verify
 │   │   └── assign-role.yml          # Utility: RBAC role assignments to SPN
 │   ├── agents/                # Agent definition files
-│   ├── skills/                # 17 skill SKILL.md entry points
+│   ├── skills/                # 20 skill SKILL.md entry points
 │   └── instructions/          # Per-filetype coding instructions
 ├── pipelines/                 # Legacy / Azure DevOps pipelines
 ├── docs/                      # Security baseline, cost governance, workflow
 │   └── tdd/                   # Generated Technical Design Documents
-└── tests/                     # 18 tests (deployment, monitoring, remediation)
+└── tests/                     # 107 tests (assessment, deployment, monitoring, remediation)
 ```
 
 ## References
