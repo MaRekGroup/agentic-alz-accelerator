@@ -11,6 +11,10 @@ This accelerator follows the [APEX](https://github.com/jonathan-vella/azure-agen
 patterns for agentic infrastructure operations, extended with continuous monitoring
 and auto-remediation for full landing zone lifecycle management.
 
+The accelerator supports both **greenfield** (new environment) and **brownfield**
+(existing environment) scenarios. For brownfield, an optional Step 0 runs a
+WAF-aligned assessment of the current estate before the standard workflow begins.
+
 ---
 
 ## CAF Design Area Alignment
@@ -38,12 +42,22 @@ Every agent and IaC module maps to official Azure Landing Zone design areas:
 |-------|----------|------|
 | `orchestrator` | 🧠 **Conductor** | Master orchestrator — routes workflow steps, enforces approval gates, maintains session state |
 
+### Brownfield Assessment Agent
+
+Step 0 runs **only for brownfield scenarios** — skipped entirely for greenfield deployments.
+
+| Agent | Codename | Role |
+|-------|----------|------|
+| `assessment` | 🔍 **Assessor** | Brownfield discovery, WAF-aligned assessment, gap analysis, and migration roadmap |
+
 ### Core Agents (by Workflow Step)
 
 Steps 1–3.5 and 7 are shared across IaC tracks. Steps 4–6 have Bicep and Terraform variants.
+Step 0 runs only for brownfield scenarios.
 
 | Step | Agent | Codename | Role | Artifact |
 |------|-------|----------|------|----------|
+| 0 | `assessment` | 🔍 **Assessor** | Brownfield discovery + WAF assessment (brownfield only) | `00-assessment-*` |
 | 1 | `requirements` | 📜 **Scribe** | Captures landing zone requirements through conversation | `01-requirements.md` |
 | 2 | `architect` | 🏛️ **Oracle** | WAF assessment, CAF design area mapping, cost estimation | `02-architecture-assessment.md` |
 | 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs | `03-design-*.{drawio,png,md}` |
@@ -72,6 +86,12 @@ Steps 1–3.5 and 7 are shared across IaC tracks. Steps 4–6 have Bicep and Ter
 ## Workflow Steps
 
 ```
+ ┌────────────┐
+ │  Step 0     │  ◄── Brownfield only
+ │ Assessment │
+ │ (Assessor) │
+ └─────┬──────┘
+       ▼
 ┌─────────┐    ┌────────────┐    ┌────────┐    ┌────────────┐
 │ Step 1   │───▶│  Step 2     │───▶│ Step 3 │───▶│ Step 3.5   │
 │ Require- │    │ Architect  │    │ Design │    │ Governance │
@@ -161,6 +181,7 @@ Budget amounts are parameterized per environment. No hardcoded values.
 
 | Step | Prefix | Example |
 |------|--------|---------|
+| Assessment (brownfield) | `00-` | `00-assessment-report.md` |
 | Requirements | `01-` | `01-requirements.md` |
 | Architecture | `02-` | `02-architecture-assessment.md` |
 | Design | `03-` | `03-design-diagram.drawio` |
