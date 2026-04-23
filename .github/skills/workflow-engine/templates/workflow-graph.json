@@ -153,6 +153,16 @@
       "artifact": "09-remediation-log.md",
       "description": "Auto-remediation with snapshot/rollback",
       "triggered_by": "step-8-monitor"
+    },
+    {
+      "id": "step-0-assess",
+      "type": "agent-step",
+      "agent": "assessment",
+      "codename": "Assessor",
+      "artifact": "agent-output/assessment/<scope>/",
+      "description": "Brownfield discovery, WARA/CAF assessment, and documentation generation",
+      "standalone": true,
+      "modes": ["assess", "assess-and-plan", "assess-and-remediate", "onboard"]
     }
   ],
   "edges": [
@@ -170,7 +180,8 @@
     { "from": "step-6-deploy", "to": "gate-6", "condition": "on_complete" },
     { "from": "gate-6", "to": "step-7-docs", "condition": "on_approve" },
     { "from": "step-7-docs", "to": "step-8-monitor", "condition": "on_complete" },
-    { "from": "step-8-monitor", "to": "step-9-remediate", "condition": "on_violation" }
+    { "from": "step-8-monitor", "to": "step-9-remediate", "condition": "on_violation" },
+    { "from": "step-0-assess", "to": "step-1-requirements", "condition": "on_complete", "mode": "onboard" }
   ],
   "challenger_review": {
     "gates": ["gate-1", "gate-2", "gate-4", "gate-5"],
