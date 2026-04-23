@@ -1,0 +1,159 @@
+# ============================================================================
+# Assessment Workflow — Brownfield Discovery + WARA/CAF Assessment
+# Runs the assessment pipeline: discover → assess → report
+# All operations are READ-ONLY against Azure (no modifications)
+# ============================================================================
+name: "Assess · Brownfield Assessment"
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Assessment scope (subscription ID or management group name)'
+        required: true
+        type: string
+      scope_type:
+        description: 'Scope type'
+        required: true
+        type: choice
+        options:
+          - management_group
+          - subscription
+          - tenant
+      mode:
+        description: 'Assessment mode'
+        required: true
+        type: choice
+        options:
+          - assess
+          - assess-and-plan
+      output_branch:
+        description: 'Branch to push assessment results to (leave blank for default)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  assess:
+    name: "Discover & Assess"
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    outputs:
+      overall_score: ${{ steps.assess.outputs.overall_score }}
+      findings_count: ${{ steps.assess.outputs.findings_count }}
+      critical_count: ${{ steps.assess.outputs.critical_count }}
+      high_count: ${{ steps.assess.outputs.high_count }}
+      output_dir: ${{ steps.assess.outputs.output_dir }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}
+
+      - name: Run Assessment
+        id: assess
+        env:
+          ASSESS_SCOPE: ${{ inputs.scope }}
+          ASSESS_SCOPE_TYPE: ${{ inputs.scope_type }}
+          ASSESS_MODE: ${{ inputs.mode }}
+        run: |
+          python -m src.tools.assess_cli \
+            --scope "$ASSESS_SCOPE" \
+            --scope-type "$ASSESS_SCOPE_TYPE" \
+            --mode "$ASSESS_MODE"
+
+          # Parse output JSON for step outputs
+          OUTPUT_DIR="agent-output/assessment/$(echo "$ASSESS_SCOPE" | tr '/' '-')"
+          if [[ -f "$OUTPUT_DIR/assessment-report.json" ]]; then
+            SCORE=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(d['overall_score'])")
+            FINDINGS=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(len(d.get('findings',[])))")
+            CRITICAL=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(sum(1 for f in d.get('findings',[]) if f['severity']=='critical'))")
+            HIGH=$(python -c "import json; d=json.load(open('$OUTPUT_DIR/assessment-report.json')); print(sum(1 for f in d.get('findings',[]) if f['severity']=='high'))")
+          else
+            SCORE="N/A"
+            FINDINGS="0"
+            CRITICAL="0"
+            HIGH="0"
+          fi
+
+          echo "overall_score=$SCORE" >> "$GITHUB_OUTPUT"
+          echo "findings_count=$FINDINGS" >> "$GITHUB_OUTPUT"
+          echo "critical_count=$CRITICAL" >> "$GITHUB_OUTPUT"
+          echo "high_count=$HIGH" >> "$GITHUB_OUTPUT"
+          echo "output_dir=$OUTPUT_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Assessment Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: assessment-report-${{ inputs.scope_type }}-${{ inputs.scope }}
+          path: agent-output/assessment/
+          retention-days: 90
+
+  publish:
+    name: "Publish Results"
+    needs: assess
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    if: always() && needs.assess.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Assessment Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: assessment-report-${{ inputs.scope_type }}-${{ inputs.scope }}
+          path: agent-output/assessment/
+
+      - name: Commit Results to Branch
+        env:
+          BRANCH: ${{ inputs.output_branch || format('assessment/{0}', inputs.scope) }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH" || git checkout "$BRANCH"
+          git add agent-output/assessment/
+          git commit -m "assessment: ${{ inputs.scope_type }}/${{ inputs.scope }} — score ${{ needs.assess.outputs.overall_score }}/100
+
+          Findings: ${{ needs.assess.outputs.findings_count }} (critical: ${{ needs.assess.outputs.critical_count }}, high: ${{ needs.assess.outputs.high_count }})
+          Mode: ${{ inputs.mode }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || echo "No changes to commit"
+
+          git push origin "$BRANCH" --force-with-lease
+
+      - name: Post Summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## 🔍 Assessment Results
+
+          | Metric | Value |
+          |--------|-------|
+          | **Scope** | `${{ inputs.scope }}` (${{ inputs.scope_type }}) |
+          | **Overall Score** | **${{ needs.assess.outputs.overall_score }}/100** |
+          | **Total Findings** | ${{ needs.assess.outputs.findings_count }} |
+          | **Critical** | ${{ needs.assess.outputs.critical_count }} |
+          | **High** | ${{ needs.assess.outputs.high_count }} |
+          | **Mode** | ${{ inputs.mode }} |
+
+          📂 Reports committed to branch `${{ inputs.output_branch || format('assessment/{0}', inputs.scope) }}`
+          EOF

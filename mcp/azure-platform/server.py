@@ -153,6 +153,46 @@ TOOLS: list[Tool] = [
             },
         },
     ),
+    # --- Assessment ---
+    Tool(
+        name="run_wara_assessment",
+        description="Run a WARA/CAF assessment against discovered Azure environment data. Returns scored findings by WAF pillar.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "scope": {
+                    "type": "string",
+                    "description": "Assessment scope (subscription ID or management group name)",
+                },
+                "scope_type": {
+                    "type": "string",
+                    "enum": ["tenant", "management_group", "subscription"],
+                    "description": "Scope type",
+                    "default": "subscription",
+                },
+            },
+            "required": ["scope"],
+        },
+    ),
+    Tool(
+        name="generate_assessment_reports",
+        description="Generate assessment report artifacts (MD, JSON, Mermaid, ADR) from prior assessment results.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "scope": {
+                    "type": "string",
+                    "description": "Assessment scope label for output directory naming",
+                },
+                "scope_type": {
+                    "type": "string",
+                    "enum": ["tenant", "management_group", "subscription"],
+                    "default": "subscription",
+                },
+            },
+            "required": ["scope"],
+        },
+    ),
     # --- Policy ---
     Tool(
         name="discover_policies",
@@ -547,6 +587,80 @@ class AzurePlatformServer:
             max_results=max_results,
         )
 
+    # ── Assessment ────────────────────────────────────────────────────────
+
+    def handle_run_wara_assessment(self, args: dict) -> dict:
+        """Run WARA assessment: discover → evaluate → return scored results."""
+        import asyncio as _asyncio
+        from src.config.settings import Settings
+        from src.tools.discovery import DiscoveryCollector, DiscoveryScope
+        from src.tools.wara_engine import WaraEngine
+
+        scope = args["scope"]
+        scope_type = args.get("scope_type", "subscription")
+
+        settings = Settings()
+        collector = DiscoveryCollector(self.credential, settings)
+        engine = WaraEngine(self.credential, settings)
+
+        discovery_scope = DiscoveryScope(scope_type)
+        discovery = _asyncio.get_event_loop().run_until_complete(
+            collector.discover(scope=scope, scope_type=discovery_scope)
+        )
+
+        subscriptions = [
+            s.get("subscriptionId", s.get("id", ""))
+            for s in discovery.subscriptions
+            if s.get("subscriptionId") or s.get("id")
+        ]
+        if not subscriptions and settings.azure.subscription_id:
+            subscriptions = [settings.azure.subscription_id]
+
+        assessment = _asyncio.get_event_loop().run_until_complete(
+            engine.assess(discovery, subscriptions=subscriptions)
+        )
+        return assessment.to_dict()
+
+    def handle_generate_assessment_reports(self, args: dict) -> dict:
+        """Generate report artifacts from a fresh discovery + assessment."""
+        import asyncio as _asyncio
+        from src.config.settings import Settings
+        from src.tools.discovery import DiscoveryCollector, DiscoveryScope
+        from src.tools.wara_engine import WaraEngine
+        from src.tools.report_generator import ReportGenerator
+
+        scope = args["scope"]
+        scope_type = args.get("scope_type", "subscription")
+
+        settings = Settings()
+        collector = DiscoveryCollector(self.credential, settings)
+        engine = WaraEngine(self.credential, settings)
+        reporter = ReportGenerator(output_dir=settings.assess.output_dir)
+
+        discovery_scope = DiscoveryScope(scope_type)
+        discovery = _asyncio.get_event_loop().run_until_complete(
+            collector.discover(scope=scope, scope_type=discovery_scope)
+        )
+
+        subscriptions = [
+            s.get("subscriptionId", s.get("id", ""))
+            for s in discovery.subscriptions
+            if s.get("subscriptionId") or s.get("id")
+        ]
+        if not subscriptions and settings.azure.subscription_id:
+            subscriptions = [settings.azure.subscription_id]
+
+        assessment = _asyncio.get_event_loop().run_until_complete(
+            engine.assess(discovery, subscriptions=subscriptions)
+        )
+
+        outputs = reporter.generate_all(discovery, assessment, scope_label=scope)
+        return {
+            "overall_score": assessment.overall_score,
+            "findings_count": len(assessment.findings),
+            "outputs": {k: str(v) for k, v in outputs.items()},
+        }
+
     # ── Policy ────────────────────────────────────────────────────────────
 
     def _insights_client(self, sub: str) -> PolicyInsightsClient:
@@ -936,6 +1050,9 @@ _DISPATCH: dict[str, str] = {
     "discover_mg_hierarchy": "handle_discover_mg_hierarchy",
     "discover_subscription_inventory": "handle_discover_subscription_inventory",
     "discover_rbac_snapshot": "handle_discover_rbac_snapshot",
+    # Assessment
+    "run_wara_assessment": "handle_run_wara_assessment",
+    "generate_assessment_reports": "handle_generate_assessment_reports",
     # Policy
     "discover_policies": "handle_discover_policies",
     "get_compliance_state": "handle_get_compliance_state",
