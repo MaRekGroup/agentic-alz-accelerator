@@ -169,7 +169,18 @@
       "skills": ["security-baseline", "cost-governance", "caf-design-areas", "azure-compliance"],
       "invokable": true,
       "description": "Adversarial reviewer — challenges architecture, plans, code, and security"
+    },
+    "assessment": {
+      "agent": ".github/agents/assessment.md",
+      "codename": "Assessor",
+      "emoji": "🔍",
+      "step": null,
+      "scope": "estate",
+      "delegation": "autonomous",
+      "skills": ["brownfield-discovery", "wara-assessment", "assessment-report"],
+      "invokable": true,
+      "description": "Brownfield discovery, WARA/CAF assessment, and environment documentation generation"
     }
   },
-  "updated": "2026-04-17"
+  "updated": "2026-04-23"
 }
