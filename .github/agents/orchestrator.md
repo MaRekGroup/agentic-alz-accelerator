@@ -2,14 +2,15 @@
 name: orchestrator
 description: >
   Master orchestrator for the Agentic ALZ Accelerator — an enterprise-scale landing zone
-  lifecycle manager. Coordinates platform LZ bootstrap (Management → Connectivity →
-  Identity → Security), application LZ provisioning, cross-cutting governance, and
-  continuous Day-2 operations across the entire estate. Routes to specialized agents,
-  enforces approval gates, and maintains estate + per-LZ session state.
+  lifecycle manager. Supports both greenfield (new) and brownfield (existing) scenarios.
+  Coordinates brownfield assessment (Step 0), platform LZ bootstrap (Management →
+  Connectivity → Identity → Security), application LZ provisioning, cross-cutting
+  governance, and continuous Day-2 operations across the entire estate. Routes to
+  specialized agents, enforces approval gates, and maintains estate + per-LZ session state.
 model: ["Claude Opus 4.6"]
 argument-hint: >
-  Describe what you want to do — deploy a platform LZ, provision an app LZ,
-  check compliance, or resume a workflow.
+  Describe what you want to do — run a brownfield assessment, deploy a platform LZ,
+  provision an app LZ, check compliance, or resume a workflow.
 user-invocable: true
 agents:
   [
@@ -54,6 +55,10 @@ handoffs:
     agent: orchestrator
     prompt: "Show the current state of ALL landing zones in the estate. Read agent-output/00-estate-state.json and summarize."
     send: true
+  - label: "🔍 Run Brownfield Assessment"
+    agent: orchestrator
+    prompt: "Run a brownfield assessment on an existing Azure environment. Ask the user for the scope (subscription ID or management group), scope type, and assessment mode (full, quick, or security-only). Then trigger the assess.yml workflow via: gh workflow run assess.yml -f scope=<scope> -f scope_type=<type> -f mode=<mode>. Report results from agent-output/assessment/."
+    send: false
   - label: "▶ Run Compliance Scan"
     agent: monitoring
     prompt: "Run a compliance scan across all deployed landing zones and report findings."
@@ -118,6 +123,8 @@ This accelerator deploys and manages:
 | `app-provision` | "New app landing zone" | Full workflow for one app LZ |
 | `monitor` | "Run compliance scan" | Scan all deployed LZs |
 | `remediate` | "Fix violations" | Auto-remediate critical/high findings |
+| `assess` | "Run brownfield assessment" | WAF-aligned assessment of existing environment (brownfield only) |
+| `brownfield-onboard` | "Onboard existing environment" | Assess → Requirements → full APEX workflow (brownfield only) |
 | `status` | "Estate status" | Show state of all LZs |
 
 ## Platform LZ Bootstrap Sequence
@@ -141,11 +148,38 @@ Deployed via: `gh workflow run 2-platform-deploy.yml` with inputs:
 - `prefix`: Resource naming prefix (e.g., mrg)
 - `location`: Azure region
 
+## Brownfield Assessment (Step 0)
+
+Step 0 runs **only for brownfield scenarios** — skipped entirely for greenfield.
+
+Trigger via GitHub Actions:
+```bash
+gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscription -f mode=full
+```
+
+The assessment pipeline: **Discover → Assess (WARA) → Generate Reports**
+
+Outputs land in `agent-output/assessment/<scope>/`:
+- `00-current-state-architecture.md` — As-is environment documentation
+- `00-target-state-architecture.md` — Recommended target state with migration roadmap
+- `00-assessment-report.md` / `.json` — WAF scores and findings
+- `00-architecture-diagram.mmd` — Mermaid diagram of discovered resources
+- `00-ADR-assessment-findings.md` — Architecture decision records
+
+After assessment, the user can proceed to Step 1 (Requirements) with brownfield context.
+
 ## Application LZ Provisioning
 
-Each app LZ follows the full APEX workflow:
+Each app LZ follows the full APEX workflow.
+
+For **greenfield** (new environment):
 ```
 Requirements → Architecture → [Design] → Governance → Plan → Code → Deploy → Docs
+```
+
+For **brownfield** (existing environment):
+```
+Assessment → Requirements → Architecture → [Design] → Governance → Plan → Code → Deploy → Docs
 ```
 
 With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
@@ -156,6 +190,7 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 | Agent | Codename | How to Invoke |
 |-------|----------|---------------|
 | Orchestrator | 🧠 Conductor | You (this agent) |
+| Assessment | 🔍 Assessor | Trigger `assess.yml` workflow (brownfield only) |
 | Governance | 🛡️ Warden | `runSubagent("governance", ...)` |
 | Monitoring | 🔭 Sentinel | `runSubagent("monitoring", ...)` |
 | Remediation | 🔧 Mender | `runSubagent("remediation", ...)` |
@@ -163,6 +198,7 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 ### Per-LZ Agents (scoped to one landing zone)
 | Agent | Codename | Step | Delegation |
 |-------|----------|------|-----------|
+| Assessment | 🔍 Assessor | 0 | Workflow trigger (brownfield only) |
 | Requirements | 📜 Scribe | 1 | Interactive (handoff) |
 | Architect | 🏛️ Oracle | 2 | Autonomous (runSubagent) |
 | Design | 🎨 Artisan | 3 | Autonomous (runSubagent) |
@@ -227,3 +263,5 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 | `.github/workflows/reusable-deploy.yml` | Reusable deploy pipeline (validate → plan → deploy → verify) |
 | `environments/subscriptions.json` | Subscription mapping |
 | `src/config/landing_zone_profiles.yaml` | LZ profile configurations |
+| `.github/workflows/assess.yml` | Brownfield assessment pipeline (discover → WARA → reports) |
+| `agent-output/assessment/` | Assessment artifacts by scope |
