@@ -26,16 +26,51 @@
     {
       "id": "old-tools-count-7",
       "pattern": "7 tools",
-      "replacement": "8 tools",
+      "replacement": "11 tools",
       "severity": "warning",
-      "reason": "python_diagram_generator.py was added as the 8th tool"
+      "reason": "Assessment tools (discovery_collector, wara_engine, report_generator, assess_cli) added, total now 11"
+    },
+    {
+      "id": "old-tools-count-8",
+      "pattern": "8 tools",
+      "replacement": "11 tools",
+      "severity": "warning",
+      "reason": "Assessment tools added, total now 11"
     },
     {
       "id": "old-agent-count-10",
       "pattern": "10 agents",
-      "replacement": "11 agents",
+      "replacement": "12 agents",
       "severity": "warning",
-      "reason": "Artisan (Design) agent added, bringing count to 11"
+      "reason": "Artisan (Design) and Assessor (Brownfield) agents added, count now 12"
+    },
+    {
+      "id": "old-agent-count-11",
+      "pattern": "11 agents",
+      "replacement": "12 agents",
+      "severity": "warning",
+      "reason": "Assessor (Brownfield) agent added, count now 12"
+    },
+    {
+      "id": "old-agent-specialized-11",
+      "pattern": "11 specialized",
+      "replacement": "12 specialized",
+      "severity": "warning",
+      "reason": "Assessor agent added, 12 specialized agents total"
+    },
+    {
+      "id": "old-mcp-tools-22",
+      "pattern": "22 tools",
+      "replacement": "27 tools",
+      "severity": "warning",
+      "reason": "5 WARA/assessment tools added to azure-platform MCP server"
+    },
+    {
+      "id": "old-mcp-22-tool",
+      "pattern": "22-tool",
+      "replacement": "27-tool",
+      "severity": "warning",
+      "reason": "5 WARA/assessment tools added to azure-platform MCP server"
     },
     {
       "id": "bootstrap-checklist-xlsx",
@@ -74,5 +109,5 @@
       "reason": "Step 3 is Design (Artisan), not Governance; Governance is Step 3.5"
     }
   ],
-  "updated": "2026-04-16"
+  "updated": "2026-04-23"
 }

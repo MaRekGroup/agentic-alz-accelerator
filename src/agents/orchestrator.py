@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class RunMode(str, Enum):
-    WORKFLOW = "workflow"   # Full APEX workflow (Steps 1-9)
+    WORKFLOW = "workflow"   # Full APEX workflow (Steps 0-9)
     DEPLOY = "deploy"      # Deploy only (Steps 4-6)
     MONITOR = "monitor"    # Continuous monitoring (Step 8-9)
     FULL = "full"          # Deploy + Monitor
@@ -97,7 +97,7 @@ class AgentOrchestrator:
             return yaml.safe_load(f)
 
     # =========================================================================
-    # Full APEX Workflow (Steps 1-9)
+    # Full APEX Workflow (Steps 0-9)
     # =========================================================================
 
     async def run_workflow(

@@ -9,10 +9,11 @@ description: All 12 agents in the ALZ Accelerator multi-agent system.
 |-------|----------|------|
 | `orchestrator` | 🧠 **Conductor** | Master orchestrator — routes workflow, enforces gates, maintains state |
 
-## Core Agents (Steps 1-7)
+## Core Agents (Steps 0-7)
 
 | Step | Agent | Codename | Role |
 |------|-------|----------|------|
+| 0 | `assessment` | 🔍 **Assessor** | Brownfield discovery, WAF assessment, gap analysis (brownfield only) |
 | 1 | `requirements` | 📜 **Scribe** | Captures LZ requirements through conversation |
 | 2 | `architect` | 🏛️ **Oracle** | WAF assessment, CAF mapping, cost estimation |
 | 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs |
@@ -40,6 +41,7 @@ description: All 12 agents in the ALZ Accelerator multi-agent system.
 ### Estate-Scoped (operate across all LZs)
 
 - **Conductor** — Orchestrates the full estate
+- **Assessor** — Brownfield discovery and WAF assessment
 - **Warden** — Cross-cutting governance and policy
 - **Sentinel** — Monitors all deployed subscriptions
 - **Mender** — Remediates violations across the estate
@@ -55,7 +57,8 @@ description: All 12 agents in the ALZ Accelerator multi-agent system.
 
 | Agent | Step | Artifact |
 |-------|------|----------|
-| 📜 Scribe | 1 | `01-requirements.md` |
+| � Assessor | 0 | `00-assessment-*.{md,json,mmd}` (brownfield only) |
+| �📜 Scribe | 1 | `01-requirements.md` |
 | 🏛️ Oracle | 2 | `02-architecture-assessment.md` |
 | 🎨 Artisan | 3 | `03-design-*.{drawio,png,md}` |
 | 🛡️ Warden | 3.5 | `04-governance-constraints.md/.json` |
@@ -84,6 +87,7 @@ All artifacts are stored in `agent-output/{project}/` with estate-level state in
 | Sentinel | Autonomous (`runSubagent`) | Estate-scoped |
 | Mender | Autonomous (`runSubagent`) | Estate-scoped |
 | Challenger | Autonomous (`runSubagent`) | Gate reviews |
+| Assessor | Workflow trigger | Brownfield only, via GitHub Actions |
 
 :::note
 **Max 3 subagent calls** before the Conductor checkpoints with the user. This ensures human oversight during complex multi-step workflows.
