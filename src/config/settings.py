@@ -60,11 +60,32 @@ class NotificationSettings(BaseSettings):
     model_config = _BASE_CONFIG
 
 
+class AssessSettings(BaseSettings):
+    mode: str = Field(
+        default="assess",
+        alias="ASSESS_MODE",
+        description="assess | assess-and-plan | assess-and-remediate | onboard",
+    )
+    scope: str = Field(default="", alias="ASSESS_SCOPE")
+    scope_type: str = Field(
+        default="subscription",
+        alias="ASSESS_SCOPE_TYPE",
+        description="tenant | management_group | subscription | resource_group",
+    )
+    output_dir: str = Field(
+        default="agent-output/assessment", alias="ASSESS_OUTPUT_DIR"
+    )
+    allow_remediation: bool = Field(default=False, alias="ASSESS_ALLOW_REMEDIATION")
+
+    model_config = _BASE_CONFIG
+
+
 class Settings(BaseSettings):
     ai: AzureAISettings = Field(default_factory=AzureAISettings)
     azure: AzureSettings = Field(default_factory=AzureSettings)
     iac: IaCSettings = Field(default_factory=IaCSettings)
     monitor: MonitorSettings = Field(default_factory=MonitorSettings)
     notifications: NotificationSettings = Field(default_factory=NotificationSettings)
+    assess: AssessSettings = Field(default_factory=AssessSettings)
 
     model_config = _BASE_CONFIG

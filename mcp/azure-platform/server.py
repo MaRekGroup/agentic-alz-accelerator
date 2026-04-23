@@ -115,6 +115,44 @@ TOOLS: list[Tool] = [
             },
         },
     ),
+    # --- Discovery (brownfield) ---
+    Tool(
+        name="discover_mg_hierarchy",
+        description="Discover management group hierarchy with subscription placement (read-only)",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "management_group": {
+                    "type": "string",
+                    "description": "Root MG name to discover under (optional — discovers all if omitted)",
+                },
+            },
+        },
+    ),
+    Tool(
+        name="discover_subscription_inventory",
+        description="Discover subscriptions with resource counts, tags, and MG placement (read-only)",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "subscription_id": {
+                    "type": "string",
+                    "description": "Specific subscription (optional — discovers all accessible if omitted)",
+                },
+            },
+        },
+    ),
+    Tool(
+        name="discover_rbac_snapshot",
+        description="Discover RBAC role assignments across a scope (read-only)",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "subscription_id": {"type": "string"},
+                "max_results": {"type": "integer", "default": 200},
+            },
+        },
+    ),
     # --- Policy ---
     Tool(
         name="discover_policies",
@@ -428,6 +466,85 @@ class AzurePlatformServer:
             "changedBy=properties.changeAttributes.changedBy, "
             "timestamp=properties.changeAttributes.timestamp",
             [sub],
+        )
+
+    # ── Discovery (brownfield) ────────────────────────────────────────────
+
+    def handle_discover_mg_hierarchy(self, args: dict) -> list[dict]:
+        mg = args.get("management_group")
+        mg_list = [mg] if mg else None
+        subs = [self.default_sub] if self.default_sub else None
+        # MG hierarchy
+        mgs = self._arg_query(
+            "resourcecontainers "
+            "| where type == 'microsoft.management/managementgroups' "
+            "| project id, name, displayName=properties.displayName, "
+            "parent=properties.details.parent.id, tenantId=tenantId "
+            "| order by name asc",
+            subscriptions=subs,
+            management_groups=mg_list,
+            max_results=500,
+        )
+        # Subscriptions under those MGs
+        sub_results = self._arg_query(
+            "resourcecontainers "
+            "| where type == 'microsoft.resources/subscriptions' "
+            "| project subscriptionId, name, displayName=properties.displayName, "
+            "state=properties.state, "
+            "managementGroup=properties.managementGroupAncestorsChain "
+            "| order by name asc",
+            subscriptions=subs,
+            management_groups=mg_list,
+            max_results=500,
+        )
+        return {"management_groups": mgs, "subscriptions": sub_results}
+
+    def handle_discover_subscription_inventory(self, args: dict) -> dict:
+        sub = self._sub(args)
+        subs = [sub] if sub else None
+        # Resource counts by type
+        by_type = self._arg_query(
+            "resources | summarize count=count() by type | order by count desc",
+            subs,
+        )
+        # Resource counts by location
+        by_location = self._arg_query(
+            "resources | summarize count=count() by location | order by count desc",
+            subs,
+        )
+        # Subscription metadata
+        sub_info = self._arg_query(
+            "resourcecontainers "
+            "| where type == 'microsoft.resources/subscriptions' "
+            f"| where subscriptionId == '{sub}' "
+            "| project subscriptionId, name, tags, "
+            "managementGroup=properties.managementGroupAncestorsChain",
+            subs,
+        )
+        total = sum(r.get("count", 0) for r in by_type)
+        return {
+            "subscription_id": sub,
+            "subscription_info": sub_info[0] if sub_info else {},
+            "total_resources": total,
+            "by_type": by_type,
+            "by_location": by_location,
+        }
+
+    def handle_discover_rbac_snapshot(self, args: dict) -> list[dict]:
+        sub = self._sub(args)
+        max_results = args.get("max_results", 200)
+        return self._arg_query(
+            "authorizationresources "
+            "| where type == 'microsoft.authorization/roleassignments' "
+            "| project id, name, "
+            "principalId=properties.principalId, "
+            "principalType=properties.principalType, "
+            "roleDefinitionId=properties.roleDefinitionId, "
+            "scope=properties.scope, "
+            "createdOn=properties.createdOn "
+            "| order by name asc",
+            [sub],
+            max_results=max_results,
         )
 
     # ── Policy ────────────────────────────────────────────────────────────
@@ -815,6 +932,10 @@ _DISPATCH: dict[str, str] = {
     "validate_landing_zone": "handle_validate_landing_zone",
     "find_public_resources": "handle_find_public_resources",
     "detect_drift": "handle_detect_drift",
+    # Discovery (brownfield)
+    "discover_mg_hierarchy": "handle_discover_mg_hierarchy",
+    "discover_subscription_inventory": "handle_discover_subscription_inventory",
+    "discover_rbac_snapshot": "handle_discover_rbac_snapshot",
     # Policy
     "discover_policies": "handle_discover_policies",
     "get_compliance_state": "handle_get_compliance_state",
@@ -865,7 +986,7 @@ def create_server() -> tuple[Server, AzurePlatformServer]:
 async def main() -> None:
     """Entry point — runs the MCP server over stdio."""
     server, _platform = create_server()
-    logger.info("Azure Platform MCP Server started (22 tools)")
+    logger.info("Azure Platform MCP Server started (25 tools)")
 
     async with stdio_server() as (read_stream, write_stream):
         init_options = server.create_initialization_options(
