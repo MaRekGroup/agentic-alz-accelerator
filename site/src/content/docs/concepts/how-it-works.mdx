@@ -64,9 +64,9 @@ Each workflow step produces a numbered artifact that feeds into the next step:
     → infra/{bicep,terraform}/ → 06-deployment-summary.md → 07-*.md
 ```
 
-All artifacts are stored in `agent-output/{project}/` with estate-level
-state tracked in `agent-output/00-estate-state.json`. Brownfield assessment
-artifacts are stored separately in `agent-output/assessment/<scope>/`.
+All artifacts are stored in `agent-output/{customer}/{project}/` with estate-level
+state tracked in `agent-output/{customer}/00-estate-state.json`. Brownfield assessment
+artifacts are stored separately in `agent-output/{customer}/assessment/<scope>/`.
 
 ## Architecture Layers
 

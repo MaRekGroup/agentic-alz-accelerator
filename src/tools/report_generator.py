@@ -8,7 +8,7 @@ Generates from DiscoveryResult + AssessmentResult:
 - Architecture Decision Records (ADRs)
 - Assessment summary report (Markdown + JSON)
 
-Output directory: agent-output/assessment/<scope>/
+Output directory: agent-output/{customer}/assessment/<scope>/
 """
 
 import json

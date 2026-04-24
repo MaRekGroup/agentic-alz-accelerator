@@ -237,9 +237,16 @@ python scripts/validators/validate_cost_governance.py infra/
 
 ```
 ├── AGENTS.md                  # Agent roster, workflow, gates, baseline
-├── agent-output/              # Estate state and per-LZ session tracking
-│   ├── 00-estate-state.json         # All platform + app LZ statuses
-│   └── {lz-name}/                   # Per-LZ artifacts and session state
+├── agent-output/              # Per-customer generated content
+│   ├── README.md                    # Structure guide
+│   └── {customer}/                  # Customer engagement folder
+│       ├── 00-estate-state.json     # All platform + app LZ statuses
+│       ├── tdd/                     # Technical Design Documents
+│       ├── diagrams/                # Architecture diagrams
+│       ├── architecture/            # Current/target state docs
+│       ├── adr/                     # Architecture Decision Records
+│       ├── assessment/              # Brownfield assessment output
+│       └── deliverables/            # Generated .xlsx, .docx, .pptx
 ├── src/
 │   ├── agents/                # Agent implementations
 │   │   ├── orchestrator.py          # 🧠 Conductor (APEX workflow)

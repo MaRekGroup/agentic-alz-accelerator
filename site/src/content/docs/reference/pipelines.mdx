@@ -314,7 +314,7 @@ After every successful deployment, the pipeline automatically generates an as-bu
 # Generate TDDs for ALL landing zones
 python -m src.tools.tdd_generator --all \
   --config environments/subscriptions.json \
-  --output-dir docs/tdd --framework bicep
+  --output-dir agent-output/{customer}/tdd --framework bicep
 
 # Generate TDD for a single landing zone
 python -m src.tools.tdd_generator \
@@ -368,7 +368,7 @@ gh workflow run "assess.yml" \
 | `scope_type` | Yes | `subscription` / `resource_group` | Scope level |
 | `mode` | Yes | `full` / `discovery` | Full assessment or discovery only |
 
-Artifacts are stored in `agent-output/assessment/<scope>/`. After assessment, proceed to the standard APEX workflow starting at Step 1 (Requirements).
+Artifacts are stored in `agent-output/{customer}/assessment/<scope>/`. After assessment, proceed to the standard APEX workflow starting at Step 1 (Requirements).
 
 :::tip
 See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield-assessment/) for detailed usage, prerequisites, and troubleshooting.

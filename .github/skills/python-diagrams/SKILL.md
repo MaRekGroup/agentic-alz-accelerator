@@ -33,7 +33,7 @@ Generate architecture diagrams using the Python `diagrams` library.
 ```python
 from src.tools.python_diagram_generator import DiagramEngine
 
-engine = DiagramEngine(output_dir="docs/diagrams")
+engine = DiagramEngine(output_dir="agent-output/{customer}/diagrams")
 
 # Generate all diagrams
 engine.generate_full_estate()
@@ -44,7 +44,7 @@ engine.generate_hub_spoke()
 
 ## Output Location
 
-Diagrams are saved to `docs/diagrams/` as PNG files:
+Diagrams are saved to `agent-output/{customer}/diagrams/` as PNG files:
 - `01-management-group-hierarchy.png`
 - `02-hub-spoke-network-topology.png`
 - `03-security-governance-monitoring.png`

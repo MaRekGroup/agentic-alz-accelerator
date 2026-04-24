@@ -41,7 +41,7 @@ auto-layout and official Azure architecture icons.
 
 ### Shared Platform Diagrams (4)
 
-Generated to `docs/diagrams/` by `generate_all_diagrams()`:
+Generated to `agent-output/{customer}/diagrams/` by `generate_all_diagrams()`:
 
 | Method | Filename | Direction | Description |
 |--------|----------|-----------|-------------|
@@ -52,7 +52,7 @@ Generated to `docs/diagrams/` by `generate_all_diagrams()`:
 
 ### TDD Per-Landing-Zone Diagrams (10)
 
-Generated to `docs/tdd/` by `generate_tdd_diagram()`, dispatched by profile:
+Generated to `agent-output/{customer}/tdd/` by `generate_tdd_diagram()`, dispatched by profile:
 
 | Profile | Method | Direction | Key Components |
 |---------|--------|-----------|---------------|
@@ -107,8 +107,8 @@ Each TDD markdown file references two images:
 
 | Image | Source | Location |
 |-------|--------|----------|
-| `TDD_{name}_architecture.png` | `DiagramEngine.generate_tdd_diagram()` | `docs/tdd/` |
-| `alz-estate-overview.png` | `DiagramEngine.generate_full_estate()` | `docs/tdd/` |
+| `TDD_{name}_architecture.png` | `DiagramEngine.generate_tdd_diagram()` | `agent-output/{customer}/tdd/` |
+| `alz-estate-overview.png` | `DiagramEngine.generate_full_estate()` | `agent-output/{customer}/tdd/` |
 
 ## Icon Registry
 
@@ -219,7 +219,7 @@ This project maintains two parallel diagram systems:
 | System | Output | Source of Truth | Used By |
 |--------|--------|----------------|---------|
 | **Python Diagrams** (this tool) | PNG | `python_diagram_generator.py` | TDD docs (per-LZ + estate) |
-| **Draw.io XML** | `.drawio` | `docs/diagrams/*.drawio` | Architecture docs, VS Code viewer |
+| **Draw.io XML** | `.drawio` | `agent-output/{customer}/diagrams/*.drawio` | Architecture docs, VS Code viewer |
 
 The drawio files are hand-crafted XML with embedded Azure SVG icons from the
 drawio-mcp-server asset library. They are the editable source for the 4 shared

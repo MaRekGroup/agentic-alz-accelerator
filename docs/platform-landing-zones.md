@@ -524,7 +524,7 @@ TDD for the deployed landing zone. Each TDD includes:
 - **Operational model** (monitoring schedules, change management process, DR)
 - **Full estate overview diagram** showing all landing zones
 
-TDDs are uploaded as pipeline artifacts (90-day retention) and saved to `docs/tdd/`.
+TDDs are uploaded as pipeline artifacts (90-day retention) and saved to `agent-output/{customer}/tdd/`.
 
 ```bash
 # Generate TDDs manually for all landing zones

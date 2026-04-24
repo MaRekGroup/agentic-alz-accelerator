@@ -159,7 +159,7 @@
       "type": "agent-step",
       "agent": "assessment",
       "codename": "Assessor",
-      "artifact": "agent-output/assessment/<scope>/",
+      "artifact": "agent-output/{customer}/assessment/<scope>/",
       "description": "Brownfield discovery, WARA/CAF assessment, and documentation generation",
       "standalone": true,
       "modes": ["assess", "assess-and-plan", "assess-and-remediate", "onboard"]

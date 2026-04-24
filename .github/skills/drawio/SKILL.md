@@ -29,7 +29,7 @@ tools for creating Azure architecture diagrams with official Azure icon librarie
 
 ## Output Location
 
-Draw.io files go to `docs/diagrams/`:
+Draw.io files go to `agent-output/{customer}/diagrams/`:
 - `01-management-group-hierarchy.drawio`
 - `02-hub-spoke-network-topology.drawio`
 - `03-security-governance-monitoring.drawio`

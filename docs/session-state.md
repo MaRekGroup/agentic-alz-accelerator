@@ -17,7 +17,7 @@
 - `requirements.txt` — added `mcp>=1.0.0`, `diagrams>=0.24.0`
 - `.devcontainer/devcontainer.json` — graphviz, submodule init, pricing deps
 
-## Diagrams Generated (docs/diagrams/)
+## Diagrams Generated (agent-output/{customer}/diagrams/)
 - `01-management-group-hierarchy.png` (85KB) — with subscriptions ✅
 - `02-hub-spoke-network-topology.png` (135KB) — proper Bastion/Automation icons ✅
 - `03-security-governance-monitoring.png` (137KB) — proper Policy icon ✅

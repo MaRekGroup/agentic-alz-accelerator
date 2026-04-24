@@ -144,7 +144,7 @@ validators, profiles, and the 10-step APEX workflow DAG.
 
 | Risk | Mitigation |
 |------|-----------|
-| Assessment reveals sensitive data in reports | Reports stored locally in `agent-output/`; no automatic upload |
+| Assessment reveals sensitive data in reports | Reports stored locally in `agent-output/{customer}/`; no automatic upload |
 | Remediation causes outage | Snapshot/rollback pattern; gated approval; critical-only auto-remediate |
 | Scope creep to destructive operations | Default mode is read-only; remediation requires double opt-in |
 | OIDC identity over-permissioned for assessment | Document minimum required roles per mode |

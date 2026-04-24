@@ -10,7 +10,7 @@ CAF design area mapping based on the requirements in `01-requirements.md`.
 
 ## Process
 
-1. Read `agent-output/{project}/01-requirements.md`
+1. Read `agent-output/{customer}/{project}/01-requirements.md`
 2. Assess against all 5 WAF pillars: Security, Reliability, Cost, Performance, Operations
 3. Map each requirement to the appropriate CAF design area and IaC module
 4. Estimate cost ranges for the proposed architecture

@@ -24,7 +24,7 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 - Discover existing Azure environment via Resource Graph
 - Run WAF Reliability Assessment (WARA) against 28-check catalog
 - Generate current-state and target-state architecture documentation
-- Output: `00-assessment-*.{md,json,mmd}` in `agent-output/assessment/<scope>/`
+- Output: `00-assessment-*.{md,json,mmd}` in `agent-output/{customer}/assessment/<scope>/`
 
 ### Step 1: Requirements (📜 Scribe)
 - Gather landing zone requirements through interactive conversation

@@ -121,7 +121,7 @@ class AgentOrchestrator:
             scope_type: "subscription" or "management_group".
         """
         state = WorkflowState(project_name=project_name, iac_tool=iac_tool)
-        output_dir = Path("agent-output") / project_name
+        output_dir = Path(self.settings.agent_output_dir) / project_name
         output_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Starting APEX workflow for project '%s' (%s, brownfield=%s)", project_name, iac_tool, brownfield)

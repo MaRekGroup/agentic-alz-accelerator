@@ -106,7 +106,7 @@ CURRENT STATE ARCHITECTURE DOCUMENTATION (NEW DELIVERABLES)
 ========================
 You must document the CURRENT STATE as it exists TODAY in this repo (and any discovered outputs).
 Deliver:
-1) /docs/architecture/current-state.md
+1) /agent-output/{customer}/architecture/current-state.md
    - Overview: What this accelerator is, what it deploys, how it’s run
    - Component inventory: modules, pipelines, scripts, config, artifacts
    - Data flows: discovery -> plan -> deploy -> validate -> report
@@ -114,12 +114,12 @@ Deliver:
    - State & storage: where state lives, artifacts, logs, reports
    - Known constraints and gaps (especially for brownfield and assessments)
    - Assumptions and non-goals
-2) /docs/architecture/current-state-diagram.mmd (Mermaid)
+2) /agent-output/{customer}/architecture/current-state-diagram.mmd (Mermaid)
    - Provide at least 1 diagram: high-level system context + execution flow
-3) /docs/architecture/target-state.md
+3) /agent-output/{customer}/architecture/target-state.md
    - Summarize intended end-state with brownfield + assessment feature included
    - Clearly list what changes and what remains unchanged
-4) Add an ADR: /docs/adr/ADR-xxxx-brownfield-assessment.md
+4) Add an ADR: /agent-output/{customer}/adr/ADR-xxxx-brownfield-assessment.md
    - Decision, options considered, tradeoffs, security & operational impact
 
 Diagram requirements:
@@ -150,8 +150,8 @@ Step 1 — Repo inspection:
 - Identify any existing discovery or assessment logic.
 
 Step 2 — Current state documentation (WRITE FIRST):
-- Generate /docs/architecture/current-state.md
-- Generate /docs/architecture/current-state-diagram.mmd (Mermaid)
+- Generate /agent-output/{customer}/architecture/current-state.md
+- Generate /agent-output/{customer}/architecture/current-state-diagram.mmd (Mermaid)
 - Capture gaps and risks especially around brownfield adoption and assessments.
 
 Step 3 — Target state design (MINIMAL CHANGE):

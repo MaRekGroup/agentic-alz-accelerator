@@ -25,7 +25,7 @@ conversation, mapping every requirement to a Cloud Adoption Framework (CAF) desi
 
 ## Output
 
-Produce `01-requirements.md` in `agent-output/{project}/` with:
+Produce `01-requirements.md` in `agent-output/{customer}/{project}/` with:
 - Project header (name, date, complexity tier)
 - One section per CAF design area
 - Summary table of key decisions

@@ -67,6 +67,11 @@ on:
         required: false
         type: string
         default: 'mrg'
+      customer:
+        description: 'Customer name for output directory (agent-output/{customer}/)'
+        required: false
+        type: string
+        default: ''
     secrets:
       AZURE_TENANT_ID:
         required: true
@@ -540,7 +545,7 @@ jobs:
               environment='${{ inputs.environment }}',
               framework='${{ inputs.framework }}',
               deployment_id='${{ needs.deploy.outputs.deployment_id }}',
-              output_dir='docs/tdd',
+              output_dir='agent-output/${{ inputs.customer }}/tdd',
               config_path='environments/subscriptions.json',
               resource_inventory=resource_inventory,
           )
@@ -552,16 +557,16 @@ jobs:
           print(f'TDD (markdown+svg) generated: {md_path}')
           "
 
-          echo "tdd_path=docs/tdd/" >> "$GITHUB_OUTPUT"
+          echo "tdd_path=agent-output/${{ inputs.customer }}/tdd/" >> "$GITHUB_OUTPUT"
 
       - name: Upload TDD artifact
         uses: actions/upload-artifact@v6
         with:
           name: tdd-${{ inputs.project_name }}
           path: |
-            docs/tdd/TDD_${{ inputs.project_name }}_*.docx
-            docs/tdd/TDD_${{ inputs.project_name }}_*.md
-            docs/tdd/TDD_${{ inputs.project_name }}_*.svg
+            agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.docx
+            agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.md
+            agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
           retention-days: 90
 
       - name: Commit TDD to repository
@@ -569,9 +574,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/tdd/TDD_${{ inputs.project_name }}_*.docx \
-                  docs/tdd/TDD_${{ inputs.project_name }}_*.md \
-                  docs/tdd/TDD_${{ inputs.project_name }}_*.svg
+          git add agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.docx \
+                  agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.md \
+                  agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
           if git diff --cached --quiet; then
             echo "No TDD changes to commit"
           else

@@ -37,3 +37,14 @@ logs/copilot/
 node_modules/
 site/dist/
 site/.astro/
+
+# Customer output (per-customer folders under agent-output/)
+# Keep agent-output/README.md and sample skeleton tracked
+agent-output/*/
+!agent-output/README.md
+
+# Customer-specific config (real values — use .sample files as templates)
+environments/subscriptions.json
+infra/bicep/parameters/*.bicepparam
+!infra/bicep/parameters/*.sample.bicepparam
+infra/terraform/environments/*/terraform.tfvars

@@ -162,7 +162,7 @@ User Input → [Scribe] Requirements → [Oracle] Architecture Assessment
   → [Envoy] Deploy via GitHub Actions → [Chronicler] As-Built Docs
 ```
 
-Each step produces artifacts in `agent-output/{lz-name}/` and passes through
+Each step produces artifacts in `agent-output/{customer}/{lz-name}/` and passes through
 approval gates. The Challenger agent reviews at gates 1, 2, 4, and 5.
 
 ### Platform Deployment Pipeline
@@ -234,7 +234,7 @@ Schedule trigger (4-monitor.yml)
 
 ### Estate State
 
-`agent-output/00-estate-state.json` — single source of truth for the entire
+`agent-output/{customer}/00-estate-state.json` — single source of truth for the entire
 landing zone estate:
 
 - Estate metadata (prefix, region, IaC tool)
@@ -247,7 +247,7 @@ landing zone estate:
 
 ### Per-LZ Session State
 
-`agent-output/{lz-name}/00-session-state.json` — per-landing-zone workflow
+`agent-output/{customer}/{lz-name}/00-session-state.json` — per-landing-zone workflow
 progress, gate approvals, and artifact inventory.
 
 ### Workflow Engine State
@@ -260,9 +260,9 @@ and gate approvals. Production config specifies Azure Table Storage for persiste
 
 | Location | Contents |
 |----------|----------|
-| `agent-output/` | Estate state, per-LZ state, challenger reviews |
-| `docs/tdd/` | Technical Design Documents (.md + .docx + .png) |
-| `docs/diagrams/` | Architecture diagrams (.drawio + .mmd + .png) |
+| `agent-output/{customer}/` | Estate state, per-LZ state, challenger reviews |
+| `agent-output/{customer}/tdd/` | Technical Design Documents (.md + .docx + .png) |
+| `agent-output/{customer}/diagrams/` | Architecture diagrams (.drawio + .mmd + .png) |
 | `infra/bicep/parameters/` | Bicep parameter files per platform LZ |
 | `infra/terraform/environments/` | Terraform variable files per environment |
 
