@@ -54,8 +54,8 @@ python -m pytest tests/ -v
 
 ## Adding a New Platform LZ Module
 
-1. Create module under `infra/bicep/modules/<name>/` and/or `infra/terraform/modules/<name>/`
-2. Add parameters to `infra/bicep/parameters/` or `infra/terraform/environments/`
+1. Create module under `infra/bicep/{customer}/modules/<name>/` and/or `infra/terraform/{customer}/modules/<name>/`
+2. Add parameters to `infra/bicep/{customer}/parameters/` or `infra/terraform/{customer}/environments/`
 3. Add subscription entry to `environments/subscriptions.json`
 4. Add deployment job to `2-platform-deploy.yml`
 5. Add GitHub environment and OIDC federated credential

@@ -68,7 +68,7 @@ gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
 
 ### Bicep
 
-Override parameters in `.bicepparam` files under `infra/bicep/parameters/`:
+Override parameters in `.bicepparam` files under `infra/bicep/{customer}/parameters/`:
 
 ```bicep
 param managedBy = 'my-org-tooling'

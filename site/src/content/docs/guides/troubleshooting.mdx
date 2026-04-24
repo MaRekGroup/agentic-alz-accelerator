@@ -45,7 +45,7 @@ description: Common issues and fixes for the ALZ Accelerator.
 ## Deploy-on-Merge
 
 The `deploy-on-merge.yml` workflow uses file-path heuristics to detect which
-LZs changed. If both `infra/bicep/` and `infra/terraform/` files change in the
+LZs changed. If both `infra/bicep/{customer}/` and `infra/terraform/{customer}/` files change in the
 same PR, set `vars.IAC_FRAMEWORK` to disambiguate.
 
 Framework detection priority:

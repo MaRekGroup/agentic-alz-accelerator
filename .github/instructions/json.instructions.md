@@ -6,8 +6,8 @@ applyTo: "**/*.{json,jsonc}"
 
 ## Parameter Files
 
-- Bicep parameter files: `infra/bicep/parameters/{env}.bicepparam`
-- Terraform var files: `infra/terraform/environments/{env}.tfvars`
+- Bicep parameter files: `infra/bicep/{customer}/parameters/{env}.bicepparam`
+- Terraform var files: `infra/terraform/{customer}/environments/{env}.tfvars`
 - Never hardcode subscription IDs, tenant IDs, or secrets in parameter files
 
 ## MCP Config

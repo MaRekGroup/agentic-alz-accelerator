@@ -453,8 +453,8 @@ The `reusable-deploy.yml` had `if: always() && secrets.TEAMS_WEBHOOK_URL != ''`.
 
 | Change | File | Description |
 |--------|------|-------------|
-| Comment out Sentinel | `infra/bicep/modules/management/main.bicep` | Sentinel disabled for initial LAW-only deployment |
-| Create param file | `infra/bicep/parameters/platform-management-prod.bicepparam` | Bicep parameters: prefix=mrg, retention=90d, budget=$500 |
+| Comment out Sentinel | `infra/bicep/{customer}/modules/management/main.bicep` | Sentinel disabled for initial LAW-only deployment |
+| Create param file | `infra/bicep/{customer}/parameters/platform-management-prod.bicepparam` | Bicep parameters: prefix=mrg, retention=90d, budget=$500 |
 | Fix secrets in `with:` | `.github/workflows/2-platform-deploy.yml` | Moved subscription IDs from `with:` to `secrets:` block |
 | Remove resolve job | `.github/workflows/reusable-deploy.yml` | Replaced masked job outputs with direct `secrets.SUBSCRIPTION_ID` |
 | Fix Teams webhook | `.github/workflows/reusable-deploy.yml` | Moved from `if:` condition to env var + runtime check |

@@ -55,6 +55,14 @@ echo ""
 # --- Create directory structure ---
 mkdir -p "$OUTPUT_DIR"/{tdd,diagrams,architecture,adr,assessment,deliverables}
 
+# --- Create per-customer IaC directories ---
+BICEP_DIR="$REPO_ROOT/infra/bicep/$CUSTOMER"
+TF_DIR="$REPO_ROOT/infra/terraform/$CUSTOMER"
+mkdir -p "$BICEP_DIR"/{modules,parameters}
+mkdir -p "$TF_DIR"/{modules,environments/dev,environments/prod}
+echo "Created infra/bicep/$CUSTOMER/"
+echo "Created infra/terraform/$CUSTOMER/"
+
 # --- Seed estate state ---
 cat > "$OUTPUT_DIR/00-estate-state.json" << EOF
 {
@@ -91,27 +99,12 @@ if [[ -f "$REPO_ROOT/environments/subscriptions.sample.json" ]]; then
   fi
 fi
 
-for sample in "$REPO_ROOT"/infra/bicep/parameters/*.sample.bicepparam; do
-  target="${sample%.sample.bicepparam}.bicepparam"
-  if [[ ! -f "$target" ]]; then
-    cp "$sample" "$target"
-    echo "Copied $(basename "$sample") → $(basename "$target")"
-  fi
-done
-
-for sample in "$REPO_ROOT"/infra/terraform/environments/*/terraform.tfvars.sample; do
-  target="${sample%.sample}"
-  if [[ ! -f "$target" ]]; then
-    cp "$sample" "$target"
-    echo "Copied $(basename "$sample") → $(basename "$target")"
-  fi
-done
-
 echo ""
 echo "Done! Next steps:"
 echo "  1. Edit environments/subscriptions.json with real subscription IDs"
-echo "  2. Edit infra/bicep/parameters/*.bicepparam with real parameter values"
-echo "  3. Start the workflow: ask the orchestrator to begin"
+echo "  2. Add Bicep modules and parameters under infra/bicep/$CUSTOMER/"
+echo "  3. Add Terraform modules and tfvars under infra/terraform/$CUSTOMER/"
+echo "  4. Start the workflow: ask the orchestrator to begin"
 echo ""
-echo "To track this customer's output in git (for a private fork):"
-echo "  Add '!agent-output/$CUSTOMER/' to .gitignore"
+echo "To track this customer's output and IaC in git (for a private fork):"
+echo "  Add '!agent-output/$CUSTOMER/' and '!infra/bicep/$CUSTOMER/' to .gitignore"

@@ -38,6 +38,10 @@ on:
         required: false
         type: string
         default: "southcentralus"
+      customer:
+        description: 'Customer name for infra paths (infra/{framework}/{customer}/)'
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -98,15 +102,15 @@ jobs:
         run: az bicep install
 
       - name: Bicep Build (Validate)
-        run: az bicep build --file infra/bicep/main.bicep
+        run: az bicep build --file infra/bicep/${{ inputs.customer }}/main.bicep
 
       - name: What-If Analysis
         if: inputs.action == 'plan'
         run: |
           az deployment sub what-if \
             --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
+            --template-file infra/bicep/${{ inputs.customer }}/main.bicep \
+            --parameters infra/bicep/${{ inputs.customer }}/parameters/${{ inputs.environment }}.bicepparam \
             --parameters profileName=${{ inputs.profile }}
 
       - name: Deploy Landing Zone
@@ -114,8 +118,8 @@ jobs:
         run: |
           az deployment sub create \
             --location ${{ inputs.location }} \
-            --template-file infra/bicep/main.bicep \
-            --parameters infra/bicep/parameters/${{ inputs.environment }}.bicepparam \
+            --template-file infra/bicep/${{ inputs.customer }}/main.bicep \
+            --parameters infra/bicep/${{ inputs.customer }}/parameters/${{ inputs.environment }}.bicepparam \
             --parameters profileName=${{ inputs.profile }} \
             --name "alz-${{ inputs.profile }}-$(date +%Y%m%d%H%M%S)"
 

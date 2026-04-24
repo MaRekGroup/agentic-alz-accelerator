@@ -63,8 +63,8 @@ Step 0 runs only for brownfield scenarios.
 | 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs | `03-design-*.{drawio,png,md}` |
 | 3.5 | `governance` | 🛡️ **Warden** | Policy discovery, compliance constraints, security baseline | `04-governance-constraints.md/.json` |
 | 4b/4t | `iac-planner` | 📐 **Strategist** | Implementation planning with AVM module selection | `04-implementation-plan.md` |
-| 5b | `bicep-code` | ⚒️ **Forge** | Bicep template generation (AVM-first) | `infra/bicep/{project}/` |
-| 5t | `terraform-code` | ⚒️ **Forge** | Terraform configuration generation (AVM-TF) | `infra/terraform/{project}/` |
+| 5b | `bicep-code` | ⚒️ **Forge** | Bicep template generation (AVM-first) | `infra/bicep/{customer}/` |
+| 5t | `terraform-code` | ⚒️ **Forge** | Terraform configuration generation (AVM-TF) | `infra/terraform/{customer}/` |
 | 6b/6t | `deploy` | 🚀 **Envoy** | Deployment with what-if/plan preview | `06-deployment-summary.md` |
 | 7 | `documentation` | 📚 **Chronicler** | Post-deployment documentation suite | `07-*.md` |
 

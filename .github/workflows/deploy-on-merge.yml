@@ -66,34 +66,34 @@ jobs:
           }
 
           MGMT=$(detect_platform management \
-            'infra/bicep/modules/management/' \
-            'infra/bicep/modules/logging/' \
-            'infra/bicep/parameters/platform-management' \
-            'infra/terraform/modules/platform-management/' \
-            'infra/terraform/modules/logging/' \
-            'infra/terraform/environments/.*/management')
+            'infra/bicep/.*/modules/management/' \
+            'infra/bicep/.*/modules/logging/' \
+            'infra/bicep/.*/parameters/platform-management' \
+            'infra/terraform/.*/modules/platform-management/' \
+            'infra/terraform/.*/modules/logging/' \
+            'infra/terraform/.*/environments/.*/management')
 
           CONN=$(detect_platform connectivity \
-            'infra/bicep/modules/connectivity/' \
-            'infra/bicep/modules/networking/' \
-            'infra/bicep/parameters/platform-connectivity' \
-            'infra/terraform/modules/connectivity/' \
-            'infra/terraform/modules/networking/' \
-            'infra/terraform/environments/.*/connectivity')
+            'infra/bicep/.*/modules/connectivity/' \
+            'infra/bicep/.*/modules/networking/' \
+            'infra/bicep/.*/parameters/platform-connectivity' \
+            'infra/terraform/.*/modules/connectivity/' \
+            'infra/terraform/.*/modules/networking/' \
+            'infra/terraform/.*/environments/.*/connectivity')
 
           IDTY=$(detect_platform identity \
-            'infra/bicep/modules/identity/' \
-            'infra/bicep/parameters/platform-identity' \
-            'infra/terraform/modules/identity/' \
-            'infra/terraform/environments/.*/identity')
+            'infra/bicep/.*/modules/identity/' \
+            'infra/bicep/.*/parameters/platform-identity' \
+            'infra/terraform/.*/modules/identity/' \
+            'infra/terraform/.*/environments/.*/identity')
 
           SEC=$(detect_platform security \
-            'infra/bicep/modules/security/' \
-            'infra/bicep/modules/platform-security/' \
-            'infra/bicep/parameters/platform-security' \
-            'infra/terraform/modules/platform-security/' \
-            'infra/terraform/modules/security/' \
-            'infra/terraform/environments/.*/security')
+            'infra/bicep/.*/modules/security/' \
+            'infra/bicep/.*/modules/platform-security/' \
+            'infra/bicep/.*/parameters/platform-security' \
+            'infra/terraform/.*/modules/platform-security/' \
+            'infra/terraform/.*/modules/security/' \
+            'infra/terraform/.*/environments/.*/security')
 
           echo "platform_management=$MGMT" >> "$GITHUB_OUTPUT"
           echo "platform_connectivity=$CONN" >> "$GITHUB_OUTPUT"
@@ -107,7 +107,7 @@ jobs:
           # --- App LZ detection ---
           # Shared modules trigger all app LZs; profile-specific changes trigger only that profile
           APP_PROFILES=""
-          if echo "$CHANGED" | grep -qE 'infra/bicep/modules/governance/|infra/bicep/modules/policies/|infra/terraform/modules/policies/|src/config/landing_zone_profiles'; then
+          if echo "$CHANGED" | grep -qE 'infra/bicep/.*/modules/governance/|infra/bicep/.*/modules/policies/|infra/terraform/.*/modules/policies/|src/config/landing_zone_profiles'; then
             APP_PROFILES="all"
           else
             for profile in corp online sandbox sap; do
@@ -165,6 +165,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
+      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -191,6 +192,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
+      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -217,6 +219,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
+      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -242,6 +245,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
+      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

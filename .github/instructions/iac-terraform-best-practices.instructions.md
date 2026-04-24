@@ -63,6 +63,6 @@ resource "azurerm_consumption_budget_subscription" "this" {
 
 ```bash
 terraform init && terraform validate
-python scripts/validators/validate_security_baseline.py infra/terraform/
-python scripts/validators/validate_cost_governance.py infra/terraform/
+python scripts/validators/validate_security_baseline.py infra/terraform/{customer}/
+python scripts/validators/validate_cost_governance.py infra/terraform/{customer}/
 ```

@@ -120,8 +120,8 @@ Follow CAF naming conventions. Required tags on all resource groups:
 | `src/agents/` | Agent Python implementations |
 | `src/tools/` | Tool implementations (11 tools) |
 | `src/config/` | Settings, profiles, agent config |
-| `infra/bicep/` | Bicep modules and parameters |
-| `infra/terraform/` | Terraform modules and environments |
+| `infra/bicep/{customer}/` | Bicep modules and parameters |
+| `infra/terraform/{customer}/` | Terraform modules and environments |
 | `mcp/` | MCP servers (3: azure-pricing, azure-platform, drawio) |
 | `docs/` | Architecture docs, diagrams, runbooks |
 | `scripts/validators/` | Security baseline and cost governance validators |
@@ -130,16 +130,16 @@ Follow CAF naming conventions. Required tags on all resource groups:
 
 ```bash
 # Security baseline validation
-python scripts/validators/validate_security_baseline.py infra/bicep/
+python scripts/validators/validate_security_baseline.py infra/bicep/{customer}/
 
 # Cost governance validation
-python scripts/validators/validate_cost_governance.py infra/bicep/
+python scripts/validators/validate_cost_governance.py infra/bicep/{customer}/
 
 # Bicep lint
-az bicep build --file infra/bicep/main.bicep
+az bicep build --file infra/bicep/{customer}/main.bicep
 
 # Terraform validate
-cd infra/terraform && terraform init && terraform validate
+cd infra/terraform/{customer} && terraform init && terraform validate
 
 # Python tests
 python -m pytest tests/ -v

@@ -51,6 +51,6 @@ Every resource that supports it must have diagnostic settings forwarding to Log 
 
 ```bash
 az bicep build --file main.bicep
-python scripts/validators/validate_security_baseline.py infra/bicep/
-python scripts/validators/validate_cost_governance.py infra/bicep/
+python scripts/validators/validate_security_baseline.py infra/bicep/{customer}/
+python scripts/validators/validate_cost_governance.py infra/bicep/{customer}/
 ```
