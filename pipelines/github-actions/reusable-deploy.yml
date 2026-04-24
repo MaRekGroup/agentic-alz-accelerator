@@ -242,8 +242,9 @@ jobs:
           fi
 
           # Build extra params for LAW ID if MGMT subscription is available
+          # Skip for platform-management — it creates the LAW, doesn't consume one
           EXTRA_PARAMS=""
-          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" && "${{ inputs.project_name }}" != "platform-management" ]]; then
             # Derive region shortcode to match Bicep naming convention
             declare -A REGION_MAP=(
               [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
@@ -347,8 +348,9 @@ jobs:
           PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
 
           # Build extra params for LAW ID if MGMT subscription is available
+          # Skip for platform-management — it creates the LAW, doesn't consume one
           EXTRA_PARAMS=""
-          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" ]]; then
+          if [[ -n "${{ secrets.MGMT_SUBSCRIPTION_ID }}" && "${{ inputs.project_name }}" != "platform-management" ]]; then
             # Derive region shortcode to match Bicep naming convention
             declare -A REGION_MAP=(
               [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
