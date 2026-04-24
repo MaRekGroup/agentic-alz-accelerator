@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MaRekGroup/agentic-alz-accelerator/schemas/agent-registry.schema.json",
+  "title": "Agent Registry",
+  "description": "Registry of all agents and subagents in the ALZ accelerator workflow.",
+  "type": "object",
+  "required": ["$schema", "description", "agents"],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the agent registry."
+    },
+    "scope_types": {
+      "type": "object",
+      "description": "Definitions of scope types (estate, per-lz, etc.).",
+      "additionalProperties": true
+    },
+    "delegation_rules": {
+      "type": "object",
+      "description": "Rules governing agent delegation modes.",
+      "additionalProperties": true
+    },
+    "landing_zone_types": {
+      "type": "object",
+      "description": "Landing zone type definitions (platform, application, etc.).",
+      "additionalProperties": true
+    },
+    "agents": {
+      "type": "object",
+      "description": "Primary agents keyed by agent name.",
+      "patternProperties": {
+        ".*": { "$ref": "#/$defs/agentEntry" }
+      }
+    },
+    "subagents": {
+      "type": "object",
+      "description": "Subagents keyed by subagent name.",
+      "patternProperties": {
+        ".*": { "$ref": "#/$defs/agentEntry" }
+      }
+    }
+  },
+  "$defs": {
+    "agentEntry": {
+      "type": "object",
+      "description": "An agent or subagent definition.",
+      "required": ["agent", "skills"],
+      "additionalProperties": true,
+      "properties": {
+        "agent": {
+          "type": ["string", "null"],
+          "description": "Agent definition file path, or null for virtual agents."
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Skills this agent can invoke."
+        },
+        "codename": {
+          "type": "string",
+          "description": "Agent codename (e.g. Conductor, Scribe, Oracle)."
+        },
+        "emoji": {
+          "type": "string",
+          "description": "Emoji identifier for the agent."
+        },
+        "step": {
+          "type": ["number", "null"],
+          "description": "Workflow step number, or null for cross-cutting agents."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["estate", "per-lz"],
+          "description": "Whether the agent operates at estate level or per landing zone."
+        },
+        "delegation": {
+          "type": "string",
+          "enum": ["interactive", "autonomous"],
+          "description": "Whether the agent requires human interaction or runs autonomously."
+        },
+        "invokable": {
+          "type": "boolean",
+          "description": "Whether the agent can be directly invoked by the orchestrator."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the agent's role."
+        },
+        "capability_skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional capability skills beyond the primary skill set."
+        }
+      }
+    }
+  }
+}

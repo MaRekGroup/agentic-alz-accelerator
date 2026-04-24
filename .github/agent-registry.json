@@ -1,5 +1,5 @@
 {
-  "$schema": "agent-registry-v2",
+  "$schema": "../tools/schemas/agent-registry.schema.json",
   "description": "Agent registry for the Agentic ALZ Accelerator — enterprise-scale landing zone lifecycle.",
   "scope_types": {
     "estate": "Operates across all landing zones (monitoring, governance, orchestration)",

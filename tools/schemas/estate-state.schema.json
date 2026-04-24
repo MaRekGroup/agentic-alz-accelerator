@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MaRekGroup/agentic-alz-accelerator/schemas/estate-state.schema.json",
+  "title": "Estate State",
+  "description": "Estate-level state tracking all landing zones across an enterprise-scale ALZ deployment.",
+  "type": "object",
+  "required": ["$schema", "description", "estate", "platform_landing_zones"],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "pattern": "^estate-state/v.+$",
+      "description": "Schema version identifier."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of this estate state file."
+    },
+    "estate": {
+      "type": "object",
+      "description": "Core estate metadata.",
+      "required": ["prefix", "primary_region", "iac_tool", "management_group_prefix", "created", "updated"],
+      "additionalProperties": true,
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "description": "Naming prefix used across all resources."
+        },
+        "primary_region": {
+          "type": "string",
+          "description": "Primary Azure region for deployments."
+        },
+        "iac_tool": {
+          "type": "string",
+          "enum": ["bicep", "terraform"],
+          "description": "Infrastructure-as-Code framework in use."
+        },
+        "management_group_prefix": {
+          "type": "string",
+          "description": "Prefix for the management group hierarchy."
+        },
+        "created": {
+          "type": "string",
+          "description": "Date the estate was created (ISO 8601 date or datetime)."
+        },
+        "updated": {
+          "type": "string",
+          "description": "Timestamp of the last update (ISO 8601 datetime)."
+        }
+      }
+    },
+    "platform_landing_zones": {
+      "type": "object",
+      "description": "Platform landing zones keyed by function.",
+      "properties": {
+        "management": { "$ref": "#/$defs/platformLandingZone" },
+        "connectivity": { "$ref": "#/$defs/platformLandingZone" },
+        "identity": { "$ref": "#/$defs/platformLandingZone" },
+        "security": { "$ref": "#/$defs/platformLandingZone" }
+      },
+      "additionalProperties": true
+    },
+    "application_landing_zones": {
+      "type": "object",
+      "description": "Application landing zones keyed by name.",
+      "additionalProperties": true
+    },
+    "governance": {
+      "type": "object",
+      "description": "Governance status across the estate.",
+      "additionalProperties": true,
+      "properties": {
+        "policies_assigned": {
+          "type": "boolean",
+          "description": "Whether CAF baseline policies have been assigned."
+        },
+        "rbac_configured": {
+          "type": "boolean",
+          "description": "Whether RBAC roles have been configured."
+        }
+      }
+    },
+    "day2": {
+      "type": "object",
+      "description": "Day-2 operations status.",
+      "additionalProperties": true,
+      "properties": {
+        "monitoring_active": {
+          "type": "boolean",
+          "description": "Whether continuous monitoring is active."
+        },
+        "last_compliance_scan": {
+          "type": ["string", "null"],
+          "description": "ISO 8601 timestamp of the last compliance scan, or null if never run."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "platformLandingZone": {
+      "type": "object",
+      "description": "A platform landing zone entry.",
+      "required": ["status"],
+      "additionalProperties": true,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pending", "deployed", "failed", "skipped"],
+          "description": "Current deployment status."
+        }
+      }
+    }
+  }
+}

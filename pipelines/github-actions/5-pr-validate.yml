@@ -13,6 +13,11 @@ on:
       - 'src/config/**'
       - 'src/agents/**'
       - 'tests/**'
+      - '.github/agents/**'
+      - '.github/skills/**'
+      - '.github/agent-registry.json'
+      - 'tools/**'
+      - 'scripts/validators/**'
 
 permissions:
   id-token: write
@@ -53,6 +58,36 @@ jobs:
       - name: Terraform format check
         if: hashFiles('infra/terraform/**/*.tf') != ''
         run: terraform fmt -check -recursive infra/terraform/
+
+  # =========================================================================
+  # Schema, Agent & Skill Validation
+  # =========================================================================
+  schema-validation:
+    name: Schema & Registry Checks
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate JSON schemas
+        run: python scripts/validators/validate_json_schemas.py
+
+      - name: Validate agents
+        run: python scripts/validators/validate_agents.py
+
+      - name: Validate skills
+        run: python scripts/validators/validate_skills.py
+
+      - name: Validate count manifest
+        run: python scripts/validators/validate_count_manifest.py
 
   # =========================================================================
   # Security & Cost Validation
@@ -111,7 +146,7 @@ jobs:
   # =========================================================================
   plan-preview:
     name: IaC Plan Preview
-    needs: [lint, security, test]
+    needs: [lint, security, test, schema-validation]
     runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5

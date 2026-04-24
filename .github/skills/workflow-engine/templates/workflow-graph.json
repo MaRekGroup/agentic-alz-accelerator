@@ -1,5 +1,5 @@
 {
-  "$schema": "workflow-graph/v1",
+  "$schema": "../../../../tools/schemas/workflow-graph.schema.json",
   "description": "Agentic ALZ Accelerator — DAG-based workflow engine",
   "nodes": [
     {

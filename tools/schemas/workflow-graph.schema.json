@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MaRekGroup/agentic-alz-accelerator/schemas/workflow-graph.schema.json",
+  "title": "Workflow Graph",
+  "description": "DAG definition for the ALZ accelerator multi-agent workflow with nodes and edges.",
+  "type": "object",
+  "required": ["$schema", "description", "nodes", "edges"],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the workflow graph."
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Workflow nodes (agent steps, gates, fan-outs, validations).",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Directed edges connecting workflow nodes.",
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "description": "A single node in the workflow graph.",
+      "required": ["id", "type"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique node identifier."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["agent-step", "gate", "subagent-fan-out", "validation"],
+          "description": "Node type in the workflow."
+        },
+        "agent": {
+          "type": "string",
+          "description": "Agent name responsible for this node."
+        },
+        "codename": {
+          "type": "string",
+          "description": "Agent codename (e.g. Conductor, Scribe)."
+        },
+        "artifact": {
+          "type": "string",
+          "description": "Primary artifact produced by this node."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the node."
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Whether this node can be skipped (e.g. brownfield-only steps)."
+        },
+        "approval_required": {
+          "type": "boolean",
+          "description": "Whether this node requires user approval to proceed."
+        },
+        "challenger": {
+          "type": "object",
+          "description": "Challenger review configuration for this node.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "description": "A directed edge between two workflow nodes.",
+      "required": ["from", "to", "condition"],
+      "additionalProperties": true,
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source node ID."
+        },
+        "to": {
+          "type": "string",
+          "description": "Target node ID."
+        },
+        "condition": {
+          "type": "string",
+          "enum": ["on_complete", "on_skip", "on_fail", "on_violation", "on_approve"],
+          "description": "Condition under which this edge is traversed."
+        }
+      }
+    }
+  }
+}
