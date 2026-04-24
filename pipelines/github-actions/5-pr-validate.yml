@@ -142,7 +142,7 @@ jobs:
             echo "=== What-If: $profile ==="
             az deployment sub what-if \
               --location ${{ vars.AZURE_DEPLOYMENT_REGION || 'southcentralus' }} \
-              --template-file infra/bicep/${{ vars.CUSTOMER_NAME || 'marekgroup' }}/main.bicep \
+              --template-file infra/bicep/${{ vars.CUSTOMER_NAME }}/main.bicep \
               --parameters profileName="$profile" \
               --subscription "${{ secrets.PLATFORM_MGMT_SUBSCRIPTION_ID }}" \
               2>&1 | head -100 || echo "(preview only — some params may be missing)"
