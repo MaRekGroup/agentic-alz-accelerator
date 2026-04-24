@@ -1,0 +1,67 @@
+# Auto normalize line endings for all text files
+* text=auto
+
+# Explicitly declare text files to always use LF
+*.md text eol=lf
+*.bicep text eol=lf
+*.bicepparam text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+*.psd1 text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.mjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.txt text eol=lf
+*.mmd text eol=lf
+
+# Terraform / HCL
+*.tf text eol=lf linguist-language=HCL
+*.tfvars text eol=lf linguist-language=HCL
+*.hcl text eol=lf linguist-language=HCL
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.docx binary
+*.svg binary
+
+# Draw.io diagram files
+*.drawio text eol=lf
+
+# GitHub specific files
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+
+# Copilot instructions
+.github/instructions/*.instructions.md linguist-documentation
+docs/**/*.md linguist-documentation
+
+# Docker files
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# CI/CD files
+.github/** text eol=lf
+azure-pipelines*.yml text eol=lf
+pipelines/**/*.yml text eol=lf
