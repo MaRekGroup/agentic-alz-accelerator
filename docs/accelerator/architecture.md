@@ -85,7 +85,7 @@ Model Context Protocol servers under `mcp/` expose tools to agents:
 Infrastructure-as-Code is implemented in both Bicep and Terraform, with Bicep
 as the primary framework.
 
-**Bicep modules** (`infra/bicep/modules/`):
+**Bicep modules** (`infra/bicep/{customer}/modules/`):
 
 | Module | Scope | Description |
 |--------|-------|-------------|
@@ -100,10 +100,10 @@ as the primary framework.
 | `policies/` | subscription | Policy definitions and assignments |
 | `security/` | resourceGroup | AVM Key Vault + Defender enablement |
 
-**Terraform modules** (`infra/terraform/modules/`) mirror the Bicep modules
+**Terraform modules** (`infra/terraform/{customer}/modules/`) mirror the Bicep modules
 with equivalent functionality using `azurerm ~>4.0`.
 
-The root orchestrators (`infra/bicep/main.bicep`, `infra/terraform/main.tf`)
+The root orchestrators (`infra/bicep/{customer}/main.bicep`, `infra/terraform/{customer}/main.tf`)
 compose modules based on landing zone profile configuration.
 
 ### Configuration
@@ -263,8 +263,8 @@ and gate approvals. Production config specifies Azure Table Storage for persiste
 | `agent-output/{customer}/` | Estate state, per-LZ state, challenger reviews |
 | `agent-output/{customer}/tdd/` | Technical Design Documents (.md + .docx + .png) |
 | `agent-output/{customer}/diagrams/` | Architecture diagrams (.drawio + .mmd + .png) |
-| `infra/bicep/parameters/` | Bicep parameter files per platform LZ |
-| `infra/terraform/environments/` | Terraform variable files per environment |
+| `infra/bicep/{customer}/parameters/` | Bicep parameter files per platform LZ |
+| `infra/terraform/{customer}/environments/` | Terraform variable files per environment |
 
 ## Current Deployment State
 

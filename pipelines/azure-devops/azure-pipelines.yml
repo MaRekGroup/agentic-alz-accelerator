@@ -32,6 +32,11 @@ parameters:
     type: string
     default: 'southcentralus'
 
+  - name: customer
+    displayName: 'Customer name for infra paths'
+    type: string
+    default: 'marekgroup'
+
 variables:
   - group: alz-accelerator-${{ parameters.environment }}
   - name: azureServiceConnection
@@ -71,12 +76,12 @@ stages:
                 scriptType: 'bash'
                 scriptLocation: 'inlineScript'
                 inlineScript: |
-                  az bicep build --file infra/bicep/main.bicep
+                  az bicep build --file infra/bicep/${{ parameters.customer }}/main.bicep
                   echo "✅ Bicep validated"
 
           - ${{ if eq(parameters.framework, 'terraform') }}:
             - script: |
-                cd infra/terraform
+                cd infra/terraform/${{ parameters.customer }}
                 terraform init -backend=false
                 terraform validate
                 echo "✅ Terraform validated"
@@ -112,12 +117,12 @@ stages:
                 inlineScript: |
                   az deployment sub what-if \
                     --location ${{ parameters.location }} \
-                    --template-file infra/bicep/main.bicep \
+                    --template-file infra/bicep/${{ parameters.customer }}/main.bicep \
                     --parameters profileName=${{ parameters.profile }}
 
           - ${{ if eq(parameters.framework, 'terraform') }}:
             - script: |
-                cd infra/terraform
+                cd infra/terraform/${{ parameters.customer }}
                 terraform init \
                   -backend-config="storage_account_name=$(tfStateStorageAccount)" \
                   -backend-config="container_name=tfstate" \
@@ -157,13 +162,13 @@ stages:
                       inlineScript: |
                         az deployment sub create \
                           --location ${{ parameters.location }} \
-                          --template-file infra/bicep/main.bicep \
+                          --template-file infra/bicep/${{ parameters.customer }}/main.bicep \
                           --parameters profileName=${{ parameters.profile }} \
                           --name "alz-${{ parameters.profile }}-$(Build.BuildId)"
 
                 - ${{ if eq(parameters.framework, 'terraform') }}:
                   - script: |
-                      cd infra/terraform
+                      cd infra/terraform/${{ parameters.customer }}
                       terraform init \
                         -backend-config="storage_account_name=$(tfStateStorageAccount)" \
                         -backend-config="container_name=tfstate" \

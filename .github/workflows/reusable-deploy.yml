@@ -182,20 +182,20 @@ jobs:
       - name: Validate security baseline
         run: |
           python scripts/validators/validate_security_baseline.py \
-            infra/${{ inputs.framework }}/modules/
+            infra/${{ inputs.framework }}/${{ inputs.customer }}/modules/
 
       - name: Validate cost governance
         run: |
           python scripts/validators/validate_cost_governance.py \
-            infra/${{ inputs.framework }}/modules/
+            infra/${{ inputs.framework }}/${{ inputs.customer }}/modules/
 
       - name: Validate IaC templates
         run: |
           if [ "${{ inputs.framework }}" = "bicep" ]; then
-            az bicep build --file infra/bicep/main.bicep
+            az bicep build --file infra/bicep/${{ inputs.customer }}/main.bicep
             echo "Bicep validated"
           else
-            cd infra/terraform
+            cd infra/terraform/${{ inputs.customer }}
             terraform init -backend=false
             terraform validate
             echo "Terraform validated"
@@ -234,10 +234,10 @@ jobs:
         # Support both subscription and resource-group scoped deployments.
         # Param file pattern: {project_name}-{environment}.bicepparam
         run: |
-          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
+          PARAMS_FILE="infra/bicep/${{ inputs.customer }}/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
           if [ ! -f "$PARAMS_FILE" ]; then
             echo "ERROR: Parameters file not found: $PARAMS_FILE"
-            ls -la infra/bicep/parameters/ || true
+            ls -la infra/bicep/${{ inputs.customer }}/parameters/ || true
             exit 1
           fi
 
@@ -279,7 +279,7 @@ jobs:
 
       - name: Terraform Plan
         if: inputs.framework == 'terraform'
-        working-directory: infra/terraform
+        working-directory: infra/terraform/${{ inputs.customer }}
         run: |
           terraform init \
             -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \
@@ -306,7 +306,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ inputs.project_name }}
-          path: infra/terraform/tfplan
+          path: infra/terraform/${{ inputs.customer }}/tfplan
 
   # =========================================================================
   # Stage 3: Deploy — apply changes (requires GitHub environment approval)
@@ -345,7 +345,7 @@ jobs:
         # Support both subscription and resource-group scoped deployments.
         run: |
           DEPLOYMENT_NAME="alz-${{ inputs.project_name }}-$(date +%Y%m%d%H%M%S)"
-          PARAMS_FILE="infra/bicep/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
+          PARAMS_FILE="infra/bicep/${{ inputs.customer }}/parameters/${{ inputs.project_name }}-${{ inputs.environment }}.bicepparam"
 
           # Build extra params for LAW ID if MGMT subscription is available
           # Skip for platform-management — it creates the LAW, doesn't consume one
@@ -392,12 +392,12 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: tfplan-${{ inputs.project_name }}
-          path: infra/terraform/
+          path: infra/terraform/${{ inputs.customer }}/
 
       - name: Deploy with Terraform
         id: deploy-tf
         if: inputs.framework == 'terraform'
-        working-directory: infra/terraform
+        working-directory: infra/terraform/${{ inputs.customer }}
         run: |
           terraform init \
             -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" \

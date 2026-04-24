@@ -45,8 +45,8 @@ Fixes #
 
 ### Validators
 
-- [ ] Security baseline: `python scripts/validators/validate_security_baseline.py infra/bicep/`
-- [ ] Cost governance: `python scripts/validators/validate_cost_governance.py infra/bicep/`
+- [ ] Security baseline: `python scripts/validators/validate_security_baseline.py infra/bicep/{customer}/`
+- [ ] Cost governance: `python scripts/validators/validate_cost_governance.py infra/bicep/{customer}/`
 - [ ] Python tests: `python -m pytest tests/ -v`
 
 ## Well-Architected Framework Alignment

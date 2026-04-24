@@ -87,12 +87,12 @@
       "iac_variants": {
         "bicep": {
           "agent": "bicep-code",
-          "artifact_path": "infra/bicep/{project}/",
+          "artifact_path": "infra/bicep/{customer}/",
           "subagents": ["bicep-validate-subagent", "bicep-whatif-subagent"]
         },
         "terraform": {
           "agent": "terraform-code",
-          "artifact_path": "infra/terraform/{project}/",
+          "artifact_path": "infra/terraform/{customer}/",
           "subagents": ["terraform-validate-subagent", "iac-planner-subagent"]
         }
       }

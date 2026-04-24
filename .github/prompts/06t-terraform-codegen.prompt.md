@@ -11,8 +11,8 @@ plan, using AVM modules where available.
 ## Process
 
 1. Read `04-implementation-plan.md` and `04-governance-constraints.md`
-2. Generate Terraform modules under `infra/terraform/{project}/`
-3. Create tfvars per environment under `infra/terraform/environments/`
+2. Generate Terraform modules under `infra/terraform/{customer}/`
+3. Create tfvars per environment under `infra/terraform/{customer}/environments/`
 4. Enforce security baseline in every module
 5. Include budget resource with parameterized alerts
 
@@ -28,11 +28,11 @@ Every Terraform file must pass:
 ## Validation
 
 ```bash
-cd infra/terraform/{project} && terraform init && terraform validate
-python scripts/validators/validate_security_baseline.py infra/terraform/{project}/
-python scripts/validators/validate_cost_governance.py infra/terraform/{project}/
+cd infra/terraform/{customer} && terraform init && terraform validate
+python scripts/validators/validate_security_baseline.py infra/terraform/{customer}/
+python scripts/validators/validate_cost_governance.py infra/terraform/{customer}/
 ```
 
 ## Output
 
-Terraform files in `infra/terraform/{project}/` with environment tfvars.
+Terraform files in `infra/terraform/{customer}/` with environment tfvars.

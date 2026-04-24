@@ -27,8 +27,8 @@ always previewing changes before applying.
 ## Bicep Deployment
 
 ```bash
-az deployment sub what-if --location southcentralus --template-file infra/bicep/main.bicep --parameters infra/bicep/parameters/dev.bicepparam
-az deployment sub create --location southcentralus --template-file infra/bicep/main.bicep --parameters infra/bicep/parameters/dev.bicepparam
+az deployment sub what-if --location southcentralus --template-file infra/bicep/{customer}/main.bicep --parameters infra/bicep/{customer}/parameters/dev.bicepparam
+az deployment sub create --location southcentralus --template-file infra/bicep/{customer}/main.bicep --parameters infra/bicep/{customer}/parameters/dev.bicepparam
 ```
 
 ## Terraform Deployment

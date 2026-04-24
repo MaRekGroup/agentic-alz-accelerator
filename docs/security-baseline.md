@@ -44,5 +44,5 @@ Violations block code generation and deployment.
 python scripts/validators/validate_security_baseline.py infra/
 
 # Check a specific file
-python scripts/validators/validate_security_baseline.py infra/bicep/main.bicep
+python scripts/validators/validate_security_baseline.py infra/bicep/{customer}/main.bicep
 ```

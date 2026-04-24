@@ -45,6 +45,10 @@ agent-output/*/
 
 # Customer-specific config (real values — use .sample files as templates)
 environments/subscriptions.json
-infra/bicep/parameters/*.bicepparam
-!infra/bicep/parameters/*.sample.bicepparam
-infra/terraform/environments/*/terraform.tfvars
+
+# Customer IaC (per-customer folders under infra/{bicep,terraform}/)
+# Keep README.md tracked as template documentation
+infra/bicep/*/
+!infra/bicep/README.md
+infra/terraform/*/
+!infra/terraform/README.md

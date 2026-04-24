@@ -98,7 +98,7 @@ Or pass as a parameter at deploy time:
 ```bash
 # Bicep
 az deployment sub create \
-  --template-file infra/bicep/modules/connectivity/main.bicep \
+  --template-file infra/bicep/{customer}/modules/connectivity/main.bicep \
   --parameters hubTopology=vwan
 
 # Terraform
@@ -591,7 +591,7 @@ python -m src.agents.orchestrator \
 # Connectivity
 az deployment sub create \
   --location eastus2 \
-  --template-file infra/bicep/modules/connectivity/main.bicep \
+  --template-file infra/bicep/{customer}/modules/connectivity/main.bicep \
   --parameters \
       prefix=contoso \
       environment=prod \
@@ -604,7 +604,7 @@ az deployment sub create \
 # Security
 az deployment sub create \
   --location eastus2 \
-  --template-file infra/bicep/modules/platform-security/main.bicep \
+  --template-file infra/bicep/{customer}/modules/platform-security/main.bicep \
   --parameters \
       prefix=contoso \
       environment=prod \
@@ -617,7 +617,7 @@ az deployment sub create \
 ### Option D: Terraform Direct
 
 ```bash
-cd infra/terraform
+cd infra/terraform/{customer}
 
 # Connectivity
 terraform init

@@ -11,8 +11,8 @@ using AVM modules where available.
 ## Process
 
 1. Read `04-implementation-plan.md` and `04-governance-constraints.md`
-2. Generate Bicep modules under `infra/bicep/{project}/`
-3. Create parameter files per environment under `infra/bicep/parameters/`
+2. Generate Bicep modules under `infra/bicep/{customer}/`
+3. Create parameter files per environment under `infra/bicep/{customer}/parameters/`
 4. Enforce security baseline in every module
 5. Include budget resource with parameterized alerts
 
@@ -28,11 +28,11 @@ Every Bicep file must pass:
 ## Validation
 
 ```bash
-az bicep build --file infra/bicep/{project}/main.bicep
-python scripts/validators/validate_security_baseline.py infra/bicep/{project}/
-python scripts/validators/validate_cost_governance.py infra/bicep/{project}/
+az bicep build --file infra/bicep/{customer}/main.bicep
+python scripts/validators/validate_security_baseline.py infra/bicep/{customer}/
+python scripts/validators/validate_cost_governance.py infra/bicep/{customer}/
 ```
 
 ## Output
 
-Bicep files in `infra/bicep/{project}/` with parameter files in `parameters/`.
+Bicep files in `infra/bicep/{customer}/` with parameter files in `parameters/`.
