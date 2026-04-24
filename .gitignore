@@ -25,6 +25,9 @@ Thumbs.db
 *.tfstate.backup
 .terraform.lock.hcl
 
+# alz-recall index
+tmp/
+
 # pytest
 .pytest_cache/
 htmlcov/
