@@ -1,0 +1,31 @@
+{
+  "$schema": "count-manifest-v1",
+  "description": "Single source of truth for project entity counts. Validators auto-compute actual values from computed_from globs and compare. Never hard-code these counts elsewhere.",
+  "counts": {
+    "agents": {
+      "computed_from": ".github/agents/*.md",
+      "description": "Agent definition files (orchestrator, requirements, governance, etc.)"
+    },
+    "skills": {
+      "computed_from": ".github/skills/*/SKILL.md",
+      "description": "Agent skills with SKILL.md entry points"
+    },
+    "instructions": {
+      "computed_from": ".github/instructions/*.instructions.md",
+      "description": "Instruction files with glob-based auto-application"
+    },
+    "validators": {
+      "computed_from": "scripts/validators/*.py",
+      "description": "Security baseline and cost governance validators"
+    },
+    "workflows": {
+      "computed_from": ".github/workflows/*.yml",
+      "description": "GitHub Actions workflow files"
+    },
+    "schemas": {
+      "computed_from": "tools/schemas/*.schema.json",
+      "description": "JSON schema files for state and config validation"
+    }
+  },
+  "updated": "2026-04-24"
+}
