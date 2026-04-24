@@ -136,7 +136,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
           # Also output a simple list for the summary job
-          TARGET_LIST=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | jq -R . | jq -s .)
+          TARGET_LIST=$(echo "$SELECTED" | tr ' ' '\n' | grep -v '^$' | jq -R . | jq -sc .)
           echo "target_list=$TARGET_LIST" >> "$GITHUB_OUTPUT"
 
           echo ""
