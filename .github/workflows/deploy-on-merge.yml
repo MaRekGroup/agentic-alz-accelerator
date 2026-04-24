@@ -165,7 +165,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
-      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
+      customer: ${{ vars.CUSTOMER_NAME }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -192,7 +192,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
-      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
+      customer: ${{ vars.CUSTOMER_NAME }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -219,7 +219,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
-      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
+      customer: ${{ vars.CUSTOMER_NAME }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -245,7 +245,7 @@ jobs:
       action: deploy
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
       prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
-      customer: ${{ vars.CUSTOMER_NAME || 'marekgroup' }}
+      customer: ${{ vars.CUSTOMER_NAME }}
     secrets:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
