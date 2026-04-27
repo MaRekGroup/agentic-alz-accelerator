@@ -602,8 +602,10 @@ jobs:
             agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
           retention-days: 90
 
-      - name: Commit TDD to repository
+      - name: Commit TDD to repository via PR
         if: steps.tdd.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -613,10 +615,17 @@ jobs:
           if git diff --cached --quiet; then
             echo "No TDD changes to commit"
           else
-            git commit -m "docs(tdd): update as-built TDD for ${{ inputs.project_name }} [skip ci]"
-            git pull --rebase origin "${{ github.ref_name }}"
-            git push origin HEAD:"${{ github.ref_name }}"
-            echo "TDD committed and pushed"
+            BRANCH="docs/tdd-${{ inputs.project_name }}-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH"
+            git commit -m "docs(tdd): update as-built TDD for ${{ inputs.project_name }}"
+            git push origin "$BRANCH"
+            gh pr create \
+              --base "${{ github.ref_name }}" \
+              --head "$BRANCH" \
+              --title "docs(tdd): update as-built TDD for ${{ inputs.project_name }}" \
+              --body "Auto-generated TDD from deployment run [\`${{ github.run_id }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})." \
+              --label "documentation"
+            echo "TDD PR created from branch $BRANCH"
           fi
 
       - name: Notify Teams on completion
