@@ -6,7 +6,7 @@ on:
       mg_prefix:
         description: Management group prefix
         required: false
-        default: mrg
+        default: alz
         type: string
       customer:
         description: 'Customer name for output directory'
