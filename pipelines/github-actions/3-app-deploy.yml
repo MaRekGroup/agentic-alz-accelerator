@@ -197,6 +197,8 @@ jobs:
       location: ${{ matrix.location }}
       action: ${{ inputs.action }}
       runner_label: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+      prefix: ${{ vars.AZURE_MANAGEMENT_GROUP_PREFIX || 'alz' }}
+      customer: ${{ vars.CUSTOMER_NAME }}
     secrets: inherit
 
   # =========================================================================
