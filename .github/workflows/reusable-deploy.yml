@@ -81,6 +81,8 @@ on:
         required: false
       MGMT_SUBSCRIPTION_ID:
         required: false
+      CONN_SUBSCRIPTION_ID:
+        required: false
       TF_STATE_STORAGE_ACCOUNT:
         required: false
       TEAMS_WEBHOOK_URL:
@@ -263,6 +265,20 @@ jobs:
             fi
           fi
 
+          # Inject hub VNet ID for identity spoke peering
+          if [[ -n "${{ secrets.CONN_SUBSCRIPTION_ID }}" && "${{ inputs.project_name }}" == "platform-identity" ]]; then
+            declare -A REGION_MAP_HUB=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT_HUB="${REGION_MAP_HUB[${{ inputs.location }}]:-${{ inputs.location }}}"
+            HUB_RG="${{ inputs.prefix }}-conn-hub-${REGION_SHORT_HUB}-rg"
+            HUB_VNET="${{ inputs.prefix }}-hub-vnet"
+            HUB_VNET_ID="/subscriptions/${{ secrets.CONN_SUBSCRIPTION_ID }}/resourceGroups/${HUB_RG}/providers/Microsoft.Network/virtualNetworks/${HUB_VNET}"
+            EXTRA_PARAMS="${EXTRA_PARAMS} --parameters hubVnetId=${HUB_VNET_ID}"
+          fi
+
           if [ "${{ inputs.deployment_scope }}" = "group" ]; then
             az deployment group what-if \
               --resource-group ${{ inputs.resource_group }} \
@@ -367,6 +383,20 @@ jobs:
             else
               EXTRA_PARAMS="--parameters logAnalyticsWorkspaceId=${LAW_ID}"
             fi
+          fi
+
+          # Inject hub VNet ID for identity spoke peering
+          if [[ -n "${{ secrets.CONN_SUBSCRIPTION_ID }}" && "${{ inputs.project_name }}" == "platform-identity" ]]; then
+            declare -A REGION_MAP_HUB=(
+              [eastus]=eus [eastus2]=eus2 [westus]=wus [westus2]=wus2 [westus3]=wus3
+              [centralus]=cus [southcentralus]=scus [northeurope]=neu [westeurope]=weu
+              [uksouth]=uks [southeastasia]=sea [australiaeast]=aue [japaneast]=jpe
+            )
+            REGION_SHORT_HUB="${REGION_MAP_HUB[${{ inputs.location }}]:-${{ inputs.location }}}"
+            HUB_RG="${{ inputs.prefix }}-conn-hub-${REGION_SHORT_HUB}-rg"
+            HUB_VNET="${{ inputs.prefix }}-hub-vnet"
+            HUB_VNET_ID="/subscriptions/${{ secrets.CONN_SUBSCRIPTION_ID }}/resourceGroups/${HUB_RG}/providers/Microsoft.Network/virtualNetworks/${HUB_VNET}"
+            EXTRA_PARAMS="${EXTRA_PARAMS} --parameters hubVnetId=${HUB_VNET_ID}"
           fi
 
           if [ "${{ inputs.deployment_scope }}" = "group" ]; then

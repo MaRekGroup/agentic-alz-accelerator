@@ -7,7 +7,7 @@
     "iac_tool": "bicep",
     "management_group_prefix": "mrg",
     "created": "2026-04-16",
-    "updated": "2026-04-20T17:00:00Z"
+    "updated": "2026-04-27T19:30:00Z"
   },
   "platform_landing_zones": {
     "management": {
@@ -47,6 +47,14 @@
       "resource_group": "mrg-identity-scus-rg",
       "depends_on": ["connectivity"],
       "last_deploy_run": 24576179090,
+      "pending_changes": {
+        "spoke_vnet": {
+          "pr": 24,
+          "branch": "feat/identity-spoke-vnet",
+          "gate5": "pass",
+          "description": "Spoke VNet 10.1.0.0/24 peered to hub, DomainControllers + IdentityServices subnets with hardened NSGs"
+        }
+      },
       "session_state": "agent-output/marekgroup/platform-identity/00-session-state.json"
     },
     "security": {
