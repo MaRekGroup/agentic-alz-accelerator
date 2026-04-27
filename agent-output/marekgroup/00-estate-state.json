@@ -46,14 +46,12 @@
       "profile": "platform-identity",
       "resource_group": "mrg-identity-scus-rg",
       "depends_on": ["connectivity"],
-      "last_deploy_run": 24576179090,
-      "pending_changes": {
-        "spoke_vnet": {
-          "pr": 24,
-          "branch": "feat/identity-spoke-vnet",
-          "gate5": "pass",
-          "description": "Spoke VNet 10.1.0.0/24 peered to hub, DomainControllers + IdentityServices subnets with hardened NSGs"
-        }
+      "last_deploy_run": 25016204631,
+      "key_resources": {
+        "spoke_vnet": "mrg-identity-spoke-vnet",
+        "spoke_address_space": "10.1.0.0/24",
+        "subnets": ["DomainControllers", "IdentityServices"],
+        "peering": "bidirectional to mrg-hub-vnet"
       },
       "session_state": "agent-output/marekgroup/platform-identity/00-session-state.json"
     },
