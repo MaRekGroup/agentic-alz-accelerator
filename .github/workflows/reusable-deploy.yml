@@ -607,9 +607,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.docx \
-                  agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.md \
-                  agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
+          git add -f agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.docx \
+                     agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.md \
+                     agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
           if git diff --cached --quiet; then
             echo "No TDD changes to commit"
           else

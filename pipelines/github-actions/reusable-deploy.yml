@@ -602,6 +602,23 @@ jobs:
             agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
           retention-days: 90
 
+      - name: Commit TDD to repository
+        if: steps.tdd.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.docx \
+                     agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.md \
+                     agent-output/${{ inputs.customer }}/tdd/TDD_${{ inputs.project_name }}_*.svg
+          if git diff --cached --quiet; then
+            echo "No TDD changes to commit"
+          else
+            git commit -m "docs(tdd): update as-built TDD for ${{ inputs.project_name }} [skip ci]"
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push origin HEAD:"${{ github.ref_name }}"
+            echo "TDD committed and pushed"
+          fi
+
       - name: Notify Teams on completion
         if: always()
         env:
