@@ -21,6 +21,18 @@ param technicalContact string
 @description('Environment name')
 param environment string
 
+@description('Deploy spoke VNet for identity workloads')
+param deploySpokeVnet bool = true
+
+@description('Spoke VNet address space')
+param spokeVnetAddressSpace string = '10.1.0.0/24'
+
+@description('Hub VNet resource ID for peering (from connectivity subscription)')
+param hubVnetId string = ''
+
+@description('Log Analytics Workspace ID for diagnostics')
+param logAnalyticsWorkspaceId string = ''
+
 param now string = utcNow('yyyy-MM-01')
 
 // ─── Variables ──────────────────────────────────────────────────────────────
@@ -59,6 +71,21 @@ module identityResources 'resources.bicep' = {
   params: {
     location: location
     prefix: prefix
+    tags: tags
+  }
+}
+
+// ─── Spoke VNet (RG-scoped module) ──────────────────────────────────────────
+
+module spokeVnet 'spoke-vnet.bicep' = if (deploySpokeVnet && hubVnetId != '') {
+  name: 'identity-spoke-vnet-deployment'
+  scope: rg
+  params: {
+    location: location
+    prefix: prefix
+    spokeVnetAddressSpace: spokeVnetAddressSpace
+    hubVnetId: hubVnetId
+    logAnalyticsWorkspaceId: logAnalyticsWorkspaceId
     tags: tags
   }
 }
@@ -136,3 +163,6 @@ output managedIdentityPrincipalId string = identityResources.outputs.managedIden
 output managedIdentityClientId string = identityResources.outputs.managedIdentityClientId
 output agentIdentityId string = identityResources.outputs.agentIdentityId
 output agentIdentityPrincipalId string = identityResources.outputs.agentIdentityPrincipalId
+output spokeVnetId string = spokeVnet.?outputs.?spokeVnetId ?? ''
+output domainControllersSubnetId string = spokeVnet.?outputs.?domainControllersSubnetId ?? ''
+output identityServicesSubnetId string = spokeVnet.?outputs.?identityServicesSubnetId ?? ''
