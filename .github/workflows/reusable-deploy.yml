@@ -529,6 +529,7 @@ jobs:
         id: tdd
         continue-on-error: true
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq libcairo2-dev libffi-dev 2>/dev/null
           pip install cairosvg python-docx pillow pyyaml azure-mgmt-resourcegraph azure-identity 2>/dev/null
 
           # Read subscription name from config
