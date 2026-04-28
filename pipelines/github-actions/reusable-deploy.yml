@@ -530,7 +530,14 @@ jobs:
         id: tdd
         continue-on-error: true
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq libcairo2-dev libffi-dev 2>/dev/null
+          # System deps:
+          #  - libcairo2-dev / libffi-dev → cairosvg (SVG fallback rendering)
+          #  - graphviz                   → diagrams library (Azure-icon PNG)
+          sudo apt-get update -qq && sudo apt-get install -y -qq libcairo2-dev libffi-dev graphviz 2>/dev/null
+          # Use full requirements.txt so the `diagrams` package is installed
+          # (without it, _generate_png_diagram() fails silently and the TDD
+          # falls back to hand-drawn SVG without real Azure icons).
+          pip install -r requirements.txt 2>/dev/null
           pip install cairosvg python-docx pillow pyyaml azure-mgmt-resourcegraph azure-identity 2>/dev/null
 
           # Read subscription name from config
