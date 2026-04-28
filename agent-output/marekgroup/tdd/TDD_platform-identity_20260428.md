@@ -2,7 +2,7 @@
 
 ## platform-identity
 
-> **Profile**: platform-identity · **Environment**: prod · **Generated**: 2026-04-28 15:27 UTC
+> **Profile**: platform-identity · **Environment**: prod · **Generated**: 2026-04-28 18:31 UTC
 
 | Field | Value |
 |-------|-------|
@@ -10,7 +10,7 @@
 | Subscription ID | `27f84456-9d87-4d58-8c73-4350c450220e` |
 | Location | southcentralus |
 | IaC Framework | Bicep |
-| Deployment ID | alz-platform-identity-20260428152453 |
+| Deployment ID | alz-platform-identity-20260428182954 |
 | Document Version | 1.0 (auto-generated) |
 
 ---
@@ -36,7 +36,7 @@ All resources comply with the CAF enterprise-scale baseline policies.
 | Region | southcentralus |
 | Environment | prod |
 | IaC Framework | Bicep |
-| Deployment ID | alz-platform-identity-20260428152453 |
+| Deployment ID | alz-platform-identity-20260428182954 |
 
 ---
 
@@ -46,7 +46,7 @@ The following diagram illustrates the as-built architecture of this landing zone
 including all deployed resources, networking topology, and security controls.
 Icons follow the official Microsoft Azure Architecture Icon set.
 
-![platform-identity Architecture — As-Built](TDD_platform-identity_20260428_architecture.svg)
+![platform-identity Architecture — As-Built](TDD_platform-identity_architecture.svg)
 
 *Figure 1: platform-identity Architecture — As-Built*
 
@@ -62,21 +62,21 @@ queried from Azure Resource Graph at generation time.
 | Resource Type | Count |
 |---------------|-------|
 | networksecuritygroups | 12 |
-| networkwatchers | 6 |
 | virtualnetworks | 6 |
-| userassignedidentities | 2 |
+| networkwatchers | 6 |
 | networkinterfaces | 2 |
+| userassignedidentities | 2 |
+| virtualmachines | 1 |
+| publicipaddresses | 1 |
 | disks | 1 |
 | virtualnetworklinks | 1 |
+| systemtopics | 1 |
+| extensions | 1 |
+| bastionhosts | 1 |
+| storageaccounts | 1 |
 | actiongroups | 1 |
 | privatednszones | 1 |
-| bastionhosts | 1 |
 | movecollections | 1 |
-| systemtopics | 1 |
-| virtualmachines | 1 |
-| storageaccounts | 1 |
-| extensions | 1 |
-| publicipaddresses | 1 |
 
 **Total resources: 39**
 
