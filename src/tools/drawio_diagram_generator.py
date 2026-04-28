@@ -22,13 +22,12 @@ identical.
 
 from __future__ import annotations
 
-import base64
 import html
 import json
 import logging
 import re
 import unicodedata
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -646,7 +645,7 @@ class DrawioEngine:
         b.container(440, 135, 355, 210, fill="#F2F7FB", stroke="#0078D4")
         b.text(445, 110, 200, 18, "Secrets & Keys", font_size=11, bold=True)
         kv1 = b.icon("Key Vaults", 460, 160, "Key Vault")
-        kv2 = b.icon("Key Vaults", 545, 160, "CMK Vault")
+        b.icon("Key Vaults", 545, 160, "CMK Vault")
         b.icon("Dedicated HSM", 630, 160, "Managed HSM")
 
         # Posture
