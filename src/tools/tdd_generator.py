@@ -16,7 +16,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-import cairosvg
+try:
+    import cairosvg
+except ImportError:
+    cairosvg = None  # type: ignore[assignment]
+
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -30,6 +34,7 @@ from src.tools.azure_diagram_generator import (
     generate_management_diagram,
     generate_security_diagram,
 )
+from src.tools.drawio_diagram_generator import DrawioEngine
 from src.tools.python_diagram_generator import DiagramEngine
 
 logger = logging.getLogger(__name__)
@@ -157,6 +162,8 @@ class TDDGenerator:
     def _insert_diagram(self, svg_content: str, caption: str = "") -> None:
         """Convert SVG to PNG and insert into the document."""
         try:
+            if cairosvg is None:
+                raise ImportError("cairosvg is not installed")
             png_bytes = cairosvg.svg2png(
                 bytestring=svg_content.encode("utf-8"),
                 output_width=1400,
@@ -203,6 +210,26 @@ class TDDGenerator:
                 f"[Diagram could not be rendered: {e}]"
             ).italic = True
 
+    def _generate_drawio_diagram(self, output_dir: str | None = None) -> tuple[str | None, str | None]:
+        """Generate Draw.io + SVG diagrams using the DrawioEngine.
+
+        Returns (drawio_path, svg_path) or (None, None) on failure.
+        """
+        try:
+            engine = DrawioEngine(output_dir=output_dir or "agent-output/tdd")
+            drawio_path, svg_path = engine.generate_tdd_diagram(
+                profile=self.profile,
+                project_name=self.project_name,
+                subscription_name=self.subscription_name,
+                location=self.location,
+                output_dir=output_dir,
+            )
+            logger.info("Draw.io diagram generated: %s", drawio_path)
+            return drawio_path, svg_path
+        except Exception as e:
+            logger.warning("Draw.io diagram generation failed: %s", e)
+            return None, None
+
     def _generate_png_diagram(self, output_dir: str | None = None) -> str | None:
         """Generate a PNG architecture diagram using the diagrams library.
 
@@ -218,7 +245,17 @@ class TDDGenerator:
                 output_dir=output_dir,
             )
         except Exception as e:
-            logger.warning(f"Failed to generate PNG diagram: {e}")
+            # Loud failure — silent fallback to SVG previously masked the
+            # missing `graphviz` system dep / `diagrams` pip package for days.
+            # Logging at ERROR with a sentinel marker makes CI surface this.
+            logger.error(
+                "[ICONS_FALLBACK_USED] Failed to generate PNG diagram with "
+                "Azure icons (diagrams library). Falling back to hand-drawn "
+                "SVG. Ensure 'graphviz' system package and 'diagrams' pip "
+                "package are installed. Error: %s",
+                e,
+                exc_info=True,
+            )
             return None
 
     # ─── Cover Page ───────────────────────────────────────────────────────
@@ -349,13 +386,21 @@ class TDDGenerator:
             "Icons follow the official Microsoft Azure Architecture Icon set."
         )
 
-        # Try PNG first (diagrams library with real Azure icons), fall back to SVG
-        png_path = self._generate_png_diagram()
-        if png_path and Path(png_path).exists():
-            self._insert_png_diagram(png_path, f"Figure 1: {self.project_name} Architecture — As-Built")
+        # Preferred: Draw.io engine (produces .drawio + .svg with Azure icons)
+        # Fallback 1: PNG via diagrams/graphviz library
+        # Fallback 2: hand-drawn SVG via azure_diagram_generator
+        caption = f"Figure 1: {self.project_name} Architecture — As-Built"
+        _drawio_path, drawio_svg = self._generate_drawio_diagram()
+        if drawio_svg and Path(drawio_svg).exists():
+            svg_content = Path(drawio_svg).read_text(encoding="utf-8")
+            self._insert_diagram(svg_content, caption)
         else:
-            svg = self._get_profile_diagram()
-            self._insert_diagram(svg, f"Figure 1: {self.project_name} Architecture — As-Built")
+            png_path = self._generate_png_diagram()
+            if png_path and Path(png_path).exists():
+                self._insert_png_diagram(png_path, caption)
+            else:
+                svg = self._get_profile_diagram()
+                self._insert_diagram(svg, caption)
 
     def _get_profile_diagram(self) -> str:
         """Generate the appropriate SVG diagram for this profile."""
@@ -830,18 +875,28 @@ class TDDGenerator:
 
         Path(svg_path).parent.mkdir(parents=True, exist_ok=True)
 
-        # Generate PNG diagram (diagrams library with real Azure icons)
+        # Preferred: Draw.io engine (.drawio + .svg with Azure icons)
+        # Fallback 1: PNG via diagrams/graphviz library
+        # Fallback 2: hand-drawn SVG via azure_diagram_generator
+        out_dir = str(Path(svg_path).parent)
+        drawio_path, drawio_svg_path = self._generate_drawio_diagram(output_dir=out_dir)
         png_filename = svg_filename.replace("_architecture.svg", "_architecture.png")
-        png_path = self._generate_png_diagram(output_dir=str(Path(svg_path).parent))
-        if not png_path or not Path(png_path).exists():
+        if drawio_svg_path and Path(drawio_svg_path).exists():
+            # Draw.io SVG is the primary diagram for markdown
             png_filename = None
-            # Fall back to SVG
-            svg_content = self._get_profile_diagram()
-            Path(svg_path).write_text(svg_content, encoding="utf-8")
-            logger.info(f"Architecture diagram (SVG fallback) saved to {svg_path}")
+            svg_filename = Path(drawio_svg_path).name
+            logger.info(f"Architecture diagram (Draw.io SVG) saved to {drawio_svg_path}")
         else:
-            png_filename = Path(png_path).name
-            logger.info(f"Architecture diagram (PNG) saved to {png_path}")
+            png_path = self._generate_png_diagram(output_dir=out_dir)
+            if not png_path or not Path(png_path).exists():
+                png_filename = None
+                # Fall back to SVG
+                svg_content = self._get_profile_diagram()
+                Path(svg_path).write_text(svg_content, encoding="utf-8")
+                logger.info(f"Architecture diagram (SVG fallback) saved to {svg_path}")
+            else:
+                png_filename = Path(png_path).name
+                logger.info(f"Architecture diagram (PNG) saved to {png_path}")
 
         # Generate shared estate PNG once (all TDDs reference the same file)
         estate_diagram_filename = None

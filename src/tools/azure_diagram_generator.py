@@ -458,9 +458,18 @@ def generate_management_diagram(subscription_name: str, location: str,
 
 
 def generate_connectivity_diagram(subscription_name: str, location: str,
-                                   hub_cidr: str = "10.0.0.0/16",
-                                   topology: str = "hub-spoke") -> str:
-    """Generate the Connectivity Landing Zone architecture diagram."""
+                                   hub_cidr: str = "",
+                                   topology: str = "hub-spoke",
+                                   spokes: list[dict] | None = None) -> str:
+    """Generate the Connectivity Landing Zone architecture diagram.
+
+    Args:
+        hub_cidr: Optional hub VNet CIDR. If omitted, the label shows just
+            "Hub VNet" without a parenthesised CIDR — avoids leaking opinionated
+            defaults that may not match the customer's actual network plan.
+        spokes: Optional list of {"name": str, "cidr": str} dicts describing
+            spoke peerings to render. If None, no spoke peering panel is drawn.
+    """
     gen = AzureDiagramGenerator()
     gen.title = "Platform Connectivity Landing Zone — As-Built"
     gen.subtitle = f"{subscription_name}  ·  {location}  ·  Topology: {topology}"
@@ -468,8 +477,9 @@ def generate_connectivity_diagram(subscription_name: str, location: str,
     gen.groups.append(DiagramGroup("sub", f"Subscription: {subscription_name}",
                                    10, 10, 780, 520, AzureColor.GREEN, "subscription"))
 
-    # Hub VNet group
-    gen.groups.append(DiagramGroup("hub", f"Hub VNet ({hub_cidr})",
+    # Hub VNet group — only show CIDR if caller provided one
+    hub_label = f"Hub VNet ({hub_cidr})" if hub_cidr else "Hub VNet"
+    gen.groups.append(DiagramGroup("hub", hub_label,
                                    30, 50, 740, 200, AzureColor.GREEN, "vnet"))
     gen.nodes.extend([
         DiagramNode("fw", "Azure Firewall", "firewall", 50, 90, 130, 90,
@@ -494,26 +504,22 @@ def generate_connectivity_diagram(subscription_name: str, location: str,
                     sublabel="Traffic Analytics"),
     ])
 
-    # Spoke peerings
-    gen.groups.append(DiagramGroup("spokes", "Spoke VNet Peerings",
-                                   30, 410, 740, 110, AzureColor.BLUE, "vnet"))
-    gen.nodes.extend([
-        DiagramNode("spoke_corp", "Corp Spoke", "vnet", 50, 435, 120, 65,
-                    sublabel="10.2.0.0/16"),
-        DiagramNode("spoke_online", "Online Spoke", "vnet", 190, 435, 120, 65,
-                    sublabel="10.1.0.0/16"),
-        DiagramNode("spoke_sap", "SAP Spoke", "vnet", 330, 435, 120, 65,
-                    sublabel="10.5.0.0/16"),
-        DiagramNode("spoke_sandbox", "Sandbox", "vnet", 470, 435, 120, 65,
-                    sublabel="10.10.0.0/16"),
-    ])
+    # Spoke peerings — data-driven from caller. Avoids hardcoded customer
+    # spokes (corp/online/sap/sandbox) that may not exist in a given estate.
+    if spokes:
+        gen.groups.append(DiagramGroup("spokes", "Spoke VNet Peerings",
+                                       30, 410, 740, 110, AzureColor.BLUE, "vnet"))
+        for idx, spoke in enumerate(spokes[:5]):  # cap at 5 to fit layout
+            sid = f"spoke_{idx}"
+            sname = spoke.get("name", f"Spoke {idx + 1}")
+            scidr = spoke.get("cidr", "")
+            gen.nodes.append(DiagramNode(sid, sname, "vnet",
+                                         50 + (idx * 140), 435, 120, 65,
+                                         sublabel=scidr))
+            gen.edges.append(DiagramEdge("fw", sid, "peering",
+                                         style="dashed", color=AzureColor.GREEN))
 
-    gen.edges.extend([
-        DiagramEdge("fw", "spoke_corp", "peering", style="dashed", color=AzureColor.GREEN),
-        DiagramEdge("fw", "spoke_online", "peering", style="dashed", color=AzureColor.GREEN),
-        DiagramEdge("fw", "spoke_sap", "peering", style="dashed", color=AzureColor.GREEN),
-        DiagramEdge("gw", "er", "", color=AzureColor.GREEN),
-    ])
+    gen.edges.append(DiagramEdge("gw", "er", "", color=AzureColor.GREEN))
 
     return gen.generate_svg()
 
@@ -607,23 +613,24 @@ def generate_security_diagram(subscription_name: str, location: str) -> str:
 def generate_app_lz_diagram(profile: str, lz_name: str, display_name: str,
                              subscription_name: str, location: str,
                              vnet_cidr: str = "") -> str:
-    """Generate an Application Landing Zone architecture diagram based on profile."""
+    """Generate an Application Landing Zone architecture diagram based on profile.
+
+    `vnet_cidr` is optional. When omitted, the VNet group label renders without
+    a CIDR rather than substituting an opinionated default that may not match
+    the customer's actual network plan.
+    """
     gen = AzureDiagramGenerator()
     gen.title = f"Application Landing Zone: {display_name} — As-Built"
     gen.subtitle = f"{subscription_name}  ·  {location}  ·  Profile: {profile}"
 
     if profile == "corp":
-        return _generate_corp_diagram(gen, display_name, subscription_name, location,
-                                       vnet_cidr or "10.2.0.0/16")
+        return _generate_corp_diagram(gen, display_name, subscription_name, location, vnet_cidr)
     elif profile == "online":
-        return _generate_online_diagram(gen, display_name, subscription_name, location,
-                                         vnet_cidr or "10.1.0.0/16")
+        return _generate_online_diagram(gen, display_name, subscription_name, location, vnet_cidr)
     elif profile == "sap":
-        return _generate_sap_diagram(gen, display_name, subscription_name, location,
-                                      vnet_cidr or "10.5.0.0/16")
+        return _generate_sap_diagram(gen, display_name, subscription_name, location, vnet_cidr)
     elif profile == "sandbox":
-        return _generate_sandbox_diagram(gen, display_name, subscription_name, location,
-                                          vnet_cidr or "10.10.0.0/16")
+        return _generate_sandbox_diagram(gen, display_name, subscription_name, location, vnet_cidr)
     else:
         # Generic fallback
         gen.groups.append(DiagramGroup("sub", f"Subscription: {subscription_name}",
@@ -636,7 +643,7 @@ def _generate_corp_diagram(gen, display_name, sub_name, location, cidr):
     gen.groups.append(DiagramGroup("sub", f"Subscription: {sub_name}",
                                    10, 10, 780, 430, AzureColor.BLUE, "subscription"))
 
-    gen.groups.append(DiagramGroup("vnet_g", f"Corp VNet ({cidr})",
+    gen.groups.append(DiagramGroup("vnet_g", f"Corp VNet ({cidr})" if cidr else "Corp VNet",
                                    30, 50, 740, 180, AzureColor.GREEN, "vnet"))
     gen.nodes.extend([
         DiagramNode("app_sub", "App Subnet", "subnet", 50, 85, 120, 75, sublabel="/24"),
@@ -676,7 +683,7 @@ def _generate_online_diagram(gen, display_name, sub_name, location, cidr):
         DiagramNode("afd", "Front Door", "app_service", 350, 75, 120, 80, sublabel="CDN + WAF"),
     ])
 
-    gen.groups.append(DiagramGroup("vnet_g", f"Online VNet ({cidr})",
+    gen.groups.append(DiagramGroup("vnet_g", f"Online VNet ({cidr})" if cidr else "Online VNet",
                                    30, 200, 740, 110, AzureColor.GREEN, "vnet"))
     gen.nodes.extend([
         DiagramNode("web_sub", "Web Subnet", "subnet", 50, 225, 120, 65, sublabel="/24"),
@@ -704,7 +711,7 @@ def _generate_sap_diagram(gen, display_name, sub_name, location, cidr):
     gen.groups.append(DiagramGroup("sub", f"Subscription: {sub_name}",
                                    10, 10, 780, 460, AzureColor.BLUE, "subscription"))
 
-    gen.groups.append(DiagramGroup("vnet_g", f"SAP VNet ({cidr})",
+    gen.groups.append(DiagramGroup("vnet_g", f"SAP VNet ({cidr})" if cidr else "SAP VNet",
                                    30, 50, 740, 200, AzureColor.GREEN, "vnet"))
     gen.nodes.extend([
         DiagramNode("app_sub", "SAP App Subnet", "subnet", 50, 85, 120, 75,
@@ -746,7 +753,7 @@ def _generate_sandbox_diagram(gen, display_name, sub_name, location, cidr):
     gen.groups.append(DiagramGroup("sub", f"Subscription: {sub_name}",
                                    10, 10, 640, 320, AzureColor.TEAL, "subscription"))
 
-    gen.groups.append(DiagramGroup("vnet_g", f"Sandbox VNet ({cidr}) — Standalone",
+    gen.groups.append(DiagramGroup("vnet_g", (f"Sandbox VNet ({cidr}) — Standalone" if cidr else "Sandbox VNet — Standalone"),
                                    30, 50, 590, 120, AzureColor.GREEN, "vnet"))
     gen.nodes.extend([
         DiagramNode("dev_sub", "Dev Subnet", "subnet", 50, 75, 120, 70, sublabel="/24"),

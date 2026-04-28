@@ -446,7 +446,7 @@ class DiagramEngine:
     def _tdd_management(self, outpath: str, sub: str, loc: str) -> None:
         with Diagram(
             f"Platform Management — {sub}",
-            filename=outpath, show=False, direction="TB",
+            filename=outpath, show=False, direction="LR",
             graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
@@ -471,7 +471,7 @@ class DiagramEngine:
     def _tdd_connectivity(self, outpath: str, sub: str, loc: str) -> None:
         with Diagram(
             f"Platform Connectivity — {sub}",
-            filename=outpath, show=False, direction="TB",
+            filename=outpath, show=False, direction="LR",
             graph_attr={"bgcolor": "white", "pad": "0.8", "ranksep": "1.0", "nodesep": "0.6"},
         ):
             with Cluster(f"Subscription: {sub}\n({loc})"):
