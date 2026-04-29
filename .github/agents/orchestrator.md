@@ -60,6 +60,14 @@ handoffs:
     agent: orchestrator
     prompt: "Run a brownfield assessment on an existing Azure environment. Ask the user for the scope (subscription ID or management group), scope type, and assessment mode (full, quick, or security-only). Then trigger the assess.yml workflow via: gh workflow run assess.yml -f scope=<scope> -f scope_type=<type> -f mode=<mode>. Report results from agent-output/{customer}/assessment/."
     send: false
+  - label: "🏛️ Architecture Assessment"
+    agent: architect
+    prompt: "Run a WAF 5-pillar architecture assessment for the customer. Read agent-output/{customer}/01-requirements.md and produce agent-output/{customer}/02-architecture-assessment.md with WAF scores, SKU recommendations, CAF design area mapping, and cost estimates."
+    send: true
+  - label: "📐 IaC Implementation Plan"
+    agent: iac-planner
+    prompt: "Create an implementation plan for the customer. Read agent-output/{customer}/02-architecture-assessment.md and agent-output/{customer}/04-governance-constraints.md/.json, verify AVM module availability, ask deployment strategy, and produce agent-output/{customer}/04-implementation-plan.md."
+    send: true
   - label: "▶ Run Compliance Scan"
     agent: monitoring
     prompt: "Run a compliance scan across all deployed landing zones and report findings."
