@@ -46,14 +46,14 @@
       "description": "Captures landing zone requirements through conversation"
     },
     "architect": {
-      "agent": null,
+      "agent": ".github/agents/architect.md",
       "codename": "Oracle",
       "emoji": "🏛️",
       "step": 2,
       "scope": "per-lz",
       "delegation": "autonomous",
       "skills": ["caf-design-areas", "cost-governance", "azure-defaults", "azure-cost-optimization"],
-      "invokable": false,
+      "invokable": true,
       "description": "WAF assessment, CAF design area mapping, cost estimation"
     },
     "design": {
@@ -80,25 +80,26 @@
       "description": "Policy discovery, compliance constraints, security baseline across the estate"
     },
     "iac-planner": {
-      "agent": null,
+      "agent": ".github/agents/iac-planner.md",
       "codename": "Strategist",
       "emoji": "📐",
       "step": 4,
       "scope": "per-lz",
       "delegation": "interactive",
       "skills": ["profile-management", "iac-common", "azure-defaults"],
-      "invokable": false,
+      "invokable": true,
       "description": "Implementation planning with AVM module selection"
     },
     "bicep-code": {
-      "agent": null,
+      "agent": ".github/agents/bicep-code.md",
       "codename": "Forge",
       "emoji": "⚒️",
       "step": 5,
       "scope": "per-lz",
       "delegation": "autonomous",
+      "subagents": ["bicep-validate-subagent", "bicep-whatif-subagent"],
       "skills": ["azure-bicep-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
-      "invokable": false,
+      "invokable": true,
       "description": "Bicep template generation (AVM-first)"
     },
     "terraform-code": {
@@ -182,5 +183,5 @@
       "description": "Brownfield discovery, WARA/CAF assessment, and environment documentation generation"
     }
   },
-  "updated": "2026-04-23"
+  "updated": "2026-04-29"
 }

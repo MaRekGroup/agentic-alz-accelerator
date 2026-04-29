@@ -81,10 +81,10 @@ When discovering policies, classify them by enforcement level:
 At the start and end of governance analysis:
 
 ```bash
-alz-recall start-step {project} 3_5 --json         # Mark Step 3.5 in-progress
-alz-recall decide {project} --key compliance --value {framework} --json
-alz-recall finding {project} --severity must_fix --message "..." --json
-alz-recall complete-step {project} 3_5 --json      # After constraints generated
+alz-recall start-step {customer} 3_5 --json         # Mark Step 3.5 in-progress
+alz-recall decide {customer} --key compliance --value {framework} --json
+alz-recall finding {customer} --severity must_fix --message "..." --json
+alz-recall complete-step {customer} 3_5 --json      # After constraints generated
 ```
 
 ## MCP Servers Used

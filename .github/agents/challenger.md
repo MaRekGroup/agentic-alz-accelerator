@@ -90,8 +90,8 @@ CAF naming conventions. Required tags on all resource groups.
 Record gate reviews and findings:
 
 ```bash
-alz-recall finding {project} --severity must_fix --message "..." --json
-alz-recall finding {project} --severity should_fix --message "..." --json
-alz-recall finding {project} --severity consider --message "..." --json
-alz-recall review-audit {project} {gate} --json    # Record gate review completion
+alz-recall finding {customer} --severity must_fix --message "..." --json
+alz-recall finding {customer} --severity should_fix --message "..." --json
+alz-recall finding {customer} --severity consider --message "..." --json
+alz-recall review-audit {customer} {gate} --json    # Record gate review completion
 ```
