@@ -14,6 +14,7 @@ argument-hint: >
 user-invocable: true
 agents:
   [
+    "assessment",
     "requirements",
     "governance",
     "challenger",
