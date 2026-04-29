@@ -72,6 +72,17 @@ base → child profile → environment override.
 | `deploy_with_terraform()` | Plan then apply using Terraform |
 | `validate_deployment()` | Post-deploy validation via Resource Graph |
 
+## Session State (via `alz-recall`)
+
+At the start and end of deployment:
+
+```bash
+alz-recall start-step {project} 6 --json          # Mark Step 6 in-progress
+alz-recall decide {project} --key deployment_strategy --value {strategy} --json
+alz-recall checkpoint {project} 6 what-if --json   # After what-if/plan preview
+alz-recall complete-step {project} 6 --json        # After successful deploy
+```
+
 ## MCP Servers Used
 
 - **Azure Deployment** — `bicep_what_if`, `bicep_deploy`, `terraform_plan`, `terraform_apply`

@@ -92,6 +92,18 @@ Each WAF pillar starts at 100 points. Deductions by severity:
 - **wara-assessment** — WAF/CAF check catalog and scoring model
 - **assessment-report** — Report generation templates and formats
 
+## Session State (via `alz-recall`)
+
+At the start and end of assessment:
+
+```bash
+alz-recall init {project} --json                   # Create session if new
+alz-recall start-step {project} 0 --json           # Mark Step 0 in-progress
+alz-recall decide {project} --key architecture_pattern --value {pattern} --json
+alz-recall finding {project} --severity critical --message "..." --json
+alz-recall complete-step {project} 0 --json        # After reports generated
+```
+
 ## Safety
 
 - All Azure operations are **read-only** (Resource Graph queries, policy reads, RBAC reads)

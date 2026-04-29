@@ -72,7 +72,18 @@ Produce a structured markdown document (`01-requirements.md`) with:
 - One section per CAF design area with requirements
 - Summary table of key decisions
 - Complexity classification with justification
+## Session State (via `alz-recall`)
 
+At the start and end of requirements gathering:
+
+```bash
+alz-recall start-step {project} 1 --json          # Mark Step 1 in-progress
+alz-recall decide {project} --key region --value {region} --json
+alz-recall decide {project} --key compliance --value {framework} --json
+alz-recall decide {project} --key iac_tool --value {bicep|terraform} --json
+alz-recall decide {project} --key complexity --value {tier} --json
+alz-recall complete-step {project} 1 --json        # Mark Step 1 done
+```
 ## Tools
 
 | Function | Purpose |

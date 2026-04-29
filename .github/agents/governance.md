@@ -76,6 +76,17 @@ When discovering policies, classify them by enforcement level:
 | `get_security_baseline()` | Return the 6 baseline rules |
 | `validate_against_governance()` | Validate IaC code against baseline + anti-patterns |
 
+## Session State (via `alz-recall`)
+
+At the start and end of governance analysis:
+
+```bash
+alz-recall start-step {project} 3_5 --json         # Mark Step 3.5 in-progress
+alz-recall decide {project} --key compliance --value {framework} --json
+alz-recall finding {project} --severity must_fix --message "..." --json
+alz-recall complete-step {project} 3_5 --json      # After constraints generated
+```
+
 ## MCP Servers Used
 
 - **Azure Policy** — `discover_policies`, `get_compliance_state`, `get_violations`

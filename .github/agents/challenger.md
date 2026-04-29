@@ -84,3 +84,14 @@ CAF naming conventions. Required tags on all resource groups.
 | Simple | 1× | 1× |
 | Standard | 2× | 2× |
 | Complex | 3× | 3× |
+
+## Session State (via `alz-recall`)
+
+Record gate reviews and findings:
+
+```bash
+alz-recall finding {project} --severity must_fix --message "..." --json
+alz-recall finding {project} --severity should_fix --message "..." --json
+alz-recall finding {project} --severity consider --message "..." --json
+alz-recall review-audit {project} {gate} --json    # Record gate review completion
+```
