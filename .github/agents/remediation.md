@@ -75,6 +75,17 @@ configuration drift with snapshot-based rollback capability.
 | `get_remediation_history()` | Return audit trail of all actions |
 | `get_available_strategies()` | List the 8 built-in strategies |
 
+## Session State (via `alz-recall`)
+
+At the start and end of remediation:
+
+```bash
+alz-recall start-step {project} 9 --json           # Mark Step 9 in-progress
+alz-recall finding {project} --severity critical --message "Remediated: ..." --json
+alz-recall checkpoint {project} 9 snapshot --json  # After pre-remediation snapshot
+alz-recall complete-step {project} 9 --json        # After remediation verified
+```
+
 ## MCP Servers Used
 
 - **Azure Deployment** — `bicep_deploy`, `terraform_apply` for remediation

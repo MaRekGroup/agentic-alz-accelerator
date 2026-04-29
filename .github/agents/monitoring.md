@@ -67,6 +67,17 @@ You run periodic scans across all landing zone subscriptions and report violatio
 - **Azure Resource Graph** — Resource inventory, change tracking
 - **Azure Monitor** — `get_secure_score`, `get_recommendations`, `query_activity_log`
 
+## Session State (via `alz-recall`)
+
+At the start and end of compliance scans:
+
+```bash
+alz-recall start-step {project} 8 --json          # Mark Step 8 in-progress
+alz-recall finding {project} --severity critical --message "..." --json
+alz-recall finding {project} --severity high --message "..." --json
+alz-recall complete-step {project} 8 --json        # After report generated
+```
+
 ## Violation Routing
 
 When violations are found, they're routed to the Orchestrator which delegates:
