@@ -97,11 +97,11 @@ Each WAF pillar starts at 100 points. Deductions by severity:
 At the start and end of assessment:
 
 ```bash
-alz-recall init {project} --json                   # Create session if new
-alz-recall start-step {project} 0 --json           # Mark Step 0 in-progress
-alz-recall decide {project} --key architecture_pattern --value {pattern} --json
-alz-recall finding {project} --severity critical --message "..." --json
-alz-recall complete-step {project} 0 --json        # After reports generated
+alz-recall init {customer} --json                   # Create session if new
+alz-recall start-step {customer} 0 --json           # Mark Step 0 in-progress
+alz-recall decide {customer} --key architecture_pattern --value {pattern} --json
+alz-recall finding {customer} --severity critical --message "..." --json
+alz-recall complete-step {customer} 0 --json        # After reports generated
 ```
 
 ## Safety

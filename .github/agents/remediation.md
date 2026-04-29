@@ -80,10 +80,10 @@ configuration drift with snapshot-based rollback capability.
 At the start and end of remediation:
 
 ```bash
-alz-recall start-step {project} 9 --json           # Mark Step 9 in-progress
-alz-recall finding {project} --severity critical --message "Remediated: ..." --json
-alz-recall checkpoint {project} 9 snapshot --json  # After pre-remediation snapshot
-alz-recall complete-step {project} 9 --json        # After remediation verified
+alz-recall start-step {customer} 9 --json           # Mark Step 9 in-progress
+alz-recall finding {customer} --severity critical --message "Remediated: ..." --json
+alz-recall checkpoint {customer} 9 snapshot --json  # After pre-remediation snapshot
+alz-recall complete-step {customer} 9 --json        # After remediation verified
 ```
 
 ## MCP Servers Used

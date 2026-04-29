@@ -77,12 +77,12 @@ Produce a structured markdown document (`01-requirements.md`) with:
 At the start and end of requirements gathering:
 
 ```bash
-alz-recall start-step {project} 1 --json          # Mark Step 1 in-progress
-alz-recall decide {project} --key region --value {region} --json
-alz-recall decide {project} --key compliance --value {framework} --json
-alz-recall decide {project} --key iac_tool --value {bicep|terraform} --json
-alz-recall decide {project} --key complexity --value {tier} --json
-alz-recall complete-step {project} 1 --json        # Mark Step 1 done
+alz-recall start-step {customer} 1 --json          # Mark Step 1 in-progress
+alz-recall decide {customer} --key region --value {region} --json
+alz-recall decide {customer} --key compliance --value {framework} --json
+alz-recall decide {customer} --key iac_tool --value {bicep|terraform} --json
+alz-recall decide {customer} --key complexity --value {tier} --json
+alz-recall complete-step {customer} 1 --json        # Mark Step 1 done
 ```
 ## Tools
 

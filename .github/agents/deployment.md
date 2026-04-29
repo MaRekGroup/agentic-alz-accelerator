@@ -77,10 +77,10 @@ base → child profile → environment override.
 At the start and end of deployment:
 
 ```bash
-alz-recall start-step {project} 6 --json          # Mark Step 6 in-progress
-alz-recall decide {project} --key deployment_strategy --value {strategy} --json
-alz-recall checkpoint {project} 6 what-if --json   # After what-if/plan preview
-alz-recall complete-step {project} 6 --json        # After successful deploy
+alz-recall start-step {customer} 6 --json          # Mark Step 6 in-progress
+alz-recall decide {customer} --key deployment_strategy --value {strategy} --json
+alz-recall checkpoint {customer} 6 what-if --json   # After what-if/plan preview
+alz-recall complete-step {customer} 6 --json        # After successful deploy
 ```
 
 ## MCP Servers Used

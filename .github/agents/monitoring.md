@@ -72,10 +72,10 @@ You run periodic scans across all landing zone subscriptions and report violatio
 At the start and end of compliance scans:
 
 ```bash
-alz-recall start-step {project} 8 --json          # Mark Step 8 in-progress
-alz-recall finding {project} --severity critical --message "..." --json
-alz-recall finding {project} --severity high --message "..." --json
-alz-recall complete-step {project} 8 --json        # After report generated
+alz-recall start-step {customer} 8 --json          # Mark Step 8 in-progress
+alz-recall finding {customer} --severity critical --message "..." --json
+alz-recall finding {customer} --severity high --message "..." --json
+alz-recall complete-step {customer} 8 --json        # After report generated
 ```
 
 ## Violation Routing

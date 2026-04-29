@@ -113,25 +113,25 @@ Do **not** read or write `00-session-state.json` or `00-estate-state.json` direc
 
 | What | How |
 |------|-----|
-| Initialize project | `alz-recall init {project} --json` |
-| Show full state | `alz-recall show {project} --json` |
-| Start a step | `alz-recall start-step {project} {step} --json` |
-| Complete a step | `alz-recall complete-step {project} {step} --json` |
-| Record decision | `alz-recall decide {project} --key {k} --value {v} --json` |
-| Record finding | `alz-recall finding {project} --severity {sev} --message "{msg}" --json` |
-| Sub-step checkpoint | `alz-recall checkpoint {project} {step} {sub_step} --json` |
-| Gate review audit | `alz-recall review-audit {project} {gate} --json` |
-| List artifacts | `alz-recall files {project}` |
+| Initialize customer | `alz-recall init {customer} --json` |
+| Show full state | `alz-recall show {customer} --json` |
+| Start a step | `alz-recall start-step {customer} {step} --json` |
+| Complete a step | `alz-recall complete-step {customer} {step} --json` |
+| Record decision | `alz-recall decide {customer} --key {k} --value {v} --json` |
+| Record finding | `alz-recall finding {customer} --severity {sev} --message "{msg}" --json` |
+| Sub-step checkpoint | `alz-recall checkpoint {customer} {step} {sub_step} --json` |
+| Gate review audit | `alz-recall review-audit {customer} {gate} --json` |
+| List artifacts | `alz-recall files {customer}` |
 | Search artifacts | `alz-recall search "{query}"` |
 | List all sessions | `alz-recall sessions` |
 | Health check | `alz-recall health` |
 
-**Handoff document**: `agent-output/{project}/00-handoff.md` — overwrite at every
+**Handoff document**: `agent-output/{customer}/00-handoff.md` — overwrite at every
 gate (under 60 lines, paths only, never embed artifact content).
 
 **IaC Tool**: NEVER ask about IaC tool (Bicep/Terraform). That is captured
 exclusively by the Requirements agent in Step 1. Read `decisions.iac_tool` from
-`alz-recall show {project} --json` after Step 1 completes.
+`alz-recall show {customer} --json` after Step 1 completes.
 
 ## State Management
 
@@ -163,19 +163,19 @@ State is managed via `alz-recall` CLI. The following files are maintained:
 | `brownfield-onboard` | "Onboard existing environment" | Assess → Requirements → full APEX workflow (brownfield only) |
 | `status` | "Estate status" | Show state of all LZs |
 
-## One-Shot Project Setup
+## One-Shot Customer Setup
 
 **HARD RULE** — Everything below happens in a **single turn** — no back-and-forth.
 
-1. Extract a kebab-case project name from the user's message
+1. Extract a kebab-case customer name from the user's message
    (e.g., "Marek Group" → `marekgroup`, "Contoso Finance" → `contoso-finance`).
 2. Call `askQuestions` with ONE question to confirm:
-   _"I'll use `{name}` as the project folder. Type OK to confirm, or enter a different name."_
+   _"I'll use `{name}` as the customer folder. Type OK to confirm, or enter a different name."_
    (If the user's message gives NO clue, ask for it outright.)
 3. **Immediately after `askQuestions` returns** (same turn), proceed:
-   a. Check `agent-output/{project}/` for existing artifacts → resume if found
-   b. Otherwise: create folder + initialize via `alz-recall init {project} --json`
-   c. Set region: `alz-recall decide {project} --key region --value southcentralus --json`
+   a. Check `agent-output/{customer}/` for existing artifacts → resume if found
+   b. Otherwise: create folder + initialize via `alz-recall init {customer} --json`
+   c. Set region: `alz-recall decide {customer} --key region --value southcentralus --json`
    d. Read skills (see [Read Skills](#read-skills))
    e. Present the **Step 1: Gather Requirements** handoff
 
@@ -184,7 +184,7 @@ continue executing steps 3a-3e in the same response.
 
 ## Read Skills
 
-**After confirming the project name**, read (in order):
+**After confirming the customer name**, read (in order):
 1. `.github/skills/azure-defaults/SKILL.md` — regions, tags, naming, AVM-first
 2. `.github/skills/caf-design-areas/SKILL.md` — CAF design area mappings
 3. `.github/skills/workflow-engine/SKILL.md` — DAG model, node types, edge conditions
@@ -199,7 +199,7 @@ Instead of hardcoded step logic, use the DAG workflow engine:
 
 1. Load `.github/skills/workflow-engine/templates/workflow-graph.json`
 2. Read `tools/registry/agent-registry.json` to resolve agent paths and delegation type
-3. Determine current node from `alz-recall show {project} --json` (`current_step`)
+3. Determine current node from `alz-recall show {customer} --json` (`current_step`)
 4. Execute the current node's agent (handoff for interactive, runSubagent for autonomous)
 5. Evaluate outgoing edges (conditions: `on_complete`, `on_approve`, `on_skip`, `on_violation`)
 6. Advance to the next node — if it's a gate, present to user for approval
@@ -225,7 +225,7 @@ score  > 4.0  → complexity = "complex"  (3 review passes)
 | `policy_violations` | Count of `deny`-effect findings in `04-governance-constraints.json` |
 | `iac_tool` | `decisions.iac_tool` (bicep or terraform) |
 
-Persist via: `alz-recall decide {project} --key complexity --value {result} --json`
+Persist via: `alz-recall decide {customer} --key complexity --value {result} --json`
 
 If `04-governance-constraints.json` is not yet generated (pre-Gate 3), set
 `policy_violations = 0` and refresh after governance approval.
@@ -236,10 +236,10 @@ At Gates 2 and 4, recommend starting a fresh chat session to prevent context exh
 
 1. Write `00-handoff.md` and update session state via `alz-recall` (as always)
 2. Present the gate with a session break recommendation
-3. If user agrees: tell them to open a new chat and invoke `@orchestrator` with the project name
+3. If user agrees: tell them to open a new chat and invoke `@orchestrator` with the customer name
 4. If user prefers to continue: proceed in same session (warn context may degrade)
 
-At resumption, run `alz-recall show {project} --json` to restore full context from
+At resumption, run `alz-recall show {customer} --json` to restore full context from
 artifact paths — no information is lost.
 
 ## Platform LZ Bootstrap Sequence
@@ -348,52 +348,52 @@ With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 ### Gate Behaviour (detailed procedure)
 
 At each approval gate:
-1. Run `alz-recall complete-step {project} {step} --json` if the step agent hasn't already
+1. Run `alz-recall complete-step {customer} {step} --json` if the step agent hasn't already
 2. Run a single comprehensive challenger pass via `runSubagent("challenger", ...)`
-3. Check `decisions.complexity` from `alz-recall show {project} --json`
+3. Check `decisions.complexity` from `alz-recall show {customer} --json`
 4. **simple/standard**: Present the single-pass result directly — no additional review
 5. **complex**: Ask the user via `askQuestions`:
-   _"Run additional adversarial review? (recommended for complex projects)"_
+   _"Run additional adversarial review? (recommended for complex deployments)"_
    Options: "Yes — run full multi-pass review" / "No — proceed with single-pass result"
 6. If user opts in, run additional challenger passes per the complexity matrix
 7. Write `00-handoff.md` with: completed steps, artifact paths, findings summary, next step
-8. Update session state: `alz-recall review-audit {project} {gate} --json`
+8. Update session state: `alz-recall review-audit {customer} {gate} --json`
 9. Present gate to user for approval
 
 ## Checkpoint Fallback (Safety Net)
 
 After each subagent returns (autonomous steps 2, 3, 5, 6, 7), verify the step was recorded:
 
-1. Run `alz-recall show {project} --json` and check `steps.{N}.status`
+1. Run `alz-recall show {customer} --json` and check `steps.{N}.status`
 2. If the step agent did NOT call `complete-step` (status is still `in_progress` or `pending`):
-   - Run `alz-recall complete-step {project} {N} --json` as a fallback
+   - Run `alz-recall complete-step {customer} {N} --json` as a fallback
 3. If the step agent did NOT record key decisions (e.g., `decisions.iac_tool` after Step 1):
    - Extract the decision from the artifact and run
-     `alz-recall decide {project} --key {k} --value {v} --json`
+     `alz-recall decide {customer} --key {k} --value {v} --json`
 
 This ensures session state stays current even when step agents skip `alz-recall` calls.
 
 ## Resume Protocol
 
-1. **Primary**: Run `alz-recall show {project} --json` — returns current step, decisions,
+1. **Primary**: Run `alz-recall show {customer} --json` — returns current step, decisions,
    artifact inventory. Use this to determine exactly where to resume.
-2. **Fallback**: If `alz-recall` returns no project but `00-handoff.md` exists, parse it
+2. **Fallback**: If `alz-recall` returns no customer but `00-handoff.md` exists, parse it
    for completed-steps checklist and key decisions.
-3. **Tertiary**: If both are absent, scan existing artifacts in `agent-output/{project}/`
+3. **Tertiary**: If both are absent, scan existing artifacts in `agent-output/{customer}/`
    and identify the last completed step from artifact numbering (01-, 02-, etc.).
 4. Present a brief status summary and offer to continue from the next step.
 5. If resuming mid-step (JSON state shows `in_progress` with a `sub_step` value),
    delegate to the appropriate agent: _"Resume Step {N} from checkpoint {sub_step}."_
 
 **Starting a new chat thread mid-workflow?** The agent auto-detects progress via
-`alz-recall show {project} --json`. Just invoke the Orchestrator with the project
+`alz-recall show {customer} --json`. Just invoke the Orchestrator with the customer
 name — no special resume prompt needed.
 
 ## DO / DON'T
 
 | DO | DON'T |
 |----|-------|
-| Complete project setup in ONE turn (askQuestions → init → handoff) | Split project setup across multiple turns |
+| Complete customer setup in ONE turn (askQuestions → init → handoff) | Split customer setup across multiple turns |
 | Use `alz-recall` for ALL state operations | Read/write JSON state files directly |
 | Use `deploy_only` for targeted platform LZ deploys | Cascade all LZs when user asks for one |
 | Deploy via GitHub Actions workflows | Use local `az` CLI commands |
@@ -441,7 +441,7 @@ name — no special resume prompt needed.
 | 3 | `03-design-*.md/.drawio` | Optional — diagrams generated? |
 | 3.5 | `04-governance-constraints.md/.json` | Policy discovery + baseline enforced? |
 | 4 | `04-implementation-plan.md` | AVM modules selected? Dependencies mapped? |
-| 5 | `infra/bicep/{project}/` or `infra/terraform/{project}/` | Templates valid? Lint passes? |
+| 5 | `infra/bicep/{customer}/` or `infra/terraform/{customer}/` | Templates valid? Lint passes? |
 | 6 | `06-deployment-summary.md` | Deployed + verified? |
 | 7 | `07-*.md` | As-built docs generated? |
 | 8 | `08-compliance-report.md` | Compliance scan results? |
