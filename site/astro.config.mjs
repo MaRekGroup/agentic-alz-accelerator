@@ -52,6 +52,10 @@ export default defineConfig({
               label: "Platform Landing Zones",
               slug: "concepts/platform-landing-zones",
             },
+            {
+              label: "Application Landing Zones",
+              slug: "concepts/application-landing-zones",
+            },
           ],
         },
         {
@@ -65,6 +69,10 @@ export default defineConfig({
             {
               label: "Platform Deployment",
               slug: "guides/platform-deployment",
+            },
+            {
+              label: "Application Deployment",
+              slug: "guides/application-deployment",
             },
             {
               label: "Security Baseline",

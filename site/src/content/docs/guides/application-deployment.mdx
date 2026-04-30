@@ -1,0 +1,125 @@
+---
+title: Application Deployment
+description: Deploy application landing zones (Online, Corp, Sandbox, SAP) via GitHub Actions.
+---
+
+Application Landing Zones are workload subscriptions deployed on top of the
+[Platform Landing Zones](/concepts/platform-landing-zones). They are provisioned
+via the `3-app-deploy.yml` workflow which reads configuration from
+`environments/subscriptions.json`.
+
+## Prerequisites
+
+Before deploying an application landing zone:
+
+1. **Platform LZs deployed** — Management and Connectivity must be running (logging + hub network)
+2. **Subscription secret set** — The target subscription ID must be configured as a GitHub secret
+3. **Profile selected** — Choose Online, Corp, Sandbox, or SAP based on workload needs (see [profiles](/concepts/application-landing-zones))
+4. **IaC templates generated** — Step 5 (Forge) must have produced templates at `infra/{bicep,terraform}/{customer}/`
+
+## Deploy a Specific App LZ
+
+Deploy a single application landing zone by key (from `environments/subscriptions.json`):
+
+```bash
+gh workflow run "3-app-deploy.yml" \
+  -f target=corp-erp \
+  -f framework=bicep \
+  -f action=deploy \
+  -f emergency_override=false
+```
+
+## Deploy All App LZs
+
+Deploy all configured application landing zones:
+
+```bash
+gh workflow run "3-app-deploy.yml" \
+  -f target=all \
+  -f framework=bicep \
+  -f action=deploy \
+  -f emergency_override=false
+```
+
+## Plan Only (Preview)
+
+Preview changes without applying:
+
+```bash
+gh workflow run "3-app-deploy.yml" \
+  -f target=corp-erp \
+  -f framework=bicep \
+  -f action=plan
+```
+
+## Workflow Inputs
+
+| Input | Required | Description |
+|-------|----------|-------------|
+| `target` | Yes | App LZ key from `subscriptions.json`, or `"all"` |
+| `framework` | Yes | `bicep` or `terraform` |
+| `action` | Yes | `plan` (preview) or `deploy` (apply) |
+| `location` | No | Override primary region (defaults to per-LZ config) |
+| `emergency_override` | Yes | Set `true` only for emergency bypasses; normal deploys go through PR merge |
+
+## Subscription Configuration
+
+Application landing zones are defined in `environments/subscriptions.json`:
+
+```json
+{
+  "applications": {
+    "corp-erp": {
+      "subscription_id_secret": "APP_CORP_ERP_SUBSCRIPTION_ID",
+      "profile": "corp",
+      "location": "southcentralus"
+    },
+    "online-web": {
+      "subscription_id_secret": "APP_ONLINE_WEB_SUBSCRIPTION_ID",
+      "profile": "online",
+      "location": "southcentralus"
+    }
+  }
+}
+```
+
+To add a new app LZ: add an entry to the JSON file — no workflow changes needed.
+
+## Deployment Flow
+
+```
+[1] Guard          ← Emergency override check
+[2] Matrix Build   ← Reads subscriptions.json, builds job matrix
+[3] Validate       ← Lint + security baseline check
+[4] Plan/What-If   ← Preview resource changes
+[5] Deploy         ← Apply changes (if action=deploy)
+[6] Verify         ← Post-deployment compliance check
+```
+
+## Setting Subscription Secrets
+
+```bash
+# Corp workload
+gh secret set APP_CORP_ERP_SUBSCRIPTION_ID --body '<subscription-id>'
+
+# Online workload
+gh secret set APP_ONLINE_WEB_SUBSCRIPTION_ID --body '<subscription-id>'
+
+# Sandbox
+gh secret set APP_SANDBOX_SUBSCRIPTION_ID --body '<subscription-id>'
+```
+
+## Terraform vs Bicep
+
+The workflow supports both frameworks. The IaC templates must exist at:
+
+- **Bicep:** `infra/bicep/{customer}/`
+- **Terraform:** `infra/terraform/{customer}/`
+
+The Forge agent (Step 5) generates these templates based on the `decisions.iac_tool`
+choice made during requirements gathering (Step 1).
+
+:::tip
+Use `action=plan` first to preview changes. Review the what-if/plan output
+before running with `action=deploy`. The Orchestrator enforces this as Gate 6.
+:::
