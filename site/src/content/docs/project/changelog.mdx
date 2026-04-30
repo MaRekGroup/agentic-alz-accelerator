@@ -3,6 +3,27 @@ title: Changelog
 description: Notable changes to the ALZ Accelerator.
 ---
 
+## 2026-04-30
+
+### Added
+- **P1 Agents**: terraform-code, design, documentation agents — completing the full 14-agent roster
+- **6 Subagents**: terraform-validate, terraform-plan, challenger-review, cost-estimate (+ existing bicep-validate, bicep-whatif)
+- Orchestrator handoff buttons for Bicep Code, Terraform Code, Design, Documentation
+- Subagents section in agent-registry.json with skills arrays
+
+### Changed
+- Agent count 12→14 across README, guide.html, agents.mdx
+- Scope references `{project}` → `{customer}` in guide.html, workflow.mdx, how-it-works.mdx, agents.mdx, docs/workflow.md
+- MCP servers reference updated: cost-estimate-subagent uses Azure Pricing MCP
+
+## 2026-04-29
+
+### Added
+- **P0 Agents**: architect (Oracle), iac-planner (Strategist), bicep-code (Forge) with full `alz-recall` integration
+- **Bicep Subagents**: bicep-validate-subagent (lint + build + review), bicep-whatif-subagent (deployment preview)
+- Orchestrator handoff buttons for Architecture Assessment and IaC Implementation Plan
+- Agent-registry.json entries for architect, iac-planner, bicep-code (invokable: true)
+
 ## 2026-04-23
 
 ### Added
