@@ -14,6 +14,7 @@ export default defineConfig({
       description:
         "Agentic Azure Landing Zone Accelerator — from requirements to deployed, governed infrastructure",
       favicon: "/images/favicon.svg",
+      customCss: ["./src/styles/custom.css"],
       editLink: {
         baseUrl:
           "https://github.com/MaRekGroup/agentic-alz-accelerator/edit/main/site/",

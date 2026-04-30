@@ -1,0 +1,61 @@
+/*
+ * Azure / Microsoft Fluent-inspired theme for Starlight
+ * Adopted from docs/guide.html color scheme
+ */
+
+/* ── Light mode ── */
+:root[data-theme="light"] {
+  --sl-color-accent-low: #e3f2fd;
+  --sl-color-accent: #0078d4;
+  --sl-color-accent-high: #004578;
+  --sl-color-bg: #f3f5f9;
+  --sl-color-bg-nav: #0b1a33;
+  --sl-color-bg-sidebar: #0b1a33;
+  --sl-color-hairline-light: #e1e6ef;
+  --sl-color-hairline: #e1e6ef;
+  --sl-color-white: #ffffff;
+  --sl-color-text: #1b2a4a;
+  --sl-color-text-accent: #0078d4;
+}
+
+/* ── Dark mode ── */
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #1b2a4a;
+  --sl-color-accent: #50e6ff;
+  --sl-color-accent-high: #e3f2fd;
+  --sl-color-bg: #0b1a33;
+  --sl-color-bg-nav: #060f1f;
+  --sl-color-bg-sidebar: #060f1f;
+  --sl-color-white: #f3f5f9;
+  --sl-color-text: #e1e6ef;
+  --sl-color-text-accent: #50e6ff;
+}
+
+/* ── Typography ── */
+:root {
+  --sl-font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --sl-font-system-mono: "Cascadia Code", "Fira Code", ui-monospace, monospace;
+}
+
+/* ── Sidebar nav links – lighter text on dark bg ── */
+starlight-menu-button + nav a {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+starlight-menu-button + nav a:hover,
+starlight-menu-button + nav a[aria-current="page"] {
+  color: #ffffff;
+}
+
+/* ── Site title in sidebar ── */
+.site-title {
+  color: #ffffff !important;
+}
+
+/* ── Badge accents (align with Azure palette) ── */
+:root {
+  --sl-color-green-high: #107c10;
+  --sl-color-orange-high: #d83b01;
+  --sl-color-red-high: #a4262c;
+  --sl-color-blue-high: #0078d4;
+}
