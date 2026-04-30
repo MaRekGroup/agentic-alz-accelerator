@@ -68,6 +68,22 @@ handoffs:
     agent: iac-planner
     prompt: "Create an implementation plan for the customer. Read agent-output/{customer}/02-architecture-assessment.md and agent-output/{customer}/04-governance-constraints.md/.json, verify AVM module availability, ask deployment strategy, and produce agent-output/{customer}/04-implementation-plan.md."
     send: true
+  - label: "⚒️ Generate Bicep Code"
+    agent: bicep-code
+    prompt: "Generate Bicep templates for the customer. Read agent-output/{customer}/04-implementation-plan.md and 04-governance-constraints.json, run preflight checks, map governance constraints, generate AVM-first Bicep at infra/bicep/{customer}/, validate with bicep build + lint."
+    send: true
+  - label: "⚒️ Generate Terraform Code"
+    agent: terraform-code
+    prompt: "Generate Terraform configurations for the customer. Read agent-output/{customer}/04-implementation-plan.md and 04-governance-constraints.json, run preflight checks, map governance constraints, generate AVM-TF configs at infra/terraform/{customer}/, validate with terraform fmt + validate."
+    send: true
+  - label: "🎨 Generate Design Artifacts"
+    agent: design
+    prompt: "Generate architecture diagrams and ADRs for the customer. Read agent-output/{customer}/02-architecture-assessment.md, produce Draw.io and PNG diagrams at agent-output/{customer}/diagrams/, create ADRs at agent-output/{customer}/adr/."
+    send: true
+  - label: "📚 Generate Documentation"
+    agent: documentation
+    prompt: "Generate as-built documentation for the customer. Read all prior artifacts (01-06), produce TDD, operational runbook, resource inventory, and compliance summary at agent-output/{customer}/deliverables/."
+    send: true
   - label: "▶ Run Compliance Scan"
     agent: monitoring
     prompt: "Run a compliance scan across all deployed landing zones and report findings."
