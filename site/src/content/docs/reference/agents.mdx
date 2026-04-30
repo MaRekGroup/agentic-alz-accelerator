@@ -1,6 +1,6 @@
 ---
 title: Agent Roster
-description: All 12 agents in the ALZ Accelerator multi-agent system.
+description: All 14 agents and 6 subagents in the ALZ Accelerator multi-agent system.
 ---
 
 ## Primary Orchestrator
@@ -63,14 +63,14 @@ description: All 12 agents in the ALZ Accelerator multi-agent system.
 | 🎨 Artisan | 3 | `03-design-*.{drawio,png,md}` |
 | 🛡️ Warden | 3.5 | `04-governance-constraints.md/.json` |
 | 📐 Strategist | 4 | `04-implementation-plan.md` |
-| ⚒️ Forge | 5 | `infra/{bicep,terraform}/{project}/` |
+| ⚒️ Forge | 5 | `infra/{bicep,terraform}/{customer}/` |
 | 🚀 Envoy | 6 | `06-deployment-summary.md` |
 | 📚 Chronicler | 7 | `07-*.md` suite |
 | 🔭 Sentinel | 8 | `08-compliance-report.md` |
 | 🔧 Mender | 9 | `09-remediation-log.md` |
 | ⚔️ Challenger | Gates | Review annotations at gates 1, 2, 4, 5 |
 
-All artifacts are stored in `agent-output/{customer}/{project}/` with estate-level state in `agent-output/{customer}/00-estate-state.json`.
+All artifacts are stored in `agent-output/{customer}/` with estate-level state in `agent-output/{customer}/00-estate-state.json`.
 
 ## Agent Invocation
 
@@ -92,3 +92,19 @@ All artifacts are stored in `agent-output/{customer}/{project}/` with estate-lev
 :::note
 **Max 3 subagent calls** before the Conductor checkpoints with the user. This ensures human oversight during complex multi-step workflows.
 :::
+
+## Subagents
+
+Lightweight specialist agents delegated by parent agents for focused tasks:
+
+| Subagent | Parent Agent(s) | Purpose |
+|----------|----------------|---------|
+| `bicep-validate-subagent` | Forge (Bicep) | `bicep lint` + `bicep build` + code review |
+| `bicep-whatif-subagent` | Forge (Bicep) | `az deployment what-if` preview |
+| `terraform-validate-subagent` | Forge (Terraform) | `terraform fmt` + `terraform validate` + code review |
+| `terraform-plan-subagent` | Forge (Terraform) | `terraform plan` preview with drift detection |
+| `challenger-review-subagent` | Oracle, Strategist, Forge | Focused adversarial review for specific artifacts |
+| `cost-estimate-subagent` | Oracle, Strategist | Azure Pricing MCP lookup — real cost estimates |
+
+Subagents are **not user-invocable** — they are called internally by parent agents
+and return structured results (PASS/FAIL/NEEDS_REVISION) with actionable findings.

@@ -59,7 +59,7 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 - Generate IaC templates following AVM standards
 - Security baseline enforcement at code generation
 - Preflight validation via subagents (lint + what-if/plan)
-- Output: `infra/{bicep,terraform}/{project}/`
+- Output: `infra/{bicep,terraform}/{customer}/`
 
 ### Step 6: Deployment (🚀 Envoy)
 - Pre-deploy security review (Challenger + security baseline validator)
