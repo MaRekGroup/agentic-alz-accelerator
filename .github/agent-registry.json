@@ -57,14 +57,14 @@
       "description": "WAF assessment, CAF design area mapping, cost estimation"
     },
     "design": {
-      "agent": null,
+      "agent": ".github/agents/design.md",
       "codename": "Artisan",
       "emoji": "🎨",
       "step": 3,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["drawio", "python-diagrams"],
-      "invokable": false,
+      "skills": ["drawio", "python-diagrams", "caf-design-areas"],
+      "invokable": true,
       "optional": true,
       "description": "Architecture diagrams and ADRs"
     },
@@ -103,14 +103,15 @@
       "description": "Bicep template generation (AVM-first)"
     },
     "terraform-code": {
-      "agent": null,
+      "agent": ".github/agents/terraform-code.md",
       "codename": "Forge",
       "emoji": "⚒️",
       "step": 5,
       "scope": "per-lz",
       "delegation": "autonomous",
+      "subagents": ["terraform-validate-subagent", "terraform-plan-subagent"],
       "skills": ["terraform-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
-      "invokable": false,
+      "invokable": true,
       "description": "Terraform configuration generation (AVM-TF)"
     },
     "deployment": {
@@ -125,14 +126,14 @@
       "description": "Deployment with what-if/plan preview via GitHub Actions"
     },
     "documentation": {
-      "agent": null,
+      "agent": ".github/agents/documentation.md",
       "codename": "Chronicler",
       "emoji": "📚",
       "step": 7,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["azure-diagnostics"],
-      "invokable": false,
+      "skills": ["azure-defaults", "azure-diagnostics"],
+      "invokable": true,
       "description": "Post-deployment documentation suite (TDD, runbook, inventory)"
     },
     "monitoring": {
@@ -183,5 +184,49 @@
       "description": "Brownfield discovery, WARA/CAF assessment, and environment documentation generation"
     }
   },
-  "updated": "2026-04-29"
+  "subagents": {
+    "bicep-validate-subagent": {
+      "agent": ".github/agents/_subagents/bicep-validate-subagent.md",
+      "parent": "bicep-code",
+      "scope": "per-lz",
+      "skills": ["azure-defaults", "iac-common"],
+      "description": "Bicep lint + build + code review"
+    },
+    "bicep-whatif-subagent": {
+      "agent": ".github/agents/_subagents/bicep-whatif-subagent.md",
+      "parent": "bicep-code",
+      "scope": "per-lz",
+      "skills": ["security-baseline"],
+      "description": "Bicep deployment what-if preview"
+    },
+    "terraform-validate-subagent": {
+      "agent": ".github/agents/_subagents/terraform-validate-subagent.md",
+      "parent": "terraform-code",
+      "scope": "per-lz",
+      "skills": ["azure-defaults", "iac-common"],
+      "description": "Terraform fmt + validate + code review"
+    },
+    "terraform-plan-subagent": {
+      "agent": ".github/agents/_subagents/terraform-plan-subagent.md",
+      "parent": "terraform-code",
+      "scope": "per-lz",
+      "skills": ["security-baseline"],
+      "description": "Terraform plan preview"
+    },
+    "challenger-review-subagent": {
+      "agent": ".github/agents/_subagents/challenger-review-subagent.md",
+      "parent": ["architect", "iac-planner", "bicep-code", "terraform-code"],
+      "scope": "per-lz",
+      "skills": ["security-baseline", "iac-common"],
+      "description": "Focused adversarial review for specific artifacts"
+    },
+    "cost-estimate-subagent": {
+      "agent": ".github/agents/_subagents/cost-estimate-subagent.md",
+      "parent": ["architect", "iac-planner"],
+      "scope": "per-lz",
+      "skills": ["cost-governance", "azure-cost-optimization"],
+      "description": "Azure pricing lookup and cost estimation"
+    }
+  },
+  "updated": "2026-04-30"
 }
