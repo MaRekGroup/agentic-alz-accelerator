@@ -344,66 +344,59 @@ class DiagramEngine:
             filename=outpath,
             show=False,
             direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.2"},
+            graph_attr={
+                "bgcolor": "white",
+                "pad": "0.4",
+                "ranksep": "1.0",
+                "nodesep": "0.5",
+            },
         ):
             root = ManagementGroups(f"{mg_prefix}\nRoot MG")
 
-            with Cluster("Platform Subscriptions"):
+            with Cluster("Platform Landing Zones", graph_attr={"style": "rounded", "bgcolor": "#e8f4fd"}):
                 with Cluster("Management"):
                     law = LogAnalyticsWorkspaces("Log Analytics")
                     auto = AutomationAccounts("Automation")
-                    mon = Monitor("Azure Monitor")
                 with Cluster("Connectivity"):
-                    fw = Firewall("Azure Firewall\n(Premium)")
                     hub = VirtualNetworks("Hub VNet\n10.0.0.0/16")
-                    gw = VirtualNetworkGateways("VPN/ER GW")
                     bastion = Bastions("Bastion")
-                    pdns = DNSZones("Private DNS\nZones")
+                    pdns = DNSZones("Private DNS")
                 with Cluster("Identity"):
-                    dc = ActiveDirectory("Domain\nControllers")
-                    pim = ManagedIdentities("PIM / RBAC")
+                    dc = ActiveDirectory("Entra ID")
+                    pim = ManagedIdentities("Managed\nIdentities")
                 with Cluster("Security"):
                     defender = MicrosoftDefenderForCloud("Defender")
                     sentinel_node = Sentinel("Sentinel")
 
-            with Cluster("Landing Zone Subscriptions"):
-                with Cluster("Corp LZ"):
-                    corp_spoke = VirtualNetworks("Corp Spoke\n10.3.0.0/16")
-                    corp_nsg = NetworkSecurityGroups("NSG")
-                    corp_app = ContainerApps("Workloads")
-                    corp_pe = PrivateEndpoint("Private\nEndpoints")
-                with Cluster("Online LZ"):
-                    online_app = FrontDoors("Public\nEndpoints")
-                    online_waf = ApplicationGateway("App GW\n+ WAF")
+            with Cluster("Application Landing Zones", graph_attr={"style": "rounded", "bgcolor": "#e8fde8"}):
+                corp_spoke = VirtualNetworks("Corp Spoke\n10.3.0.0/16")
+                online_spoke = FrontDoors("Online\nEndpoints")
+                corp_nsg = NetworkSecurityGroups("NSG")
+                corp_app = ContainerApps("Workloads")
 
-            with Cluster("Cross-Cutting Services"):
-                policy = Policy("Azure Policy\n(CAF Baseline)")
-                compliance_node = Compliance("Compliance")
-                cost = CostManagement("Cost Mgmt\n& Budgets")
+            with Cluster("Governance & Compliance", graph_attr={"style": "rounded", "bgcolor": "#fdf8e8"}):
+                policy = Policy("Azure Policy")
+                cost = CostManagement("Budgets")
                 kv = KeyVaults("Key Vault")
-                rt = RouteTables("Route Tables\n(UDR → FW)")
+                compliance_node = Compliance("Compliance")
 
-            # Hierarchy
-            root >> Edge(color="darkblue", style="bold") >> [law, fw, dc, defender]
+            # Root MG connects to both LZ groups
+            root >> Edge(color="darkblue", label="Platform") >> law
+            root >> Edge(color="darkblue") >> hub
+            root >> Edge(color="darkblue") >> dc
+            root >> Edge(color="darkblue") >> defender
+            root >> Edge(color="green", label="App LZs") >> corp_spoke
+            root >> Edge(color="green", style="dashed") >> online_spoke
 
-            # Network flow
-            gw >> hub >> fw
-            fw >> Edge(color="green", label="VNet\nPeering") >> corp_spoke
-            corp_spoke >> corp_nsg >> corp_app
-            corp_app >> corp_pe
-            fw >> Edge(color="green", style="dashed") >> online_app
-            online_app >> online_waf
+            # Hub peering to app spokes
+            hub >> Edge(color="steelblue", label="Peering") >> corp_spoke
 
-            # Monitoring
+            # Monitoring flow
             law >> Edge(style="dashed", color="orange") >> sentinel_node
-            mon >> Edge(style="dashed", color="orange") >> law
 
-            # DNS
-            corp_pe >> Edge(style="dashed", color="purple") >> pdns
-
-            # Cross-cutting
+            # Governance sits below - connected from platform
+            defender >> Edge(style="dashed", color="gray", label="Policy") >> policy
             policy >> Edge(style="dashed", color="gray") >> compliance_node
-            policy >> Edge(style="dashed", color="gray") >> defender
 
         return outpath + ".png"
 
