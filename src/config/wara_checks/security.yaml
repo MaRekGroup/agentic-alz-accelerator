@@ -218,3 +218,597 @@ checks:
     mappings:
       waf_pillar: [security]
       caf_lifecycle: [govern, manage]
+
+  # --- WAF Security Checklist: Defender & Monitoring ---
+
+  - id: SEC-010
+    title: "Defender for Cloud enabled on subscriptions"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      securityresources
+      | where type == "microsoft.security/pricings"
+      | where properties.pricingTier != "Standard"
+      | project id, name, subscriptionId, tier=properties.pricingTier
+    match: any
+    recommendation: "Enable Defender for Cloud Standard tier on all subscriptions."
+    remediation_steps:
+      - "Enable via: az security pricing create --name default --tier Standard"
+    references:
+      - "https://learn.microsoft.com/azure/defender-for-cloud/enable-enhanced-security"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-011
+    title: "Defender plans active for key resource types"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      securityresources
+      | where type == "microsoft.security/pricings"
+      | where name in~ ("VirtualMachines", "SqlServers", "StorageAccounts", "KeyVaults", "Arm")
+      | where properties.pricingTier != "Standard"
+      | project id, name, subscriptionId, tier=properties.pricingTier
+    match: any
+    recommendation: "Enable Defender plans for VMs, SQL, Storage, Key Vault, and ARM."
+    remediation_steps:
+      - "Enable each plan: az security pricing create --name {plan} --tier Standard"
+    references:
+      - "https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-012
+    title: "NSGs applied to all subnets"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/virtualnetworks"
+      | mv-expand subnet = properties.subnets
+      | where subnet.name !in~ ("GatewaySubnet", "AzureFirewallSubnet", "AzureFirewallManagementSubnet", "AzureBastionSubnet", "RouteServerSubnet")
+      | where isnull(subnet.properties.networkSecurityGroup)
+      | project id, vnetName=name, subnetName=tostring(subnet.name), resourceGroup, subscriptionId
+    match: any
+    recommendation: "Attach an NSG to every subnet (except gateway/firewall/bastion subnets)."
+    remediation_steps:
+      - "Create and associate NSG: az network vnet subnet update --nsg {nsg-name}"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-013
+    title: "Private endpoints used for PaaS services"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.storage/storageaccounts",
+          "microsoft.keyvault/vaults",
+          "microsoft.sql/servers",
+          "microsoft.cognitiveservices/accounts"
+        )
+      | where properties.publicNetworkAccess =~ "Enabled" or isnull(properties.publicNetworkAccess)
+      | where array_length(properties.privateEndpointConnections) == 0
+            or isnull(properties.privateEndpointConnections)
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Use private endpoints for PaaS services to eliminate public network exposure."
+    remediation_steps:
+      - "Create private endpoint and disable public access on the resource"
+    references:
+      - "https://learn.microsoft.com/azure/private-link/private-endpoint-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-014
+    title: "DDoS Protection Plan on hub VNet"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/virtualnetworks"
+      | where tags["alz_role"] =~ "hub" or name contains "hub"
+      | where isnull(properties.ddosProtectionPlan) or properties.enableDdosProtection != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable DDoS Network Protection on hub virtual networks."
+    remediation_steps:
+      - "Create DDoS protection plan and associate with hub VNet"
+    references:
+      - "https://learn.microsoft.com/azure/ddos-protection/ddos-protection-overview"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-015
+    title: "WAF enabled on Application Gateway or Front Door"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/applicationgateways"
+      | where properties.webApplicationFirewallConfiguration == dynamic(null)
+            and isnull(properties.firewallPolicy)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable Web Application Firewall on all Application Gateways with public listeners."
+    remediation_steps:
+      - "Associate a WAF policy with the Application Gateway"
+    references:
+      - "https://learn.microsoft.com/azure/web-application-firewall/ag/ag-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-016
+    title: "Disk encryption on all VMs"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.compute/disks"
+      | where properties.encryption.type !in~ ("EncryptionAtRestWithPlatformKey", "EncryptionAtRestWithCustomerKey", "EncryptionAtRestWithPlatformAndCustomerKeys")
+            and properties.encryptionSettingsCollection.enabled != true
+      | project id, name, diskState=properties.diskState, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Ensure all managed disks have encryption enabled (platform or customer-managed key)."
+    remediation_steps:
+      - "Enable Azure Disk Encryption or use encryption at host"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disk-encryption-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-017
+    title: "SQL TDE enabled on all databases"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.sql/servers/databases"
+      | where name != "master"
+      | where properties.transparentDataEncryption[0].status !~ "Enabled"
+            and properties.transparentDataEncryption == dynamic(null)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable Transparent Data Encryption (TDE) on all SQL databases."
+    remediation_steps:
+      - "Enable TDE: az sql db tde set --status Enabled"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/transparent-data-encryption-tde-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-018
+    title: "Diagnostic settings on security-critical resources"
+    pillar: security
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.keyvault/vaults",
+          "microsoft.network/networksecuritygroups",
+          "microsoft.network/azurefirewalls"
+        )
+      | join kind=leftouter (
+          resources
+          | where type =~ "microsoft.insights/diagnosticsettings"
+          | extend targetId = tostring(properties.resourceId)
+          | project targetId
+        ) on $left.id == $right.targetId
+      | where isempty(targetId)
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Configure diagnostic settings on Key Vaults, NSGs, and Firewalls to ship logs to Log Analytics."
+    remediation_steps:
+      - "Create diagnostic setting: az monitor diagnostic-settings create --resource {id} --workspace {law-id}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/essentials/diagnostic-settings"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-019
+    title: "No open management ports from internet"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/networksecuritygroups"
+      | mv-expand rule = properties.securityRules
+      | where rule.properties.direction =~ "Inbound"
+      | where rule.properties.access =~ "Allow"
+      | where rule.properties.sourceAddressPrefix in~ ("*", "Internet", "0.0.0.0/0")
+      | where rule.properties.destinationPortRange in~ ("22", "3389", "22-22", "3389-3389")
+            or rule.properties.destinationPortRange == "*"
+      | project id, nsgName=name, ruleName=tostring(rule.name), port=tostring(rule.properties.destinationPortRange), resourceGroup, subscriptionId
+    match: any
+    recommendation: "Remove NSG rules that allow RDP (3389) or SSH (22) from the internet. Use Azure Bastion or JIT access."
+    remediation_steps:
+      - "Delete or restrict the inbound rule source to specific IPs"
+      - "Enable JIT VM access via Defender for Cloud"
+    references:
+      - "https://learn.microsoft.com/azure/defender-for-cloud/just-in-time-access-usage"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-020
+    title: "JIT VM access enabled for management"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      securityresources
+      | where type =~ "microsoft.security/jitnetworkaccesspolicies"
+      | summarize jitCount = count()
+      | where jitCount == 0
+    match: any
+    recommendation: "Enable Just-In-Time VM access to reduce attack surface for management ports."
+    remediation_steps:
+      - "Configure JIT access in Defender for Cloud for VMs requiring management access"
+    references:
+      - "https://learn.microsoft.com/azure/defender-for-cloud/just-in-time-access-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-021
+    title: "No classic/legacy resources deployed"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type startswith "microsoft.classic"
+            or type =~ "microsoft.compute/virtualmachines" and kind =~ "classic"
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Migrate all classic/legacy resources to ARM — classic resources lack modern security controls."
+    remediation_steps:
+      - "Migrate classic VMs, storage, and networking to ARM equivalents"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/classic-vm-deprecation"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-022
+    title: "Key Vault secrets/certificates expiring within 30 days"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.keyvault/vaults/secrets"
+            or type =~ "microsoft.keyvault/vaults/certificates"
+      | where properties.attributes.expires != ""
+      | extend expiryDate = todatetime(properties.attributes.expires)
+      | where expiryDate <= now() + 30d
+      | project id, name, type, expiryDate, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Rotate or renew secrets and certificates expiring within 30 days."
+    remediation_steps:
+      - "Renew the certificate or rotate the secret before expiry"
+      - "Configure auto-rotation policies where supported"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/certificates/overview-renew-certificate"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-023
+    title: "SQL Azure AD-only authentication enabled"
+    pillar: security
+    caf_area: identity_access
+    alz_area: identity
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.sql/servers"
+      | where properties.administrators.azureADOnlyAuthentication != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable Azure AD-only authentication on SQL Servers to eliminate password-based access."
+    remediation_steps:
+      - "Enable Azure AD-only auth: az sql server ad-only-auth enable"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/authentication-azure-ad-only-authentication"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-024
+    title: "Public network access disabled on PaaS (prod)"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.storage/storageaccounts",
+          "microsoft.keyvault/vaults",
+          "microsoft.sql/servers",
+          "microsoft.web/sites",
+          "microsoft.containerregistry/registries"
+        )
+      | where tags["Environment"] =~ "Production" or tags["environment"] =~ "prod"
+      | where properties.publicNetworkAccess =~ "Enabled" or isnull(properties.publicNetworkAccess)
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Disable public network access on PaaS resources in production environments."
+    remediation_steps:
+      - "Set publicNetworkAccess to Disabled and ensure private endpoint connectivity"
+    references:
+      - "https://learn.microsoft.com/azure/private-link/disable-public-network-access"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-025
+    title: "Managed Identity preferred over service principal secrets"
+    pillar: security
+    caf_area: identity_access
+    alz_area: identity
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.web/sites",
+          "microsoft.compute/virtualmachines",
+          "microsoft.containerinstance/containergroups",
+          "microsoft.app/containerapps"
+        )
+      | where isnull(properties.identity) or properties.identity.type =~ "None"
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Assign managed identity to compute resources instead of using service principal secrets."
+    remediation_steps:
+      - "Enable system-assigned or user-assigned managed identity on the resource"
+    references:
+      - "https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-026
+    title: "Activity log exported to Log Analytics"
+    pillar: security
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.insights/diagnosticsettings"
+      | where properties.logs contains "Administrative" or properties.logs contains "Security"
+      | summarize settingsCount = count()
+      | where settingsCount == 0
+    match: any
+    recommendation: "Export Activity Log to Log Analytics workspace for audit and threat detection."
+    remediation_steps:
+      - "Create subscription-level diagnostic setting to ship Activity Log to LAW"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-027
+    title: "Backup vault soft delete and immutability enabled"
+    pillar: security
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.recoveryservices/vaults"
+      | where properties.securitySettings.softDeleteSettings.softDeleteState !~ "Enabled"
+            or properties.securitySettings.immutabilitySettings.state !~ "Locked"
+      | project id, name, resourceGroup, subscriptionId,
+                softDelete=properties.securitySettings.softDeleteSettings.softDeleteState,
+                immutability=properties.securitySettings.immutabilitySettings.state
+    match: any
+    recommendation: "Enable soft delete and immutability on Recovery Services vaults to prevent ransomware deletion of backups."
+    remediation_steps:
+      - "Enable soft delete and set immutability to Locked on backup vaults"
+    references:
+      - "https://learn.microsoft.com/azure/backup/backup-azure-security-feature-cloud"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-028
+    title: "VMs with pending critical security patches"
+    pillar: security
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      patchassessmentresources
+      | where type =~ "microsoft.compute/virtualmachines/patchassessmentresults/latest"
+      | where properties.criticalAndSecurityPatchCount > 0
+      | project id, vmName=tostring(split(id, "/")[8]),
+                criticalPatches=properties.criticalAndSecurityPatchCount,
+                subscriptionId
+    match: any
+    recommendation: "Apply pending critical security patches to VMs using Azure Update Manager."
+    remediation_steps:
+      - "Schedule patching via Azure Update Manager or apply immediately"
+    references:
+      - "https://learn.microsoft.com/azure/update-manager/overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [manage]
+
+  - id: SEC-029
+    title: "Storage accounts require secure transfer (SMB encryption)"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.storage/storageaccounts"
+      | where properties.supportsHttpsTrafficOnly != true
+            or properties.encryption.requireInfrastructureEncryption != true
+      | project id, name, resourceGroup, subscriptionId,
+                httpsOnly=properties.supportsHttpsTrafficOnly,
+                infraEncryption=properties.encryption.requireInfrastructureEncryption
+    match: any
+    recommendation: "Require secure transfer and enable infrastructure encryption on storage accounts."
+    remediation_steps:
+      - "Enable HTTPS-only and infrastructure encryption on storage accounts"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-030
+    title: "Network Watcher enabled in active regions"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/virtualnetworks"
+      | distinct location
+      | join kind=leftanti (
+          resources
+          | where type =~ "microsoft.network/networkwatchers"
+          | project location
+        ) on location
+      | project missingRegion=location
+    match: any
+    recommendation: "Enable Network Watcher in all regions where you have deployed virtual networks."
+    remediation_steps:
+      - "Create Network Watcher: az network watcher configure --locations {region} --enabled true"
+    references:
+      - "https://learn.microsoft.com/azure/network-watcher/network-watcher-overview"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-031
+    title: "No classic networking resources"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.classicnetwork/virtualnetworks",
+          "microsoft.classicnetwork/networksecuritygroups",
+          "microsoft.classicnetwork/reservedips"
+        )
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Migrate classic networking resources to ARM — they lack NSG flow logs, Private Link, and modern security features."
+    remediation_steps:
+      - "Migrate classic VNets to ARM virtual networks"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/migrate-classic-vnet-powershell"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
