@@ -50,3 +50,537 @@ checks:
     mappings:
       waf_pillar: [cost_optimization]
       caf_lifecycle: [manage]
+
+  # --- WAF Cost Optimization: Orphan/Waste Detection (CO:05) ---
+
+  - id: COS-003
+    title: "Orphan public IP addresses (unassociated)"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/publicipaddresses"
+      | where properties.ipConfiguration == dynamic(null)
+            and properties.natGateway == dynamic(null)
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.name, allocationMethod=properties.publicIPAllocationMethod
+    match: any
+    recommendation: "Delete unassociated public IPs — they incur charges even when unused (Standard SKU)."
+    remediation_steps:
+      - "Verify IP is not needed, then delete: az network public-ip delete --ids <id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/ip-services/virtual-network-public-ip-address"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-004
+    title: "Orphan network interfaces (unattached)"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/networkinterfaces"
+      | where isnull(properties.virtualMachine)
+            and isnull(properties.privateEndpoint)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Delete orphan NICs left behind after VM deletion."
+    remediation_steps:
+      - "Verify NIC is not needed, then delete: az network nic delete --ids <id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-005
+    title: "Empty resource groups"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resourcecontainers
+      | where type =~ "microsoft.resources/subscriptions/resourcegroups"
+      | join kind=leftanti (
+          resources
+          | summarize by resourceGroup, subscriptionId
+        ) on $left.name == $right.resourceGroup, $left.subscriptionId == $right.subscriptionId
+      | project id, name, subscriptionId, location
+    match: any
+    recommendation: "Review and delete empty resource groups to reduce clutter and simplify governance."
+    remediation_steps:
+      - "Verify RG is unused, then delete: az group delete --name <rg-name>"
+    references:
+      - "https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-006
+    title: "VMs in stopped (not deallocated) state"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.compute/virtualmachines"
+      | where properties.extended.instanceView.powerState.displayStatus =~ "VM stopped"
+      | project id, name, resourceGroup, subscriptionId,
+                vmSize=properties.hardwareProfile.vmSize
+    match: any
+    recommendation: "Deallocate stopped VMs — stopped (not deallocated) VMs still incur compute charges."
+    remediation_steps:
+      - "Deallocate VM: az vm deallocate --ids <vm-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/states-billing"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-010
+    title: "App Service plans with no apps"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.web/serverfarms"
+      | where properties.numberOfSites == 0
+      | where sku.tier !~ "Free" and sku.tier !~ "Shared"
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.name, tier=sku.tier
+    match: any
+    recommendation: "Delete or downgrade App Service plans with no hosted apps — they incur charges regardless of usage."
+    remediation_steps:
+      - "Delete empty plan: az appservice plan delete --ids <id>"
+    references:
+      - "https://learn.microsoft.com/azure/app-service/overview-hosting-plans"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-013
+    title: "Load balancers with empty backend pools"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.network/loadbalancers"
+      | where sku.name =~ "Standard"
+      | mv-expand pool = properties.backendAddressPools
+      | extend backendCount = array_length(pool.properties.backendIPConfigurations)
+      | summarize totalBackends = sum(backendCount) by id, name, resourceGroup, subscriptionId
+      | where totalBackends == 0
+    match: any
+    recommendation: "Delete or reconfigure Standard Load Balancers with no backends — they incur hourly charges."
+    remediation_steps:
+      - "Remove unused load balancer: az network lb delete --ids <id>"
+    references:
+      - "https://learn.microsoft.com/azure/load-balancer/skus"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-015
+    title: "Orphan disk snapshots older than 30 days"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.compute/snapshots"
+      | where properties.timeCreated < ago(30d)
+      | project id, name, resourceGroup, subscriptionId,
+                createdDate=properties.timeCreated, diskSizeGB=properties.diskSizeGB
+    match: any
+    recommendation: "Review and delete disk snapshots older than 30 days to reduce storage costs."
+    remediation_steps:
+      - "Delete old snapshot: az snapshot delete --ids <id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disks-incremental-snapshots"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  # --- WAF Cost Optimization: Governance & Monitoring (CO:01, CO:02, CO:12) ---
+
+  - id: COS-007
+    title: "No cost alert rules configured"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.consumption/budgets"
+      | where array_length(properties.notifications) == 0
+            or properties.notifications == dynamic(null)
+      | project id, name, subscriptionId
+    match: any
+    recommendation: "Configure budget alert notifications at 80%, 100%, and 120% forecast thresholds."
+    remediation_steps:
+      - "Update budget with alert thresholds and action groups"
+    references:
+      - "https://learn.microsoft.com/azure/cost-management-billing/costs/cost-mgt-alerts-monitor-usage-spending"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-014
+    title: "Azure Advisor cost recommendations pending"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      advisorresources
+      | where type =~ "microsoft.advisor/recommendations"
+      | where properties.category =~ "Cost"
+      | where properties.suppressionIds == dynamic(null)
+      | project id, name=properties.shortDescription.solution,
+                impact=properties.impact, resourceId=properties.resourceMetadata.resourceId,
+                subscriptionId
+    match: any
+    recommendation: "Review and act on Azure Advisor cost recommendations to reduce waste."
+    remediation_steps:
+      - "Review recommendations: az advisor recommendation list --category Cost"
+      - "Implement or dismiss each recommendation"
+    references:
+      - "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-017
+    title: "Resource groups missing CostCenter tag"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resourcecontainers
+      | where type =~ "microsoft.resources/subscriptions/resourcegroups"
+      | where isnull(tags["CostCenter"]) and isnull(tags["costcenter"]) and isnull(tags["costCenter"])
+      | project id, name, subscriptionId, tags
+    match: any
+    recommendation: "Apply CostCenter tag to all resource groups for cost allocation and chargeback."
+    remediation_steps:
+      - "Tag resource group: az tag update --resource-id <rg-id> --operation merge --tags CostCenter=<value>"
+    references:
+      - "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-020
+    title: "No Cost Management scheduled exports"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.costmanagement/exports"
+      | summarize exportCount = count()
+      | where exportCount == 0
+    match: any
+    recommendation: "Configure scheduled Cost Management exports for cost data analysis and FinOps reporting."
+    remediation_steps:
+      - "Create export: az costmanagement export create --scope <sub-id> --name daily-export"
+    references:
+      - "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-export-acm-data"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  # --- WAF Cost Optimization: Right-sizing & Scaling (CO:04, CO:10) ---
+
+  - id: COS-008
+    title: "Premium SSD disks on non-production workloads"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.compute/disks"
+      | where sku.name =~ "Premium_LRS" or sku.name =~ "Premium_ZRS"
+      | extend rg = resourceGroup
+      | join kind=inner (
+          resourcecontainers
+          | where type =~ "microsoft.resources/subscriptions/resourcegroups"
+          | where tags["Environment"] in~ ("dev", "development", "test", "staging", "sandbox")
+                or tags["environment"] in~ ("dev", "development", "test", "staging", "sandbox")
+          | project rg=name, subscriptionId
+        ) on rg, subscriptionId
+      | project id, name, resourceGroup, subscriptionId, sku=sku.name
+    match: any
+    recommendation: "Use Standard SSD/HDD for non-production workloads instead of Premium SSD to reduce costs."
+    remediation_steps:
+      - "Change disk SKU: az disk update --sku StandardSSD_LRS --ids <disk-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disks-types"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-011
+    title: "Potentially over-provisioned VMs (B-series recommended)"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      advisorresources
+      | where type =~ "microsoft.advisor/recommendations"
+      | where properties.category =~ "Cost"
+      | where properties.shortDescription.solution contains "right-size"
+            or properties.shortDescription.solution contains "underutilized"
+      | project id, vmName=properties.resourceMetadata.resourceId,
+                savings=properties.extendedProperties.savingsAmount,
+                subscriptionId
+    match: any
+    recommendation: "Right-size over-provisioned VMs per Azure Advisor recommendations."
+    remediation_steps:
+      - "Resize VM to recommended SKU: az vm resize --size <recommended-size>"
+    references:
+      - "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-016
+    title: "ExpressRoute/VPN gateways in non-production environments"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.network/virtualnetworkgateways",
+          "microsoft.network/expressroutecircuits"
+        )
+      | extend rg = resourceGroup
+      | join kind=inner (
+          resourcecontainers
+          | where type =~ "microsoft.resources/subscriptions/resourcegroups"
+          | where tags["Environment"] in~ ("dev", "development", "test", "staging", "sandbox")
+                or tags["environment"] in~ ("dev", "development", "test", "staging", "sandbox")
+          | project rg=name, subscriptionId
+        ) on rg, subscriptionId
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Evaluate necessity of VPN/ExpressRoute gateways in non-production — consider VNet peering or VPN alternatives."
+    remediation_steps:
+      - "Assess if gateway is needed or if VNet peering suffices for non-prod connectivity"
+    references:
+      - "https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpngateways"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-018
+    title: "SQL elastic pools near capacity limits"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.sql/servers/elasticpools"
+      | where properties.state =~ "Ready"
+      | extend maxDtu = toint(properties.dtu)
+      | extend usedSpace = toint(properties.currentDatabaseCount)
+      | extend maxDbs = toint(properties.maxDatabaseCount)
+      | where usedSpace >= maxDbs or maxDtu <= 50
+      | project id, name, resourceGroup, subscriptionId,
+                dtu=maxDtu, dbCount=usedSpace, maxDatabases=maxDbs
+    match: any
+    recommendation: "Review SQL elastic pools at capacity — consider scaling up or splitting databases across pools."
+    remediation_steps:
+      - "Scale pool: az sql elastic-pool update --dtu <new-value>"
+      - "Consider moving databases to separate pools"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/elastic-pool-overview"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-019
+    title: "Scalable resources without autoscale rules"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          "microsoft.compute/virtualmachinescalesets",
+          "microsoft.web/serverfarms"
+        )
+      | where type =~ "microsoft.web/serverfarms" and sku.tier in~ ("Standard", "Premium", "PremiumV2", "PremiumV3")
+            or type =~ "microsoft.compute/virtualmachinescalesets"
+      | join kind=leftanti (
+          resources
+          | where type =~ "microsoft.insights/autoscalesettings"
+          | extend targetId = tostring(properties.targetResourceUri)
+          | project targetId
+        ) on $left.id == $right.targetId
+      | project id, name, type, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Configure autoscale rules on VMSS and App Service plans to optimize scaling costs."
+    remediation_steps:
+      - "Create autoscale setting: az monitor autoscale create --resource <id>"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-overview"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  # --- WAF Cost Optimization: Rate Optimization (CO:03) ---
+
+  - id: COS-009
+    title: "Long-running VMs without Reserved Instances"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      advisorresources
+      | where type =~ "microsoft.advisor/recommendations"
+      | where properties.category =~ "Cost"
+      | where properties.shortDescription.solution contains "reserved"
+            or properties.shortDescription.solution contains "reservation"
+      | project id, name=properties.shortDescription.solution,
+                savings=properties.extendedProperties.savingsAmount,
+                subscriptionId
+    match: any
+    recommendation: "Purchase Reserved Instances for VMs running 24/7 to save up to 72% vs pay-as-you-go."
+    remediation_steps:
+      - "Review Advisor RI recommendations and purchase via Azure portal or API"
+    references:
+      - "https://learn.microsoft.com/azure/cost-management-billing/reservations/save-compute-costs-reservations"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-012
+    title: "Storage accounts without lifecycle management policies"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.storage/storageaccounts"
+      | where kind =~ "StorageV2" or kind =~ "BlobStorage"
+      | where isnull(properties.azureFilesIdentityBasedAuthentication)
+      | join kind=leftanti (
+          resources
+          | where type =~ "microsoft.storage/storageaccounts/managementpolicies"
+          | extend storageId = tostring(split(id, "/managementPolicies")[0])
+          | project storageId
+        ) on $left.id == $right.storageId
+      | project id, name, resourceGroup, subscriptionId, accessTier=properties.accessTier
+    match: any
+    recommendation: "Configure lifecycle management policies to automatically tier or delete old blobs and reduce storage costs."
+    remediation_steps:
+      - "Create lifecycle policy: az storage account management-policy create"
+    references:
+      - "https://learn.microsoft.com/azure/storage/blobs/lifecycle-management-overview"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+
+  - id: COS-021
+    title: "Windows VMs without Azure Hybrid Benefit"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ "microsoft.compute/virtualmachines"
+      | where properties.storageProfile.osDisk.osType =~ "Windows"
+      | where properties.licenseType != "Windows_Server"
+            and properties.licenseType != "Windows_Client"
+      | project id, name, resourceGroup, subscriptionId,
+                vmSize=properties.hardwareProfile.vmSize, licenseType=properties.licenseType
+    match: any
+    recommendation: "Apply Azure Hybrid Benefit to Windows VMs with eligible licenses to save up to 40%."
+    remediation_steps:
+      - "Apply hybrid benefit: az vm update --license-type Windows_Server --ids <vm-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/windows/hybrid-use-benefit-licensing"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
