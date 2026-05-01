@@ -200,9 +200,9 @@ class TestCheckCatalogIntegrity:
             assert len(ids) == len(set(ids)), f"Duplicate IDs: {[x for x in ids if ids.count(x) > 1]}"
 
     def test_check_id_format(self, mock_credential, mock_settings):
-        """Check IDs follow the SEC-NNN / REL-NNN / OPE-NNN / COS-NNN / PER-NNN format."""
+        """Check IDs follow pillar-NNN or APRL-pillar-hex format."""
         import re
-        valid_pattern = re.compile(r"^(SEC|REL|OPE|COS|PER)-\d{3}$")
+        valid_pattern = re.compile(r"^(SEC|REL|OPE|COS|PER)-\d{3}$|^APRL-(SEC|REL|OPE|COS|PER)-[0-9A-F]{8}$")
         with patch("src.tools.wara_engine.AzureRGClient"):
             engine = WaraEngine(mock_credential, mock_settings)
             for check in engine.checks:

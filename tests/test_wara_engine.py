@@ -473,7 +473,6 @@ checks:
 
     def test_real_checks_directory(self, mock_credential, mock_settings):
         """The real wara_checks/ directory loads all per-pillar + APRL checks."""
-        from src.tools.wara_engine import CHECKS_DIR
         with patch("src.tools.wara_engine.AzureRGClient"):
             e = WaraEngine(mock_credential, mock_settings)
             # Should load from directory (20 custom + APRL synced)
