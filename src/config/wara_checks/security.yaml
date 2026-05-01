@@ -1,0 +1,220 @@
+# Security Pillar Checks
+# Evaluated by src/tools/wara_engine.py
+# Prefix: SEC-
+
+checks:
+  - id: SEC-001
+    title: "TLS 1.2 minimum on storage accounts"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.minimumTlsVersion != 'TLS1_2'
+      | project id, name, resourceGroup, subscriptionId,
+                minTls=properties.minimumTlsVersion
+    match: any
+    recommendation: "Set minimumTlsVersion to TLS1_2 on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --min-tls-version TLS1_2"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/transport-layer-security"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-002
+    title: "HTTPS-only on storage accounts"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.supportsHttpsTrafficOnly != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable HTTPS-only traffic on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --https-only true"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-003
+    title: "No public blob access on storage"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where properties.allowBlobPublicAccess == true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Disable public blob access on all storage accounts."
+    remediation_steps:
+      - "Update storage account: az storage account update --allow-blob-public-access false"
+    references:
+      - "https://learn.microsoft.com/azure/storage/blobs/anonymous-read-access-prevent"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-004
+    title: "Key Vault soft delete enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enableSoftDelete != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable soft delete on all Key Vaults."
+    remediation_steps:
+      - "Soft delete is enabled by default on new vaults; re-create or update existing vaults"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-005
+    title: "Key Vault purge protection enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enablePurgeProtection != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable purge protection on all Key Vaults."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --enable-purge-protection true"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview#purge-protection"
+    mappings:
+      waf_pillar: [security, reliability]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-006
+    title: "Key Vault RBAC authorization enabled"
+    pillar: security
+    caf_area: identity_access
+    alz_area: identity
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.enableRbacAuthorization != true
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Use RBAC authorization instead of access policies for Key Vaults."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --enable-rbac-authorization true"
+      - "Migrate access policies to RBAC role assignments"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/rbac-guide"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-007
+    title: "Key Vault network ACLs deny by default"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where properties.networkAcls.defaultAction =~ 'Allow'
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Set Key Vault network ACLs default action to Deny."
+    remediation_steps:
+      - "Update Key Vault: az keyvault update --default-action Deny"
+      - "Add required network rules for permitted access"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/network-security"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-008
+    title: "Public IP addresses detected"
+    pillar: security
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/publicipaddresses'
+      | project id, name, resourceGroup, subscriptionId,
+                ipAddress=properties.ipAddress
+    match: any
+    recommendation: "Review public IP addresses — remove unnecessary public exposure."
+    remediation_steps:
+      - "Audit each public IP for necessity"
+      - "Replace with Private Endpoints where possible"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+
+  - id: SEC-009
+    title: "No Sentinel workspace detected"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "security_posture.sentinel"
+    match: empty
+    recommendation: "Enable Microsoft Sentinel for SIEM/SOAR capabilities."
+    remediation_steps:
+      - "Onboard Sentinel to the management Log Analytics workspace"
+    references:
+      - "https://learn.microsoft.com/azure/sentinel/quickstart-onboard"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]

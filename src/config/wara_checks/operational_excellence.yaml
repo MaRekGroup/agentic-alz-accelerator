@@ -1,0 +1,136 @@
+# Operational Excellence Pillar Checks
+# Evaluated by src/tools/wara_engine.py
+# Prefix: OPE-
+
+checks:
+  - id: OPE-001
+    title: "Log Analytics workspace retention under 90 days"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.operationalinsights/workspaces'
+      | where toint(properties.retentionInDays) < 90
+      | project id, name, resourceGroup, subscriptionId,
+                retentionDays=properties.retentionInDays
+    match: any
+    recommendation: "Set LAW retention to at least 90 days for compliance."
+    remediation_steps:
+      - "Update workspace: az monitor log-analytics workspace update --retention-time 90"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [manage]
+
+  - id: OPE-002
+    title: "No policy assignments found"
+    pillar: operational_excellence
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: discovery_field
+    query: "policy_assignments"
+    match: empty
+    recommendation: "Assign Azure Policy initiatives (e.g., ASB, CIS) for governance enforcement."
+    remediation_steps:
+      - "Assign Azure Security Benchmark initiative at MG or subscription scope"
+    references:
+      - "https://learn.microsoft.com/azure/governance/policy/overview"
+    mappings:
+      waf_pillar: [operational_excellence, security]
+      caf_lifecycle: [govern, manage]
+
+  - id: OPE-003
+    title: "No automation accounts found"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "logging_config.automation_accounts"
+    match: empty
+    recommendation: "Deploy an Automation Account for runbook-based operations."
+    remediation_steps:
+      - "Create automation account in management subscription"
+    references:
+      - "https://learn.microsoft.com/azure/automation/overview"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [manage]
+
+  - id: OPE-004
+    title: "Management group hierarchy not CAF-aligned"
+    pillar: operational_excellence
+    caf_area: resource_org
+    alz_area: management_groups
+    severity: high
+    confidence: medium
+    scope: management_group
+    query_type: discovery_field
+    query: "management_groups"
+    match: custom
+    evaluation: "check_caf_mg_hierarchy"
+    recommendation: "Adopt CAF enterprise-scale MG hierarchy: platform, landing zones, sandbox, decommissioned."
+    remediation_steps:
+      - "Run bootstrap workflow to create CAF-aligned MG hierarchy"
+      - "Move subscriptions to appropriate MGs"
+    references:
+      - "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-management-groups"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [ready, govern]
+
+  - id: OPE-005
+    title: "Resources missing required tags"
+    pillar: operational_excellence
+    caf_area: resource_org
+    alz_area: policy
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resourcecontainers
+      | where type =~ 'microsoft.resources/subscriptions/resourcegroups'
+      | where isnull(tags.Environment) or isnull(tags.Owner) or isnull(tags.CostCenter)
+      | project id, name, subscriptionId, tags
+    match: any
+    recommendation: "Apply required tags (Environment, Owner, CostCenter) to all resource groups."
+    remediation_steps:
+      - "Assign tagging policy at MG scope to enforce required tags"
+      - "Remediate existing resources with tagging task"
+    references:
+      - "https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources"
+    mappings:
+      waf_pillar: [operational_excellence, cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: OPE-006
+    title: "No hub VNet or firewall detected"
+    pillar: operational_excellence
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: discovery_field
+    query: "network_topology.firewalls"
+    match: empty
+    recommendation: "Deploy a hub VNet with Azure Firewall for centralized network governance."
+    remediation_steps:
+      - "Deploy connectivity landing zone with hub-spoke topology"
+    references:
+      - "https://learn.microsoft.com/azure/architecture/networking/architecture/hub-spoke"
+    mappings:
+      waf_pillar: [security, operational_excellence]
+      caf_lifecycle: [ready, adopt]

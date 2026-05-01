@@ -1,0 +1,57 @@
+# Reliability Pillar Checks
+# Evaluated by src/tools/wara_engine.py
+# Prefix: REL-
+
+checks:
+  - id: REL-001
+    title: "VMs without availability zones"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | where isnull(zones) or array_length(zones) == 0
+      | project id, name, resourceGroup, subscriptionId, location
+    match: any
+    recommendation: "Deploy VMs across availability zones for high availability."
+    remediation_steps:
+      - "Redeploy VMs into availability zones (requires VM recreate)"
+    references:
+      - "https://learn.microsoft.com/azure/reliability/availability-zones-overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+
+  - id: REL-002
+    title: "Single-instance resources without redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          'microsoft.operationalinsights/workspaces',
+          'microsoft.automation/automationaccounts',
+          'microsoft.keyvault/vaults'
+        )
+      | summarize count=count() by type
+      | where count == 1
+      | project type, count
+    match: any
+    recommendation: "Consider redundancy for single-instance critical resources."
+    remediation_steps:
+      - "Evaluate if cross-region replication or secondary instances are needed"
+    references:
+      - "https://learn.microsoft.com/azure/reliability/overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
