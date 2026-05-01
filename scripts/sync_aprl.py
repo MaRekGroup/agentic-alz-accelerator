@@ -220,11 +220,18 @@ def write_yaml(checks: list[dict[str, Any]], output: Path) -> None:
 
     content = {"checks": checks}
 
+    class IndentedDumper(yaml.Dumper):
+        """Dumper that indents list items inside mappings (yamllint-compliant)."""
+
+        def increase_indent(self, flow=False, indentless=False):
+            return yaml.Dumper.increase_indent(self, flow, False)
+
     with open(output, "w") as f:
         f.write(header)
         yaml.dump(
             content,
             f,
+            Dumper=IndentedDumper,
             default_flow_style=False,
             sort_keys=False,
             width=120,
