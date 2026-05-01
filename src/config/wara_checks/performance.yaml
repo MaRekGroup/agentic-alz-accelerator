@@ -1,0 +1,28 @@
+# Performance Pillar Checks
+# Evaluated by src/tools/wara_engine.py
+# Prefix: PER-
+
+checks:
+  - id: PER-001
+    title: "Storage accounts using legacy SKU"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where sku.name =~ 'Standard_LRS'
+      | project id, name, resourceGroup, subscriptionId, sku=sku.name
+    match: any
+    recommendation: "Evaluate if ZRS or GRS replication is appropriate for production workloads."
+    remediation_steps:
+      - "Assess replication needs per workload; upgrade to ZRS/GRS where needed"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-redundancy"
+    mappings:
+      waf_pillar: [performance, reliability]
+      caf_lifecycle: [ready, adopt]

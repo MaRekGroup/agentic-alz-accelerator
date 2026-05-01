@@ -1,0 +1,52 @@
+# Cost Optimization Pillar Checks
+# Evaluated by src/tools/wara_engine.py
+# Prefix: COS-
+
+checks:
+  - id: COS-001
+    title: "No budget resources found"
+    pillar: cost_optimization
+    caf_area: governance
+    alz_area: policy
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.consumption/budgets'
+      | project id, name
+    match: empty
+    recommendation: "Create budget resources with 80/100/120% forecast alerts."
+    remediation_steps:
+      - "Deploy budget resource via IaC with parameterized thresholds"
+    references:
+      - "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+
+  - id: COS-002
+    title: "Unattached managed disks"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/disks'
+      | where properties.diskState =~ 'Unattached'
+      | project id, name, resourceGroup, subscriptionId,
+                diskSizeGB=properties.diskSizeGB, sku=sku.name
+    match: any
+    recommendation: "Review and delete unattached managed disks to reduce cost."
+    remediation_steps:
+      - "Verify disk is not needed, then delete: az disk delete --ids <disk-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disks-find-unattached-portal"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]

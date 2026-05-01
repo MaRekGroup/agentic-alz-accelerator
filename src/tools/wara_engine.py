@@ -30,6 +30,7 @@ from src.tools.discovery import DiscoveryResult
 logger = logging.getLogger(__name__)
 
 CHECKS_FILE = Path(__file__).parent.parent / "config" / "wara_checks.yaml"
+CHECKS_DIR = Path(__file__).parent.parent / "config" / "wara_checks"
 
 
 class Severity(str, Enum):
@@ -159,11 +160,12 @@ class WaraEngine:
         credential: DefaultAzureCredential,
         settings: Settings,
         checks_file: Path | None = None,
+        checks_dir: Path | None = None,
     ):
         self.credential = credential
         self.settings = settings
         self._arg_client: AzureRGClient | None = None
-        self.checks = self._load_checks(checks_file or CHECKS_FILE)
+        self.checks = self._load_checks(checks_file, checks_dir)
 
     @property
     def arg_client(self) -> AzureRGClient:
@@ -172,13 +174,56 @@ class WaraEngine:
         return self._arg_client
 
     @staticmethod
-    def _load_checks(path: Path) -> list[dict]:
-        """Load check definitions from YAML catalog."""
+    def _load_checks(
+        checks_file: Path | None = None,
+        checks_dir: Path | None = None,
+    ) -> list[dict]:
+        """Load check definitions from YAML catalog(s).
+
+        Priority:
+          1. If checks_file is given, load only that file (backwards compat).
+          2. If checks_dir exists, glob all *.yaml files from it.
+          3. Fall back to the legacy single-file CHECKS_FILE.
+        """
+        if checks_file is not None:
+            return WaraEngine._load_single_file(checks_file)
+
+        directory = checks_dir or CHECKS_DIR
+        if directory.is_dir():
+            return WaraEngine._load_from_directory(directory)
+
+        # Legacy fallback to single file
+        return WaraEngine._load_single_file(CHECKS_FILE)
+
+    @staticmethod
+    def _load_single_file(path: Path) -> list[dict]:
+        """Load checks from a single YAML file."""
         with open(path) as f:
             data = yaml.safe_load(f)
         checks = data.get("checks", [])
-        logger.info(f"Loaded {len(checks)} WARA checks from {path}")
+        logger.info("Loaded %d WARA checks from %s", len(checks), path)
         return checks
+
+    @staticmethod
+    def _load_from_directory(directory: Path) -> list[dict]:
+        """Load and merge checks from all *.yaml files in a directory."""
+        all_checks: list[dict] = []
+        seen_ids: set[str] = set()
+
+        for yaml_file in sorted(directory.glob("*.yaml")):
+            with open(yaml_file) as f:
+                data = yaml.safe_load(f)
+            file_checks = data.get("checks", [])
+            # Deduplicate by check ID
+            for check in file_checks:
+                check_id = check.get("id", "")
+                if check_id not in seen_ids:
+                    seen_ids.add(check_id)
+                    all_checks.append(check)
+            logger.info("Loaded %d checks from %s", len(file_checks), yaml_file.name)
+
+        logger.info("Total: %d unique WARA checks from %s", len(all_checks), directory)
+        return all_checks
 
     async def assess(
         self,

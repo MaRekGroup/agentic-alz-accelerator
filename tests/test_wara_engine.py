@@ -405,3 +405,82 @@ class TestApplyFindingToScores:
         )
         WaraEngine._apply_finding_to_scores(finding, scores)
         assert scores["security"].score == 100.0  # Unchanged
+
+
+class TestDirectoryLoader:
+    """Tests for the per-pillar directory-based check loading."""
+
+    def test_load_from_directory(self, tmp_path):
+        """Loads and merges checks from multiple YAML files."""
+        (tmp_path / "security.yaml").write_text("""
+checks:
+  - id: SEC-T01
+    title: Test sec
+    pillar: security
+    severity: high
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where 1==0"
+    match: any
+    recommendation: Fix
+""")
+        (tmp_path / "reliability.yaml").write_text("""
+checks:
+  - id: REL-T01
+    title: Test rel
+    pillar: reliability
+    severity: medium
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where 1==0"
+    match: any
+    recommendation: Fix
+""")
+        checks = WaraEngine._load_from_directory(tmp_path)
+        assert len(checks) == 2
+        ids = {c["id"] for c in checks}
+        assert ids == {"SEC-T01", "REL-T01"}
+
+    def test_deduplication(self, tmp_path):
+        """Duplicate IDs across files are deduplicated (first wins)."""
+        (tmp_path / "a_first.yaml").write_text("""
+checks:
+  - id: DUP-001
+    title: First version
+    pillar: security
+    severity: high
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where 1==0"
+    match: any
+    recommendation: First
+""")
+        (tmp_path / "b_second.yaml").write_text("""
+checks:
+  - id: DUP-001
+    title: Second version (should be skipped)
+    pillar: security
+    severity: low
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where 1==0"
+    match: any
+    recommendation: Second
+""")
+        checks = WaraEngine._load_from_directory(tmp_path)
+        assert len(checks) == 1
+        assert checks[0]["title"] == "First version"
+
+    def test_real_checks_directory(self, mock_credential, mock_settings):
+        """The real wara_checks/ directory loads all per-pillar + APRL checks."""
+        from src.tools.wara_engine import CHECKS_DIR
+        with patch("src.tools.wara_engine.AzureRGClient"):
+            e = WaraEngine(mock_credential, mock_settings)
+            # Should load from directory (20 custom + APRL synced)
+            assert len(e.checks) >= 20
+            # All checks have required fields
+            for check in e.checks:
+                assert "id" in check
+                assert "pillar" in check
+                assert "severity" in check
+                assert "query" in check
