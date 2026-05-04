@@ -65,8 +65,8 @@ checks:
     query: |
       resources
       | where type =~ "microsoft.network/publicipaddresses"
-      | where properties.ipConfiguration == dynamic(null)
-            and properties.natGateway == dynamic(null)
+      | where isnull(properties.ipConfiguration)
+            and isnull(properties.natGateway)
       | project id, name, resourceGroup, subscriptionId,
                 sku=sku.name, allocationMethod=properties.publicIPAllocationMethod
     match: any
@@ -116,10 +116,11 @@ checks:
     query: |
       resourcecontainers
       | where type =~ "microsoft.resources/subscriptions/resourcegroups"
-      | join kind=leftanti (
+      | join kind=leftouter (
           resources
-          | summarize by resourceGroup, subscriptionId
+          | summarize resourceCount=count() by resourceGroup, subscriptionId
         ) on $left.name == $right.resourceGroup, $left.subscriptionId == $right.subscriptionId
+      | where isnull(resourceCount)
       | project id, name, subscriptionId, location
     match: any
     recommendation: "Review and delete empty resource groups to reduce clutter and simplify governance."
@@ -248,8 +249,8 @@ checks:
     query: |
       resources
       | where type =~ "microsoft.consumption/budgets"
-      | where array_length(properties.notifications) == 0
-            or properties.notifications == dynamic(null)
+      | where isnull(properties.notifications)
+            or tostring(properties.notifications) == "{}"
       | project id, name, subscriptionId
     match: any
     recommendation: "Configure budget alert notifications at 80%, 100%, and 120% forecast thresholds."
@@ -274,7 +275,7 @@ checks:
       advisorresources
       | where type =~ "microsoft.advisor/recommendations"
       | where properties.category =~ "Cost"
-      | where properties.suppressionIds == dynamic(null)
+      | where isnull(properties.suppressionIds)
       | project id, name=properties.shortDescription.solution,
                 impact=properties.impact, resourceId=properties.resourceMetadata.resourceId,
                 subscriptionId
@@ -480,12 +481,13 @@ checks:
         )
       | where type =~ "microsoft.web/serverfarms" and sku.tier in~ ("Standard", "Premium", "PremiumV2", "PremiumV3")
             or type =~ "microsoft.compute/virtualmachinescalesets"
-      | join kind=leftanti (
+      | join kind=leftouter (
           resources
           | where type =~ "microsoft.insights/autoscalesettings"
           | extend targetId = tostring(properties.targetResourceUri)
           | project targetId
         ) on $left.id == $right.targetId
+      | where isnull(targetId)
       | project id, name, type, resourceGroup, subscriptionId
     match: any
     recommendation: "Configure autoscale rules on VMSS and App Service plans to optimize scaling costs."
@@ -541,12 +543,13 @@ checks:
       | where type =~ "microsoft.storage/storageaccounts"
       | where kind =~ "StorageV2" or kind =~ "BlobStorage"
       | where isnull(properties.azureFilesIdentityBasedAuthentication)
-      | join kind=leftanti (
+      | join kind=leftouter (
           resources
           | where type =~ "microsoft.storage/storageaccounts/managementpolicies"
           | extend storageId = tostring(split(id, "/managementPolicies")[0])
           | project storageId
         ) on $left.id == $right.storageId
+      | where isnull(storageId)
       | project id, name, resourceGroup, subscriptionId, accessTier=properties.accessTier
     match: any
     recommendation: "Configure lifecycle management policies to automatically tier or delete old blobs and reduce storage costs."
