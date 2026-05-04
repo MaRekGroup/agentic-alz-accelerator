@@ -137,7 +137,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git checkout -b "$BRANCH" || git checkout "$BRANCH"
-          git add agent-output/${{ inputs.customer }}/assessment/
+          git add -f agent-output/${{ inputs.customer }}/assessment/
           git commit -m "assessment: ${{ inputs.scope_type }}/${{ inputs.scope }} — score ${{ needs.assess.outputs.overall_score }}/100
 
           Findings: ${{ needs.assess.outputs.findings_count }} (critical: ${{ needs.assess.outputs.critical_count }}, high: ${{ needs.assess.outputs.high_count }})
