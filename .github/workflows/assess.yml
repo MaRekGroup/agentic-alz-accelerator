@@ -108,6 +108,7 @@ jobs:
           echo "output_dir=$OUTPUT_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Upload Assessment Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: assessment-report-${{ inputs.scope_type }}-${{ inputs.scope }}
