@@ -188,14 +188,30 @@ class ReportGenerator:
                         "| Resource Type | Count |",
                         "|--------------|-------|",
                     ]
-                    for rtype, count in sorted(
-                        discovery.resources["by_type"].items(),
-                        key=lambda x: x[1],
-                        reverse=True,
-                    ):
-                        lines.append(f"| `{rtype}` | {count} |")
+                    by_type = discovery.resources["by_type"]
+                    if isinstance(by_type, list):
+                        for item in sorted(
+                            by_type,
+                            key=lambda x: x.get("count", 0),
+                            reverse=True,
+                        ):
+                            lines.append(
+                                f"| `{item.get('type', 'unknown')}` | {item.get('count', 0)} |"
+                            )
+                    elif isinstance(by_type, dict):
+                        for rtype, count in sorted(
+                            by_type.items(),
+                            key=lambda x: x[1],
+                            reverse=True,
+                        ):
+                            lines.append(f"| `{rtype}` | {count} |")
                     lines.append("")
-                if "total" in discovery.resources:
+                if "total_count" in discovery.resources:
+                    lines.append(
+                        f"**Total resources**: {discovery.resources['total_count']}"
+                    )
+                    lines.append("")
+                elif "total" in discovery.resources:
                     lines.append(f"**Total resources**: {discovery.resources['total']}")
                     lines.append("")
             else:
