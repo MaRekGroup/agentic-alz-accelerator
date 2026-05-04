@@ -38,7 +38,7 @@ and generates IaC from scratch. There is no mechanism to:
 │  python -m src.agents.orchestrator                  │
 │    --mode assess                                    │
 │    --scope /providers/.../managementGroups/mrg       │
-│    --output agent-output/{customer}/assessment/      │
+│    --output agent-output/assessment/                │
 │                                                     │
 │  OR: --mode onboard (assess + generate import IaC) │
 └─────────────┬───────────────────────────────────────┘

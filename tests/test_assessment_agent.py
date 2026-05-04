@@ -117,7 +117,7 @@ class TestRunAssessment:
         assert result["critical"] == 1
         assert result["high"] == 1
         assert "outputs" in result
-        assert len(result["outputs"]) == 6
+        assert len(result["outputs"]) == 11
 
     @pytest.mark.asyncio
     async def test_uses_settings_defaults(

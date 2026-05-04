@@ -38,6 +38,40 @@ _PILLAR_NAMES = {
     "performance": "Performance Efficiency",
 }
 
+# Pillar descriptions for per-pillar reports
+_PILLAR_DESCRIPTIONS = {
+    "security": (
+        "Protect your workload against security threats. Security controls include "
+        "network segmentation, identity management, encryption, threat detection, "
+        "and vulnerability management."
+    ),
+    "reliability": (
+        "Ensure your workload meets uptime commitments. Reliability encompasses "
+        "availability zones, redundancy, disaster recovery, backup, and monitoring."
+    ),
+    "cost_optimization": (
+        "Deliver business value while minimizing cost. Cost optimization covers "
+        "right-sizing, reserved instances, waste elimination, budgets, and governance."
+    ),
+    "operational_excellence": (
+        "Maintain operational health of your workload. Operational excellence includes "
+        "IaC practices, policy-driven governance, logging, alerting, and automation."
+    ),
+    "performance": (
+        "Ensure your workload meets performance targets. Performance efficiency covers "
+        "scaling, caching, load balancing, and resource sizing."
+    ),
+}
+
+# Pillar → relevant CAF design areas
+_PILLAR_CAF_AREAS = {
+    "security": ["security", "identity_access", "network"],
+    "reliability": ["network", "management", "security"],
+    "cost_optimization": ["governance", "management"],
+    "operational_excellence": ["governance", "management", "platform_automation"],
+    "performance": ["network", "management"],
+}
+
 
 class ReportGenerator:
     """Generates assessment reports and environment documentation."""
@@ -84,6 +118,16 @@ class ReportGenerator:
             report_dir / "ADR-assessment-findings.md",
             self.render_adr(assessment, label),
         )
+
+        # Per-pillar detailed reports
+        pillar_dir = report_dir / "pillar-reports"
+        pillar_dir.mkdir(parents=True, exist_ok=True)
+        for pillar_key in _PILLAR_NAMES:
+            filename = f"wara-{pillar_key.replace('_', '-')}.md"
+            outputs[f"pillar_{pillar_key}"] = self._write(
+                pillar_dir / filename,
+                self.render_pillar_report(assessment, pillar_key, label),
+            )
 
         logger.info("Generated %d report artifacts in %s", len(outputs), report_dir)
         return outputs
@@ -510,6 +554,186 @@ class ReportGenerator:
             "- Deferred findings will be tracked in the next assessment cycle",
             "",
         ]
+
+        return "\n".join(lines)
+
+    # ── Per-Pillar Detailed Report ──────────────────────────────────────
+
+    def render_pillar_report(
+        self,
+        assessment: AssessmentResult,
+        pillar_key: str,
+        label: str,
+    ) -> str:
+        """Render a detailed report for a single WAF pillar."""
+        pillar_name = _PILLAR_NAMES.get(pillar_key, pillar_key)
+        description = _PILLAR_DESCRIPTIONS.get(pillar_key, "")
+        caf_areas = _PILLAR_CAF_AREAS.get(pillar_key, [])
+        score_obj = assessment.pillar_scores.get(pillar_key)
+        pillar_findings = [f for f in assessment.findings if f.pillar == pillar_key]
+
+        lines = [
+            f"# {pillar_name} — Detailed Assessment Report",
+            "",
+            f"> **Scope**: `{assessment.scope}` | **Assessed**: {assessment.assessed_at}",
+            "",
+            "---",
+            "",
+            "## Overview",
+            "",
+            description,
+            "",
+        ]
+
+        # Score summary
+        if score_obj:
+            lines += [
+                "## Score",
+                "",
+                "| Metric | Value |",
+                "|--------|-------|",
+                f"| **Pillar Score** | **{score_obj.score:.1f}/100** |",
+                f"| Critical findings | {score_obj.critical} |",
+                f"| High findings | {score_obj.high} |",
+                f"| Medium findings | {score_obj.medium} |",
+                f"| Low findings | {score_obj.low} |",
+                f"| Total findings | {len(pillar_findings)} |",
+                "",
+            ]
+
+            # Score interpretation
+            if score_obj.score >= 90:
+                lines.append("**Assessment**: ✅ Excellent — minimal remediation needed.")
+            elif score_obj.score >= 70:
+                lines.append("**Assessment**: ⚠️ Good — some improvements recommended.")
+            elif score_obj.score >= 50:
+                lines.append("**Assessment**: 🟡 Fair — significant gaps require attention.")
+            else:
+                lines.append("**Assessment**: 🔴 Poor — critical remediation required.")
+            lines.append("")
+        else:
+            lines += [
+                "## Score",
+                "",
+                "No score data available for this pillar.",
+                "",
+            ]
+
+        # Related CAF design areas
+        if caf_areas:
+            lines += [
+                "## Related CAF Design Areas",
+                "",
+                "| Design Area | Relevance |",
+                "|-------------|-----------|",
+            ]
+            area_names = {
+                "security": "Security",
+                "identity_access": "Identity & Access Management",
+                "network": "Network Topology & Connectivity",
+                "governance": "Governance",
+                "management": "Management",
+                "platform_automation": "Platform Automation & DevOps",
+            }
+            for area in caf_areas:
+                lines.append(f"| {area_names.get(area, area)} | Primary |")
+            lines.append("")
+
+        # Findings by severity
+        if pillar_findings:
+            severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+            pillar_findings.sort(key=lambda f: severity_order.get(f.severity, 99))
+
+            # Summary table
+            lines += [
+                "## Findings Summary",
+                "",
+                "| # | ID | Severity | Title | Confidence | Resources |",
+                "|---|-----|----------|-------|-----------|-----------|",
+            ]
+            for i, f in enumerate(pillar_findings, 1):
+                badge = _SEVERITY_BADGE.get(f.severity, f.severity)
+                res_count = len(f.evidence) if f.evidence else 0
+                lines.append(
+                    f"| {i} | `{f.rule_id}` | {badge} | {f.title} | {f.confidence} | {res_count} |"
+                )
+            lines.append("")
+
+            # Detailed findings
+            lines += ["## Detailed Findings", ""]
+            for f in pillar_findings:
+                badge = _SEVERITY_BADGE.get(f.severity, f.severity)
+                lines += [
+                    f"### {f.rule_id}: {f.title}",
+                    "",
+                    "| Attribute | Value |",
+                    "|-----------|-------|",
+                    f"| Severity | {badge} |",
+                    f"| Confidence | {f.confidence} |",
+                    f"| CAF Area | {f.caf_area} |",
+                    f"| ALZ Area | {f.alz_area} |",
+                    f"| Resources Affected | {len(f.evidence) if f.evidence else 0} |",
+                    "",
+                    f"**Recommendation**: {f.recommendation}",
+                    "",
+                ]
+
+                if f.remediation_steps:
+                    lines.append("**Remediation Steps**:")
+                    lines.append("")
+                    for i, step in enumerate(f.remediation_steps, 1):
+                        lines.append(f"{i}. {step}")
+                    lines.append("")
+
+                if f.evidence:
+                    lines += [
+                        "**Affected Resources**:",
+                        "",
+                        "| Resource ID | Name |",
+                        "|------------|------|",
+                    ]
+                    for res in f.evidence[:20]:
+                        res_id = res.get("id", "—")
+                        res_name = res.get("name", "—")
+                        lines.append(f"| `{res_id}` | {res_name} |")
+                    if len(f.evidence) > 20:
+                        lines.append(f"| ... | *{len(f.evidence) - 20} more* |")
+                    lines.append("")
+
+                if f.references:
+                    lines.append("**References**:")
+                    lines.append("")
+                    for ref in f.references:
+                        lines.append(f"- [{ref}]({ref})")
+                    lines.append("")
+
+                lines.append("---")
+                lines.append("")
+        else:
+            lines += [
+                "## Findings",
+                "",
+                "✅ No findings — all checks passed for this pillar.",
+                "",
+            ]
+
+        # Remediation priority matrix (only if findings exist)
+        if pillar_findings:
+            lines += [
+                "## Remediation Priority Matrix",
+                "",
+                "| Priority | ID | Title | Effort | Impact |",
+                "|----------|-----|-------|--------|--------|",
+            ]
+            for i, f in enumerate(pillar_findings, 1):
+                # Estimate effort based on remediation steps count
+                steps = len(f.remediation_steps) if f.remediation_steps else 0
+                effort = "Low" if steps <= 1 else ("Medium" if steps <= 3 else "High")
+                impact = "Critical" if f.severity == "critical" else (
+                    "High" if f.severity == "high" else "Medium"
+                )
+                lines.append(f"| {i} | `{f.rule_id}` | {f.title} | {effort} | {impact} |")
+            lines.append("")
 
         return "\n".join(lines)
 
