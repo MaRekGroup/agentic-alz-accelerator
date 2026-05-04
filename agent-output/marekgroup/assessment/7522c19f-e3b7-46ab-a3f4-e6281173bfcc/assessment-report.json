@@ -1,78 +1,138 @@
 {
   "scope": "7522c19f-e3b7-46ab-a3f4-e6281173bfcc",
-  "assessed_at": "2026-05-04T17:35:30.187786+00:00",
-  "overall_score": 92.6,
+  "assessed_at": "2026-05-04T18:19:20.499872+00:00",
+  "overall_score": 52.0,
   "checks_run": 221,
-  "checks_passed": 216,
-  "checks_failed": 5,
+  "checks_passed": 187,
+  "checks_failed": 34,
   "pillar_scores": {
     "reliability": {
       "pillar": "reliability",
-      "score": 100.0,
-      "findings_count": 0,
+      "score": 30.0,
+      "findings_count": 9,
       "critical": 0,
-      "high": 0,
-      "medium": 0,
+      "high": 5,
+      "medium": 4,
       "low": 0
     },
     "security": {
       "pillar": "security",
-      "score": 95.0,
-      "findings_count": 1,
-      "critical": 0,
-      "high": 0,
-      "medium": 1,
+      "score": 30.0,
+      "findings_count": 8,
+      "critical": 1,
+      "high": 3,
+      "medium": 4,
       "low": 0
     },
     "cost_optimization": {
       "pillar": "cost_optimization",
-      "score": 100.0,
-      "findings_count": 0,
+      "score": 55.0,
+      "findings_count": 6,
       "critical": 0,
-      "high": 0,
-      "medium": 0,
+      "high": 3,
+      "medium": 3,
       "low": 0
     },
     "operational_excellence": {
       "pillar": "operational_excellence",
-      "score": 68.0,
-      "findings_count": 4,
+      "score": 57.0,
+      "findings_count": 9,
       "critical": 0,
-      "high": 3,
-      "medium": 0,
-      "low": 1
+      "high": 2,
+      "medium": 3,
+      "low": 4
     },
     "performance": {
       "pillar": "performance",
-      "score": 100.0,
-      "findings_count": 0,
+      "score": 88.0,
+      "findings_count": 2,
       "critical": 0,
-      "high": 0,
+      "high": 1,
       "medium": 0,
-      "low": 0
+      "low": 1
     }
   },
   "findings": [
     {
-      "rule_id": "OPE-002",
-      "title": "No policy assignments found",
-      "pillar": "operational_excellence",
-      "caf_area": "governance",
-      "alz_area": "policy",
-      "severity": "high",
+      "rule_id": "SEC-010",
+      "title": "Defender for Cloud enabled on subscriptions",
+      "pillar": "security",
+      "caf_area": "security",
+      "alz_area": "security",
+      "severity": "critical",
       "confidence": "high",
-      "recommendation": "Assign Azure Policy initiatives (e.g., ASB, CIS) for governance enforcement.",
-      "evidence_count": 0,
-      "evidence": [],
+      "recommendation": "Enable Defender for Cloud Standard tier on all subscriptions.",
+      "evidence_count": 39,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/providers/Microsoft.Security/pricings/Api",
+          "name": "Api",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/providers/Microsoft.Security/pricings/ContainerRegistry",
+          "name": "ContainerRegistry",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/providers/Microsoft.Security/pricings/Dns",
+          "name": "Dns",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/providers/Microsoft.Security/pricings/KubernetesService",
+          "name": "KubernetesService",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Security/pricings/Api",
+          "name": "Api",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Security/pricings/ContainerRegistry",
+          "name": "ContainerRegistry",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Security/pricings/Dns",
+          "name": "Dns",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Security/pricings/KubernetesService",
+          "name": "KubernetesService",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/providers/Microsoft.Security/pricings/Api",
+          "name": "Api",
+          "subscriptionId": "29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "tier": "Free"
+        },
+        {
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/providers/Microsoft.Security/pricings/ContainerRegistry",
+          "name": "ContainerRegistry",
+          "subscriptionId": "29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "tier": "Free"
+        }
+      ],
       "remediation_steps": [
-        "Assign Azure Security Benchmark initiative at MG or subscription scope"
+        "Enable via: az security pricing create --name default --tier Standard"
       ],
       "references": [
-        "https://learn.microsoft.com/azure/governance/policy/overview"
+        "https://learn.microsoft.com/azure/defender-for-cloud/enable-enhanced-security"
       ],
       "mappings": {
         "waf_pillar": [
-          "operational_excellence",
           "security"
         ],
         "caf_lifecycle": [
@@ -82,30 +142,607 @@
       }
     },
     {
-      "rule_id": "OPE-004",
-      "title": "Management group hierarchy not CAF-aligned",
+      "rule_id": "APRL-OPE-9729C89D",
+      "title": "Configure Service Health Alerts (Subscriptions)",
       "pillar": "operational_excellence",
-      "caf_area": "resource_org",
-      "alz_area": "management_groups",
+      "caf_area": "management",
+      "alz_area": "logging",
       "severity": "high",
-      "confidence": "medium",
-      "recommendation": "Adopt CAF enterprise-scale MG hierarchy: platform, landing zones, sandbox, decommissioned.",
-      "evidence_count": 0,
-      "evidence": [],
-      "remediation_steps": [
-        "Run bootstrap workflow to create CAF-aligned MG hierarchy",
-        "Move subscriptions to appropriate MGs"
+      "confidence": "high",
+      "recommendation": "Service health gives a personalized health view of Azure services and regions used, offering the best place for notifications on outages, planned maintenance, and health advisories by knowing the services used.",
+      "evidence_count": 10,
+      "evidence": [
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-1",
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-04-14"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-3",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-04-14"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-6",
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-8",
+          "id": "/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-9",
+          "id": "/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-2",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-04-14"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-7",
+          "id": "/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-5",
+          "id": "/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-4",
+          "id": "/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-04-14"
+          },
+          "param1": "No Service Health Alert Rule found."
+        },
+        {
+          "recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+          "name": "ME-MngEnvMCAP084543-ytesfaye-10",
+          "id": "/subscriptions/f85d0678-f17c-4695-abd1-55ae93516337",
+          "tags": {
+            "Environment": "Hybrid",
+            "Purpose": "UserTenant",
+            "Division": "Core",
+            "TimeZone": "_P73324_United States_444350001",
+            "SubscriptionHeartbeat": "2026-05-03"
+          },
+          "param1": "No Service Health Alert Rule found."
+        }
       ],
+      "remediation_steps": [],
       "references": [
-        "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-management-groups"
+        "https://learn.microsoft.com/azure/service-health/alerts-activity-log-service-notifications-portal"
       ],
       "mappings": {
         "waf_pillar": [
           "operational_excellence"
         ],
         "caf_lifecycle": [
-          "ready",
-          "govern"
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "9729c89d-8118-41b4-a39b-e12468fa872b",
+        "resource_type": "Microsoft.Subscription/Subscriptions"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-E6C7E1CC",
+      "title": "Ensure that storage accounts are zone or region redundant (storageAccounts)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Redundancy ensures storage accounts meet availability and durability targets amidst failures, weighing lower costs against higher availability. Locally redundant storage offers the least durability at the lowest cost.",
+      "evidence_count": 11,
+      "evidence": [
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcapsb9337e00020542b2",
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb9337e00020542b2",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "stglxystrb4bmr2m",
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803/providers/Microsoft.Storage/storageAccounts/stglxystrb4bmr2m",
+          "tags": {},
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps8c734350c450220e",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8c734350c450220e",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps9a18f171cde8a007",
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a18f171cde8a007",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps8cf4c4e3c74d41f3",
+          "id": "/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8cf4c4e3c74d41f3",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps9a46234a7851bd2d",
+          "id": "/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a46234a7851bd2d",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcapsb13aaeea0d0d7c35",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb13aaeea0d0d7c35",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps9ac3821ab51454e9",
+          "id": "/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9ac3821ab51454e9",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps88a7cdc86edbe853",
+          "id": "/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps88a7cdc86edbe853",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        },
+        {
+          "recommendationId": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+          "name": "mcaps8f810dbef6d6d9e7",
+          "id": "/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8f810dbef6d6d9e7",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          },
+          "param1": "sku: Standard_LRS"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/storage/common/storage-redundancy"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "e6c7e1cc-2f47-264d-aa50-1da421314472",
+        "resource_type": "Microsoft.Storage/storageAccounts"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-C63B81FB",
+      "title": "Use Standard SKU and Zone-Redundant IPs when applicable (publicIPAddresses)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Public IP addresses in Azure can be of standard SKU, available as non-zonal, zonal, or zone-redundant. Zone-redundant IPs are accessible across all zones, resisting any single zone failure, thereby providing higher resilience.",
+      "evidence_count": 2,
+      "evidence": [
+        {
+          "recommendationId": "c63b81fb-7afc-894c-a840-91bb8a8dcfaf",
+          "name": "gh-runner-pip",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Network/publicIPAddresses/gh-runner-pip",
+          "tags": {},
+          "param1": "sku: Standard",
+          "param2": "availabilityZone: Zonal (1)"
+        },
+        {
+          "recommendationId": "c63b81fb-7afc-894c-a840-91bb8a8dcfaf",
+          "name": "mrg-bastion-pip",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/publicIPAddresses/mrg-bastion-pip",
+          "tags": {
+            "Environment": "prod",
+            "CostCenter": "platform",
+            "Owner": "platform-team",
+            "ManagedBy": "agentic-alz-accelerator",
+            "Project": "platform-connectivity"
+          },
+          "param1": "sku: Standard",
+          "param2": "availabilityZone: Non-zonal"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses#availability-zone"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "c63b81fb-7afc-894c-a840-91bb8a8dcfaf",
+        "resource_type": "Microsoft.Network/publicIPAddresses"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-273F6B30",
+      "title": "Run production workloads on two or more VMs using VMSS Flex (virtualMachines)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Production VM workloads should be deployed on multiple VMs and grouped in a VMSS Flex instance to intelligently distribute across the platform, minimizing the impact of platform faults and updates.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "273f6b30-68e0-4241-85ea-acf15ffb60bf",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": null
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes#what-has-changed-with-flexible-orchestration-mode"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "273f6b30-68e0-4241-85ea-acf15ffb60bf",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-2BD0BE95",
+      "title": "Deploy VMs across Availability Zones (virtualMachines)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Azure Availability Zones, within each Azure region, are tolerant to local failures, protecting applications and data against unlikely Datacenter failures by being physically separate.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "2bd0be95-a825-6f47-a8c6-3db1fb5eb387",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": null,
+          "param1": "No Zone"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-machines/create-portal-availability-zone?tabs=standard"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "2bd0be95-a825-6f47-a8c6-3db1fb5eb387",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "APRL-PER-DF0FF862",
+      "title": "Mission Critical Workloads should consider using Premium or Ultra Disks (virtualMachines)",
+      "pillar": "performance",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Compared to Standard HDD and SSD, Premium SSD, SSD v2, and Ultra Disks offer improved performance, configurability, and higher single-instance VM uptime SLAs. The lowest SLA of all disks on a VM applies, so it is best to use Premium or Ultra Disks for the highest uptime SLA.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "df0ff862-814d-45a3-95e4-4fad5a244ba6",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": null,
+          "param1": "AffectedDisks: [\"vm-github-runner-01_OsDisk_1_7078f65d45eb49458d014dc447142539\"]"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-machines/disks-types#disk-type-comparison"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "performance"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "df0ff862-814d-45a3-95e4-4fad5a244ba6",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "COS-001",
+      "title": "No budget resources found",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Create budget resources with 80/100/120% forecast alerts.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Deploy budget resource via IaC with parameterized thresholds"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-017",
+      "title": "Resource groups missing CostCenter tag",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Apply CostCenter tag to all resource groups for cost allocation and chargeback.",
+      "evidence_count": 22,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          }
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803",
+          "name": "rg-ytesfaye-4803",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup",
+          "name": "ContosoResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": {
+            "required": "do not create if no tag"
+          }
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup",
+          "name": "ExpressRouteResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": {
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "Action": "Do Not Delete"
+          }
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG",
+          "name": "NetworkWatcherRG",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2",
+          "name": "ResourceMoverRG-southcentralus-centralus-eus2",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss",
+          "name": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        }
+      ],
+      "remediation_steps": [
+        "Tag resource group: az tag update --resource-id <rg-id> --operation merge --tags CostCenter=<value>"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-009",
+      "title": "Long-running VMs without Reserved Instances",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "high",
+      "confidence": "medium",
+      "recommendation": "Purchase Reserved Instances for VMs running 24/7 to save up to 72% vs pay-as-you-go.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Advisor/recommendations/cc20d24328e0aef3f3b6d77ded603f0f591bd470c8d0ea6515c7bac9e2c60c0e",
+          "name": "Consider virtual machine reserved instance to save over the on-demand costs",
+          "savings": "11",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Review Advisor RI recommendations and purchase via Azure portal or API"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/cost-management-billing/reservations/save-compute-costs-reservations"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
         ]
       }
     },
@@ -138,21 +775,99 @@
       }
     },
     {
-      "rule_id": "SEC-009",
-      "title": "No Sentinel workspace detected",
-      "pillar": "security",
-      "caf_area": "security",
-      "alz_area": "security",
-      "severity": "medium",
-      "confidence": "medium",
-      "recommendation": "Enable Microsoft Sentinel for SIEM/SOAR capabilities.",
-      "evidence_count": 0,
-      "evidence": [],
+      "rule_id": "REL-001",
+      "title": "VMs without availability zones",
+      "pillar": "reliability",
+      "caf_area": "network",
+      "alz_area": "networking",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Deploy VMs across availability zones for high availability.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "name": "vm-github-runner-01",
+          "resourceGroup": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "centralus"
+        }
+      ],
       "remediation_steps": [
-        "Onboard Sentinel to the management Log Analytics workspace"
+        "Redeploy VMs into availability zones (requires VM recreate)"
       ],
       "references": [
-        "https://learn.microsoft.com/azure/sentinel/quickstart-onboard"
+        "https://learn.microsoft.com/azure/reliability/availability-zones-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "ready",
+          "adopt"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-014",
+      "title": "DDoS Protection Plan on hub VNet",
+      "pillar": "security",
+      "caf_area": "network",
+      "alz_area": "networking",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Enable DDoS Network Protection on hub virtual networks.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/virtualNetworks/mrg-hub-vnet",
+          "name": "mrg-hub-vnet",
+          "resourceGroup": "mrg-conn-hub-scus-rg",
+          "subscriptionId": "a2343e21-1c22-42a2-b13a-aeea0d0d7c35"
+        }
+      ],
+      "remediation_steps": [
+        "Create DDoS protection plan and associate with hub VNet"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/ddos-protection/ddos-protection-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security",
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-025",
+      "title": "Managed Identity preferred over service principal secrets",
+      "pillar": "security",
+      "caf_area": "identity_access",
+      "alz_area": "identity",
+      "severity": "high",
+      "confidence": "medium",
+      "recommendation": "Assign managed identity to compute resources instead of using service principal secrets.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "name": "vm-github-runner-01",
+          "type": "microsoft.compute/virtualmachines",
+          "resourceGroup": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Enable system-assigned or user-assigned managed identity on the resource"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview"
       ],
       "mappings": {
         "waf_pillar": [
@@ -165,28 +880,1255 @@
       }
     },
     {
-      "rule_id": "OPE-003",
-      "title": "No automation accounts found",
+      "rule_id": "SEC-029",
+      "title": "Storage accounts require secure transfer (SMB encryption)",
+      "pillar": "security",
+      "caf_area": "security",
+      "alz_area": "security",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Require secure transfer and enable infrastructure encryption on storage accounts.",
+      "evidence_count": 11,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb9337e00020542b2",
+          "name": "mcapsb9337e00020542b2",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803/providers/Microsoft.Storage/storageAccounts/stglxystrb4bmr2m",
+          "name": "stglxystrb4bmr2m",
+          "resourceGroup": "rg-ytesfaye-4803",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8c734350c450220e",
+          "name": "mcaps8c734350c450220e",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a18f171cde8a007",
+          "name": "mcaps9a18f171cde8a007",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8cf4c4e3c74d41f3",
+          "name": "mcaps8cf4c4e3c74d41f3",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a46234a7851bd2d",
+          "name": "mcaps9a46234a7851bd2d",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "71d5e806-d26a-45b6-9a46-234a7851bd2d",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb13aaeea0d0d7c35",
+          "name": "mcapsb13aaeea0d0d7c35",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "a2343e21-1c22-42a2-b13a-aeea0d0d7c35",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9ac3821ab51454e9",
+          "name": "mcaps9ac3821ab51454e9",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "e56ced5d-d05f-45a2-9ac3-821ab51454e9",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps88a7cdc86edbe853",
+          "name": "mcaps88a7cdc86edbe853",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "e9a25ee1-a88a-4af0-88a7-cdc86edbe853",
+          "httpsOnly": true,
+          "infraEncryption": null
+        },
+        {
+          "id": "/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8f810dbef6d6d9e7",
+          "name": "mcaps8f810dbef6d6d9e7",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7",
+          "httpsOnly": true,
+          "infraEncryption": null
+        }
+      ],
+      "remediation_steps": [
+        "Enable HTTPS-only and infrastructure encryption on storage accounts"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-1E28BBC1",
+      "title": "Configure Network Watcher Connection monitor (networkWatchers)",
       "pillar": "operational_excellence",
       "caf_area": "management",
       "alz_area": "logging",
-      "severity": "low",
-      "confidence": "medium",
-      "recommendation": "Deploy an Automation Account for runbook-based operations.",
-      "evidence_count": 0,
-      "evidence": [],
-      "remediation_steps": [
-        "Create automation account in management subscription"
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Improves monitoring for Azure and Hybrid connectivity",
+      "evidence_count": 7,
+      "evidence": [
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_centralus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centralus",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_eastus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_southcentralus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_southcentralus",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_southeastasia",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_southeastasia",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_westeurope",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westeurope",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_westus3",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus3",
+          "tags": ""
+        },
+        {
+          "recommendationId": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+          "name": "NetworkWatcher_southcentralus",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_southcentralus",
+          "tags": ""
+        }
       ],
+      "remediation_steps": [],
       "references": [
-        "https://learn.microsoft.com/azure/automation/overview"
+        "https://learn.microsoft.com/azure/network-watcher/connection-monitor-overview"
       ],
       "mappings": {
         "waf_pillar": [
           "operational_excellence"
         ],
         "caf_lifecycle": [
+          "govern",
           "manage"
+        ],
+        "aprl_guid": "1e28bbc1-1eb7-486f-8d7f-93943f40219c",
+        "resource_type": "Microsoft.Network/networkWatchers"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-3538AA48",
+      "title": "Ensure Time-To-Live (TTL) is set appropriately to ensure RTOs can be met (privateDnsZones)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Azure Private DNS allows the Time-To-Live (TTL) for record sets in the zone to be set to a value between 1 and 2147483647 seconds. You should ensure that the TTL for the DNS record sets in your DNS Zones are set appropriately to meet your RTO targets.",
+      "evidence_count": 10,
+      "evidence": [
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/contosoresourcegroup/providers/microsoft.network/privatednszones/contoso.com/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.azurecr.io/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.azurewebsites.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.blob.core.windows.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.cognitiveservices.azure.com/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.database.windows.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.file.core.windows.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.openai.azure.com/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.servicebus.windows.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        },
+        {
+          "recommendationId": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+          "name": "@",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-dns-scus-rg/providers/microsoft.network/privatednszones/privatelink.vaultcore.azure.net/SOA/@",
+          "tags": null,
+          "param1": "Time-To-Live: 3600"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/reliability/reliability-dns"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "3538aa48-c40b-455b-a93b-269fe6e65be2",
+        "resource_type": "Microsoft.Network/privateDnsZones"
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-06B77BE9",
+      "title": "Enable Virtual Network Flow Logs (virtualNetworks)",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Improves monitoring and security for Azure and Hybrid connectivity",
+      "evidence_count": 7,
+      "evidence": [
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "CoreServicesVnet",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/contosoresourcegroup/providers/microsoft.network/virtualnetworks/coreservicesvnet",
+          "tags": null,
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "ManufacturingVnet",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/contosoresourcegroup/providers/microsoft.network/virtualnetworks/manufacturingvnet",
+          "tags": null,
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "ResearchVnet",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/contosoresourcegroup/providers/microsoft.network/virtualnetworks/researchvnet",
+          "tags": null,
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "mrg-hub-vnet",
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-hub-scus-rg/providers/microsoft.network/virtualnetworks/mrg-hub-vnet",
+          "tags": {
+            "Environment": "prod",
+            "CostCenter": "platform",
+            "Owner": "platform-team",
+            "ManagedBy": "agentic-alz-accelerator",
+            "Project": "platform-connectivity"
+          },
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "mrg-identity-spoke-vnet",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/mrg-identity-scus-rg/providers/microsoft.network/virtualnetworks/mrg-identity-spoke-vnet",
+          "tags": {
+            "Environment": "prod",
+            "CostCenter": "platform",
+            "Owner": "platform-team",
+            "Project": "platform-identity",
+            "ManagedBy": "agentic-alz-accelerator"
+          },
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "vnet-centralus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.network/virtualnetworks/vnet-centralus",
+          "tags": {},
+          "param1": "Missing Vnet Flow Log configuration"
+        },
+        {
+          "recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+          "name": "vnet-westus3",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/contosoresourcegroup/providers/microsoft.network/virtualnetworks/vnet-westus3",
+          "tags": {
+            "LegacyVMNVA": "LegacyVMNVA"
+          },
+          "param1": "Missing Vnet Flow Log configuration"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "06b77be9-56a3-4d41-b362-8b295c5a283d",
+        "resource_type": "Microsoft.Network/virtualNetworks"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-1ADBA190",
+      "title": "Use NAT gateway for outbound connectivity to avoid SNAT Exhaustion (publicIPAddresses)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Prevent connectivity failures due to SNAT port exhaustion by employing NAT gateway for outbound traffic from virtual networks, ensuring dynamic scaling and secure internet connections.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "1adba190-5c4c-e646-8527-dd1b2a6d8b15",
+          "name": "gh-runner-pip",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Network/publicIPAddresses/gh-runner-pip",
+          "tags": {},
+          "param1": "Migrate from instance IP to NAT Gateway"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/advisor/advisor-reference-reliability-recommendations#use-nat-gateway-for-outbound-connectivity"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "1adba190-5c4c-e646-8527-dd1b2a6d8b15",
+        "resource_type": "Microsoft.Network/publicIPAddresses"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-CFE22A65",
+      "title": "Replicate VMs using Azure Site Recovery (virtualMachines)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Replicating Azure VMs via Site Recovery entails continuous, asynchronous disk replication to a target region. Recovery points are generated every few minutes, ensuring a Recovery Point Objective (RPO) in minutes.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "cfe22a65-b1db-fd41-9e8e-d573922709ae",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": null
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/architecture/checklist/resiliency-per-service#virtual-machines"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "cfe22a65-b1db-fd41-9e8e-d573922709ae",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "APRL-REL-1981F704",
+      "title": "Backup VMs with Azure Backup service (virtualMachines)",
+      "pillar": "reliability",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Enable backups for your virtual machines with Azure Backup to secure and quickly recover your data. This service offers simple, secure, and cost-effective solutions for backing up and recovering data from the Microsoft Azure cloud.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "1981f704-97b9-b645-9c57-33f8ded9261a",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": null
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/backup/backup-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "1981f704-97b9-b645-9c57-33f8ded9261a",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "COS-004",
+      "title": "Orphan network interfaces (unattached)",
+      "pillar": "cost_optimization",
+      "caf_area": "network",
+      "alz_area": "networking",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Delete orphan NICs left behind after VM deletion.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Network/networkInterfaces/nic2",
+          "name": "nic2",
+          "resourceGroup": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Verify NIC is not needed, then delete: az network nic delete --ids <id>"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-020",
+      "title": "No Cost Management scheduled exports",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Configure scheduled Cost Management exports for cost data analysis and FinOps reporting.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "exportCount": 0
+        }
+      ],
+      "remediation_steps": [
+        "Create export: az costmanagement export create --scope <sub-id> --name daily-export"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-export-acm-data"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-011",
+      "title": "Potentially over-provisioned VMs (B-series recommended)",
+      "pillar": "cost_optimization",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Right-size over-provisioned VMs per Azure Advisor recommendations.",
+      "evidence_count": 2,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/4275dc26-48f7-3fc4-e4ac-ecae1bb76f95",
+          "vmName": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01",
+          "savings": "17",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/ff10582f1f5e0dc0257620d6420d2b7b5e726e3e4987aca4a2e18a68a457f109",
+          "vmName": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01",
+          "savings": "17",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Resize VM to recommended SKU: az vm resize --size <recommended-size>"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "OPE-005",
+      "title": "Resources missing required tags",
+      "pillar": "operational_excellence",
+      "caf_area": "resource_org",
+      "alz_area": "policy",
+      "severity": "medium",
+      "confidence": "high",
+      "recommendation": "Apply required tags (Environment, Owner, CostCenter) to all resource groups.",
+      "evidence_count": 22,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          }
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803",
+          "name": "rg-ytesfaye-4803",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup",
+          "name": "ContosoResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": {
+            "required": "do not create if no tag"
+          }
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup",
+          "name": "ExpressRouteResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": {
+            "Contact": "https://aka.ms/mcapsazuresupport",
+            "CreatedByPolicy": "MCAPS Governance Team",
+            "Action": "Do Not Delete"
+          }
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG",
+          "name": "NetworkWatcherRG",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2",
+          "name": "ResourceMoverRG-southcentralus-centralus-eus2",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss",
+          "name": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": null
+        }
+      ],
+      "remediation_steps": [
+        "Assign tagging policy at MG scope to enforce required tags",
+        "Remediate existing resources with tagging task"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-resource-manager/management/tag-resources"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence",
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-008",
+      "title": "Public IP addresses detected",
+      "pillar": "security",
+      "caf_area": "network",
+      "alz_area": "networking",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Review public IP addresses \u2014 remove unnecessary public exposure.",
+      "evidence_count": 2,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Network/publicIPAddresses/gh-runner-pip",
+          "name": "gh-runner-pip",
+          "resourceGroup": "rg-nottagged-vmss",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "ipAddress": "40.67.160.136"
+        },
+        {
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/publicIPAddresses/mrg-bastion-pip",
+          "name": "mrg-bastion-pip",
+          "resourceGroup": "mrg-conn-hub-scus-rg",
+          "subscriptionId": "a2343e21-1c22-42a2-b13a-aeea0d0d7c35",
+          "ipAddress": "23.100.124.99"
+        }
+      ],
+      "remediation_steps": [
+        "Audit each public IP for necessity",
+        "Replace with Private Endpoints where possible"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-018",
+      "title": "Diagnostic settings on security-critical resources",
+      "pillar": "security",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Configure diagnostic settings on Key Vaults, NSGs, and Firewalls to ship logs to Log Analytics.",
+      "evidence_count": 16,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-DatabaseSubnet-nsg-eastus",
+          "name": "CoreServicesVnet-DatabaseSubnet-nsg-eastus",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-PublicWebServiceSubnet-nsg-eastus",
+          "name": "CoreServicesVnet-PublicWebServiceSubnet-nsg-eastus",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-SharedServicesSubnet-nsg-eastus",
+          "name": "CoreServicesVnet-SharedServicesSubnet-nsg-eastus",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-ManufacturingSystemsSubnet-nsg-westeurope",
+          "name": "ManufacturingVnet-ManufacturingSystemsSubnet-nsg-westeurope",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet1-nsg-westeurope",
+          "name": "ManufacturingVnet-SensorSubnet1-nsg-westeurope",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet2-nsg-westeurope",
+          "name": "ManufacturingVnet-SensorSubnet2-nsg-westeurope",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet3-nsg-westeurope",
+          "name": "ManufacturingVnet-SensorSubnet3-nsg-westeurope",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ResearchVnet-ResearchSystemSubnet-nsg-southeastasia",
+          "name": "ResearchVnet-ResearchSystemSubnet-nsg-southeastasia",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup/providers/Microsoft.Network/networkSecurityGroups/vnet-westus3-nic01-nsg",
+          "name": "vnet-westus3-nic01-nsg",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "contosoresourcegroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/mrg-identity-scus-rg/providers/Microsoft.Network/networkSecurityGroups/mrg-identity-dc-nsg",
+          "name": "mrg-identity-dc-nsg",
+          "type": "microsoft.network/networksecuritygroups",
+          "resourceGroup": "mrg-identity-scus-rg",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Create diagnostic setting: az monitor diagnostic-settings create --resource {id} --workspace {law-id}"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-monitor/essentials/diagnostic-settings"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-020",
+      "title": "JIT VM access enabled for management",
+      "pillar": "security",
+      "caf_area": "security",
+      "alz_area": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Enable Just-In-Time VM access to reduce attack surface for management ports.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "jitCount": 0
+        }
+      ],
+      "remediation_steps": [
+        "Configure JIT access in Defender for Cloud for VMs requiring management access"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/defender-for-cloud/just-in-time-access-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-026",
+      "title": "Activity log exported to Log Analytics",
+      "pillar": "security",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Export Activity Log to Log Analytics workspace for audit and threat detection.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "settingsCount": 0
+        }
+      ],
+      "remediation_steps": [
+        "Create subscription-level diagnostic setting to ship Activity Log to LAW"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-8BB4A57B",
+      "title": "Monitor changes in Network Security Groups with Azure Monitor (networkSecurityGroups)",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "high",
+      "recommendation": "Create Alerts with Azure Monitor for operations like creating or updating Network Security Group rules to catch unauthorized/undesired changes to resources and spot attempts to bypass firewalls or access resources from the outside.",
+      "evidence_count": 15,
+      "evidence": [
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "CoreServicesVnet-DatabaseSubnet-nsg-eastus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-DatabaseSubnet-nsg-eastus",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "CoreServicesVnet-PublicWebServiceSubnet-nsg-eastus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-PublicWebServiceSubnet-nsg-eastus",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "CoreServicesVnet-SharedServicesSubnet-nsg-eastus",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/CoreServicesVnet-SharedServicesSubnet-nsg-eastus",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "ManufacturingVnet-ManufacturingSystemsSubnet-nsg-westeurope",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-ManufacturingSystemsSubnet-nsg-westeurope",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "ManufacturingVnet-SensorSubnet1-nsg-westeurope",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet1-nsg-westeurope",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "ManufacturingVnet-SensorSubnet2-nsg-westeurope",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet2-nsg-westeurope",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "ManufacturingVnet-SensorSubnet3-nsg-westeurope",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ManufacturingVnet-SensorSubnet3-nsg-westeurope",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "ResearchVnet-ResearchSystemSubnet-nsg-southeastasia",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/contosoresourcegroup/providers/Microsoft.Network/networkSecurityGroups/ResearchVnet-ResearchSystemSubnet-nsg-southeastasia",
+          "tags": null,
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "vnet-westus3-nic01-nsg",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup/providers/Microsoft.Network/networkSecurityGroups/vnet-westus3-nic01-nsg",
+          "tags": {
+            "LegacyVMNVA": "LegacyVMNVA"
+          },
+          "param1": "ModificationAlert: Not configured/Disabled"
+        },
+        {
+          "recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+          "name": "mrg-identity-dc-nsg",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/mrg-identity-scus-rg/providers/Microsoft.Network/networkSecurityGroups/mrg-identity-dc-nsg",
+          "tags": {
+            "Environment": "prod",
+            "Owner": "platform-team",
+            "CostCenter": "platform",
+            "Project": "platform-identity",
+            "ManagedBy": "agentic-alz-accelerator"
+          },
+          "param1": "ModificationAlert: Not configured/Disabled"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log?tabs=powershell"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
+        "resource_type": "Microsoft.Network/networkSecurityGroups"
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-4E133BD0",
+      "title": "Deploy Network Watcher in all regions where you have networking services (networkWatchers)",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "high",
+      "recommendation": "Azure Network Watcher offers tools for monitoring, diagnosing, viewing metrics, and managing logs for IaaS resources. It helps maintain the health of VMs, VNets, application gateways, load balancers, but not for PaaS or Web analytics.",
+      "evidence_count": 14,
+      "evidence": [
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "e9a25ee1-a88a-4af0-88a7-cdc86edbe853",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_southcentralus",
+          "id": "f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7",
+          "tags": "",
+          "param1": "missingLocation: southcentralus"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_eastus2",
+          "id": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": "",
+          "param1": "missingLocation: eastus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "e56ced5d-d05f-45a2-9ac3-821ab51454e9",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "71d5e806-d26a-45b6-9a46-234a7851bd2d",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "f85d0678-f17c-4695-abd1-55ae93516337",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_westus2",
+          "id": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": "",
+          "param1": "missingLocation: westus2"
+        },
+        {
+          "recommendationId": "4e133bd0-8762-bc40-a95b-b29142427d73",
+          "name": "NetworkWatcher_eastus2",
+          "id": "009ae910-a172-4aac-b933-7e00020542b2",
+          "tags": "",
+          "param1": "missingLocation: eastus2"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/network-watcher/network-watcher-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "4e133bd0-8762-bc40-a95b-b29142427d73",
+        "resource_type": "Microsoft.Network/networkWatchers"
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-73D1BB04",
+      "title": "When AccelNet is enabled, you must manually update the GuestOS NIC driver (virtualMachines)",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "high",
+      "recommendation": "When Accelerated Networking is enabled, the default Azure VNet interface in GuestOS is swapped for a Mellanox, and its driver comes from a 3rd party. Marketplace images have the latest Mellanox drivers, but post-deployment, updating the driver is the user's responsibility.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "73d1bb04-7d3e-0d47-bc0d-63afe773b5fe",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Compute/virtualMachines/vm-github-runner-01",
+          "tags": "",
+          "param1": "This machine has AccelNet enabled, but it is not possible to confirm if the GuestOS drivers are Up-to-Date.",
+          "param2": "NicName: vm-github-runner-0134",
+          "param3": "VMSize: Standard_D4ds_v4"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "73d1bb04-7d3e-0d47-bc0d-63afe773b5fe",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "APRL-OPE-B72214BB",
+      "title": "Enable VM Insights (virtualMachines)",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "high",
+      "recommendation": "VM Insights monitors VM and scale set performance, health, running processes, and dependencies. It enhances the predictability of application performance and availability by pinpointing performance bottlenecks and network issues, and it clarifies if problems are related to other dependencies.",
+      "evidence_count": 1,
+      "evidence": [
+        {
+          "recommendationId": "b72214bb-e879-5f4b-b9cd-642db84f36f4",
+          "name": "vm-github-runner-01",
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01",
+          "tags": null,
+          "param1": "MonitoringExtension:",
+          "param2": "DataCollectionRuleId:",
+          "param3": "isPerformanceEnabled:"
+        }
+      ],
+      "remediation_steps": [],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ],
+        "aprl_guid": "b72214bb-e879-5f4b-b9cd-642db84f36f4",
+        "resource_type": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    {
+      "rule_id": "PER-001",
+      "title": "Storage accounts using legacy SKU",
+      "pillar": "performance",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "medium",
+      "recommendation": "Evaluate if ZRS or GRS replication is appropriate for production workloads.",
+      "evidence_count": 11,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb9337e00020542b2",
+          "name": "mcapsb9337e00020542b2",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803/providers/Microsoft.Storage/storageAccounts/stglxystrb4bmr2m",
+          "name": "stglxystrb4bmr2m",
+          "resourceGroup": "rg-ytesfaye-4803",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8c734350c450220e",
+          "name": "mcaps8c734350c450220e",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a18f171cde8a007",
+          "name": "mcaps9a18f171cde8a007",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8cf4c4e3c74d41f3",
+          "name": "mcaps8cf4c4e3c74d41f3",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9a46234a7851bd2d",
+          "name": "mcaps9a46234a7851bd2d",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "71d5e806-d26a-45b6-9a46-234a7851bd2d",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcapsb13aaeea0d0d7c35",
+          "name": "mcapsb13aaeea0d0d7c35",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "a2343e21-1c22-42a2-b13a-aeea0d0d7c35",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps9ac3821ab51454e9",
+          "name": "mcaps9ac3821ab51454e9",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "e56ced5d-d05f-45a2-9ac3-821ab51454e9",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps88a7cdc86edbe853",
+          "name": "mcaps88a7cdc86edbe853",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "e9a25ee1-a88a-4af0-88a7-cdc86edbe853",
+          "sku": "Standard_LRS"
+        },
+        {
+          "id": "/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/McapsGovernance/providers/Microsoft.Storage/storageAccounts/mcaps8f810dbef6d6d9e7",
+          "name": "mcaps8f810dbef6d6d9e7",
+          "resourceGroup": "mcapsgovernance",
+          "subscriptionId": "f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7",
+          "sku": "Standard_LRS"
+        }
+      ],
+      "remediation_steps": [
+        "Assess replication needs per workload; upgrade to ZRS/GRS where needed"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/storage/common/storage-redundancy"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "performance",
+          "reliability"
+        ],
+        "caf_lifecycle": [
+          "ready",
+          "adopt"
         ]
       }
     }

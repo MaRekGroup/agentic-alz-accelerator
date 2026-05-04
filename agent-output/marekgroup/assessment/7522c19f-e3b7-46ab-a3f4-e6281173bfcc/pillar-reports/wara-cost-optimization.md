@@ -1,6 +1,6 @@
 # Cost Optimization — Detailed Assessment Report
 
-> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-04T17:35:30.187786+00:00
+> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-04T18:19:20.499872+00:00
 
 ---
 
@@ -12,14 +12,14 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 
 | Metric | Value |
 |--------|-------|
-| **Pillar Score** | **100.0/100** |
+| **Pillar Score** | **55.0/100** |
 | Critical findings | 0 |
-| High findings | 0 |
-| Medium findings | 0 |
+| High findings | 3 |
+| Medium findings | 3 |
 | Low findings | 0 |
-| Total findings | 0 |
+| Total findings | 6 |
 
-**Assessment**: ✅ Excellent — minimal remediation needed.
+**Assessment**: 🟡 Fair — significant gaps require attention.
 
 ## Related CAF Design Areas
 
@@ -28,6 +28,209 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Governance | Primary |
 | Management | Primary |
 
-## Findings
+## Findings Summary
 
-✅ No findings — all checks passed for this pillar.
+| # | ID | Severity | Title | Confidence | Resources |
+|---|-----|----------|-------|-----------|-----------|
+| 1 | `COS-001` | 🟠 High | No budget resources found | high | 0 |
+| 2 | `COS-017` | 🟠 High | Resource groups missing CostCenter tag | high | 22 |
+| 3 | `COS-009` | 🟠 High | Long-running VMs without Reserved Instances | medium | 1 |
+| 4 | `COS-004` | 🟡 Medium | Orphan network interfaces (unattached) | high | 1 |
+| 5 | `COS-020` | 🟡 Medium | No Cost Management scheduled exports | medium | 1 |
+| 6 | `COS-011` | 🟡 Medium | Potentially over-provisioned VMs (B-series recommended) | medium | 2 |
+
+## Detailed Findings
+
+### COS-001: No budget resources found
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟠 High |
+| Confidence | high |
+| CAF Area | governance |
+| ALZ Area | policy |
+| Resources Affected | 0 |
+
+**Recommendation**: Create budget resources with 80/100/120% forecast alerts.
+
+**Remediation Steps**:
+
+1. Deploy budget resource via IaC with parameterized thresholds
+
+**References**:
+
+- [https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets](https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets)
+
+---
+
+### COS-017: Resource groups missing CostCenter tag
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟠 High |
+| Confidence | high |
+| CAF Area | governance |
+| ALZ Area | policy |
+| Resources Affected | 22 |
+
+**Recommendation**: Apply CostCenter tag to all resource groups for cost allocation and chargeback.
+
+**Remediation Steps**:
+
+1. Tag resource group: az tag update --resource-id <rg-id> --operation merge --tags CostCenter=<value>
+
+**Affected Resources**:
+
+| Resource ID | Name |
+|------------|------|
+| `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803` | rg-ytesfaye-4803 |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup` | ContosoResourceGroup |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup` | ExpressRouteResourceGroup |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2` | ResourceMoverRG-southcentralus-centralus-eus2 |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss` | rg-nottagged-vmss |
+| `/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
+| `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance` | McapsGovernance |
+| `/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| ... | *2 more* |
+
+**References**:
+
+- [https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging)
+
+---
+
+### COS-009: Long-running VMs without Reserved Instances
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟠 High |
+| Confidence | medium |
+| CAF Area | governance |
+| ALZ Area | policy |
+| Resources Affected | 1 |
+
+**Recommendation**: Purchase Reserved Instances for VMs running 24/7 to save up to 72% vs pay-as-you-go.
+
+**Remediation Steps**:
+
+1. Review Advisor RI recommendations and purchase via Azure portal or API
+
+**Affected Resources**:
+
+| Resource ID | Name |
+|------------|------|
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Advisor/recommendations/cc20d24328e0aef3f3b6d77ded603f0f591bd470c8d0ea6515c7bac9e2c60c0e` | Consider virtual machine reserved instance to save over the on-demand costs |
+
+**References**:
+
+- [https://learn.microsoft.com/azure/cost-management-billing/reservations/save-compute-costs-reservations](https://learn.microsoft.com/azure/cost-management-billing/reservations/save-compute-costs-reservations)
+
+---
+
+### COS-004: Orphan network interfaces (unattached)
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟡 Medium |
+| Confidence | high |
+| CAF Area | network |
+| ALZ Area | networking |
+| Resources Affected | 1 |
+
+**Recommendation**: Delete orphan NICs left behind after VM deletion.
+
+**Remediation Steps**:
+
+1. Verify NIC is not needed, then delete: az network nic delete --ids <id>
+
+**Affected Resources**:
+
+| Resource ID | Name |
+|------------|------|
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss/providers/Microsoft.Network/networkInterfaces/nic2` | nic2 |
+
+**References**:
+
+- [https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface](https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface)
+
+---
+
+### COS-020: No Cost Management scheduled exports
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟡 Medium |
+| Confidence | medium |
+| CAF Area | governance |
+| ALZ Area | policy |
+| Resources Affected | 1 |
+
+**Recommendation**: Configure scheduled Cost Management exports for cost data analysis and FinOps reporting.
+
+**Remediation Steps**:
+
+1. Create export: az costmanagement export create --scope <sub-id> --name daily-export
+
+**Affected Resources**:
+
+| Resource ID | Name |
+|------------|------|
+| `—` | — |
+
+**References**:
+
+- [https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-export-acm-data](https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-export-acm-data)
+
+---
+
+### COS-011: Potentially over-provisioned VMs (B-series recommended)
+
+| Attribute | Value |
+|-----------|-------|
+| Severity | 🟡 Medium |
+| Confidence | medium |
+| CAF Area | management |
+| ALZ Area | logging |
+| Resources Affected | 2 |
+
+**Recommendation**: Right-size over-provisioned VMs per Azure Advisor recommendations.
+
+**Remediation Steps**:
+
+1. Resize VM to recommended SKU: az vm resize --size <recommended-size>
+
+**Affected Resources**:
+
+| Resource ID | Name |
+|------------|------|
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/4275dc26-48f7-3fc4-e4ac-ecae1bb76f95` | — |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/ff10582f1f5e0dc0257620d6420d2b7b5e726e3e4987aca4a2e18a68a457f109` | — |
+
+**References**:
+
+- [https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations](https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations)
+
+---
+
+## Remediation Priority Matrix
+
+| Priority | ID | Title | Effort | Impact |
+|----------|-----|-------|--------|--------|
+| 1 | `COS-001` | No budget resources found | Low | High |
+| 2 | `COS-017` | Resource groups missing CostCenter tag | Low | High |
+| 3 | `COS-009` | Long-running VMs without Reserved Instances | Low | High |
+| 4 | `COS-004` | Orphan network interfaces (unattached) | Low | Medium |
+| 5 | `COS-020` | No Cost Management scheduled exports | Low | Medium |
+| 6 | `COS-011` | Potentially over-provisioned VMs (B-series recommended) | Low | Medium |
