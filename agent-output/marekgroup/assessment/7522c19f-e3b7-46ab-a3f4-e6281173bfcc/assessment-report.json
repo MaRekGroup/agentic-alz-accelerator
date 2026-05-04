@@ -1,0 +1,194 @@
+{
+  "scope": "7522c19f-e3b7-46ab-a3f4-e6281173bfcc",
+  "assessed_at": "2026-05-04T17:35:30.187786+00:00",
+  "overall_score": 92.6,
+  "checks_run": 221,
+  "checks_passed": 216,
+  "checks_failed": 5,
+  "pillar_scores": {
+    "reliability": {
+      "pillar": "reliability",
+      "score": 100.0,
+      "findings_count": 0,
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "security": {
+      "pillar": "security",
+      "score": 95.0,
+      "findings_count": 1,
+      "critical": 0,
+      "high": 0,
+      "medium": 1,
+      "low": 0
+    },
+    "cost_optimization": {
+      "pillar": "cost_optimization",
+      "score": 100.0,
+      "findings_count": 0,
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "operational_excellence": {
+      "pillar": "operational_excellence",
+      "score": 68.0,
+      "findings_count": 4,
+      "critical": 0,
+      "high": 3,
+      "medium": 0,
+      "low": 1
+    },
+    "performance": {
+      "pillar": "performance",
+      "score": 100.0,
+      "findings_count": 0,
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "findings": [
+    {
+      "rule_id": "OPE-002",
+      "title": "No policy assignments found",
+      "pillar": "operational_excellence",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Assign Azure Policy initiatives (e.g., ASB, CIS) for governance enforcement.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Assign Azure Security Benchmark initiative at MG or subscription scope"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/governance/policy/overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence",
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "OPE-004",
+      "title": "Management group hierarchy not CAF-aligned",
+      "pillar": "operational_excellence",
+      "caf_area": "resource_org",
+      "alz_area": "management_groups",
+      "severity": "high",
+      "confidence": "medium",
+      "recommendation": "Adopt CAF enterprise-scale MG hierarchy: platform, landing zones, sandbox, decommissioned.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Run bootstrap workflow to create CAF-aligned MG hierarchy",
+        "Move subscriptions to appropriate MGs"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-management-groups"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "ready",
+          "govern"
+        ]
+      }
+    },
+    {
+      "rule_id": "OPE-006",
+      "title": "No hub VNet or firewall detected",
+      "pillar": "operational_excellence",
+      "caf_area": "network",
+      "alz_area": "networking",
+      "severity": "high",
+      "confidence": "medium",
+      "recommendation": "Deploy a hub VNet with Azure Firewall for centralized network governance.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Deploy connectivity landing zone with hub-spoke topology"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/architecture/networking/architecture/hub-spoke"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security",
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "ready",
+          "adopt"
+        ]
+      }
+    },
+    {
+      "rule_id": "SEC-009",
+      "title": "No Sentinel workspace detected",
+      "pillar": "security",
+      "caf_area": "security",
+      "alz_area": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Enable Microsoft Sentinel for SIEM/SOAR capabilities.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Onboard Sentinel to the management Log Analytics workspace"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/sentinel/quickstart-onboard"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "security"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "OPE-003",
+      "title": "No automation accounts found",
+      "pillar": "operational_excellence",
+      "caf_area": "management",
+      "alz_area": "logging",
+      "severity": "low",
+      "confidence": "medium",
+      "recommendation": "Deploy an Automation Account for runbook-based operations.",
+      "evidence_count": 0,
+      "evidence": [],
+      "remediation_steps": [
+        "Create automation account in management subscription"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/automation/overview"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "operational_excellence"
+        ],
+        "caf_lifecycle": [
+          "manage"
+        ]
+      }
+    }
+  ]
+}

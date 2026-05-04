@@ -132,18 +132,27 @@ class DiscoveryCollector:
             DiscoveryResult with all collected inventory data.
         """
         result = DiscoveryResult(scope=scope, scope_type=scope_type)
-        subs = subscriptions or [self.settings.azure.subscription_id]
 
         mg_groups = None
         if scope_type in (DiscoveryScope.TENANT, DiscoveryScope.MANAGEMENT_GROUP):
             mg_groups = [scope] if scope_type == DiscoveryScope.MANAGEMENT_GROUP else None
+
+        # When querying at MG/tenant scope, Resource Graph uses management_groups
+        # parameter to resolve subscriptions automatically — do NOT pass subscriptions
+        # with empty/invalid GUIDs. Only pass explicit subscriptions for sub-level scope.
+        if mg_groups is not None:
+            subs = None
+        elif subscriptions:
+            subs = subscriptions
+        else:
+            sub_id = self.settings.azure.subscription_id
+            subs = [sub_id] if sub_id else None
 
         collectors = [
             ("management_groups", self._discover_management_groups, mg_groups, subs),
             ("subscriptions", self._discover_subscriptions, mg_groups, subs),
             ("resources", self._discover_resources, mg_groups, subs),
             ("policy_assignments", self._discover_policies, mg_groups, subs),
-            ("policy_compliance", self._discover_compliance, subs),
             ("rbac_assignments", self._discover_rbac, mg_groups, subs),
             ("network_topology", self._discover_network, mg_groups, subs),
             ("logging_config", self._discover_logging, mg_groups, subs),
@@ -160,12 +169,31 @@ class DiscoveryCollector:
                 logger.warning(msg)
                 result.errors.append(msg)
 
+        # Policy compliance requires per-subscription SDK calls.
+        # Resolve subscription IDs from discovered subscriptions, or fall back
+        # to explicit list / settings.
+        compliance_subs = [
+            s["subscriptionId"]
+            for s in result.subscriptions
+            if "subscriptionId" in s
+        ]
+        if not compliance_subs and subs:
+            compliance_subs = subs
+        if compliance_subs:
+            try:
+                logger.info(f"Discovering policy_compliance at scope {scope}")
+                result.policy_compliance = await self._discover_compliance(compliance_subs)
+            except Exception as e:
+                msg = f"Failed to discover policy_compliance: {e}"
+                logger.warning(msg)
+                result.errors.append(msg)
+
         return result
 
     async def _discover_management_groups(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> list[dict]:
         """Discover management group hierarchy."""
         query = """
@@ -185,7 +213,7 @@ class DiscoveryCollector:
     async def _discover_subscriptions(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> list[dict]:
         """Discover subscriptions and their MG placement."""
         query = """
@@ -205,7 +233,7 @@ class DiscoveryCollector:
     async def _discover_resources(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> dict:
         """Discover resource inventory grouped by type and location."""
         by_type_query = """
@@ -253,7 +281,7 @@ class DiscoveryCollector:
     async def _discover_policies(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> list[dict]:
         """Discover policy assignments."""
         query = """
@@ -274,7 +302,7 @@ class DiscoveryCollector:
 
     async def _discover_compliance(
         self,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> dict:
         """Discover policy compliance state per subscription."""
         from azure.mgmt.policyinsights import PolicyInsightsClient
@@ -308,7 +336,7 @@ class DiscoveryCollector:
     async def _discover_rbac(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> list[dict]:
         """Discover RBAC role assignments."""
         query = """
@@ -332,7 +360,7 @@ class DiscoveryCollector:
     async def _discover_network(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> dict:
         """Discover network topology: VNets, peerings, NSGs, DNS zones."""
         vnets_query = """
@@ -410,7 +438,7 @@ class DiscoveryCollector:
     async def _discover_logging(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> dict:
         """Discover logging and monitoring configuration."""
         law_query = """
@@ -461,7 +489,7 @@ class DiscoveryCollector:
     async def _discover_security(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str],
+        subscriptions: list[str] | None,
     ) -> dict:
         """Discover security posture: Key Vaults, Defender plans, Sentinel."""
         kv_query = """
