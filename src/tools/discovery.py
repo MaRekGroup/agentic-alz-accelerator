@@ -107,7 +107,7 @@ class DiscoveryCollector:
             top=max_results,
         )
         request = QueryRequest(
-            query=query,
+            query=query.strip(),
             subscriptions=subscriptions,
             management_groups=management_groups,
             options=options,
@@ -193,7 +193,7 @@ class DiscoveryCollector:
     async def _discover_management_groups(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> list[dict]:
         """Discover management group hierarchy."""
         query = """
@@ -213,7 +213,7 @@ class DiscoveryCollector:
     async def _discover_subscriptions(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> list[dict]:
         """Discover subscriptions and their MG placement."""
         query = """
@@ -233,7 +233,7 @@ class DiscoveryCollector:
     async def _discover_resources(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> dict:
         """Discover resource inventory grouped by type and location."""
         by_type_query = """
@@ -241,33 +241,45 @@ class DiscoveryCollector:
         | summarize count=count() by type
         | order by count desc
         """
-        by_type = self._arg_query(
-            by_type_query,
-            subscriptions=subscriptions,
-            management_groups=management_groups,
-        )
+        try:
+            by_type = self._arg_query(
+                by_type_query,
+                subscriptions=subscriptions,
+                management_groups=management_groups,
+            )
+        except Exception as e:
+            logger.warning("Resource discovery by_type query failed: %s", e)
+            by_type = []
 
         by_location_query = """
         resources
         | summarize count=count() by location
         | order by count desc
         """
-        by_location = self._arg_query(
-            by_location_query,
-            subscriptions=subscriptions,
-            management_groups=management_groups,
-        )
+        try:
+            by_location = self._arg_query(
+                by_location_query,
+                subscriptions=subscriptions,
+                management_groups=management_groups,
+            )
+        except Exception as e:
+            logger.warning("Resource discovery by_location query failed: %s", e)
+            by_location = []
 
         by_rg_query = """
         resources
         | summarize count=count() by resourceGroup, subscriptionId
         | order by count desc
         """
-        by_rg = self._arg_query(
-            by_rg_query,
-            subscriptions=subscriptions,
-            management_groups=management_groups,
-        )
+        try:
+            by_rg = self._arg_query(
+                by_rg_query,
+                subscriptions=subscriptions,
+                management_groups=management_groups,
+            )
+        except Exception as e:
+            logger.warning("Resource discovery by_rg query failed: %s", e)
+            by_rg = []
 
         total = sum(r.get("count", 0) for r in by_type)
 
@@ -281,7 +293,7 @@ class DiscoveryCollector:
     async def _discover_policies(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> list[dict]:
         """Discover policy assignments."""
         query = """
@@ -302,7 +314,7 @@ class DiscoveryCollector:
 
     async def _discover_compliance(
         self,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> dict:
         """Discover policy compliance state per subscription."""
         from azure.mgmt.policyinsights import PolicyInsightsClient
@@ -336,7 +348,7 @@ class DiscoveryCollector:
     async def _discover_rbac(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> list[dict]:
         """Discover RBAC role assignments."""
         query = """
@@ -360,7 +372,7 @@ class DiscoveryCollector:
     async def _discover_network(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> dict:
         """Discover network topology: VNets, peerings, NSGs, DNS zones."""
         vnets_query = """
@@ -438,7 +450,7 @@ class DiscoveryCollector:
     async def _discover_logging(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> dict:
         """Discover logging and monitoring configuration."""
         law_query = """
@@ -489,7 +501,7 @@ class DiscoveryCollector:
     async def _discover_security(
         self,
         management_groups: list[str] | None,
-        subscriptions: list[str] | None,
+        subscriptions: list[str],
     ) -> dict:
         """Discover security posture: Key Vaults, Defender plans, Sentinel."""
         kv_query = """
