@@ -1,6 +1,6 @@
 {
   "scope": "7522c19f-e3b7-46ab-a3f4-e6281173bfcc",
-  "assessed_at": "2026-05-04T21:00:05.733455+00:00",
+  "assessed_at": "2026-05-04T21:57:12.707019+00:00",
   "overall_score": 49.0,
   "checks_run": 221,
   "checks_passed": 185,
@@ -275,8 +275,8 @@
           "id": "/subscriptions/f85d0678-f17c-4695-abd1-55ae93516337",
           "tags": {
             "Environment": "Hybrid",
-            "Division": "Core",
             "Purpose": "UserTenant",
+            "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
             "SubscriptionHeartbeat": "2026-05-04"
           },
@@ -458,8 +458,8 @@
           "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/publicIPAddresses/mrg-bastion-pip",
           "tags": {
             "Environment": "prod",
-            "Owner": "platform-team",
             "CostCenter": "platform",
+            "Owner": "platform-team",
             "ManagedBy": "agentic-alz-accelerator",
             "Project": "platform-connectivity"
           },
@@ -1243,8 +1243,8 @@
           "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourcegroups/mrg-conn-hub-scus-rg/providers/microsoft.network/virtualnetworks/mrg-hub-vnet",
           "tags": {
             "Environment": "prod",
-            "CostCenter": "platform",
             "Owner": "platform-team",
+            "CostCenter": "platform",
             "ManagedBy": "agentic-alz-accelerator",
             "Project": "platform-connectivity"
           },
@@ -1257,8 +1257,8 @@
           "tags": {
             "Environment": "prod",
             "Owner": "platform-team",
-            "CostCenter": "platform",
             "Project": "platform-identity",
+            "CostCenter": "platform",
             "ManagedBy": "agentic-alz-accelerator"
           },
           "param1": "Missing Vnet Flow Log configuration"
@@ -1647,8 +1647,8 @@
           "name": "McapsGovernance",
           "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
           "tags": {
-            "Contact": "https://aka.ms/mcapsazuresupport",
             "CreatedByPolicy": "MCAPS Governance Team",
+            "Contact": "https://aka.ms/mcapsazuresupport",
             "Action": "Do Not Delete"
           }
         },
@@ -1975,8 +1975,8 @@
           "tags": {
             "Environment": "prod",
             "CostCenter": "platform",
-            "Project": "platform-identity",
             "Owner": "platform-team",
+            "Project": "platform-identity",
             "ManagedBy": "agentic-alz-accelerator"
           },
           "param1": "ModificationAlert: Not configured/Disabled"
