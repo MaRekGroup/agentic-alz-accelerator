@@ -364,7 +364,7 @@ checks:
     query: |
       resources
       | where type =~ "microsoft.network/applicationgateways"
-      | where properties.webApplicationFirewallConfiguration == dynamic(null)
+      | where isnull(properties.webApplicationFirewallConfiguration)
             and isnull(properties.firewallPolicy)
       | project id, name, resourceGroup, subscriptionId
     match: any
@@ -416,7 +416,7 @@ checks:
       | where type =~ "microsoft.sql/servers/databases"
       | where name != "master"
       | where properties.transparentDataEncryption[0].status !~ "Enabled"
-            and properties.transparentDataEncryption == dynamic(null)
+            and isnull(properties.transparentDataEncryption)
       | project id, name, resourceGroup, subscriptionId
     match: any
     recommendation: "Enable Transparent Data Encryption (TDE) on all SQL databases."
@@ -770,11 +770,12 @@ checks:
       resources
       | where type =~ "microsoft.network/virtualnetworks"
       | distinct location
-      | join kind=leftanti (
+      | join kind=leftouter (
           resources
           | where type =~ "microsoft.network/networkwatchers"
-          | project location
-        ) on location
+          | project watcherLocation=location
+        ) on $left.location == $right.watcherLocation
+      | where isnull(watcherLocation)
       | project missingRegion=location
     match: any
     recommendation: "Enable Network Watcher in all regions where you have deployed virtual networks."
