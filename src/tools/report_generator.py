@@ -192,11 +192,12 @@ class ReportGenerator:
                     if isinstance(by_type, list):
                         for item in sorted(
                             by_type,
-                            key=lambda x: x.get("count", 0),
+                            key=lambda x: x.get("resource_count", x.get("count", 0)),
                             reverse=True,
                         ):
+                            count = item.get("resource_count", item.get("count", 0))
                             lines.append(
-                                f"| `{item.get('type', 'unknown')}` | {item.get('count', 0)} |"
+                                f"| `{item.get('type', 'unknown')}` | {count} |"
                             )
                     elif isinstance(by_type, dict):
                         for rtype, count in sorted(

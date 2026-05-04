@@ -236,11 +236,11 @@ class DiscoveryCollector:
         subscriptions: list[str],
     ) -> dict:
         """Discover resource inventory grouped by type and location."""
-        by_type_query = """
-        resources
-        | summarize count=count() by type
-        | order by count desc
-        """
+        by_type_query = (
+            "resources"
+            " | summarize resource_count=count() by type"
+            " | order by resource_count desc"
+        )
         try:
             by_type = self._arg_query(
                 by_type_query,
@@ -251,11 +251,11 @@ class DiscoveryCollector:
             logger.warning("Resource discovery by_type query failed: %s", e)
             by_type = []
 
-        by_location_query = """
-        resources
-        | summarize count=count() by location
-        | order by count desc
-        """
+        by_location_query = (
+            "resources"
+            " | summarize resource_count=count() by location"
+            " | order by resource_count desc"
+        )
         try:
             by_location = self._arg_query(
                 by_location_query,
@@ -266,11 +266,11 @@ class DiscoveryCollector:
             logger.warning("Resource discovery by_location query failed: %s", e)
             by_location = []
 
-        by_rg_query = """
-        resources
-        | summarize count=count() by resourceGroup, subscriptionId
-        | order by count desc
-        """
+        by_rg_query = (
+            "resources"
+            " | summarize resource_count=count() by resourceGroup, subscriptionId"
+            " | order by resource_count desc"
+        )
         try:
             by_rg = self._arg_query(
                 by_rg_query,
@@ -281,7 +281,7 @@ class DiscoveryCollector:
             logger.warning("Resource discovery by_rg query failed: %s", e)
             by_rg = []
 
-        total = sum(r.get("count", 0) for r in by_type)
+        total = sum(r.get("resource_count", r.get("count", 0)) for r in by_type)
 
         return {
             "total_count": total,
