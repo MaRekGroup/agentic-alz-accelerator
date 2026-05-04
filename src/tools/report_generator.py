@@ -590,8 +590,8 @@ class ReportGenerator:
             lines += [
                 "## Score",
                 "",
-                f"| Metric | Value |",
-                f"|--------|-------|",
+                "| Metric | Value |",
+                "|--------|-------|",
                 f"| **Pillar Score** | **{score_obj.score:.1f}/100** |",
                 f"| Critical findings | {score_obj.critical} |",
                 f"| High findings | {score_obj.high} |",
@@ -666,8 +666,8 @@ class ReportGenerator:
                 lines += [
                     f"### {f.rule_id}: {f.title}",
                     "",
-                    f"| Attribute | Value |",
-                    f"|-----------|-------|",
+                    "| Attribute | Value |",
+                    "|-----------|-------|",
                     f"| Severity | {badge} |",
                     f"| Confidence | {f.confidence} |",
                     f"| CAF Area | {f.caf_area} |",
