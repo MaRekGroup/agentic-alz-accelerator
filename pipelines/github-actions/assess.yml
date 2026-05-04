@@ -80,6 +80,7 @@ jobs:
           ASSESS_SCOPE: ${{ inputs.scope }}
           ASSESS_SCOPE_TYPE: ${{ inputs.scope_type }}
           ASSESS_MODE: ${{ inputs.mode }}
+          ASSESS_OUTPUT_DIR: agent-output/${{ inputs.customer }}/assessment
         run: |
           python -m src.tools.assess_cli \
             --scope "$ASSESS_SCOPE" \
