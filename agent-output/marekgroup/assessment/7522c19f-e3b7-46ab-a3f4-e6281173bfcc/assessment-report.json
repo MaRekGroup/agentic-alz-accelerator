@@ -1,10 +1,10 @@
 {
   "scope": "7522c19f-e3b7-46ab-a3f4-e6281173bfcc",
-  "assessed_at": "2026-05-04T18:19:20.499872+00:00",
-  "overall_score": 52.0,
+  "assessed_at": "2026-05-04T21:00:05.733455+00:00",
+  "overall_score": 49.0,
   "checks_run": 221,
-  "checks_passed": 187,
-  "checks_failed": 34,
+  "checks_passed": 185,
+  "checks_failed": 36,
   "pillar_scores": {
     "reliability": {
       "pillar": "reliability",
@@ -26,11 +26,11 @@
     },
     "cost_optimization": {
       "pillar": "cost_optimization",
-      "score": 55.0,
-      "findings_count": 6,
+      "score": 40.0,
+      "findings_count": 8,
       "critical": 0,
-      "high": 3,
-      "medium": 3,
+      "high": 4,
+      "medium": 4,
       "low": 0
     },
     "operational_excellence": {
@@ -187,7 +187,7 @@
             "Purpose": "UserTenant",
             "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         },
@@ -200,7 +200,7 @@
             "Purpose": "UserTenant",
             "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         },
@@ -213,7 +213,7 @@
             "Purpose": "UserTenant",
             "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         },
@@ -239,7 +239,7 @@
             "Purpose": "UserTenant",
             "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         },
@@ -252,7 +252,7 @@
             "Purpose": "UserTenant",
             "Division": "Core",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         },
@@ -275,10 +275,10 @@
           "id": "/subscriptions/f85d0678-f17c-4695-abd1-55ae93516337",
           "tags": {
             "Environment": "Hybrid",
-            "Purpose": "UserTenant",
             "Division": "Core",
+            "Purpose": "UserTenant",
             "TimeZone": "_P73324_United States_444350001",
-            "SubscriptionHeartbeat": "2026-05-03"
+            "SubscriptionHeartbeat": "2026-05-04"
           },
           "param1": "No Service Health Alert Rule found."
         }
@@ -458,8 +458,8 @@
           "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/publicIPAddresses/mrg-bastion-pip",
           "tags": {
             "Environment": "prod",
-            "CostCenter": "platform",
             "Owner": "platform-team",
+            "CostCenter": "platform",
             "ManagedBy": "agentic-alz-accelerator",
             "Project": "platform-connectivity"
           },
@@ -603,6 +603,56 @@
       ],
       "references": [
         "https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "govern",
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-014",
+      "title": "Azure Advisor cost recommendations pending",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "high",
+      "confidence": "high",
+      "recommendation": "Review and act on Azure Advisor cost recommendations to reduce waste.",
+      "evidence_count": 3,
+      "evidence": [
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Advisor/recommendations/cc20d24328e0aef3f3b6d77ded603f0f591bd470c8d0ea6515c7bac9e2c60c0e",
+          "name": "Consider virtual machine reserved instance to save over the on-demand costs",
+          "impact": "High",
+          "resourceId": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/4275dc26-48f7-3fc4-e4ac-ecae1bb76f95",
+          "name": "Right-size or shutdown underutilized virtual machines",
+          "impact": "High",
+          "resourceId": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/ff10582f1f5e0dc0257620d6420d2b7b5e726e3e4987aca4a2e18a68a457f109",
+          "name": "Right-size or shutdown underutilized virtual machines",
+          "impact": "High",
+          "resourceId": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e"
+        }
+      ],
+      "remediation_steps": [
+        "Review recommendations: az advisor recommendation list --category Cost",
+        "Implement or dismiss each recommendation"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations"
       ],
       "mappings": {
         "waf_pillar": [
@@ -1206,8 +1256,8 @@
           "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/mrg-identity-scus-rg/providers/microsoft.network/virtualnetworks/mrg-identity-spoke-vnet",
           "tags": {
             "Environment": "prod",
-            "CostCenter": "platform",
             "Owner": "platform-team",
+            "CostCenter": "platform",
             "Project": "platform-identity",
             "ManagedBy": "agentic-alz-accelerator"
           },
@@ -1372,6 +1422,93 @@
       ],
       "references": [
         "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface"
+      ],
+      "mappings": {
+        "waf_pillar": [
+          "cost_optimization"
+        ],
+        "caf_lifecycle": [
+          "manage"
+        ]
+      }
+    },
+    {
+      "rule_id": "COS-005",
+      "title": "Empty resource groups",
+      "pillar": "cost_optimization",
+      "caf_area": "governance",
+      "alz_area": "policy",
+      "severity": "medium",
+      "confidence": "medium",
+      "recommendation": "Review and delete empty resource groups to reduce clutter and simplify governance.",
+      "evidence_count": 23,
+      "evidence": [
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "location": "eastus"
+        },
+        {
+          "id": "/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "009ae910-a172-4aac-b933-7e00020542b2",
+          "location": "westus2"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup",
+          "name": "ContosoResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "eastus"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts",
+          "name": "Default-ActivityLogAlerts",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "eastus"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup",
+          "name": "ExpressRouteResourceGroup",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "eastus2"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "westus2"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG",
+          "name": "NetworkWatcherRG",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "westeurope"
+        },
+        {
+          "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2",
+          "name": "ResourceMoverRG-southcentralus-centralus-eus2",
+          "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
+          "location": "eastus2"
+        },
+        {
+          "id": "/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "29b08c4f-2190-4b60-9a18-f171cde8a007",
+          "location": "westus2"
+        },
+        {
+          "id": "/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance",
+          "name": "McapsGovernance",
+          "subscriptionId": "67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3",
+          "location": "westus2"
+        }
+      ],
+      "remediation_steps": [
+        "Verify RG is unused, then delete: az group delete --name <rg-name>"
+      ],
+      "references": [
+        "https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal"
       ],
       "mappings": {
         "waf_pillar": [
@@ -1837,9 +1974,9 @@
           "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/mrg-identity-scus-rg/providers/Microsoft.Network/networkSecurityGroups/mrg-identity-dc-nsg",
           "tags": {
             "Environment": "prod",
-            "Owner": "platform-team",
             "CostCenter": "platform",
             "Project": "platform-identity",
+            "Owner": "platform-team",
             "ManagedBy": "agentic-alz-accelerator"
           },
           "param1": "ModificationAlert: Not configured/Disabled"

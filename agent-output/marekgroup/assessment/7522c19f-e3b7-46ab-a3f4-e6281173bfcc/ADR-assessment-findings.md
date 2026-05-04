@@ -6,8 +6,8 @@
 
 ## Context
 
-A WARA/CAF assessment was performed on `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` scoring **52.0/100** overall.
-The assessment identified **34** findings across 221 checks.
+A WARA/CAF assessment was performed on `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` scoring **49.0/100** overall.
+The assessment identified **36** findings across 221 checks.
 
 ## Critical/High Findings Requiring Decision
 
@@ -48,6 +48,14 @@ The assessment identified **34** findings across 221 checks.
 
 **Proposed remediation**:
 1. Deploy budget resource via IaC with parameterized thresholds
+
+### 🟠 High — Azure Advisor cost recommendations pending (`COS-014`)
+
+**Problem**: Review and act on Azure Advisor cost recommendations to reduce waste.
+
+**Proposed remediation**:
+1. Review recommendations: az advisor recommendation list --category Cost
+2. Implement or dismiss each recommendation
 
 ### 🟠 High — Resource groups missing CostCenter tag (`COS-017`)
 

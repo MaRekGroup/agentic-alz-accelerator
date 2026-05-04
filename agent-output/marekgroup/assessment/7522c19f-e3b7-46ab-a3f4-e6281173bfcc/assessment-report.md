@@ -1,15 +1,15 @@
 # WARA Assessment Report — 7522c19f-e3b7-46ab-a3f4-e6281173bfcc
 
-> Assessed on 2026-05-04T18:19:20.499872+00:00
+> Assessed on 2026-05-04T21:00:05.733455+00:00
 
 ## Executive Summary
 
 | Metric | Value |
 |--------|-------|
-| Overall Score | **52.0/100** |
+| Overall Score | **49.0/100** |
 | Checks Run | 221 |
-| Checks Passed | 187 |
-| Findings | 34 |
+| Checks Passed | 185 |
+| Findings | 36 |
 
 ## Pillar Scores
 
@@ -17,7 +17,7 @@
 |--------|-------|----------|------|--------|-----|
 | Security | 30.0 | 1 | 3 | 4 | 0 |
 | Reliability | 30.0 | 0 | 5 | 4 | 0 |
-| Cost Optimization | 55.0 | 0 | 3 | 3 | 0 |
+| Cost Optimization | 40.0 | 0 | 4 | 4 | 0 |
 | Operational Excellence | 57.0 | 0 | 2 | 3 | 4 |
 | Performance Efficiency | 88.0 | 0 | 1 | 0 | 1 |
 
@@ -132,6 +132,23 @@
 
 **References**:
 - https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets
+
+### 🟠 High — Azure Advisor cost recommendations pending (`COS-014`)
+
+- **Pillar**: Cost Optimization
+- **CAF Area**: governance
+- **ALZ Area**: policy
+- **Confidence**: high
+- **Resources affected**: 3
+
+**Recommendation**: Review and act on Azure Advisor cost recommendations to reduce waste.
+
+**Remediation**:
+1. Review recommendations: az advisor recommendation list --category Cost
+2. Implement or dismiss each recommendation
+
+**References**:
+- https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations
 
 ### 🟠 High — Resource groups missing CostCenter tag (`COS-017`)
 
@@ -338,6 +355,22 @@
 
 **References**:
 - https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface
+
+### 🟡 Medium — Empty resource groups (`COS-005`)
+
+- **Pillar**: Cost Optimization
+- **CAF Area**: governance
+- **ALZ Area**: policy
+- **Confidence**: medium
+- **Resources affected**: 23
+
+**Recommendation**: Review and delete empty resource groups to reduce clutter and simplify governance.
+
+**Remediation**:
+1. Verify RG is unused, then delete: az group delete --name <rg-name>
+
+**References**:
+- https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal
 
 ### 🟡 Medium — No Cost Management scheduled exports (`COS-020`)
 
