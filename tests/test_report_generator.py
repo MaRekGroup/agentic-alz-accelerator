@@ -307,7 +307,7 @@ class TestADR:
 class TestGenerateAll:
     def test_creates_all_files(self, reporter, discovery, assessment):
         outputs = reporter.generate_all(discovery, assessment, scope_label="test-scope")
-        assert len(outputs) == 6
+        assert len(outputs) == 11  # 6 base + 5 pillar reports
         for key, path in outputs.items():
             assert path.exists(), f"{key} file not created: {path}"
 
@@ -322,3 +322,76 @@ class TestGenerateAll:
         outputs = reporter.generate_all(discovery, assessment, scope_label="my-scope")
         for path in outputs.values():
             assert "my-scope" in str(path)
+
+    def test_pillar_reports_in_subdirectory(self, reporter, discovery, assessment):
+        outputs = reporter.generate_all(discovery, assessment, scope_label="test-scope")
+        pillar_keys = [k for k in outputs if k.startswith("pillar_")]
+        assert len(pillar_keys) == 5
+        for key in pillar_keys:
+            assert "pillar-reports" in str(outputs[key])
+
+
+class TestPillarReport:
+    def test_security_report_has_findings(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "# Security — Detailed Assessment Report" in md
+        assert "SEC-001" in md
+        assert "Storage without TLS 1.2" in md
+
+    def test_pillar_score_shown(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "80.0/100" in md
+
+    def test_score_interpretation_excellent(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "reliability", "test")
+        assert "Excellent" in md
+
+    def test_score_interpretation_good(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "Good" in md
+
+    def test_no_findings_pillar(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "performance", "test")
+        assert "No findings — all checks passed" in md
+
+    def test_remediation_steps_shown(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "Update TLS setting" in md
+        assert "Verify connectivity" in md
+
+    def test_references_shown(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "https://example.com/tls" in md
+
+    def test_affected_resources_table(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "Affected Resources" in md
+        assert "badsa" in md
+
+    def test_findings_summary_table(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "cost_optimization", "test")
+        assert "Findings Summary" in md
+        assert "COS-001" in md
+
+    def test_remediation_priority_matrix(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "Remediation Priority Matrix" in md
+
+    def test_caf_design_areas_section(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "security", "test")
+        assert "Related CAF Design Areas" in md
+        assert "Security" in md
+
+    def test_operational_excellence_report(self, reporter, assessment):
+        md = reporter.render_pillar_report(assessment, "operational_excellence", "test")
+        assert "OPE-001" in md
+        assert "No diagnostic settings" in md
+        assert "Enable diagnostic settings" in md
+
+    def test_pillar_report_filenames(self, reporter, discovery, assessment):
+        outputs = reporter.generate_all(discovery, assessment, scope_label="test")
+        assert outputs["pillar_security"].name == "wara-security.md"
+        assert outputs["pillar_cost_optimization"].name == "wara-cost-optimization.md"
+        assert outputs["pillar_reliability"].name == "wara-reliability.md"
+        assert outputs["pillar_operational_excellence"].name == "wara-operational-excellence.md"
+        assert outputs["pillar_performance"].name == "wara-performance.md"

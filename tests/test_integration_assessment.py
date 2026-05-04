@@ -76,8 +76,8 @@ class TestEndToEndPipeline:
             reporter = ReportGenerator(output_dir=mock_settings.assess.output_dir)
             outputs = reporter.generate_all(discovery, assessment, scope_label="sub-001")
 
-            # All 6 report files created
-            assert len(outputs) == 6
+            # All 11 report files created (6 base + 5 per-pillar)
+            assert len(outputs) == 11
             for name, path in outputs.items():
                 assert path.exists(), f"{name} not created"
 
