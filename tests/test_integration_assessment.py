@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.tools.discovery import DiscoveryResult, DiscoveryScope
-from src.tools.wara_engine import WaraEngine
 from src.tools.report_generator import ReportGenerator
+from src.tools.wara_engine import WaraEngine
 
 
 def _mock_arg_result(data):

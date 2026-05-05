@@ -5,7 +5,7 @@ description: >
   or Terraform via GitHub Actions workflows, always previewing changes with
   what-if/plan before applying. Validates deployments post-apply and produces
   06-deployment-summary.md.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Specify what to deploy — a platform LZ (management, connectivity, identity,
   security), an app LZ, or a specific module. Include framework (bicep/terraform)

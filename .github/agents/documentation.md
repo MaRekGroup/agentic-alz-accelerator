@@ -4,7 +4,7 @@ description: >
   Post-deployment documentation agent that generates the as-built documentation
   suite for Azure Landing Zone deployments. Produces Technical Design Documents
   (TDD), operational runbooks, resource inventories, and compliance summaries.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name. The agent reads all prior artifacts (01 through 06)
   and deployed resource state to produce as-built documentation at

@@ -1,7 +1,8 @@
 """Tests for the Monitoring Agent."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from src.agents.monitoring_agent import MonitoringAgent
 

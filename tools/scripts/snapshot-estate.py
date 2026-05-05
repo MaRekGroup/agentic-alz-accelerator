@@ -12,7 +12,6 @@ Usage:
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -87,7 +86,7 @@ def _print_text(estate: dict, customer: str) -> None:
     d2 = estate.get("day2_operations", {})
     mon = d2.get("monitoring", {})
     rem = d2.get("remediation", {})
-    print(f"\nDay-2 Ops:")
+    print("\nDay-2 Ops:")
     print(f"  Monitoring:   {mon.get('status', '?')}")
     print(f"  Remediation:  {rem.get('status', '?')}")
 

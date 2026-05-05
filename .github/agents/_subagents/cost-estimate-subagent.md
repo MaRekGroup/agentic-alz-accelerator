@@ -5,7 +5,7 @@ description: >
   pricing data. Produces structured monthly cost estimates for planned resources.
   Used by the Architect agent during WAF cost pillar assessment and by the
   IaC Planner for budget validation.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 user-invocable: false
 tools:
   [

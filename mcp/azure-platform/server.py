@@ -18,10 +18,6 @@ import subprocess
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from mcp.server import NotificationOptions, Server
-from mcp.server.stdio import stdio_server
-from mcp.types import TextContent, Tool
-
 # ---------------------------------------------------------------------------
 # Azure SDK imports (lazy — only used when tools are actually called)
 # ---------------------------------------------------------------------------
@@ -35,6 +31,9 @@ from azure.mgmt.resourcegraph.models import (
     QueryRequestOptions,
     ResultFormat,
 )
+from mcp.server import NotificationOptions, Server
+from mcp.server.stdio import stdio_server
+from mcp.types import TextContent, Tool
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -592,6 +591,7 @@ class AzurePlatformServer:
     def handle_run_wara_assessment(self, args: dict) -> dict:
         """Run WARA assessment: discover → evaluate → return scored results."""
         import asyncio as _asyncio
+
         from src.config.settings import Settings
         from src.tools.discovery import DiscoveryCollector, DiscoveryScope
         from src.tools.wara_engine import WaraEngine
@@ -624,10 +624,11 @@ class AzurePlatformServer:
     def handle_generate_assessment_reports(self, args: dict) -> dict:
         """Generate report artifacts from a fresh discovery + assessment."""
         import asyncio as _asyncio
+
         from src.config.settings import Settings
         from src.tools.discovery import DiscoveryCollector, DiscoveryScope
-        from src.tools.wara_engine import WaraEngine
         from src.tools.report_generator import ReportGenerator
+        from src.tools.wara_engine import WaraEngine
 
         scope = args["scope"]
         scope_type = args.get("scope_type", "subscription")

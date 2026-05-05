@@ -6,7 +6,6 @@ individual resources against specific policy definitions.
 """
 
 import logging
-from typing import Optional
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.policyinsights import PolicyInsightsClient
@@ -150,7 +149,7 @@ class PolicyChecker:
             return False
 
     async def get_policy_assignments(
-        self, scope: Optional[str] = None
+        self, scope: str | None = None
     ) -> list[dict]:
         """List policy assignments at the given scope."""
         from azure.mgmt.resource.policy import PolicyClient

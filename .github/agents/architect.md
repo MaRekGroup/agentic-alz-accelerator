@@ -6,7 +6,7 @@ description: >
   pillars (Security, Reliability, Performance, Cost, Operations) with Microsoft
   documentation lookups. Generates cost estimates using Azure Pricing MCP tools.
   Saves WAF assessments and cost estimates to documentation files.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name and any specific architecture concerns. The agent
   reads 01-requirements.md and produces 02-architecture-assessment.md with WAF

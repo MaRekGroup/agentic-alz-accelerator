@@ -12,7 +12,6 @@ import asyncio
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 import typer
 import yaml
@@ -44,7 +43,7 @@ class RunMode(str, Enum):
 class AgentOrchestrator:
     """APEX-aligned orchestrator with DAG workflow, approval gates, and MCP integration."""
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(self, settings: Settings | None = None):
         self.settings = settings or Settings()
         self.credential = DefaultAzureCredential()
         self.kernel = self._build_kernel()
@@ -106,7 +105,7 @@ class AgentOrchestrator:
         iac_tool: str = "bicep",
         diagram_engine: str = "python",
         brownfield: bool = False,
-        scope: Optional[str] = None,
+        scope: str | None = None,
         scope_type: str = "subscription",
     ) -> WorkflowState:
         """Execute the full APEX-aligned workflow with approval gates.
@@ -249,7 +248,7 @@ class AgentOrchestrator:
     # Deployment Modes
     # =========================================================================
 
-    async def run_deployment(self, profile: Optional[str] = None) -> dict:
+    async def run_deployment(self, profile: str | None = None) -> dict:
         """Run the deployment agent interactively or with a profile."""
         logger.info("Starting deployment agent...")
 
@@ -311,7 +310,7 @@ class AgentOrchestrator:
         """Send notification requesting human approval for remediation."""
         logger.info(f"Notification sent for: {violation.get('policy_name')}")
 
-    async def run_full_lifecycle(self, profile: Optional[str] = None) -> None:
+    async def run_full_lifecycle(self, profile: str | None = None) -> None:
         """Deploy then start continuous monitoring."""
         deploy_result = await self.run_deployment(profile)
         logger.info(f"Deployment complete: {deploy_result}")
@@ -319,7 +318,7 @@ class AgentOrchestrator:
 
     async def run_assessment(
         self,
-        scope: Optional[str] = None,
+        scope: str | None = None,
         scope_type: str = "subscription",
         mode: str = "full",
     ) -> dict:
@@ -358,9 +357,9 @@ def main(
     mode: RunMode = typer.Option(RunMode.FULL, help="Run mode"),
     project: str = typer.Option("default", help="Project name for artifact output"),
     iac_tool: str = typer.Option("bicep", help="IaC framework: bicep or terraform"),
-    profile: Optional[str] = typer.Option(None, help="Landing zone profile"),
+    profile: str | None = typer.Option(None, help="Landing zone profile"),
     brownfield: bool = typer.Option(False, "--brownfield", help="Enable Step 0 brownfield assessment"),
-    scope: Optional[str] = typer.Option(None, help="Azure scope for brownfield assessment"),
+    scope: str | None = typer.Option(None, help="Azure scope for brownfield assessment"),
     scope_type: str = typer.Option("subscription", help="Scope type: subscription or management_group"),
     assess_mode: str = typer.Option("full", "--assess-mode", help="Assessment mode: full, quick, or security-only"),
     verbose: bool = typer.Option(False, "--verbose", "-v"),

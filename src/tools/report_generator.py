@@ -374,7 +374,10 @@ class ReportGenerator:
             "",
             "- **CAF Enterprise-Scale** management group hierarchy",
             "- **WAF 5-Pillar** best practices across all resources",
-            "- **Security Baseline** (TLS 1.2, HTTPS-only, no public blob, managed identity, AAD-only SQL, no public endpoints in prod)",
+            (
+                "- **Security Baseline** (TLS 1.2, HTTPS-only, no public blob,"
+                " managed identity, AAD-only SQL, no public endpoints in prod)"
+            ),
             "- **Cost Governance** (budgets with 80%/100%/120% alerts)",
             "- **Operational Excellence** (centralized logging, policy-driven governance, tagging standards)",
             "",

@@ -5,7 +5,7 @@ description: >
   scans across all landing zone subscriptions — compliance every 30 min,
   drift every hour, full audit daily at 6 AM. Routes critical/high violations
   to the Mender for auto-remediation. Produces 08-compliance-report.md.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Ask for a compliance scan, drift check, security posture report, or
   full audit across all deployed landing zones.

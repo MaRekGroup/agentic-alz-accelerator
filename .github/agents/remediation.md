@@ -5,7 +5,7 @@ description: >
   with snapshot-based rollback capability. 8 built-in remediation strategies
   for common violations. Auto-remediates critical/high severity, escalates
   medium/low to human approval. Produces 09-remediation-log.md.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Specify violations to remediate — provide the compliance report or
   specific violation IDs. Or ask to review the remediation queue.

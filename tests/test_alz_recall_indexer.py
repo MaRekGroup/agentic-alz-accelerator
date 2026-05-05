@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 
 import pytest
-
 from alz_recall.indexer import (
     _classify,
     ensure_db,

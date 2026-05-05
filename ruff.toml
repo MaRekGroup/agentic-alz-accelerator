@@ -1,6 +1,31 @@
+line-length = 120
+
 [lint]
-select = ["F"]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM"]
 
 [lint.per-file-ignores]
 # diagrams library uses variable assignment to create nodes in context managers
-"src/tools/python_diagram_generator.py" = ["F841"]
+"src/tools/python_diagram_generator.py" = ["F841", "SIM108"]
+# MCP servers have long tool description strings
+"mcp/azure-pricing-mcp/src/**/*.py" = ["E501"]
+"mcp/azure-platform/server.py" = ["E501"]
+# Diagram generators have long SVG/template strings
+"src/tools/azure_diagram_generator.py" = ["E501"]
+# TDD generator has long assertion template strings
+"src/tools/tdd_generator.py" = ["E501"]
+# Agent files have long structured data literals
+"src/agents/governance_agent.py" = ["E501"]
+"src/agents/requirements_agent.py" = ["E501"]
+"src/agents/challenger_agent.py" = ["E501"]
+# Workflow engine has long config strings
+"src/agents/workflow_engine.py" = ["E501"]
+# Typer uses function calls in defaults by design
+"src/agents/orchestrator.py" = ["B008"]
+# Scripts with unused loop vars for iteration
+"mcp/azure-pricing-mcp/scripts/*.py" = ["B007"]
+"tools/apex-recall/src/**/*.py" = ["B007"]
+# Tests with nested with statements (mock patching)
+"tests/*.py" = ["SIM117", "E501"]
+
+[lint.isort]
+known-first-party = ["src"]

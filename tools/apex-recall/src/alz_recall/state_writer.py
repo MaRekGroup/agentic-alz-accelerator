@@ -15,7 +15,6 @@ from .config import (
 from .indexer import reindex_file
 from .types import atomic_write_json, now_iso, read_json
 
-
 # ---------------------------------------------------------------------------
 # Path helpers
 # ---------------------------------------------------------------------------

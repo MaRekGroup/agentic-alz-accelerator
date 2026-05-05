@@ -6,7 +6,7 @@ description: >
   evaluates Azure Verified Modules (Bicep or Terraform), and designs complete
   infrastructure solutions with dependency ordering. Routes to the appropriate
   IaC track based on decisions.iac_tool in session state.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name. The agent reads 02-architecture-assessment.md and
   04-governance-constraints.md/.json, then produces 04-implementation-plan.md

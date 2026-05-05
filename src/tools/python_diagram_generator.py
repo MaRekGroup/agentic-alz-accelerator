@@ -17,7 +17,7 @@ from typing import Any
 from diagrams import Cluster, Diagram, Edge
 
 # ── Azure icon imports ────────────────────────────────────────────────────
-from diagrams.azure.compute import ContainerApps, FunctionApps, VM
+from diagrams.azure.compute import VM, ContainerApps, FunctionApps
 from diagrams.azure.database import CosmosDb, DatabaseForMysqlServers
 from diagrams.azure.general import (
     CostManagement,

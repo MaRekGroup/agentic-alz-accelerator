@@ -1,17 +1,18 @@
 """Tests for the WARA assessment engine."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+from src.tools.discovery import DiscoveryResult, DiscoveryScope
 from src.tools.wara_engine import (
+    SEVERITY_DEDUCTIONS,
     AssessmentResult,
     Finding,
     PillarScore,
     Severity,
-    SEVERITY_DEDUCTIONS,
     WaraEngine,
 )
-from src.tools.discovery import DiscoveryResult, DiscoveryScope
 
 
 @pytest.fixture

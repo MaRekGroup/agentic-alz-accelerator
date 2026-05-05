@@ -29,7 +29,6 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class IconEntry:
 class IconLibrary:
     """Lazy loader for the Azure icon catalog."""
 
-    _instance: Optional["IconLibrary"] = None
+    _instance: IconLibrary | None = None
 
     def __init__(self, path: Path = ICON_LIBRARY_PATH):
         self.path = path
@@ -65,7 +64,7 @@ class IconLibrary:
         self._loaded = False
 
     @classmethod
-    def shared(cls) -> "IconLibrary":
+    def shared(cls) -> IconLibrary:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -153,7 +152,7 @@ class _Cell:
     style: str = ""
     source: str = ""
     target: str = ""
-    icon: Optional[IconEntry] = None
+    icon: IconEntry | None = None
 
 
 class DrawioBuilder:
@@ -236,7 +235,7 @@ class DrawioBuilder:
         containers.
         """
         dash = "dashed=1;" if dashed else ""
-        if around:
+        if around:  # noqa: SIM108
             # Anchors are direction-aware: top vs bottom is decided in the
             # SVG renderer; for Draw.io we always use bottom-to-bottom (a
             # no-op approximation — Draw.io's auto-router will pick a

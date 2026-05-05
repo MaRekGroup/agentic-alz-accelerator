@@ -66,7 +66,7 @@ def main() -> int:
         # Check referenced skills exist
         for skill in sorted(referenced_skills):
             if skill not in skills_with_file:
-                if skill in {d for d in skill_dirs}:
+                if skill in set(skill_dirs):
                     errors.append(f"{skill}: referenced in registry but SKILL.md is missing/empty")
                 else:
                     errors.append(f"{skill}: referenced in registry but directory not found")

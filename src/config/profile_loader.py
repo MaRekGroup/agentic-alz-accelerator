@@ -29,7 +29,6 @@ import copy
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
@@ -43,7 +42,7 @@ OVERRIDES_DIR = PROFILES_DIR / "overrides"
 class ProfileLoader:
     """Loads, merges, and validates Landing Zone profiles with inheritance."""
 
-    def __init__(self, profiles_dir: Optional[Path] = None):
+    def __init__(self, profiles_dir: Path | None = None):
         self.profiles_dir = profiles_dir or PROFILES_DIR
         self._cache: dict[str, dict] = {}
 
@@ -241,7 +240,7 @@ class ProfileLoader:
         parent_resolved = self._resolve_inheritance(parent_raw)
         return self._deep_merge(parent_resolved, profile)
 
-    def _read_override(self, profile_name: str, environment: str) -> Optional[dict]:
+    def _read_override(self, profile_name: str, environment: str) -> dict | None:
         """Load an environment-specific override file if it exists."""
         override_path = OVERRIDES_DIR / environment / f"{profile_name}.yaml"
         if override_path.exists():

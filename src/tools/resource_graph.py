@@ -6,7 +6,6 @@ query interface for ad-hoc Resource Graph Explorer queries.
 """
 
 import logging
-from typing import Optional
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resourcegraph import ResourceGraphClient as AzureRGClient
@@ -32,8 +31,8 @@ class ResourceGraphClient:
     async def query(
         self,
         query_str: str,
-        subscriptions: Optional[list[str]] = None,
-        management_groups: Optional[list[str]] = None,
+        subscriptions: list[str] | None = None,
+        management_groups: list[str] | None = None,
         max_results: int = 100,
     ) -> list[dict]:
         """Execute a Resource Graph query."""
@@ -177,7 +176,7 @@ class ResourceGraphClient:
     async def find_resources_without_tags(
         self,
         required_tags: list[str],
-        subscription_id: Optional[str] = None,
+        subscription_id: str | None = None,
     ) -> list[dict]:
         """Find resources missing required tags."""
         sub = subscription_id or self.settings.azure.subscription_id
@@ -195,7 +194,7 @@ class ResourceGraphClient:
         return await self.query(query, subscriptions=[sub])
 
     async def get_public_ip_resources(
-        self, subscription_id: Optional[str] = None
+        self, subscription_id: str | None = None
     ) -> list[dict]:
         """Find all resources with public IP addresses."""
         sub = subscription_id or self.settings.azure.subscription_id

@@ -14,9 +14,9 @@ from semantic_kernel import Kernel
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 from src.config.settings import Settings
+from src.tools.drift_detector import DriftDetector
 from src.tools.policy_checker import PolicyChecker
 from src.tools.resource_graph import ResourceGraphClient
-from src.tools.drift_detector import DriftDetector
 
 logger = logging.getLogger(__name__)
 
