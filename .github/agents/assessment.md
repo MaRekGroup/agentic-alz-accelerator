@@ -5,7 +5,7 @@ description: >
   of existing Azure environments — discovers inventory, evaluates against WAF 5-pillar
   checks and CAF design area alignment, generates current-state and target-state
   architecture documentation with remediation roadmaps.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Specify the Azure scope to assess — a subscription ID, management group,
   or resource group path. Choose mode: assess, assess-and-plan, or onboard.

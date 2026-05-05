@@ -5,7 +5,7 @@ description: >
   architecture diagrams (Draw.io and Python diagrams) and Architecture Decision
   Records (ADRs) for Azure Landing Zone deployments. Translates architecture
   assessments into visual artifacts.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name. The agent reads 02-architecture-assessment.md
   and generates diagrams at agent-output/{customer}/diagrams/ plus ADRs at

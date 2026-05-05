@@ -6,7 +6,7 @@ description: >
   Azure Verified Modules (AVM-TF) standards. Validates, tests, and ensures
   code quality. Generates configurations for enterprise-scale landing zones
   with AVM-first approach and remote state backend.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name. The agent reads 04-implementation-plan.md and
   04-governance-constraints.json, then generates Terraform configurations at

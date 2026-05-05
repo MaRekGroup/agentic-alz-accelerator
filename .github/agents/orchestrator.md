@@ -7,7 +7,7 @@ description: >
   Connectivity → Identity → Security), application LZ provisioning, cross-cutting
   governance, and continuous Day-2 operations across the entire estate. Routes to
   specialized agents, enforces approval gates, and maintains estate + per-LZ session state.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Describe what you want to do — run a brownfield assessment, deploy a platform LZ,
   provision an app LZ, check compliance, or resume a workflow.

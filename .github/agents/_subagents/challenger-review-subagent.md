@@ -5,7 +5,7 @@ description: >
   code, architecture, or plan reviews. Unlike the full Challenger agent (which
   operates at gates), this subagent performs targeted single-concern reviews
   and returns structured findings.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 user-invocable: false
 tools:
   [

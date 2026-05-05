@@ -4,7 +4,7 @@ description: >
   Bicep validation subagent. Runs lint (bicep lint + build) first, then code
   review (AVM standards, naming, security baseline, governance compliance).
   Returns structured PASS/FAIL with diagnostics and verdict.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 user-invocable: false
 tools:
   [

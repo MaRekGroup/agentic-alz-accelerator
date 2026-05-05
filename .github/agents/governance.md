@@ -5,7 +5,7 @@ description: >
   enforces the non-negotiable security baseline (6 rules), detects anti-patterns
   in IaC code, and produces governance constraints that downstream agents must
   respect. Outputs 04-governance-constraints.md/.json.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 argument-hint: >
   Specify the scope to audit — a management group, subscription, or resource
   group. Or ask to validate IaC code against the security baseline.

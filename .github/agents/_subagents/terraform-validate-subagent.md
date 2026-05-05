@@ -4,7 +4,7 @@ description: >
   Terraform validation subagent. Runs fmt check and validate first, then code
   review (AVM-TF standards, naming, security baseline, governance compliance).
   Returns structured PASS/FAIL with diagnostics and verdict.
-model: ["Claude Opus 4.6"]
+model: Claude Opus 4.6
 user-invocable: false
 tools:
   [
