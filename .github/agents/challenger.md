@@ -14,6 +14,7 @@ tools:
   [
     read,
     search,
+    execute,
     web/fetch,
     todo,
   ]
@@ -31,6 +32,25 @@ before they reach production.
 - Apply review depth proportional to complexity tier
 - Flag findings as `must_fix`, `should_fix`, or `consider`
 - Block deployments that have `must_fix` findings
+
+## Pre-Review: Load Estate Context
+
+**Before reviewing any artifacts**, read the estate state to understand what is
+actually deployed vs what exists only in code:
+
+1. Identify the customer from the prompt or scan `agent-output/` for customer folders
+2. Read `agent-output/{customer}/00-estate-state.json` — this is the source of truth
+   for deployed infrastructure (platform LZs, MG hierarchy, deploy history)
+3. Cross-reference estate state with IaC code. Distinguish between:
+   - **Not deployed** — no estate record AND no IaC wiring
+   - **Deployed via separate mechanism** — estate records it but IaC module is orphaned
+   - **Deployed via IaC** — estate records it AND IaC is wired up
+4. Do NOT flag "not deployed" for resources that the estate state records as `"status": "deployed"`
+5. If the estate state shows a component deployed via a workflow run ID, treat it as
+   deployed regardless of whether the Bicep/Terraform module is referenced by param files
+
+**If `00-estate-state.json` does not exist**, proceed with code-only review and note
+that no estate context was available.
 
 ## Review Framework
 
