@@ -5,7 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 
-from ..indexer import ensure_db, reindex as do_reindex
+from ..indexer import ensure_db
+from ..indexer import reindex as do_reindex
 
 
 def register(sub: argparse._SubParsersAction) -> None:

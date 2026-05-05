@@ -9,7 +9,6 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import ResourceManagementClient
@@ -132,7 +131,7 @@ class BicepDeployer:
         self,
         template_path: str,
         parameters: dict,
-        resource_group: Optional[str] = None,
+        resource_group: str | None = None,
     ) -> dict:
         """Deploy a specific Bicep template (used for remediation)."""
         subscription_id = self.settings.azure.subscription_id

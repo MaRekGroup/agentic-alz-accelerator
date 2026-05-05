@@ -7,7 +7,6 @@ import json
 
 from ..indexer import ensure_fresh
 from ..state_writer import load_estate, load_session
-from ..types import fmt_json
 
 
 def register(sub: argparse._SubParsersAction) -> None:

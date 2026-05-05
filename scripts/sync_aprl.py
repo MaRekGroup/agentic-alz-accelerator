@@ -14,7 +14,6 @@ Requires network access. Intended for local dev or CI (weekly schedule).
 import argparse
 import json
 import logging
-import sys
 import textwrap
 import urllib.request
 from pathlib import Path
@@ -276,23 +275,23 @@ def main() -> None:
         confidence_counts = Counter(c["confidence"] for c in checks)
 
         print(f"\n{'='*50}")
-        print(f"APRL Sync Summary")
+        print("APRL Sync Summary")
         print(f"{'='*50}")
         print(f"Total checks: {len(checks)}")
-        print(f"\nBy pillar:")
+        print("\nBy pillar:")
         for p, cnt in pillar_counts.most_common():
             print(f"  {p}: {cnt}")
-        print(f"\nBy severity:")
+        print("\nBy severity:")
         for s, cnt in severity_counts.most_common():
             print(f"  {s}: {cnt}")
-        print(f"\nBy confidence:")
+        print("\nBy confidence:")
         for c, cnt in confidence_counts.most_common():
             print(f"  {c}: {cnt}")
 
         if args.dry_run:
             print(f"\nDry run — would write to: {args.output}")
             # Print first 2 checks as sample
-            print(f"\nSample checks (first 2):")
+            print("\nSample checks (first 2):")
             print(yaml.dump({"checks": checks[:2]}, default_flow_style=False, sort_keys=False))
         return
 

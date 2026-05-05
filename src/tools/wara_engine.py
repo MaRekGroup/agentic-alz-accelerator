@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resourcegraph import ResourceGraphClient as AzureRGClient
 from azure.mgmt.resourcegraph.models import (
@@ -306,9 +305,7 @@ class WaraEngine:
 
         # Determine if this is a finding
         is_finding = False
-        if match_type == "any" and evidence:
-            is_finding = True
-        elif match_type == "empty" and not evidence:
+        if match_type == "any" and evidence or match_type == "empty" and not evidence:
             is_finding = True
         elif match_type == "custom":
             eval_func = check.get("evaluation")

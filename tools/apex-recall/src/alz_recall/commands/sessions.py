@@ -66,7 +66,7 @@ def run(args: argparse.Namespace) -> int:
         print(json.dumps(sessions, indent=2))
     else:
         if not sessions:
-            print("No session states found in the last {} day(s).".format(args.days))
+            print(f"No session states found in the last {args.days} day(s).")
             return 0
         for s in sessions:
             step = s["current_step"]

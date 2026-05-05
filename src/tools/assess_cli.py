@@ -17,8 +17,8 @@ from azure.identity import DefaultAzureCredential
 
 from src.config.settings import Settings
 from src.tools.discovery import DiscoveryCollector, DiscoveryScope
-from src.tools.wara_engine import WaraEngine
 from src.tools.report_generator import ReportGenerator
+from src.tools.wara_engine import WaraEngine
 
 logging.basicConfig(
     level=logging.INFO,

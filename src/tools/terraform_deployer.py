@@ -10,7 +10,6 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from azure.identity import DefaultAzureCredential
 
@@ -32,7 +31,7 @@ class TerraformDeployer:
     async def _run_terraform(
         self,
         args: list[str],
-        env_override: Optional[dict] = None,
+        env_override: dict | None = None,
     ) -> dict:
         """Execute a Terraform command asynchronously."""
         env = os.environ.copy()

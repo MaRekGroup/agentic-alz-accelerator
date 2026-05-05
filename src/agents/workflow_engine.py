@@ -11,7 +11,6 @@ import json
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +40,7 @@ class WorkflowState:
         self.complexity = ComplexityTier.STANDARD
         self.steps: dict[str, StepStatus] = {}
         self.artifacts: dict[str, str] = {}
-        self.current_step: Optional[str] = None
+        self.current_step: str | None = None
         self.gate_approvals: dict[str, bool] = {}
 
     def to_dict(self) -> dict:
@@ -59,12 +58,12 @@ class WorkflowState:
 class WorkflowEngine:
     """DAG-based workflow engine that orchestrates agent steps and approval gates."""
 
-    def __init__(self, graph_path: Optional[str] = None):
+    def __init__(self, graph_path: str | None = None):
         self.graph = self._load_graph(graph_path)
         self.nodes = {n["id"]: n for n in self.graph["nodes"]}
         self.edges = self.graph["edges"]
 
-    def _load_graph(self, graph_path: Optional[str]) -> dict:
+    def _load_graph(self, graph_path: str | None) -> dict:
         """Load the workflow DAG from JSON."""
         if graph_path:
             path = Path(graph_path)
@@ -102,9 +101,7 @@ class WorkflowEngine:
             condition = edge.get("condition", "on_complete")
 
             satisfied = False
-            if condition == "on_complete" and source_status == StepStatus.COMPLETED:
-                satisfied = True
-            elif condition == "on_approve" and state.gate_approvals.get(source_id):
+            if condition == "on_complete" and source_status == StepStatus.COMPLETED or condition == "on_approve" and state.gate_approvals.get(source_id):
                 satisfied = True
             elif condition == "on_violation":
                 # Triggered by monitoring findings

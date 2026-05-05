@@ -87,7 +87,7 @@ def main() -> int:
     quick_only = "--quick" in sys.argv
 
     print(f"{'=' * 60}")
-    print(f"  ALZ Accelerator — Validate All")
+    print("  ALZ Accelerator — Validate All")
     print(f"  Mode: {'quick' if quick_only else 'full'}")
     print(f"{'=' * 60}\n")
 
@@ -113,7 +113,7 @@ def main() -> int:
 
     # Summary
     print(f"{'=' * 60}")
-    print(f"  Results")
+    print("  Results")
     print(f"{'=' * 60}")
     for name, status, elapsed in results:
         marker = "✓" if status == "PASS" else "✗"

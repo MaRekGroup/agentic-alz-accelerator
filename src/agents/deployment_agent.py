@@ -20,8 +20,8 @@ from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 from src.config.settings import Settings
 from src.tools.bicep_deployer import BicepDeployer
-from src.tools.terraform_deployer import TerraformDeployer
 from src.tools.resource_graph import ResourceGraphClient
+from src.tools.terraform_deployer import TerraformDeployer
 
 logger = logging.getLogger(__name__)
 

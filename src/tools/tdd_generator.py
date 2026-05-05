@@ -14,7 +14,6 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 try:
     import cairosvg
@@ -106,7 +105,7 @@ class TDDGenerator:
     # ─── Table Helpers ────────────────────────────────────────────────────
 
     def _add_table(self, headers: list[str], rows: list[list[str]],
-                   col_widths: Optional[list[float]] = None) -> None:
+                   col_widths: list[float] | None = None) -> None:
         """Add a formatted table with Azure blue header row."""
         table = self.doc.add_table(rows=1 + len(rows), cols=len(headers))
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -812,8 +811,8 @@ class TDDGenerator:
     def generate(
         self,
         output_path: str,
-        resource_inventory: Optional[dict] = None,
-        compliance_data: Optional[dict] = None,
+        resource_inventory: dict | None = None,
+        compliance_data: dict | None = None,
     ) -> str:
         """
         Generate the complete TDD document.
@@ -857,7 +856,7 @@ class TDDGenerator:
         md_path: str,
         svg_path: str,
         svg_filename: str,
-        resource_inventory: Optional[dict] = None,
+        resource_inventory: dict | None = None,
     ) -> str:
         """
         Generate a markdown version of the TDD with an SVG architecture diagram.
@@ -932,7 +931,7 @@ class TDDGenerator:
     def _build_markdown(
         self,
         diagram_filename: str,
-        estate_diagram_filename: Optional[str],
+        estate_diagram_filename: str | None,
         resource_inventory: dict,
         generated_at: str,
     ) -> str:
@@ -1355,7 +1354,7 @@ All infrastructure changes follow the GitOps workflow:
 ---
 """
 
-    def _md_appendix(self, estate_diagram_filename: Optional[str], generated_at: str) -> str:
+    def _md_appendix(self, estate_diagram_filename: str | None, generated_at: str) -> str:
         lines = [
             "## 9. Appendix",
             "",
@@ -1515,17 +1514,17 @@ def generate_all_tdds(
             all_lzs.append((key, cfg, ""))
 
     for key, cfg, default_profile in all_lzs:
-        kwargs = dict(
-            project_name=key,
-            profile=cfg.get("profile", default_profile),
-            subscription_id=cfg.get("subscription_id", ""),
-            subscription_name=cfg.get("subscription_name", key),
-            location=cfg.get("location", location),
-            environment=cfg.get("environment", "prod"),
-            framework=framework,
-            output_dir=output_dir,
-            config_path=config_path,
-        )
+        kwargs = {
+            "project_name": key,
+            "profile": cfg.get("profile", default_profile),
+            "subscription_id": cfg.get("subscription_id", ""),
+            "subscription_name": cfg.get("subscription_name", key),
+            "location": cfg.get("location", location),
+            "environment": cfg.get("environment", "prod"),
+            "framework": framework,
+            "output_dir": output_dir,
+            "config_path": config_path,
+        }
         for gen_fn in gen_fns:
             path = gen_fn(**kwargs)
             generated.append(path)
@@ -1567,18 +1566,18 @@ if __name__ == "__main__":
             "both": [generate_tdd_for_deployment, generate_tdd_markdown_for_deployment],
         }[args.format]
 
-        base_kwargs = dict(
-            project_name=args.project,
-            profile=args.profile,
-            subscription_id=args.subscription_id,
-            subscription_name=args.subscription_name,
-            location=args.location,
-            environment=args.environment,
-            framework=args.framework,
-            deployment_id=args.deployment_id,
-            output_dir=args.output_dir,
-            config_path=args.config,
-        )
+        base_kwargs = {
+            "project_name": args.project,
+            "profile": args.profile,
+            "subscription_id": args.subscription_id,
+            "subscription_name": args.subscription_name,
+            "location": args.location,
+            "environment": args.environment,
+            "framework": args.framework,
+            "deployment_id": args.deployment_id,
+            "output_dir": args.output_dir,
+            "config_path": args.config,
+        }
         for fn in gen_fns:
             path = fn(**base_kwargs)
             print(f"TDD generated: {path}")

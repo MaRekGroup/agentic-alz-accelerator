@@ -1,7 +1,8 @@
 """Tests for the brownfield Discovery module."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.tools.discovery import DiscoveryCollector, DiscoveryResult, DiscoveryScope
 

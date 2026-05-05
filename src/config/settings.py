@@ -1,7 +1,7 @@
 """Application settings loaded from environment variables."""
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 _ENV_FILE = ".env"
 _BASE_CONFIG = {"env_file": _ENV_FILE, "env_file_encoding": "utf-8", "extra": "ignore"}

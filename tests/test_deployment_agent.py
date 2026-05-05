@@ -1,7 +1,8 @@
 """Tests for the Deployment Agent."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from src.agents.deployment_agent import DeploymentAgent
 
@@ -32,10 +33,9 @@ def mock_settings():
 
 @pytest.fixture
 def agent(mock_kernel, mock_credential, mock_settings):
-    with patch("src.agents.deployment_agent.BicepDeployer"):
-        with patch("src.agents.deployment_agent.TerraformDeployer"):
-            with patch("src.agents.deployment_agent.ResourceGraphClient"):
-                return DeploymentAgent(mock_kernel, mock_credential, mock_settings)
+    with patch("src.agents.deployment_agent.BicepDeployer"), patch("src.agents.deployment_agent.TerraformDeployer"):
+        with patch("src.agents.deployment_agent.ResourceGraphClient"):
+            return DeploymentAgent(mock_kernel, mock_credential, mock_settings)
 
 
 class TestDeploymentAgent:

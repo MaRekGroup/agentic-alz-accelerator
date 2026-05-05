@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from alz_recall.__main__ import main
 
 

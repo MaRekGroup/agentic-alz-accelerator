@@ -40,7 +40,7 @@ def run(args: argparse.Namespace) -> int:
         print(json.dumps(results, indent=2))
     else:
         if not results:
-            print("No artifacts found in the last {} day(s).".format(args.days))
+            print(f"No artifacts found in the last {args.days} day(s).")
             return 0
         for r in results:
             ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(r["mtime"]))

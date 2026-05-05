@@ -15,8 +15,8 @@ from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 from src.config.settings import Settings
 from src.tools.discovery import DiscoveryCollector, DiscoveryScope
-from src.tools.wara_engine import WaraEngine
 from src.tools.report_generator import ReportGenerator
+from src.tools.wara_engine import WaraEngine
 
 logger = logging.getLogger(__name__)
 

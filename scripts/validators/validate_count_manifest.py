@@ -36,7 +36,6 @@ def main() -> int:
 
         actual = sorted(repo_root.glob(glob_pattern))
         actual_count = len(actual)
-        desc = entry.get("description", "")
         print(f"  {key}: {actual_count} files (glob: {glob_pattern})")
 
         if actual_count == 0:

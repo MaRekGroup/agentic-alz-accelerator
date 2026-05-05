@@ -153,7 +153,7 @@ def main():
         print("\n❌ Cost governance validation FAILED — no budget, no merge")
         sys.exit(1)
 
-    print(f"\n✅ Cost governance validation PASSED")
+    print("\n✅ Cost governance validation PASSED")
     sys.exit(0)
 
 

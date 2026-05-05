@@ -11,7 +11,6 @@ from typing import Any
 
 from .config import AGENT_OUTPUT_DIR, ARTIFACT_PATTERNS, DB_PATH
 
-
 # ---------------------------------------------------------------------------
 # Schema
 # ---------------------------------------------------------------------------
