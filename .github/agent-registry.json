@@ -94,7 +94,8 @@
         "python-diagrams",
         "caf-design-areas",
         "mermaid",
-        "azure-diagrams"
+        "azure-diagrams",
+        "azure-resource-visualizer"
       ],
       "invokable": true,
       "optional": true,
@@ -112,7 +113,8 @@
         "caf-design-areas",
         "azure-compliance",
         "azure-rbac",
-        "azure-governance-discovery"
+        "azure-governance-discovery",
+        "entra-app-registration"
       ],
       "invokable": true,
       "description": "Policy discovery, compliance constraints, security baseline across the estate"
@@ -185,7 +187,8 @@
         "profile-management",
         "github-operations",
         "azure-validate",
-        "azure-quotas"
+        "azure-quotas",
+        "entra-app-registration"
       ],
       "invokable": true,
       "description": "Deployment with what-if/plan preview via GitHub Actions"
@@ -201,7 +204,8 @@
         "azure-defaults",
         "azure-diagnostics",
         "mermaid",
-        "azure-adr"
+        "azure-adr",
+        "docs-writer"
       ],
       "invokable": true,
       "description": "Post-deployment documentation suite (TDD, runbook, inventory)"
@@ -272,7 +276,9 @@
       "skills": [
         "brownfield-discovery",
         "wara-assessment",
-        "assessment-report"
+        "assessment-report",
+        "terraform-search-import",
+        "azure-resource-visualizer"
       ],
       "invokable": true,
       "description": "Brownfield discovery, WARA/CAF assessment, and environment documentation generation"
