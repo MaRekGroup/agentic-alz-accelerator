@@ -59,6 +59,7 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-quotas` | `.github/skills/azure-quotas/` | Strategist, Envoy |
 | `iac-common` | `.github/skills/iac-common/` | Strategist, Forge |
 | `terraform-test` | `.github/skills/terraform-test/` | Forge (Terraform) |
+| `terraform-search-import` | `.github/skills/terraform-search-import/` | Forge (Terraform), Assessor |
 
 ### Tooling & Operations Skills
 
@@ -69,8 +70,10 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `drawio` | `.github/skills/drawio/` | Artisan |
 | `mermaid` | `.github/skills/mermaid/` | Artisan, Chronicler |
 | `azure-diagrams` | `.github/skills/azure-diagrams/` | Artisan (routing) |
+| `azure-resource-visualizer` | `.github/skills/azure-resource-visualizer/` | Artisan, Assessor |
 | `azure-adr` | `.github/skills/azure-adr/` | Oracle, Chronicler |
 | `github-operations` | `.github/skills/github-operations/` | Envoy, Conductor |
+| `docs-writer` | `.github/skills/docs-writer/` | Chronicler |
 
 ### Agent Governance & Context Skills
 
@@ -81,6 +84,8 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-validate` | `.github/skills/azure-validate/` | Envoy, Challenger |
 | `azure-governance-discovery` | `.github/skills/azure-governance-discovery/` | Warden |
 | `context-optimizer` | `.github/skills/context-optimizer/` | Conductor (audits) |
+| `count-registry` | `.github/skills/count-registry/` | All agents (entity counts) |
+| `entra-app-registration` | `.github/skills/entra-app-registration/` | Warden, Envoy |
 
 ### Assessment Skills (Brownfield)
 
