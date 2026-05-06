@@ -45,7 +45,8 @@
         "session-resume",
         "github-operations",
         "context-shredding",
-        "golden-principles"
+        "golden-principles",
+        "context-optimizer"
       ],
       "invokable": true,
       "description": "Master orchestrator \u2014 routes workflow steps, enforces approval gates, manages estate state"
@@ -75,7 +76,8 @@
         "caf-design-areas",
         "cost-governance",
         "azure-defaults",
-        "azure-cost-optimization"
+        "azure-cost-optimization",
+        "azure-adr"
       ],
       "invokable": true,
       "description": "WAF assessment, CAF design area mapping, cost estimation"
@@ -91,7 +93,8 @@
         "drawio",
         "python-diagrams",
         "caf-design-areas",
-        "mermaid"
+        "mermaid",
+        "azure-diagrams"
       ],
       "invokable": true,
       "optional": true,
@@ -124,7 +127,8 @@
       "skills": [
         "profile-management",
         "iac-common",
-        "azure-defaults"
+        "azure-defaults",
+        "azure-quotas"
       ],
       "invokable": true,
       "description": "Implementation planning with AVM module selection"
@@ -164,7 +168,8 @@
         "terraform-patterns",
         "security-baseline",
         "iac-common",
-        "azure-diagnostics"
+        "azure-diagnostics",
+        "terraform-test"
       ],
       "invokable": true,
       "description": "Terraform configuration generation (AVM-TF)"
@@ -179,7 +184,8 @@
       "skills": [
         "profile-management",
         "github-operations",
-        "azure-validate"
+        "azure-validate",
+        "azure-quotas"
       ],
       "invokable": true,
       "description": "Deployment with what-if/plan preview via GitHub Actions"
@@ -194,7 +200,8 @@
       "skills": [
         "azure-defaults",
         "azure-diagnostics",
-        "mermaid"
+        "mermaid",
+        "azure-adr"
       ],
       "invokable": true,
       "description": "Post-deployment documentation suite (TDD, runbook, inventory)"

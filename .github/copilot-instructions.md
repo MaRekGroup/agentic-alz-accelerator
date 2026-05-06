@@ -56,7 +56,9 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-rbac` | `.github/skills/azure-rbac/` | Warden, Forge |
 | `azure-compliance` | `.github/skills/azure-compliance/` | Warden, Sentinel, Challenger |
 | `azure-cost-optimization` | `.github/skills/azure-cost-optimization/` | Oracle, Sentinel |
+| `azure-quotas` | `.github/skills/azure-quotas/` | Strategist, Envoy |
 | `iac-common` | `.github/skills/iac-common/` | Strategist, Forge |
+| `terraform-test` | `.github/skills/terraform-test/` | Forge (Terraform) |
 
 ### Tooling & Operations Skills
 
@@ -66,6 +68,8 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `python-diagrams` | `.github/skills/python-diagrams/` | Artisan |
 | `drawio` | `.github/skills/drawio/` | Artisan |
 | `mermaid` | `.github/skills/mermaid/` | Artisan, Chronicler |
+| `azure-diagrams` | `.github/skills/azure-diagrams/` | Artisan (routing) |
+| `azure-adr` | `.github/skills/azure-adr/` | Oracle, Chronicler |
 | `github-operations` | `.github/skills/github-operations/` | Envoy, Conductor |
 
 ### Agent Governance & Context Skills
@@ -76,6 +80,7 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `context-shredding` | `.github/skills/context-shredding/` | All agents (context compression) |
 | `azure-validate` | `.github/skills/azure-validate/` | Envoy, Challenger |
 | `azure-governance-discovery` | `.github/skills/azure-governance-discovery/` | Warden |
+| `context-optimizer` | `.github/skills/context-optimizer/` | Conductor (audits) |
 
 ### Assessment Skills (Brownfield)
 
