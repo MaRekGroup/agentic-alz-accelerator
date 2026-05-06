@@ -1,19 +1,29 @@
 {
   "$schema": "../tools/schemas/agent-registry.schema.json",
-  "description": "Agent registry for the Agentic ALZ Accelerator — enterprise-scale landing zone lifecycle.",
+  "description": "Agent registry for the Agentic ALZ Accelerator \u2014 enterprise-scale landing zone lifecycle.",
   "scope_types": {
     "estate": "Operates across all landing zones (monitoring, governance, orchestration)",
     "per-lz": "Scoped to a single landing zone instance (platform or application)"
   },
   "delegation_rules": {
-    "interactive": "Use handoff — agent needs user interaction (askQuestions)",
-    "autonomous": "Use runSubagent — agent runs to completion without user input"
+    "interactive": "Use handoff \u2014 agent needs user interaction (askQuestions)",
+    "autonomous": "Use runSubagent \u2014 agent runs to completion without user input"
   },
   "landing_zone_types": {
     "platform": {
       "description": "CAF enterprise-scale platform subscriptions",
-      "members": ["platform-management", "platform-connectivity", "platform-identity", "platform-security"],
-      "deploy_order": ["management", "connectivity", "identity", "security"],
+      "members": [
+        "platform-management",
+        "platform-connectivity",
+        "platform-identity",
+        "platform-security"
+      ],
+      "deploy_order": [
+        "management",
+        "connectivity",
+        "identity",
+        "security"
+      ],
       "workflow": ".github/workflows/2-platform-deploy.yml"
     },
     "application": {
@@ -26,44 +36,63 @@
     "orchestrator": {
       "agent": ".github/agents/orchestrator.md",
       "codename": "Conductor",
-      "emoji": "🧠",
+      "emoji": "\ud83e\udde0",
       "step": null,
       "scope": "estate",
       "delegation": "interactive",
-      "skills": ["workflow-engine", "session-resume", "github-operations"],
+      "skills": [
+        "workflow-engine",
+        "session-resume",
+        "github-operations",
+        "context-shredding",
+        "golden-principles"
+      ],
       "invokable": true,
-      "description": "Master orchestrator — routes workflow steps, enforces approval gates, manages estate state"
+      "description": "Master orchestrator \u2014 routes workflow steps, enforces approval gates, manages estate state"
     },
     "requirements": {
       "agent": ".github/agents/requirements.md",
       "codename": "Scribe",
-      "emoji": "📜",
+      "emoji": "\ud83d\udcdc",
       "step": 1,
       "scope": "per-lz",
       "delegation": "interactive",
-      "skills": ["caf-design-areas", "azure-defaults"],
+      "skills": [
+        "caf-design-areas",
+        "azure-defaults"
+      ],
       "invokable": true,
       "description": "Captures landing zone requirements through conversation"
     },
     "architect": {
       "agent": ".github/agents/architect.md",
       "codename": "Oracle",
-      "emoji": "🏛️",
+      "emoji": "\ud83c\udfdb\ufe0f",
       "step": 2,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["caf-design-areas", "cost-governance", "azure-defaults", "azure-cost-optimization"],
+      "skills": [
+        "caf-design-areas",
+        "cost-governance",
+        "azure-defaults",
+        "azure-cost-optimization"
+      ],
       "invokable": true,
       "description": "WAF assessment, CAF design area mapping, cost estimation"
     },
     "design": {
       "agent": ".github/agents/design.md",
       "codename": "Artisan",
-      "emoji": "🎨",
+      "emoji": "\ud83c\udfa8",
       "step": 3,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["drawio", "python-diagrams", "caf-design-areas"],
+      "skills": [
+        "drawio",
+        "python-diagrams",
+        "caf-design-areas",
+        "mermaid"
+      ],
       "invokable": true,
       "optional": true,
       "description": "Architecture diagrams and ADRs"
@@ -71,115 +100,173 @@
     "governance": {
       "agent": ".github/agents/governance.md",
       "codename": "Warden",
-      "emoji": "🛡️",
+      "emoji": "\ud83d\udee1\ufe0f",
       "step": 3.5,
       "scope": "estate",
       "delegation": "autonomous",
-      "skills": ["security-baseline", "caf-design-areas", "azure-compliance", "azure-rbac"],
+      "skills": [
+        "security-baseline",
+        "caf-design-areas",
+        "azure-compliance",
+        "azure-rbac",
+        "azure-governance-discovery"
+      ],
       "invokable": true,
       "description": "Policy discovery, compliance constraints, security baseline across the estate"
     },
     "iac-planner": {
       "agent": ".github/agents/iac-planner.md",
       "codename": "Strategist",
-      "emoji": "📐",
+      "emoji": "\ud83d\udcd0",
       "step": 4,
       "scope": "per-lz",
       "delegation": "interactive",
-      "skills": ["profile-management", "iac-common", "azure-defaults"],
+      "skills": [
+        "profile-management",
+        "iac-common",
+        "azure-defaults"
+      ],
       "invokable": true,
       "description": "Implementation planning with AVM module selection"
     },
     "bicep-code": {
       "agent": ".github/agents/bicep-code.md",
       "codename": "Forge",
-      "emoji": "⚒️",
+      "emoji": "\u2692\ufe0f",
       "step": 5,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "subagents": ["bicep-validate-subagent", "bicep-whatif-subagent"],
-      "skills": ["azure-bicep-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
+      "subagents": [
+        "bicep-validate-subagent",
+        "bicep-whatif-subagent"
+      ],
+      "skills": [
+        "azure-bicep-patterns",
+        "security-baseline",
+        "iac-common",
+        "azure-diagnostics"
+      ],
       "invokable": true,
       "description": "Bicep template generation (AVM-first)"
     },
     "terraform-code": {
       "agent": ".github/agents/terraform-code.md",
       "codename": "Forge",
-      "emoji": "⚒️",
+      "emoji": "\u2692\ufe0f",
       "step": 5,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "subagents": ["terraform-validate-subagent", "terraform-plan-subagent"],
-      "skills": ["terraform-patterns", "security-baseline", "iac-common", "azure-diagnostics"],
+      "subagents": [
+        "terraform-validate-subagent",
+        "terraform-plan-subagent"
+      ],
+      "skills": [
+        "terraform-patterns",
+        "security-baseline",
+        "iac-common",
+        "azure-diagnostics"
+      ],
       "invokable": true,
       "description": "Terraform configuration generation (AVM-TF)"
     },
     "deployment": {
       "agent": ".github/agents/deployment.md",
       "codename": "Envoy",
-      "emoji": "🚀",
+      "emoji": "\ud83d\ude80",
       "step": 6,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["profile-management", "github-operations"],
+      "skills": [
+        "profile-management",
+        "github-operations",
+        "azure-validate"
+      ],
       "invokable": true,
       "description": "Deployment with what-if/plan preview via GitHub Actions"
     },
     "documentation": {
       "agent": ".github/agents/documentation.md",
       "codename": "Chronicler",
-      "emoji": "📚",
+      "emoji": "\ud83d\udcda",
       "step": 7,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "skills": ["azure-defaults", "azure-diagnostics"],
+      "skills": [
+        "azure-defaults",
+        "azure-diagnostics",
+        "mermaid"
+      ],
       "invokable": true,
       "description": "Post-deployment documentation suite (TDD, runbook, inventory)"
     },
     "monitoring": {
       "agent": ".github/agents/monitoring.md",
       "codename": "Sentinel",
-      "emoji": "🔭",
+      "emoji": "\ud83d\udd2d",
       "step": 8,
       "scope": "estate",
       "delegation": "autonomous",
       "continuous": true,
-      "skills": ["security-baseline", "cost-governance", "azure-diagnostics", "azure-compliance"],
+      "skills": [
+        "security-baseline",
+        "cost-governance",
+        "azure-diagnostics",
+        "azure-compliance"
+      ],
       "invokable": true,
       "description": "Continuous compliance monitoring, drift detection across ALL landing zones"
     },
     "remediation": {
       "agent": ".github/agents/remediation.md",
       "codename": "Mender",
-      "emoji": "🔧",
+      "emoji": "\ud83d\udd27",
       "step": 9,
       "scope": "estate",
       "delegation": "autonomous",
       "triggered_by": "monitoring",
-      "skills": ["security-baseline", "azure-diagnostics", "azure-rbac"],
+      "skills": [
+        "security-baseline",
+        "azure-diagnostics",
+        "azure-rbac"
+      ],
       "invokable": true,
       "description": "Auto-remediation with snapshot/rollback across ALL landing zones"
     },
     "challenger": {
       "agent": ".github/agents/challenger.md",
       "codename": "Challenger",
-      "emoji": "⚔️",
+      "emoji": "\u2694\ufe0f",
       "step": null,
       "scope": "per-lz",
       "delegation": "autonomous",
-      "gates": ["gate-1", "gate-2", "gate-4", "gate-5"],
-      "skills": ["security-baseline", "cost-governance", "caf-design-areas", "azure-compliance"],
+      "gates": [
+        "gate-1",
+        "gate-2",
+        "gate-4",
+        "gate-5"
+      ],
+      "skills": [
+        "security-baseline",
+        "cost-governance",
+        "caf-design-areas",
+        "azure-compliance",
+        "golden-principles"
+      ],
       "invokable": true,
-      "description": "Adversarial reviewer — challenges architecture, plans, code, and security"
+      "description": "Adversarial reviewer \u2014 challenges architecture, plans, code, and security"
     },
     "assessment": {
       "agent": ".github/agents/assessment.md",
       "codename": "Assessor",
-      "emoji": "🔍",
+      "emoji": "\ud83d\udd0d",
       "step": null,
       "scope": "estate",
       "delegation": "autonomous",
-      "skills": ["brownfield-discovery", "wara-assessment", "assessment-report"],
+      "skills": [
+        "brownfield-discovery",
+        "wara-assessment",
+        "assessment-report"
+      ],
       "invokable": true,
       "description": "Brownfield discovery, WARA/CAF assessment, and environment documentation generation"
     }
@@ -189,42 +276,66 @@
       "agent": ".github/agents/_subagents/bicep-validate-subagent.md",
       "parent": "bicep-code",
       "scope": "per-lz",
-      "skills": ["azure-defaults", "iac-common"],
+      "skills": [
+        "azure-defaults",
+        "iac-common"
+      ],
       "description": "Bicep lint + build + code review"
     },
     "bicep-whatif-subagent": {
       "agent": ".github/agents/_subagents/bicep-whatif-subagent.md",
       "parent": "bicep-code",
       "scope": "per-lz",
-      "skills": ["security-baseline"],
+      "skills": [
+        "security-baseline"
+      ],
       "description": "Bicep deployment what-if preview"
     },
     "terraform-validate-subagent": {
       "agent": ".github/agents/_subagents/terraform-validate-subagent.md",
       "parent": "terraform-code",
       "scope": "per-lz",
-      "skills": ["azure-defaults", "iac-common"],
+      "skills": [
+        "azure-defaults",
+        "iac-common"
+      ],
       "description": "Terraform fmt + validate + code review"
     },
     "terraform-plan-subagent": {
       "agent": ".github/agents/_subagents/terraform-plan-subagent.md",
       "parent": "terraform-code",
       "scope": "per-lz",
-      "skills": ["security-baseline"],
+      "skills": [
+        "security-baseline"
+      ],
       "description": "Terraform plan preview"
     },
     "challenger-review-subagent": {
       "agent": ".github/agents/_subagents/challenger-review-subagent.md",
-      "parent": ["architect", "iac-planner", "bicep-code", "terraform-code"],
+      "parent": [
+        "architect",
+        "iac-planner",
+        "bicep-code",
+        "terraform-code"
+      ],
       "scope": "per-lz",
-      "skills": ["security-baseline", "iac-common"],
+      "skills": [
+        "security-baseline",
+        "iac-common"
+      ],
       "description": "Focused adversarial review for specific artifacts"
     },
     "cost-estimate-subagent": {
       "agent": ".github/agents/_subagents/cost-estimate-subagent.md",
-      "parent": ["architect", "iac-planner"],
+      "parent": [
+        "architect",
+        "iac-planner"
+      ],
       "scope": "per-lz",
-      "skills": ["cost-governance", "azure-cost-optimization"],
+      "skills": [
+        "cost-governance",
+        "azure-cost-optimization"
+      ],
       "description": "Azure pricing lookup and cost estimation"
     }
   },
