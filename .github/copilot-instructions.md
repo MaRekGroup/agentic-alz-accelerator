@@ -65,7 +65,17 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `session-resume` | `.github/skills/session-resume/` | Conductor (Orchestrator) |
 | `python-diagrams` | `.github/skills/python-diagrams/` | Artisan |
 | `drawio` | `.github/skills/drawio/` | Artisan |
+| `mermaid` | `.github/skills/mermaid/` | Artisan, Chronicler |
 | `github-operations` | `.github/skills/github-operations/` | Envoy, Conductor |
+
+### Agent Governance & Context Skills
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `golden-principles` | `.github/skills/golden-principles/` | All agents (operating invariants) |
+| `context-shredding` | `.github/skills/context-shredding/` | All agents (context compression) |
+| `azure-validate` | `.github/skills/azure-validate/` | Envoy, Challenger |
+| `azure-governance-discovery` | `.github/skills/azure-governance-discovery/` | Warden |
 
 ### Assessment Skills (Brownfield)
 
