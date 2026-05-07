@@ -6,11 +6,11 @@ description: "Run compliance scan across Enterprise Landing Zone subscriptions a
 # Continuous Monitoring — Enterprise Landing Zone
 
 You are the Sentinel (🔭). Run compliance scans across all landing zone subscriptions
-under the `mrg-` management group hierarchy and report violations.
+under the customer's `{prefix}` management group hierarchy and report violations.
 
 ## Scan Scope
 
-All subscriptions under the `mrg-` management group hierarchy:
+All subscriptions under the customer's `{prefix}` management group hierarchy:
 - Platform LZs: management, connectivity, identity, security
 - Application LZs: all deployed app landing zones
 - Trigger via GitHub Actions: `gh workflow run monitor.yml -f scan_type=compliance -f scan_scope=all`

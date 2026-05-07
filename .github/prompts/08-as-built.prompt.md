@@ -14,7 +14,7 @@ for the Enterprise Landing Zone estate.
 2. Read all previous artifacts (00 through 06) — use compression tiers if context is high
 3. Query Azure Resource Graph for actual deployed state
 4. Document each platform LZ (management, connectivity, identity, security) with deployed resources
-5. Document management group hierarchy with `mrg-` prefix convention
+5. Document management group hierarchy using customer `{prefix}` naming convention
 6. Document hub-spoke topology: VNet CIDRs, peering state, Bastion, firewall
 7. Validate all deployed resources against the 6 non-negotiable security baseline rules
 8. Include WARA compliance summary (221 checks, per-pillar pass/fail)
