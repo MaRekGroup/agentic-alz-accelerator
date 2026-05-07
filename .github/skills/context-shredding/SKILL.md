@@ -64,53 +64,27 @@ Skills also have compression tiers (digest and minimal variants):
 
 ## Artifact Compression Templates
 
-### 01-requirements.md
+Detailed per-artifact compression rules with H2 sections to keep/drop and
+character budget targets are in the reference doc:
 
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire document |
-| summarized | Overview, CAF Design Area Summary table, Complexity, IaC Tool |
-| minimal | `complexity: {tier}, iac_tool: {tool}, regions: {list}, environments: {list}` |
+| Reference | File | Content |
+|-----------|------|---------|
+| Compression Templates | `references/compression-templates.md` | Per-artifact H2 sections per tier for all 10 ALZ artifacts (00–09) |
 
-### 02-architecture-assessment.md
+### Quick Reference (Inline)
 
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire document |
-| summarized | WAF Scores table, Resource List, Cost Estimate, Key Decisions |
-| minimal | `waf_score: {n}/100, resources: {count}, cost_monthly: ${n}, key_risks: [...]` |
-
-### 04-governance-constraints.md/.json
-
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire document |
-| summarized | Deny-effect policies, Security baseline violations, Blocker count |
-| minimal | `blockers: {n}, deny_policies: {n}, baseline_violations: [...]` |
-
-### 04-implementation-plan.md
-
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire document |
-| summarized | Module List with AVM refs, Deployment Order, Parameter Strategy |
-| minimal | `modules: {list}, deploy_order: [...], framework: {bicep|terraform}` |
-
-### 00-assessment-report.md (Brownfield)
-
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire document |
-| summarized | Executive Summary, WAF Scores, must_fix findings only |
-| minimal | `score: {n}/100, findings: {n}, must_fix: {n}, resource_count: {n}` |
-
-### 00-estate-state.json
-
-| Tier | Load These Sections |
-|------|---------------------|
-| full | Entire JSON |
-| summarized | `estate` + `platform_landing_zones` status fields only |
-| minimal | `platform: {mgmt:✅, conn:✅, id:✅, sec:✅}, apps: {count}` |
+| Artifact | Summarized (60-80%) | Minimal (>80%) |
+|----------|---------------------|----------------|
+| `00-assessment-*` | Executive Summary, WAF Scores, must_fix findings | `score: {n}/100, must_fix: {n}` |
+| `00-estate-state.json` | `estate` + LZ statuses | `platform: {status×4}, apps: {n}` |
+| `01-requirements.md` | Overview, CAF table, Complexity, IaC Tool | `complexity: {tier}, iac_tool: {tool}` |
+| `02-architecture-assessment.md` | WAF Scores, Resources, Cost, Decisions | `waf: {n}/100, cost: ${n}` |
+| `03-design-*` | ADR table, diagram paths | `diagrams: [{paths}]` |
+| `04-governance-constraints.*` | Deny policies, Baseline violations, Blockers | `blockers: {n}, deny: {n}` |
+| `04-implementation-plan.md` | Modules, Deploy Order, Parameters | `modules: [{list}], framework: {tool}` |
+| `06-deployment-summary.md` | Result, Resources, Validation | `status: {ok}, resources: {n}` |
+| `08-compliance-report.md` | Summary, Critical/High violations | `compliance: {n}%, violations: {n}` |
+| `09-remediation-log.md` | Actions table, Rollbacks | `remediated: {n}, failed: {n}` |
 
 ## Session State via alz-recall
 
