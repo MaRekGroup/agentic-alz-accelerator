@@ -1,5 +1,5 @@
 ---
-mode: requirements
+agent: requirements
 description: "Gather Enterprise Landing Zone requirements mapped to CAF design areas"
 ---
 

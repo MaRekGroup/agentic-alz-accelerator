@@ -1,5 +1,5 @@
 ---
-mode: monitoring
+agent: monitoring
 description: "Run compliance scan across Enterprise Landing Zone subscriptions and generate monitoring report"
 ---
 

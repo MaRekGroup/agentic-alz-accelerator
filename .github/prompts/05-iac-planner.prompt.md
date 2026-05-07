@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: iac-planner
 description: "Create IaC implementation plan with AVM module selection"
 ---
 

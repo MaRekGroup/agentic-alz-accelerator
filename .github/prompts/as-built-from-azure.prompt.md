@@ -1,6 +1,6 @@
 ---
 description: "Generate as-built documentation for an existing Azure deployment with no prior artifacts. Discovers resources, collects requirements interactively, synthesizes pseudo-artifacts, then generates documentation."
-mode: orchestrator
+agent: orchestrator
 argument-hint: "Provide subscription name/ID, resource group(s), and workload name"
 ---
 

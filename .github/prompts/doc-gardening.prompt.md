@@ -1,6 +1,6 @@
 ---
 description: "Scan for stale docs, count drift, quality issues, and tech debt across the ALZ accelerator."
-mode: orchestrator
+agent: orchestrator
 ---
 
 # Doc Gardening

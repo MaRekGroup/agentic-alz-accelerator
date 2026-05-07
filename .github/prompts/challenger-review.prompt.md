@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: challenger
 description: "Adversarial review of architecture, plans, or code at an approval gate"
 ---
 
