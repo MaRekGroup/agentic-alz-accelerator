@@ -1,16 +1,20 @@
 ---
 mode: orchestrator
-description: "Resume an interrupted APEX workflow from the last completed step"
+description: "Resume an interrupted Enterprise Landing Zone APEX workflow from the last completed step"
 ---
 
 # Resume Workflow
 
-Resume a previously interrupted APEX workflow session.
+Resume a previously interrupted APEX workflow session for an Enterprise Landing Zone deployment.
 
 ## Process
 
-1. Check `agent-output/{customer}/{project}/` for existing artifacts
-2. Determine the last completed step based on artifact presence:
+1. **Primary**: Run `alz-recall show {customer} --json` to restore full session state —
+   current step, decisions (region, iac_tool, complexity), artifact inventory
+2. **Fallback**: If `alz-recall` returns no customer, check `agent-output/{customer}/00-handoff.md`
+   for completed-steps checklist and key decisions
+3. **Tertiary**: If both are absent, scan existing artifacts:
+   - `00-assessment-*` → Step 0 done (brownfield)
    - `01-requirements.md` → Step 1 done
    - `02-architecture-assessment.md` → Step 2 done
    - `03-design-*` → Step 3 done
@@ -19,9 +23,16 @@ Resume a previously interrupted APEX workflow session.
    - IaC files in `infra/` → Step 5 done
    - `06-deployment-summary.md` → Step 6 done
    - `07-*.md` → Step 7 done
-3. Read the last completed artifact to restore context
-4. Resume from the next uncompleted step
+   - `08-compliance-report.md` → Step 8 active (monitoring)
+   - `09-remediation-log.md` → Step 9 active (remediation)
+4. Check platform LZ deployment state from `alz-recall show {customer} --json` →
+   `platform_landing_zones` section
+5. Check GitHub Actions run status for recent `2-platform-deploy.yml` or `3-app-deploy.yml` runs
+
+## Skills to reference
+
+Read `.github/skills/session-resume/SKILL.md` for full recovery procedure.
 
 ## Ask the user
 
-"I found artifacts through Step {N}. Ready to continue with Step {N+1}?"
+"I found state showing Step {N} complete. Ready to continue with Step {N+1}?"
