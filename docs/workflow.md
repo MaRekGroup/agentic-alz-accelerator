@@ -22,7 +22,7 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 
 ### Step 0: Assessment (🔍 Assessor) [Brownfield Only]
 - Discover existing Azure environment via Resource Graph
-- Run WAF Reliability Assessment (WARA) against 28-check catalog
+- Run WAF Assessment (WARA) against 221-check APRL-synced catalog (all 5 pillars)
 - Generate current-state and target-state architecture documentation
 - Output: `00-assessment-*.{md,json,mmd}` in `agent-output/{customer}/assessment/<scope>/`
 
@@ -139,7 +139,7 @@ See `src/config/profile_loader.py` for the merge logic.
 
 ## Test Coverage
 
-107 tests validate agent workflows across 6 test files:
+197 tests validate agent workflows across 13 test files:
 
 | Test File | Covers |
 |-----------|--------|
@@ -149,3 +149,10 @@ See `src/config/profile_loader.py` for the merge logic.
 | `test_assess_cli.py` | CLI summary, fallback subscription, exit codes |
 | `test_assessment_agent.py` | Init, full pipeline, defaults, fallback, discovery-only |
 | `test_integration_assessment.py` | E2E pipeline, check catalog integrity |
+| `test_discovery.py` | Resource Graph discovery, inventory collection |
+| `test_wara_engine.py` | WAF check evaluation, scoring, APRL catalog loading |
+| `test_report_generator.py` | Assessment report artifact generation |
+| `test_validators.py` | Security baseline + cost governance validators |
+| `test_alz_recall_commands.py` | alz-recall CLI read commands |
+| `test_alz_recall_write_commands.py` | alz-recall CLI write commands |
+| `test_alz_recall_indexer.py` | FTS5 indexing and search |

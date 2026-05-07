@@ -1,8 +1,8 @@
 # Current-State Architecture — Agentic ALZ Accelerator
 
-> **Date:** 2026-04-23
-> **Branch:** `pr1/current-state-architecture-docs`
-> **Scope:** Describes the system as it exists today — before brownfield/assessment enhancements.
+> **Date:** 2026-05-07
+> **Branch:** `main`
+> **Scope:** Describes the system as it exists today — full greenfield + brownfield capability.
 
 ## Overview
 
@@ -33,9 +33,16 @@ Agents are defined in two layers: agent definitions (Markdown) under
 | Agent | Codename | Step | Role |
 |-------|----------|------|------|
 | Orchestrator | 🧠 Conductor | — | Master coordinator; routes workflow, enforces gates |
+| Assessment | 🔍 Assessor | 0 | Brownfield discovery + WAF-aligned assessment (brownfield only) |
 | Requirements | 📜 Scribe | 1 | Captures LZ requirements across CAF design areas |
+| Architect | 🏛️ Oracle | 2 | WAF assessment, CAF mapping, cost estimation |
+| Design | 🎨 Artisan | 3 | Architecture diagrams (Python, Draw.io MCP), ADRs |
 | Governance | 🛡️ Warden | 3.5 | Policy discovery, security baseline enforcement |
+| IaC Planner | 📐 Strategist | 4 | Implementation plan with AVM module selection |
+| Code Gen (Bicep) | ⚒️ Forge | 5 | Bicep template generation (AVM-first) |
+| Code Gen (Terraform) | ⚒️ Forge | 5 | Terraform configuration generation (AVM-TF) |
 | Deployment | 🚀 Envoy | 6 | Profile selection, what-if/plan, deploy, verify |
+| Documentation | 📚 Chronicler | 7 | As-built design docs, ops runbooks, resource inventory |
 | Monitoring | 🔭 Sentinel | 8 | Compliance scans, drift detection, security posture |
 | Remediation | 🔧 Mender | 9 | Auto-remediation with snapshot/rollback |
 | Challenger | ⚔️ Challenger | Gates | Adversarial review at gates 1, 2, 4, 5 |
@@ -55,20 +62,27 @@ Tools under `src/tools/` provide Azure integration capabilities:
 | `bicep_deployer.py` | What-if analysis, Bicep compilation, deployment execution |
 | `terraform_deployer.py` | Terraform plan/apply/destroy with Azure backend |
 | `python_diagram_generator.py` | PNG architecture diagrams via `mingrammer/diagrams` |
-| `azure_diagram_generator.py` | SVG diagrams with Azure icon colors (inline) |
+| `azure_diagram_generator.py` | Architecture diagram facade — engine selector |
+| `drawio_diagram_generator.py` | Draw.io XML diagram generation with Azure icon library |
 | `tdd_generator.py` | Technical Design Documents (.docx + .md + .svg/.png) |
+| `discovery.py` | Brownfield environment discovery via Resource Graph |
+| `wara_engine.py` | WAF Assessment engine with 221-check APRL-synced catalog |
+| `report_generator.py` | Assessment report generation (6 artifact types) |
+| `assess_cli.py` | Assessment CLI — orchestrates discovery, WARA, and reports |
 
 ### Skills
 
 Skills under `.github/skills/` provide domain knowledge to agents as structured
-Markdown. Categories include:
+Markdown. 35 skills across these categories:
 
-- **Azure infrastructure** — defaults, naming, tagging, AVM-first policy
-- **IaC patterns** — Bicep and Terraform module examples
-- **Security & compliance** — baseline rules, compliance framework mapping, RBAC
+- **Azure infrastructure** — defaults, naming, tagging, AVM-first policy, quotas
+- **IaC patterns** — Bicep and Terraform module examples, testing
+- **Security & compliance** — baseline rules, compliance framework mapping, RBAC, Entra ID
 - **Cost** — governance enforcement, optimization patterns
-- **Operations** — diagnostics, session resume, workflow engine
-- **Tooling** — Draw.io, Python diagrams, GitHub operations
+- **Operations** — diagnostics, session resume, workflow engine, context optimization
+- **Tooling** — Draw.io, Python diagrams, Mermaid, GitHub operations, docs writer
+- **Assessment** — brownfield discovery, WARA checks, report generation
+- **Governance** — golden principles, context shredding, count registry, resource visualizer
 
 ### MCP Servers
 
@@ -125,13 +139,10 @@ GitHub Actions workflows under `.github/workflows/`:
 | `1-bootstrap.yml` | Manual | MG hierarchy creation, subscription moves, provider registration |
 | `2-platform-deploy.yml` | Manual | Sequential platform LZ deployment with approval gates |
 | `3-app-deploy.yml` | Manual + callable | Application LZ deployment from `subscriptions.json` |
-| `4-monitor.yml` | Schedule + manual | Compliance (30min), drift (hourly), full audit (daily 6AM) |
+| `monitor.yml` | Schedule + manual | Compliance (30min), drift (hourly), full audit (daily 6AM) |
 | `5-pr-validate.yml` | Pull request | Lint, security validator, cost validator, pytest |
 | `reusable-deploy.yml` | Callable | Validate → plan → deploy → verify pipeline |
-| `deploy-on-merge.yml` | Push to main | Trunk-based: deploys only changed LZs |
-| `generate-diagrams.yml` | Manual | Python architecture diagram generation |
-| `deploy-docs.yml` | Push to main | Astro docs site → GitHub Pages |
-| `cleanup-old-rg.yml` | Manual | Utility: delete resource groups |
+| `assess.yml` | Manual | Brownfield WAF-aligned assessment (discover → WARA → reports) |
 | `assign-role.yml` | Manual | Utility: RBAC role assignment |
 
 Reference copies also exist under `pipelines/github-actions/` and an Azure DevOps
@@ -148,8 +159,18 @@ Pre-merge enforcement scripts under `scripts/validators/`:
 
 ### Tests
 
-Unit tests under `tests/` cover deployment agent, monitoring agent, and
-remediation agent. Tests use mocked Azure SDK clients and Semantic Kernel.
+197 tests across 13 test files under `tests/` cover all agents (assessment,
+deployment, monitoring, remediation), tools (discovery, WARA engine, report
+generator, validators), and the `alz-recall` CLI. Tests use mocked Azure SDK
+clients and Semantic Kernel.
+
+### CLI Tools
+
+| Tool | Location | Purpose |
+|------|----------|---------|
+| `alz-recall` | `tools/apex-recall/` | Session state management CLI (init, show, decide, checkpoint, etc.) |
+| Agent Registry | `tools/registry/agent-registry.json` | Agent → definition, skills, scope mapping |
+| JSON Schemas | `tools/schemas/` | State file validation schemas |
 
 ## Data Flows
 
@@ -183,7 +204,7 @@ with its own subscription secret.
 ### Continuous Operations (Day-2)
 
 ```
-Schedule trigger (4-monitor.yml)
+Schedule trigger (monitor.yml)
   → [Sentinel] Compliance scan (Policy) every 30 min
   → [Sentinel] Drift detection (Resource Graph) every hour
   → [Sentinel] Full audit (Defender + Policy + Resource Graph) daily 6 AM
@@ -281,36 +302,36 @@ and gate approvals. Production config specifies Azure Table Storage for persiste
 
 ## Known Constraints and Gaps
 
-### Greenfield-Only Limitation
+### Resolved (formerly gaps)
 
-The current workflow assumes a **greenfield** environment. There is no mechanism to:
+The following were previously gaps and are now fully implemented:
 
-1. Discover existing Azure resources, policies, or RBAC in a tenant
-2. Assess an existing environment against WAF pillars or CAF areas
-3. Generate a current-state architecture document from live Azure state
-4. Onboard an existing environment into the accelerator workflow
-5. Handle coexistence with non-ALZ management group hierarchies
+- ✅ **Brownfield assessment** — Step 0 with discovery, 221-check WARA engine, and report generation
+- ✅ **WAF/Well-Architected scoring** — All 5 pillars scored via APRL-synced catalog
+- ✅ **Current-state architecture docs** — Auto-generated from live Azure state
+- ✅ **CAF assessment output** — Design area alignment included in assessment reports
 
-### Incomplete Cross-Cutting Governance
+### Remaining Gaps
+
+#### Cross-Cutting Governance
 
 - **Policy assignments:** Not started — only budget policies are deployed
 - **RBAC assignments:** Not started
 - **Tagging enforcement:** Missing required tags (Owner, CostCenter, Project)
 
-### Security Gaps (from Challenger Review)
+#### Security Gaps (from Assessment — 5 must_fix)
 
-- LAW public network access enabled (`logging/main.bicep`)
-- Azure Firewall disabled in connectivity parameter file
+- Defender for Cloud not fully enabled across all subscriptions (SEC-010)
+- Azure Firewall disabled in connectivity parameter file (OPE-006)
+- No budget resources deployed (COS-001)
+- Insecure storage defaults (SEC-029)
+- Missing diagnostic settings on platform resources
+
+#### Operational Gaps
+
+- Single-region deployment only (no HA/DR)
 - Empty SOAR playbooks in security LZ
 - Threat Intelligence connector pending permissions
-
-### Operational Gaps
-
-- No brownfield discovery or assessment capability
-- No WARA/Well-Architected scoring
-- No CAF assessment output
-- No current-state architecture documentation from live state
-- Single-region deployment only (no HA/DR)
 
 ## Assumptions and Non-Goals
 

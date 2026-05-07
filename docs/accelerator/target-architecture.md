@@ -1,8 +1,10 @@
 # Target-State Architecture — Brownfield + Assessment Enhancement
 
-> **Date:** 2026-04-23
-> **Status:** Proposed
+> **Date:** 2026-04-23 | **Completed:** 2026-05-04
+> **Status:** ✅ Implemented — this target state is now the current state
 > **ADR:** [ADR-0001](adr/ADR-0001-brownfield-assessment.md)
+>
+> For current architecture documentation, see [architecture.md](architecture.md).
 
 ## Summary
 

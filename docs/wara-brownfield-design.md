@@ -1,8 +1,12 @@
 # WARA/Brownfield Enhancement — Design Document
 
-> **Branch:** `features-enhancement-wara`
-> **Status:** Planned — not yet implemented
-> **Date:** 2026-04-22
+> **Branch:** `main` (merged)
+> **Status:** ✅ Implemented
+> **Date:** 2026-04-22 | **Completed:** 2026-05-04
+>
+> This document served as the original design spec. The feature is now fully
+> implemented with a 221-check APRL-synced catalog (vs. the 20 checks described here).
+> For current architecture, see [architecture.md](accelerator/architecture.md).
 
 ## Overview
 

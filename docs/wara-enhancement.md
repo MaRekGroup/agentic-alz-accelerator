@@ -1,5 +1,11 @@
 ========================
-MISSION
+STATUS: ✅ IMPLEMENTED (2026-05-04)
+========================
+This was the original prompt/spec used to design the brownfield+WARA feature.
+All items below are now fully implemented. Kept for historical context.
+
+========================
+MISSION (COMPLETED)
 ========================
 Enhance the current agentic ALZ accelerator to:
 1) Support brownfield (existing environment) scenarios end-to-end
@@ -7,7 +13,7 @@ Enhance the current agentic ALZ accelerator to:
    - Azure Well-Architected Review / WARA-style design and reliability signals (and other pillars where applicable)
    - Cloud Adoption Framework (CAF) assessment-style outputs (strategy/plan/ready/adopt/govern/manage + organizational alignment)
 
-ALSO REQUIRED (NEW):
+ALSO REQUIRED (COMPLETED):
 3) Document the CURRENT STATE architecture (as discovered from repo + optional live discovery outputs) including:
    - A current-state architecture diagram (Mermaid)
    - A current-state architecture document in Markdown describing components, flows, scope, assumptions, and gaps
