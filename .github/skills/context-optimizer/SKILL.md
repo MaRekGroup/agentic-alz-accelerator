@@ -60,7 +60,7 @@ Extract structured data from Copilot Chat debug logs:
 
 ```bash
 # Parse log entries into structured JSON
-python3 tools/scripts/parse-chat-logs.py \
+python3 .github/skills/context-optimizer/scripts/parse-chat-logs.py \
   --log-dir ~/.vscode-server*/data/logs/ \
   --output context-audit.json
 ```
@@ -216,3 +216,14 @@ at Gates 2 and 4.
 **DON'T:** Load this skill during normal workflow execution · Over-optimize
 (diminishing returns below 40% context usage) · Remove skills without checking
 agent dependencies in `agent-registry.json`.
+
+## Reference Index
+
+Load these on demand — do NOT read all at once:
+
+| Reference | File | When to Load |
+|-----------|------|--------------|
+| Analysis Methodology | `references/analysis-methodology.md` | Deep-dive log analysis, latency heuristics, optimization patterns |
+| Token Estimation | `references/token-estimation.md` | Estimating context cost for agents, files, tools |
+| Report Template | `templates/optimization-report.md` | Generating structured optimization reports |
+| Log Parser Script | `scripts/parse-chat-logs.py` | Extracting structured JSON from Copilot Chat debug logs |
