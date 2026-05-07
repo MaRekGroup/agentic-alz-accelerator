@@ -1,8 +1,13 @@
 # Current-State Architecture — Agentic ALZ Accelerator
 
+> **Canonical version:** [docs/accelerator/architecture.md](../../../docs/accelerator/architecture.md)
+>
+> This file is a historical snapshot from 2026-04-23. The canonical architecture
+> documentation is maintained in `docs/accelerator/architecture.md`. Refer there
+> for the current state (14 agents, 35 skills, 13 tools, brownfield assessment).
+
 > **Date:** 2026-04-23
-> **Branch:** `pr1/current-state-architecture-docs`
-> **Scope:** Describes the system as it exists today — before brownfield/assessment enhancements.
+> **Status:** ⚠️ Outdated snapshot — see canonical version above
 
 ## Overview
 

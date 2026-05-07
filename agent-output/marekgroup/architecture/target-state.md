@@ -1,7 +1,12 @@
 # Target-State Architecture — Brownfield + Assessment Enhancement
 
+> **Canonical version:** [docs/accelerator/target-architecture.md](../../../docs/accelerator/target-architecture.md)
+>
+> This file is a historical snapshot. The target state described here is now
+> fully implemented as of 2026-05-04.
+
 > **Date:** 2026-04-23
-> **Status:** Proposed
+> **Status:** ✅ Implemented
 > **ADR:** [ADR-0001](../adr/ADR-0001-brownfield-assessment.md)
 
 ## Summary

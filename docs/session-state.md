@@ -1,4 +1,8 @@
-# Agentic ALZ Accelerator — Session State
+# Agentic ALZ Accelerator — Session State (Historical Changelog)
+
+> **Status:** Historical — this file was used as a session changelog during early development.
+> For current estate state, use `alz-recall show marekgroup --json`.
+> For current architecture, see [docs/accelerator/architecture.md](accelerator/architecture.md).
 
 ## Completed Work
 - **MCP Overhaul**: Replaced 5 homegrown MCP servers with 3 (APEX azure-pricing-mcp submodule + consolidated azure-platform + drawio)

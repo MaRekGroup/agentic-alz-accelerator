@@ -1,12 +1,18 @@
 # APRL Integration Plan — WARA Assessment Enhancement
 
-> Status: Planning | Date: 2026-04-30
+> Status: ✅ Implemented | Date: 2026-04-30 | Completed: 2026-05-04
 
 ## Context
 
-Our current `wara_checks.yaml` has **20 checks** (9 SEC, 6 OPE, 2 REL, 2 COS, 1 PER).
+Our original `wara_checks.yaml` had **20 checks** (9 SEC, 6 OPE, 2 REL, 2 COS, 1 PER).
 Microsoft's Azure Proactive Resiliency Library (APRL) publishes **393 recommendations**
 (372 with ARG queries) across 83 resource types via a public JSON feed.
+
+> **Implementation note:** APRL integration is complete. The sync script
+> (`scripts/sync_aprl.py`) fetches and converts APRL checks into per-pillar YAML
+> files under `src/config/wara_checks/`. The combined catalog now has **221 checks**
+> (61 custom + 160 APRL) across all 5 WAF pillars. See the assessment output at
+> `agent-output/marekgroup/assessment/` for a live example.
 
 - Feed URL: `https://azure.github.io/WARA-Build/objects/recommendations.json`
 - Source repo: `Azure/Well-Architected-Reliability-Assessment`

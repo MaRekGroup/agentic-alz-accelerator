@@ -107,7 +107,7 @@ Every deployment includes budget alerts — **no budget, no merge**:
 
 ## CI/CD Pipelines
 
-7 GitHub Actions workflows orchestrate the full lifecycle:
+8 GitHub Actions workflows orchestrate the full lifecycle:
 
 | Workflow | Trigger | Scope |
 |----------|---------|-------|
@@ -274,7 +274,8 @@ python scripts/validators/validate_cost_governance.py infra/
 │   └── config/                # Agent and profile configs
 │       ├── settings.py              # pydantic-settings from .env
 │       ├── profile_loader.py        # 3-tier YAML profile inheritance
-│       ├── wara_checks.yaml         # 28 WAF reliability assessment checks
+│       ├── wara_checks/              # 221 WAF assessment checks (APRL-synced, per-pillar)
+│       ├── wara_checks.yaml         # Legacy single-file checks (superseded by wara_checks/)
 │       └── profiles/                # base → child → env overrides
 ├── infra/
 │   ├── bicep/modules/         # Bicep by CAF design area
@@ -313,12 +314,17 @@ python scripts/validators/validate_cost_governance.py infra/
 │   │   ├── reusable-deploy.yml      # Shared: resolve → validate → plan → deploy → verify
 │   │   └── assign-role.yml          # Utility: RBAC role assignments to SPN
 │   ├── agents/                # Agent definition files
-│   ├── skills/                # 20 skill SKILL.md entry points
+│   ├── skills/                # 35 skill SKILL.md entry points
 │   └── instructions/          # Per-filetype coding instructions
 ├── pipelines/                 # Legacy / Azure DevOps pipelines
 ├── docs/                      # Security baseline, cost governance, workflow
 │   └── tdd/                   # Generated Technical Design Documents
-└── tests/                     # 107 tests (assessment, deployment, monitoring, remediation)
+├── tools/                     # CLI tools and registries
+│   ├── apex-recall/           # alz-recall CLI (session state management)
+│   ├── registry/              # Agent registry (agent-registry.json)
+│   ├── schemas/               # JSON schemas for state files
+│   └── scripts/               # Utility scripts
+└── tests/                     # 197 tests across 13 test files
 ```
 
 ## References

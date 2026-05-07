@@ -802,10 +802,10 @@
       📐 CAF Design Areas <span class="nav-badge">8</span>
     </a>
     <a class="nav-item" onclick="showSection('agents')">
-      🤖 Agent Roster <span class="nav-badge">12</span>
+      🤖 Agent Roster <span class="nav-badge">14</span>
     </a>
     <a class="nav-item" onclick="showSection('tools')">
-      🛠️ Agent Tools <span class="nav-badge">11</span>
+      🛠️ Agent Tools <span class="nav-badge">13</span>
     </a>
 
     <div class="nav-section">Get Started</div>
@@ -876,7 +876,7 @@
         <p>A multi-agent workflow that transforms Azure Landing Zone requirements into deployed, governed, and continuously monitored infrastructure — aligned with the Cloud Adoption Framework and APEX agentic infrastructure patterns.</p>
         <div class="hero-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
         <div class="hero-stats">
-          <div class="hero-stat"><div class="num">12</div><div class="lbl">Specialized Agents</div></div>
+          <div class="hero-stat"><div class="num">14</div><div class="lbl">Specialized Agents</div></div>
           <div class="hero-stat"><div class="num">8</div><div class="lbl">CAF Design Areas</div></div>
           <div class="hero-stat"><div class="num">6</div><div class="lbl">Approval Gates</div></div>
           <div class="hero-stat"><div class="num">2</div><div class="lbl">IaC Frameworks</div></div>
@@ -1235,9 +1235,11 @@
             <tr><td><strong>Diagram Generator</strong></td><td><code>azure_diagram_generator.py</code></td><td>Architecture diagram facade — engine selector (Python, SVG, or Draw.io MCP)</td></tr>
             <tr><td><strong>Python Diagram Engine</strong></td><td><code>python_diagram_generator.py</code></td><td>Graphviz-based PNG diagrams using <code>diagrams</code> library with official Azure icons</td></tr>
             <tr><td><strong>TDD Generator</strong></td><td><code>tdd_generator.py</code></td><td>Technical Design Document generation with as-built resource details</td></tr>
-            <tr><td><strong>Discovery Collector</strong></td><td><code>discovery_collector.py</code></td><td>Brownfield environment discovery via Azure Resource Graph — inventories resources, networking, IAM, and policies</td></tr>
-            <tr><td><strong>WARA Engine</strong></td><td><code>wara_engine.py</code></td><td>WAF Reliability Assessment with 28-check catalog — scores existing resources against Well-Architected best practices</td></tr>
+            <tr><td><strong>Discovery Collector</strong></td><td><code>discovery.py</code></td><td>Brownfield environment discovery via Azure Resource Graph — inventories resources, networking, IAM, and policies</td></tr>
+            <tr><td><strong>WARA Engine</strong></td><td><code>wara_engine.py</code></td><td>WAF Assessment with 221-check APRL-synced catalog — scores existing resources against all 5 Well-Architected pillars</td></tr>
             <tr><td><strong>Report Generator</strong></td><td><code>report_generator.py</code></td><td>Generates 6 assessment artifacts: architecture docs, gap analysis, Mermaid diagrams, ADRs, and migration roadmap</td></tr>
+            <tr><td><strong>Assessment CLI</strong></td><td><code>assess_cli.py</code></td><td>CLI entry point for brownfield assessment — orchestrates discovery, WARA evaluation, and report generation</td></tr>
+            <tr><td><strong>Draw.io Engine</strong></td><td><code>drawio_diagram_generator.py</code></td><td>Draw.io XML diagram generation with Azure icon library for SVG architecture visualizations</td></tr>
           </tbody>
         </table>
       </div>

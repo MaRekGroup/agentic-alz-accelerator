@@ -15,12 +15,18 @@ graph TB
         Environments["GitHub Environments<br/>(7: platform × 4,<br/>app × 2, remediation)"]
     end
 
-    subgraph Agents["Agent Layer (src/agents/)"]
+    subgraph Agents["Agent Layer (src/agents/ + .github/agents/)"]
         direction TB
         Conductor["🧠 Conductor<br/>Orchestrator"]
+        Assessor["🔍 Assessor<br/>Assessment"]
         Scribe["📜 Scribe<br/>Requirements"]
+        Oracle["🏛️ Oracle<br/>Architect"]
+        Artisan["🎨 Artisan<br/>Design"]
         Warden["🛡️ Warden<br/>Governance"]
+        Strategist["📐 Strategist<br/>IaC Planner"]
+        Forge["⚒️ Forge<br/>Code Gen (Bicep/TF)"]
         Envoy["🚀 Envoy<br/>Deployment"]
+        Chronicler["📚 Chronicler<br/>Documentation"]
         Sentinel["🔭 Sentinel<br/>Monitoring"]
         Mender["🔧 Mender<br/>Remediation"]
         Challenger["⚔️ Challenger<br/>Adversarial Review"]
@@ -35,6 +41,9 @@ graph TB
         TFDeploy["TerraformDeployer"]
         DiagramGen["DiagramEngine"]
         TDDGen["TDDGenerator"]
+        Discovery["DiscoveryCollector"]
+        WARA["WARAEngine"]
+        ReportGen["ReportGenerator"]
     end
 
     subgraph MCP["MCP Servers (mcp/)"]
@@ -69,6 +78,7 @@ graph TB
         direction TB
         Estate["00-estate-state.json"]
         Session["Per-LZ session state"]
+        Assessment["Assessment reports"]
         Reports["Compliance reports"]
         TDDs["Technical Design Docs"]
         Diagrams["Architecture diagrams"]
@@ -78,15 +88,28 @@ graph TB
     CLI -->|"chat commands"| Conductor
     CLI -->|"gh workflow run"| Actions
 
+    Conductor -->|"delegate"| Assessor
     Conductor -->|"delegate"| Scribe
+    Conductor -->|"delegate"| Oracle
+    Conductor -->|"delegate"| Artisan
     Conductor -->|"delegate"| Warden
+    Conductor -->|"delegate"| Strategist
+    Conductor -->|"delegate"| Forge
     Conductor -->|"delegate"| Envoy
+    Conductor -->|"delegate"| Chronicler
     Conductor -->|"delegate"| Sentinel
     Conductor -->|"delegate"| Mender
     Conductor -->|"gate review"| Challenger
 
+    Assessor --> Discovery
+    Assessor --> WARA
+    Assessor --> ReportGen
     Scribe -->|"produce"| Artifacts
+    Oracle --> Pricing
+    Artisan --> DrawIO
     Warden --> Policy
+    Forge --> BicepDeploy
+    Forge --> TFDeploy
     Envoy --> BicepDeploy
     Envoy --> TFDeploy
     Sentinel --> RG
@@ -108,6 +131,9 @@ graph TB
     Platform --> Monitor
     Platform --> Defender
 
+    Discovery --> ARG
+    WARA --> ARG
+
     BicepMods -->|"compiled + deployed"| ARM
     TFMods -->|"planned + applied"| ARM
 
@@ -125,9 +151,9 @@ graph TB
     classDef github fill:#24292e,stroke:#1b1f23,color:#fff
     classDef mcp fill:#9b59b6,stroke:#7d3c98,color:#fff
 
-    class Conductor,Scribe,Warden,Envoy,Sentinel,Mender,Challenger agent
-    class RG,Policy,Drift,BicepDeploy,TFDeploy,DiagramGen,TDDGen tool
+    class Conductor,Assessor,Scribe,Oracle,Artisan,Warden,Strategist,Forge,Envoy,Chronicler,Sentinel,Mender,Challenger agent
+    class RG,Policy,Drift,BicepDeploy,TFDeploy,DiagramGen,TDDGen,Discovery,WARA,ReportGen tool
     class ARM,ARG,AzPolicy,Defender,Monitor,Tenant,MGs,Subs,RGs azure
-    class Estate,Session,Reports,TDDs,Diagrams artifact
+    class Estate,Session,Assessment,Reports,TDDs,Diagrams artifact
     class Repo,Actions,Secrets,Environments github
     class Pricing,Platform,DrawIO mcp
