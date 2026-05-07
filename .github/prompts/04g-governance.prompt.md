@@ -1,5 +1,5 @@
 ---
-mode: governance
+agent: governance
 description: "Discover Azure Policy assignments and produce governance constraints"
 ---
 

@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: orchestrator
 description: "Resume an interrupted Enterprise Landing Zone APEX workflow from the last completed step"
 ---
 

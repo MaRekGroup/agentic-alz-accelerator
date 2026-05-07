@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: terraform-code
 description: "Generate Terraform configurations using AVM modules"
 ---
 

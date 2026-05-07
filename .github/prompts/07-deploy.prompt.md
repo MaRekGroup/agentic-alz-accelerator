@@ -1,5 +1,5 @@
 ---
-mode: deployment
+agent: deployment
 description: "Deploy Enterprise Landing Zone infrastructure with what-if/plan preview via GitHub Actions"
 ---
 

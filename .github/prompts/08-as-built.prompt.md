@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: documentation
 description: "Generate post-deployment Enterprise Landing Zone as-built documentation"
 ---
 

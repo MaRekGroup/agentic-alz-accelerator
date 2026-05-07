@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: architect
 description: "Perform WAF assessment, CAF design area mapping, and Enterprise Landing Zone architecture"
 ---
 

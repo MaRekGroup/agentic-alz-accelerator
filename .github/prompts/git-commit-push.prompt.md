@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: orchestrator
 description: "Commit staged changes and push to remote"
 ---
 

@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: design
 description: "Generate Enterprise Landing Zone architecture diagrams and ADRs"
 ---
 

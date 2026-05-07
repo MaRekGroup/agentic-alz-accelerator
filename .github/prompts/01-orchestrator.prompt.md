@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: orchestrator
 description: "Run the full APEX workflow for an Azure Landing Zone deployment"
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: "Audit agent context window utilization from Copilot Chat debug logs and produce optimization recommendations."
-mode: orchestrator
+agent: orchestrator
 ---
 
 # Context Window Audit

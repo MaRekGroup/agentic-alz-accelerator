@@ -1,5 +1,5 @@
 ---
-mode: orchestrator
+agent: bicep-code
 description: "Generate Bicep templates using AVM modules"
 ---
 
