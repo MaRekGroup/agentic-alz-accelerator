@@ -11,10 +11,10 @@ CAF design area mapping for an Enterprise Landing Zone based on `01-requirements
 ## Process
 
 1. Read `agent-output/{customer}/01-requirements.md`
-2. Design the **management group hierarchy** with `mrg-` prefix convention:
-   - Platform MGs: `mrg-platform-management`, `mrg-platform-connectivity`, `mrg-platform-identity`, `mrg-platform-security`
-   - App LZ MGs: `mrg-landingzones-corp`, `mrg-landingzones-online`
-   - Utility: `mrg-sandbox`, `mrg-decommissioned`
+2. Design the **management group hierarchy** using the customer's `{prefix}` (from `AZURE_MANAGEMENT_GROUP_PREFIX`, default `mrg`):
+   - Platform MGs: `{prefix}-platform-management`, `{prefix}-platform-connectivity`, `{prefix}-platform-identity`, `{prefix}-platform-security`
+   - App LZ MGs: `{prefix}-landingzones-corp`, `{prefix}-landingzones-online`
+   - Utility: `{prefix}-sandbox`, `{prefix}-decommissioned`
 3. Define **4 platform LZs** with subscription assignments:
    - Management (LAW, Automation Account)
    - Connectivity (Hub VNet, Bastion, optional Firewall, DNS zones)

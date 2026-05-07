@@ -33,7 +33,7 @@ run commands before completing Phases 1-2.
 ### Round 1: Azure Environment
 
 Ask 4 questions:
-1. **Customer / project name** — used as `{customer}` folder name under `agent-output/`
+1. **Customer name** — used as `{customer}` folder name under `agent-output/`
 2. **Subscription** — name or ID
 3. **Resource Group(s)** — comma-separated if multiple
 4. **Brief workload description** — 1-2 sentences

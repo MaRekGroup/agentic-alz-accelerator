@@ -13,7 +13,7 @@ Enterprise Landing Zone deployment.
 This accelerator deploys **CAF enterprise-scale architecture**:
 - **Platform Landing Zones** — 4 sequential: Management → Connectivity → Identity → Security
 - **Application Landing Zones** — Workloads stamped on the platform (corp, online, sandbox profiles)
-- **Management Group Hierarchy** — `mrg-` prefix convention with platform and app LZ separation
+- **Management Group Hierarchy** — `{prefix}` naming convention with platform and app LZ separation (prefix from `AZURE_MANAGEMENT_GROUP_PREFIX`, e.g., `mrg`)
 - **Deployments via GitHub Actions** — `2-platform-deploy.yml`, `3-app-deploy.yml` (never local `az` CLI)
 - **OIDC authentication** — Workload identity federation, no stored secrets
 - **State management** — Use `alz-recall` CLI for all session state (never write JSON directly)

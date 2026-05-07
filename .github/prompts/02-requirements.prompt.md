@@ -15,7 +15,7 @@ conversation, mapping every requirement to a Cloud Adoption Framework (CAF) desi
 3. Walk through all 8 CAF design areas:
    - **Billing & Tenant** — Tenant ID, EA/MCA, subscription strategy
    - **Identity & Access** — Entra ID, RBAC model, PIM, OIDC for deployment
-   - **Resource Organization** — Management group hierarchy (`mrg-` prefix), subscription placement
+   - **Resource Organization** — Management group hierarchy (`{prefix}` naming convention), subscription placement
    - **Network Topology & Connectivity** — Hub-spoke vs vWAN, CIDR ranges, Bastion, optional firewall, ExpressRoute/VPN
    - **Security** — Defender plans, Sentinel, Key Vault, 6-rule security baseline
    - **Management** — Central logging (LAW), automation, monitoring strategy
@@ -29,7 +29,7 @@ conversation, mapping every requirement to a Cloud Adoption Framework (CAF) desi
 ## Output
 
 Produce `01-requirements.md` in `agent-output/{customer}/` with:
-- Project header (name, date, complexity tier)
+- Customer header (name, date, complexity tier)
 - One section per CAF design area
 - Platform LZ requirements (which of the 4 are needed)
 - App LZ profile requirements
