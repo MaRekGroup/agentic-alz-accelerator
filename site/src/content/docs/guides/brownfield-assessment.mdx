@@ -23,13 +23,13 @@ Skip this step entirely for **greenfield** (new, empty) environments.
 The assessment runs as a three-stage pipeline:
 
 ```
-Discover (Resource Graph)  →  Assess (28 WARA checks)  →  Generate Reports (6 artifacts)
+Discover (Resource Graph)  →  Assess (221 WAF checks)  →  Generate Reports (6 artifacts)
 ```
 
 | Stage | Tool | What It Does |
 |-------|------|-------------|
 | **Discover** | `discovery_collector.py` | Queries Azure Resource Graph for all resources, networking topology, IAM assignments, and policy state |
-| **Assess** | `wara_engine.py` | Runs 28 WAF Reliability Assessment checks — availability zones, redundancy, backup, DR, monitoring, scaling |
+| **Assess** | `wara_engine.py` | Runs 221 WAF checks (APRL-synced, per-pillar) — reliability, security, cost optimization, operational excellence, performance |
 | **Report** | `report_generator.py` | Generates 6 structured artifacts for human review and downstream agent consumption |
 
 ## Prerequisites
@@ -102,18 +102,18 @@ All outputs land in `agent-output/{customer}/assessment/<scope>/`:
 | `00-architecture-diagram.mmd` | Mermaid diagram of discovered resource topology |
 | `00-ADR-assessment-findings.md` | Architecture Decision Record documenting key findings and trade-offs |
 
-## WARA Check Catalog (28 checks)
+## WAF Check Catalog (221 checks)
 
-The WAF Reliability Assessment evaluates resources across 6 categories:
+The WAF Assessment evaluates resources across 5 pillars with an APRL-synced catalog:
 
-| Category | Checks | Examples |
-|----------|--------|---------|
-| **Availability Zones** | 5 | VMs in zone-redundant config, zone-aware load balancers |
-| **Redundancy** | 5 | Multi-instance deployments, geo-redundant storage |
-| **Backup** | 5 | Backup policies enabled, Recovery Services Vault configured |
-| **Disaster Recovery** | 5 | Cross-region replication, failover groups |
-| **Monitoring** | 4 | Diagnostic settings, alert rules, Log Analytics integration |
-| **Scaling** | 4 | Autoscale rules, appropriate SKU tiers |
+| Category | Checks | Source |
+|----------|--------|--------|
+| **APRL-Synced** | 160 | Azure Proactive Resiliency Library — cross-pillar best practices |
+| **Security** | 31 | TLS, encryption, network isolation, identity, key management |
+| **Cost Optimization** | 21 | SKU right-sizing, reserved instances, idle resource detection |
+| **Operational Excellence** | 6 | Diagnostic settings, alert rules, tagging, automation |
+| **Reliability** | 2 | Availability zones, redundancy configuration |
+| **Performance** | 1 | Accelerated networking, proximity placement |
 
 Each check returns **Pass**, **Fail**, or **Not Applicable** with a recommendation
 for remediation.

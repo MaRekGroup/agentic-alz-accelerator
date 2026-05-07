@@ -5,7 +5,7 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 
 ## Workflow Overview
 
-9 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
+10 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
 
 | Workflow | Trigger | Scope | Key Feature |
 |----------|---------|-------|-------------|
@@ -17,6 +17,7 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 | `5-pr-validate.yml` | PR to `main` | Changed files | Lint, security, cost, tests, what-if preview posted as PR comment |
 | `deploy-docs.yml` | Push to `main` | GitHub Pages | Builds & deploys docs site when `site/**` changes |
 | `deploy-on-merge.yml` | Push to `main` | Changed LZs | Auto-deploy changed landing zones on merge |
+| `assign-role.yml` | Manual | Per subscription | Assign/remove RBAC roles for Sentinel/Defender integration |
 | `reusable-deploy.yml` | Called by 2 & 3 | Single sub | DRY: resolve → validate → plan → deploy → verify |
 
 ## Full Deployment Sequence
