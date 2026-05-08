@@ -1,6 +1,6 @@
 # Operational Excellence — Detailed Assessment Report
 
-> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-04T21:57:12.707019+00:00
+> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-08T18:04:02.022802+00:00
 
 ---
 
@@ -37,7 +37,7 @@ Maintain operational health of your workload. Operational excellence includes Ia
 | 2 | `OPE-006` | 🟠 High | No hub VNet or firewall detected | medium | 0 |
 | 3 | `APRL-OPE-1E28BBC1` | 🟡 Medium | Configure Network Watcher Connection monitor (networkWatchers) | high | 7 |
 | 4 | `APRL-OPE-06B77BE9` | 🟡 Medium | Enable Virtual Network Flow Logs (virtualNetworks) | high | 7 |
-| 5 | `OPE-005` | 🟡 Medium | Resources missing required tags | high | 22 |
+| 5 | `OPE-005` | 🟡 Medium | Resources missing required tags | high | 24 |
 | 6 | `APRL-OPE-8BB4A57B` | 🔵 Low | Monitor changes in Network Security Groups with Azure Monitor (networkSecurityGroups) | high | 15 |
 | 7 | `APRL-OPE-4E133BD0` | 🔵 Low | Deploy Network Watcher in all regions where you have networking services (networkWatchers) | high | 14 |
 | 8 | `APRL-OPE-73D1BB04` | 🔵 Low | When AccelNet is enabled, you must manually update the GuestOS NIC driver (virtualMachines) | high | 1 |
@@ -168,7 +168,7 @@ Maintain operational health of your workload. Operational excellence includes Ia
 | Confidence | high |
 | CAF Area | resource_org |
 | ALZ Area | policy |
-| Resources Affected | 22 |
+| Resources Affected | 24 |
 
 **Recommendation**: Apply required tags (Environment, Owner, CostCenter) to all resource groups.
 
@@ -186,11 +186,13 @@ Maintain operational health of your workload. Operational excellence includes Ia
 | `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803` | rg-ytesfaye-4803 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup` | ContosoResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/DefaultResourceGroup-EUS2` | DefaultResourceGroup-EUS2 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup` | ExpressRouteResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2` | ResourceMoverRG-southcentralus-centralus-eus2 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss` | rg-nottagged-vmss |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/secure-logc-app` | secure-logc-app |
 | `/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance` | McapsGovernance |
@@ -199,9 +201,7 @@ Maintain operational health of your workload. Operational excellence includes Ia
 | `/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance` | McapsGovernance |
-| `/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance` | McapsGovernance |
-| `/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
-| ... | *2 more* |
+| ... | *4 more* |
 
 **References**:
 
