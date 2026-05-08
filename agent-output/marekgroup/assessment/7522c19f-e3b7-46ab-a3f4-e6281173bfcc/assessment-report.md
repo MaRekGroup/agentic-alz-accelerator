@@ -1,6 +1,6 @@
 # WARA Assessment Report — 7522c19f-e3b7-46ab-a3f4-e6281173bfcc
 
-> Assessed on 2026-05-04T21:57:12.707019+00:00
+> Assessed on 2026-05-08T18:04:02.022802+00:00
 
 ## Executive Summary
 
@@ -139,7 +139,7 @@
 - **CAF Area**: governance
 - **ALZ Area**: policy
 - **Confidence**: high
-- **Resources affected**: 3
+- **Resources affected**: 2
 
 **Recommendation**: Review and act on Azure Advisor cost recommendations to reduce waste.
 
@@ -156,7 +156,7 @@
 - **CAF Area**: governance
 - **ALZ Area**: policy
 - **Confidence**: high
-- **Resources affected**: 22
+- **Resources affected**: 24
 
 **Recommendation**: Apply CostCenter tag to all resource groups for cost allocation and chargeback.
 
@@ -362,7 +362,7 @@
 - **CAF Area**: governance
 - **ALZ Area**: policy
 - **Confidence**: medium
-- **Resources affected**: 23
+- **Resources affected**: 25
 
 **Recommendation**: Review and delete empty resource groups to reduce clutter and simplify governance.
 
@@ -394,7 +394,7 @@
 - **CAF Area**: management
 - **ALZ Area**: logging
 - **Confidence**: medium
-- **Resources affected**: 2
+- **Resources affected**: 1
 
 **Recommendation**: Right-size over-provisioned VMs per Azure Advisor recommendations.
 
@@ -410,7 +410,7 @@
 - **CAF Area**: resource_org
 - **ALZ Area**: policy
 - **Confidence**: high
-- **Resources affected**: 22
+- **Resources affected**: 24
 
 **Recommendation**: Apply required tags (Environment, Owner, CostCenter) to all resource groups.
 

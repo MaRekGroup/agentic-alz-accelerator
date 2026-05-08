@@ -1,6 +1,6 @@
 # Cost Optimization — Detailed Assessment Report
 
-> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-04T21:57:12.707019+00:00
+> **Scope**: `7522c19f-e3b7-46ab-a3f4-e6281173bfcc` | **Assessed**: 2026-05-08T18:04:02.022802+00:00
 
 ---
 
@@ -33,13 +33,13 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | # | ID | Severity | Title | Confidence | Resources |
 |---|-----|----------|-------|-----------|-----------|
 | 1 | `COS-001` | 🟠 High | No budget resources found | high | 0 |
-| 2 | `COS-014` | 🟠 High | Azure Advisor cost recommendations pending | high | 3 |
-| 3 | `COS-017` | 🟠 High | Resource groups missing CostCenter tag | high | 22 |
+| 2 | `COS-014` | 🟠 High | Azure Advisor cost recommendations pending | high | 2 |
+| 3 | `COS-017` | 🟠 High | Resource groups missing CostCenter tag | high | 24 |
 | 4 | `COS-009` | 🟠 High | Long-running VMs without Reserved Instances | medium | 1 |
 | 5 | `COS-004` | 🟡 Medium | Orphan network interfaces (unattached) | high | 1 |
-| 6 | `COS-005` | 🟡 Medium | Empty resource groups | medium | 23 |
+| 6 | `COS-005` | 🟡 Medium | Empty resource groups | medium | 25 |
 | 7 | `COS-020` | 🟡 Medium | No Cost Management scheduled exports | medium | 1 |
-| 8 | `COS-011` | 🟡 Medium | Potentially over-provisioned VMs (B-series recommended) | medium | 2 |
+| 8 | `COS-011` | 🟡 Medium | Potentially over-provisioned VMs (B-series recommended) | medium | 1 |
 
 ## Detailed Findings
 
@@ -73,7 +73,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Confidence | high |
 | CAF Area | governance |
 | ALZ Area | policy |
-| Resources Affected | 3 |
+| Resources Affected | 2 |
 
 **Recommendation**: Review and act on Azure Advisor cost recommendations to reduce waste.
 
@@ -87,7 +87,6 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Resource ID | Name |
 |------------|------|
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/providers/Microsoft.Advisor/recommendations/cc20d24328e0aef3f3b6d77ded603f0f591bd470c8d0ea6515c7bac9e2c60c0e` | Consider virtual machine reserved instance to save over the on-demand costs |
-| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/4275dc26-48f7-3fc4-e4ac-ecae1bb76f95` | Right-size or shutdown underutilized virtual machines |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/ff10582f1f5e0dc0257620d6420d2b7b5e726e3e4987aca4a2e18a68a457f109` | Right-size or shutdown underutilized virtual machines |
 
 **References**:
@@ -104,7 +103,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Confidence | high |
 | CAF Area | governance |
 | ALZ Area | policy |
-| Resources Affected | 22 |
+| Resources Affected | 24 |
 
 **Recommendation**: Apply CostCenter tag to all resource groups for cost allocation and chargeback.
 
@@ -121,11 +120,13 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/rg-ytesfaye-4803` | rg-ytesfaye-4803 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup` | ContosoResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/DefaultResourceGroup-EUS2` | DefaultResourceGroup-EUS2 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup` | ExpressRouteResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2` | ResourceMoverRG-southcentralus-centralus-eus2 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/rg-nottagged-vmss` | rg-nottagged-vmss |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/secure-logc-app` | secure-logc-app |
 | `/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance` | McapsGovernance |
@@ -134,9 +135,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | `/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance` | McapsGovernance |
-| `/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance` | McapsGovernance |
-| `/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
-| ... | *2 more* |
+| ... | *4 more* |
 
 **References**:
 
@@ -208,7 +207,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Confidence | medium |
 | CAF Area | governance |
 | ALZ Area | policy |
-| Resources Affected | 23 |
+| Resources Affected | 25 |
 
 **Recommendation**: Review and delete empty resource groups to reduce clutter and simplify governance.
 
@@ -224,10 +223,12 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | `/subscriptions/009ae910-a172-4aac-b933-7e00020542b2/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ContosoResourceGroup` | ContosoResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/DefaultResourceGroup-EUS2` | DefaultResourceGroup-EUS2 |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ExpressRouteResourceGroup` | ExpressRouteResourceGroup |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/NetworkWatcherRG` | NetworkWatcherRG |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/ResourceMoverRG-southcentralus-centralus-eus2` | ResourceMoverRG-southcentralus-centralus-eus2 |
+| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/secure-logc-app` | secure-logc-app |
 | `/subscriptions/29b08c4f-2190-4b60-9a18-f171cde8a007/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/67c7b3ae-08e7-49d4-8cf4-c4e3c74d41f3/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/71d5e806-d26a-45b6-9a46-234a7851bd2d/resourceGroups/McapsGovernance` | McapsGovernance |
@@ -238,9 +239,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
 | `/subscriptions/e56ced5d-d05f-45a2-9ac3-821ab51454e9/resourceGroups/McapsGovernance` | McapsGovernance |
 | `/subscriptions/e9a25ee1-a88a-4af0-88a7-cdc86edbe853/resourceGroups/McapsGovernance` | McapsGovernance |
-| `/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/Default-ActivityLogAlerts` | Default-ActivityLogAlerts |
-| `/subscriptions/f7c2c8aa-f2ae-4e22-8f81-0dbef6d6d9e7/resourceGroups/McapsGovernance` | McapsGovernance |
-| ... | *3 more* |
+| ... | *5 more* |
 
 **References**:
 
@@ -284,7 +283,7 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 | Confidence | medium |
 | CAF Area | management |
 | ALZ Area | logging |
-| Resources Affected | 2 |
+| Resources Affected | 1 |
 
 **Recommendation**: Right-size over-provisioned VMs per Azure Advisor recommendations.
 
@@ -296,7 +295,6 @@ Deliver business value while minimizing cost. Cost optimization covers right-siz
 
 | Resource ID | Name |
 |------------|------|
-| `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/4275dc26-48f7-3fc4-e4ac-ecae1bb76f95` | — |
 | `/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/rg-nottagged-vmss/providers/microsoft.compute/virtualmachines/vm-github-runner-01/providers/Microsoft.Advisor/recommendations/ff10582f1f5e0dc0257620d6420d2b7b5e726e3e4987aca4a2e18a68a457f109` | — |
 
 **References**:
