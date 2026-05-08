@@ -137,8 +137,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Fetch existing remote branch (if any) so force-with-lease has correct ref
-          git fetch origin "$BRANCH" 2>/dev/null && git checkout "$BRANCH" && git reset --mixed HEAD || git checkout -b "$BRANCH"
+          # Prune stale remote refs and create a fresh branch
+          git remote prune origin
+          git checkout -b "$BRANCH"
           git add -f agent-output/${{ inputs.customer }}/assessment/
           git commit -m "assessment: ${{ inputs.scope_type }}/${{ inputs.scope }} — score ${{ needs.assess.outputs.overall_score }}/100
 
@@ -146,7 +147,7 @@ jobs:
           Mode: ${{ inputs.mode }}
           Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || echo "No changes to commit"
 
-          git push origin "$BRANCH" --force-with-lease
+          git push origin "$BRANCH" --force
 
       - name: Post Summary
         run: |
