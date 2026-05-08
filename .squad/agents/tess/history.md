@@ -114,3 +114,73 @@ Each gap includes transparent messaging ("TTDs capture deployed state *at deploy
 
 **Next Phase:** Sprint S1 will generate sample TDD + diagrams using marekgroup deployment. README will be updated to elevate docs-as-operational-asset positioning.
 
+---
+
+## 2026-05-08T22:45:22Z — ALZ Documentation Comparison & Gap Analysis
+
+**Task:** Compare official Azure Landing Zones documentation to this accelerator's documentation story. Identify value-add, gaps, and positioning.
+
+**Findings:**
+
+### Where We Add Value (Beyond Official ALZ)
+1. **Multi-agent orchestration story** — 14-step workflow with artifact handoffs, approval gates, complexity classification (unique)
+2. **Operational handoff** — Post-deployment TDD, runbooks, resource inventory, compliance summary (concrete vs. template)
+3. **Brownfield assessment** — Step 0 with 221-check WARA engine + current-state/target-state docs (official ALZ has none)
+4. **Security baseline enforcement** — 6 non-negotiable rules codified in Bicep/Terraform, validated at 6 enforcement points
+5. **Cost governance** — Budget resources mandatory with parameterized alerts at 80/100/120% (built-in, not optional)
+6. **Quick start & runbooks** — Fork to deployed in <30 min with `gh workflow` + OIDC (no stored secrets)
+
+### Where Official ALZ is Stronger
+1. **Conceptual depth** — Design principles (6) + CAF design area decision frameworks
+2. **Reference architecture** — Hub-spoke vs. vWAN with topology pros/cons
+3. **Policy intent & mapping** — Azure Policy library with effect explanations
+4. **Identity & access governance** — PIM, RBAC, managed identity lifecycle
+5. **Hybrid connectivity** — ExpressRoute, site-to-site VPN patterns
+
+### Top Documentation Gaps (Priority)
+1. **Day-2 compliance & remediation playbooks** (HIGH) — ops playbook for auto-remediation workflows, rollback, escalation
+2. **Application LZ vending playbook** (HIGH) — app team request/approval/deployment workflow
+3. **Troubleshooting guide** (MEDIUM) — common failure modes, OIDC rotation, quota scenarios
+4. **Platform LZ customization guide** (MEDIUM) — how to fork profiles and override parameters
+5. **Well-Architected review checklist** (MEDIUM) — standalone checklist (all 5 pillars, 8 design areas, severity)
+
+### Positioning Recommendation
+
+> The Agentic ALZ Accelerator transforms Microsoft's Azure Landing Zone design principles into an **automated, auditable, continuously improving** deployment and operations system. While Microsoft Learn provides foundational architecture and design areas, this accelerator operationalizes them through multi-agent orchestration, Security-Baseline-enforced code generation, real-time WAF assessment, and Day-2 compliance automation. We provide hands-on deployment runbooks, complete operational handoff artifacts (TDD, runbooks, inventory), and brownfield assessment capability that reduces ALZ deployment from weeks of manual effort to hours of guided automation.
+
+### Artifacts Created
+- Decision doc: `.squad/decisions/inbox/tess-alz-docs-comparison.md` (11.6KB, complete with roadmap and metrics)
+
+### Key Insights
+1. Official ALZ docs are strong on *what to build*, we're strong on *how to build it and operate it*
+2. Brownfield assessment is completely missing from official ALZ narrative
+3. Day-2 operations (monitoring, remediation, compliance) are our biggest differentiator vs. official ALZ
+4. Handoff documentation (TDD + runbook) becomes operational leverage when linked to continuous monitoring
+5. Security baseline enforcement (6 rules, 6 validation points) is concrete; official ALZ documents principles
+
+
+---
+
+### Session Update: 2026-05-08T22:45:22.602+00:00 — Documentation Comparison & Roadmap Complete
+
+**Status:** Merged to `.squad/decisions.md`
+
+**Key Deliverable:** Value-add analysis + 5 documentation gaps with priority roadmap
+- Where we add value: Automation story, operational handoff, brownfield assessment, enforcement, quick-start
+- Where ALZ is stronger: Conceptual depth, design principles, policy strategy, hybrid connectivity
+
+**Five Priority Gaps to Close:**
+1. (HIGH) Day-2 compliance & auto-remediation playbook — operators need escalation guidance
+2. (HIGH) Application LZ vending playbook — enable self-service app team onboarding
+3. (MEDIUM) Troubleshooting guide — reduce engineering escalations
+4. (MEDIUM) Platform LZ customization guide — self-service profile changes
+5. (MEDIUM) WAF review checklist — governance reference document
+
+**Documentation Roadmap:**
+- Phase 1 (2–3 weeks): Day-2 runbook, troubleshooting, design principles
+- Phase 2 (1–2 months): App vending, WAF checklist, customization guide
+- Phase 3 (ongoing): Policy strategy, identity governance, hybrid connectivity
+
+**Success Metrics:** ~25–30 user-facing docs (from ~15), <1 hour first deploy, >70% app self-service
+
+**Status:** Ready for phase prioritization and documentation team assignment

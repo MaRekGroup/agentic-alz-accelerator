@@ -1,0 +1,109 @@
+{
+  "agents": {
+    "orchestrator": {
+      "persistent_name": "Danny",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "scrum-master": {
+      "persistent_name": "Benedict",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T22:01:32.879+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "requirements": {
+      "persistent_name": "Rusty",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "architect": {
+      "persistent_name": "Linus",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "design": {
+      "persistent_name": "Basher",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "governance": {
+      "persistent_name": "Saul",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "iac-planner": {
+      "persistent_name": "Reuben",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "bicep-code": {
+      "persistent_name": "Livingston",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "terraform-code": {
+      "persistent_name": "Yen",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "deployment": {
+      "persistent_name": "Frank",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "documentation": {
+      "persistent_name": "Tess",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "monitoring": {
+      "persistent_name": "Turk",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "remediation": {
+      "persistent_name": "Virgil",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "challenger": {
+      "persistent_name": "Isabel",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "assessment": {
+      "persistent_name": "Terry",
+      "universe": "Ocean's Eleven",
+      "created_at": "2026-05-08T21:31:32.689+00:00",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}

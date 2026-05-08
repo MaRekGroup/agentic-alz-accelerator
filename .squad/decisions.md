@@ -38,6 +38,42 @@
 
 ---
 
+
+## Inbox Merge: ALZ Comparison Fan-Out (2026-05-08T22:45:22.602+00:00)
+
+**Coordinator:** Scribe  
+**Context:** Three agents completed ALZ comparison analysis to ground value propositions. Agents: Linus (differentiators), Terry (gaps/risks), Tess (documentation).
+
+### 2026-05-08T22:45:22.602+00:00: ALZ Comparison Analysis - Linus (Differentiators vs Official ALZ)
+
+**By:** Linus (Architect)
+
+**Summary:** Identified 3 differentiated value propositions: (1) Three-tier enforcement (code→deploy→monitor), (2) Brownfield assessment with WAF alignment, (3) Agentic orchestration reducing timeline from 8-12 weeks to 2-4 weeks. All grounded in repo evidence.
+
+**Key Finding:** Three-tier enforcement (validation at code gen, deployment, and continuous monitoring) is the primary differentiator vs official ALZ.
+
+---
+
+### 2026-05-08T22:45:22.602+00:00: ALZ Comparative Gap Analysis - Terry (Coverage & Risks)
+
+**By:** Terry (Assessment)
+
+**Summary:** Microsoft covers ALZ design guidance well; we uniquely offer brownfield assessment (untested at scale), approval gates (unproven friction), security baseline enforcement (proven), mandatory cost governance (adoption risk). Terraform track ~40% complete.
+
+**Key Finding:** Biggest risks: Terraform incomplete, Day-2 auto-remediation untested in production, TDD generation unvalidated. Should position as 'Governance-First ALZ Accelerator' with brownfield + gates as lead differentiators.
+
+---
+
+### 2026-05-08T22:45:22.602+00:00: Documentation Comparison - Tess (ALZ Docs vs Our Docs)
+
+**By:** Tess (Documentation)
+
+**Summary:** Our docs add value in automation (14-agent workflow), brownfield assessment (Step 0), security enforcement, cost governance, and quick-start runbooks. Gaps: Day-2 ops playbooks, app LZ vending, troubleshooting guide, WAF checklist, policy strategy.
+
+**Key Finding:** Position as operationalizing ALZ principles through automation + enforcement. Close 5 key doc gaps to strengthen positioning: Day-2 runbook, app vending, troubleshooting, customization guide, WAF checklist.
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus

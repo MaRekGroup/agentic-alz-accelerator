@@ -16,6 +16,58 @@ Terry maps to the HVE assessment role and owns brownfield discovery work.
 
 ## Learnings
 
+### ALZ Comparative Gap Analysis (2026-05-08T22:45:22.602Z)
+**Key Insight:** Microsoft doesn't claim what we do—they provide guidance + templates; we provide workflow automation + continuous governance.
+
+**What Microsoft Covers Well (Don't Claim These):**
+- 8 CAF Design Areas guidance (official, authoritative)
+- Reference architectures and implementation patterns
+- Bicep AVM modules (maintained, official)
+- APRL policy library (200+ policies, quarterly updates)
+- RBAC and governance conceptual frameworks
+
+**Our Genuine Differentiation (Claim These):**
+1. **Brownfield Assessment** — automated WARA scoring (5 pillars) + CAF alignment (8 areas) with remediation roadmaps. No competitor offers this operationally.
+2. **Approval Gates** — 6 non-negotiable gates with adversarial Challenger review at architecture/code stages. Unique governance model.
+3. **Security Baseline Enforcement** — 6 rules checked at code-gen time, not audit time (TLS, HTTPS, public blob, managed identity, SQL auth, network).
+4. **Mandatory Cost Governance** — parameterized budgets with 80/100/120% alerts. "No budget, no merge" is enforced.
+5. **Read-Only Discovery** — assessment is non-destructive (enterprise risk governance).
+6. **Continuous Monitoring & Drift Detection** — Step 8 (30 min compliance scans, hourly drift, daily audit).
+
+**Honest Gaps (Don't Overstate These):**
+1. Terraform track is ~40% complete (Bicep is production-ready).
+2. Design agent (Step 3) is optional, not mandatory.
+3. Day-2 runbooks not yet implemented.
+4. Assessment read-only principle not prominently exposed in messaging.
+5. Single customer example (marekgroup)—unclear how to generalize.
+6. TDD auto-generation not validated against customer standards.
+7. APRL sync details not documented (policy version pinning, deprecation handling).
+8. Gate approval workflow lacks integration with enterprise change control (ServiceNow, GitHub Approval Environments).
+
+**Critical Risks (Don't Claim Unless Proven):**
+- **Risk #1:** Brownfield assessment accuracy untested at scale (may have high false-positive rate).
+- **Risk #2:** 6 approval gates may be seen as governance friction vs. "faster competitors."
+- **Risk #3:** Cost governance "no merge without budget" may be too rigid (dev/test teams).
+- **Risk #4:** Day-2 operations (Mender auto-remediation) unproven in production—highest credibility risk.
+- **Risk #5:** "AI agents" terminology misleading (they're orchestrated Python roles, not LLM-driven).
+- **Risk #6:** TDD generation promised but unvalidated.
+- **Risk #7:** Authority risk—we use "ALZ Accelerator" but we're not Microsoft.
+
+**Positioning Recommendation:**
+- Lead with: "Governance-First ALZ Accelerator" (automation + assessment + gates).
+- Emphasize: Brownfield assessment + mandatory gates (honest, unique, proven).
+- Qualify: Day-2 operations (aspirational); Terraform 2.0 (known gap).
+- Avoid: "Better than ALZ," "fully automated," "AI-powered," "production-ready everywhere."
+
+**Value Prop Angle:** "Bridge the guidance-to-governance gap" — enterprises have ALZ design areas but lack automated workflow to assess current state → enforce decisions → generate code → maintain compliance.
+
+**Files to Monitor:**
+- `.squad/decisions/inbox/terry-alz-gaps.md` — full decision document
+- `README.md` — ensure positioning claims are honest
+- `AGENTS.md` — ensure gaps are acknowledged
+- `docs/wara-brownfield-design.md` — assessment capability details
+- `scripts/validators/validate_security_baseline.py` — enforcement proof
+
 ### Day-1 Context
 - Assessment outputs feed architecture, governance, and planning without mutating live state
 - Read-only discovery is non-negotiable for brownfield scenarios (customer risk management)
@@ -119,3 +171,27 @@ This model separates discovery from action—critical for enterprise risk manage
 
 **Next Phase:** Sprint S1 will refine messaging and finalize go-to-market narrative.
 
+
+---
+
+### Session Update: 2026-05-08T22:45:22.602+00:00 — ALZ Gap Analysis Complete
+
+**Status:** Merged to `.squad/decisions.md`
+
+**Key Deliverable:** Comprehensive coverage + risks matrix
+- Microsoft coverage: 8 CAF areas, reference architectures, AVM modules (strong)
+- Our unique offerings: Brownfield assessment, approval gates, security enforcement (proven)
+- Unvalidated claims: WARA at scale, auto-remediation, TDD generation, Terraform (40% complete)
+
+**Risk Mitigation Strategies:**
+- Mark Terraform as "beta" with roadmap
+- Start with monitoring-only (defer auto-remediation to 2.0)
+- Run assessment on public customer archetypes to validate WARA checks
+- Allow cost governance overrides with approval
+
+**Positioning Refined:** "Governance-First ALZ Accelerator"
+- Emphasize: Brownfield + gates (honest, unique, proven)
+- Defer: Day-2 ops (aspirational); Terraform (known gap)
+- Avoid: "Superior to Microsoft," "fully automated," "AI-powered"
+
+**Status:** Ready for positioning consensus and customer validation planning

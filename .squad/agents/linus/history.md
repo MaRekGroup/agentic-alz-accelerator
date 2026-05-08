@@ -18,6 +18,48 @@ Linus maps to the HVE architect role and owns target-state design reasoning.
 
 Day-1 context: architecture decisions should respect WAF, CAF, governance, and downstream IaC needs.
 
+### Session 2026-05-08T22:45:22.602+00:00 — ALZ Comparison & Differentiation Analysis
+
+**Task:** Compare this repository to official Azure Landing Zones (site + Enterprise-Scale repo). Identify true differentiators vs. repackaging.
+
+**Findings:**
+
+**Three Truly Differentiated Propositions:**
+
+1. **Three-Tier Enforcement (PRIMARY)**
+   - Code-gen validation (Step 5): 6 security rules + cost governance block PRs
+   - Deployment validation (Step 6): What-if preview + complexity-scaled approval gates
+   - Continuous operations (Steps 8-9): 30-min compliance scans, 1-hr drift detection, auto-remediation with rollback
+   - Evidence: validate_security_baseline.py, validate_cost_governance.py, monitoring.md, remediation.md
+   - Unique vs ALZ: Official ALZ provides templates; we enforce compliance post-deployment continuously
+
+2. **Brownfield Assessment with WAF Alignment (SECONDARY)**
+   - Step 0: Read-only discovery of existing Azure environment (Resource Graph queries)
+   - WARA evaluation: 22+ checks across 5 WAF pillars, scored by pillar
+   - Generated artifacts: Current-state architecture, target-state roadmap, ADRs with criticality
+   - Evidence: assessment.md agent, wara-assessment skill, discovery collectors
+   - Unique vs ALZ: Official ALZ is greenfield reference; we assess existing estates algorithmically
+
+3. **Agentic Orchestration Reduces Timeline (TERTIARY)**
+   - Parallelized workflow: Design (Step 3) and Governance (Step 3.5) run concurrently
+   - Guided conversation: Scribe → Oracle → Warden → Strategist → Forge → Envoy (handoff contracts)
+   - Complexity-scaled gates: Simple (1×), Standard (2×), Complex (3×) gate passes
+   - Impact: 8–12 weeks (manual) → 2–4 weeks (orchestrated)
+   - Evidence: orchestrator.md, AGENTS.md workflow diagram, caf-design-areas mapping
+
+**Four Propositions That Are Repackaging (NOT Differentiated):**
+- IaC templates (we use AVM, not create new modules)
+- Azure Policy/RBAC (we discover, not define)
+- Management group hierarchy (we guide to ALZ structure, not invent)
+- Network topology (we automate ALZ selection, not design new topologies)
+
+**Concise Positioning Statement:**
+"Agentic ALZ Accelerator builds on official ALZ guidance by adding three operational layers: enforcement at three stages (code→deploy→monitor+remediate), brownfield assessment with WAF scoring, and orchestrated workflow automation (2–4 week deployment)."
+
+**Recommendation:** Lead with Enforcement (broadest TAM: compliance/security); secondary Brownfield (migrations); tertiary Speed (delivery teams).
+
+**Artifact:** Decision documented at .squad/decisions/inbox/linus-alz-comparison-2026-05-08.md
+
 ### Session 2026-05-08T22:31:56.807+00:00 — Value Proposition Synthesis
 
 **Task:** Fanned out across repo to synthesize three differentiated value propositions grounded in actual code, not marketing claims.
@@ -129,3 +171,20 @@ All propositions supported by file-specific proof points (agents, skills, valida
 
 **Next Phase:** Sprint S1 execution will synthesize all inputs into final positioning decision with Yeselam sign-off.
 
+
+---
+
+### Session Update: 2026-05-08T22:45:22.602+00:00 — ALZ Comparison Analysis Complete
+
+**Status:** Merged to `.squad/decisions.md`
+
+**Key Deliverable:** Comprehensive value proposition analysis grounded in repo evidence
+- Three differentiated propositions identified (all supported by code)
+- Four non-differentiated propositions documented (repackaging, not innovation)
+- Positioning recommendation: Lead with enforcement, follow with brownfield + speed
+
+**Consensus Point:** Three-tier enforcement is most defensible differentiator
+- Evidence: Validator scripts exist, security baseline specs in code
+- Risk: Brownfield assessment untested at scale; Day-2 operations unproven
+
+**Status:** Ready for team consensus on positioning strategy
