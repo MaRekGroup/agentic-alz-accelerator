@@ -158,3 +158,11 @@ increases proactively · Validate before deployment workflows.
 
 **DON'T:** Trust REST API "No Limit" values · Assume ARM type = quota name ·
 Skip quota checks for "small" deployments · Hard-code subscription IDs.
+
+## Microsoft Learn References
+
+> Fetch full content using `mcp_microsoftdocs:microsoft_docs_fetch` with query string `from=learn-agent-skill`, or `fetch_webpage` with `from=learn-agent-skill&accept=text/markdown`.
+
+| Topic | URL |
+|-------|-----|
+| Increase Azure Storage account quota per region | https://learn.microsoft.com/en-us/azure/quotas/storage-account-quota-requests |

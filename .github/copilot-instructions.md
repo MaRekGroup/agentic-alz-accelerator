@@ -95,6 +95,74 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `wara-assessment` | `.github/skills/wara-assessment/` | Assessor, Oracle |
 | `assessment-report` | `.github/skills/assessment-report/` | Assessor, Chronicler |
 
+### Microsoft Learn Skills (Azure Services)
+
+> Source: [MicrosoftDocs/Agent-Skills](https://github.com/MicrosoftDocs/Agent-Skills). Provide Learn doc links fetched via `mcp_microsoftdocs:microsoft_docs_fetch`.
+
+#### Governance & Architecture
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-policy` | `.github/skills/azure-policy/` | Warden, Sentinel, Challenger |
+| `azure-cloud-adoption-framework` | `.github/skills/azure-cloud-adoption-framework/` | Scribe, Oracle, Conductor |
+| `azure-well-architected` | `.github/skills/azure-well-architected/` | Oracle, Challenger, Assessor |
+| `azure-architecture` | `.github/skills/azure-architecture/` | Oracle, Artisan |
+| `azure-resource-manager` | `.github/skills/azure-resource-manager/` | Forge, Strategist, Envoy |
+| `azure-resource-graph` | `.github/skills/azure-resource-graph/` | Assessor, Sentinel, Warden |
+
+#### Security
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-security` | `.github/skills/azure-security/` | Warden, Challenger, Sentinel |
+| `azure-defender-for-cloud` | `.github/skills/azure-defender-for-cloud/` | Warden, Sentinel, Mender |
+| `azure-sentinel` | `.github/skills/azure-sentinel/` | Sentinel, Chronicler |
+| `azure-key-vault` | `.github/skills/azure-key-vault/` | Warden, Forge |
+
+#### Networking
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-virtual-network` | `.github/skills/azure-virtual-network/` | Oracle, Forge |
+| `azure-networking` | `.github/skills/azure-networking/` | Oracle, Forge, Strategist |
+| `azure-firewall` | `.github/skills/azure-firewall/` | Forge, Warden |
+| `azure-firewall-manager` | `.github/skills/azure-firewall-manager/` | Warden, Forge |
+| `azure-bastion` | `.github/skills/azure-bastion/` | Forge, Strategist |
+| `azure-dns` | `.github/skills/azure-dns/` | Forge, Oracle |
+| `azure-expressroute` | `.github/skills/azure-expressroute/` | Oracle, Forge |
+| `azure-vpn-gateway` | `.github/skills/azure-vpn-gateway/` | Oracle, Forge |
+| `azure-virtual-wan` | `.github/skills/azure-virtual-wan/` | Oracle, Forge |
+| `azure-virtual-network-manager` | `.github/skills/azure-virtual-network-manager/` | Warden, Forge |
+| `azure-private-link` | `.github/skills/azure-private-link/` | Forge, Warden |
+| `azure-application-gateway` | `.github/skills/azure-application-gateway/` | Forge, Oracle |
+| `azure-web-application-firewall` | `.github/skills/azure-web-application-firewall/` | Warden, Forge |
+| `azure-ddos-protection` | `.github/skills/azure-ddos-protection/` | Warden, Forge |
+| `azure-nat-gateway` | `.github/skills/azure-nat-gateway/` | Forge |
+| `azure-network-watcher` | `.github/skills/azure-network-watcher/` | Sentinel, Chronicler |
+| `azure-front-door` | `.github/skills/azure-front-door/` | Oracle, Forge |
+| `azure-load-balancer` | `.github/skills/azure-load-balancer/` | Forge, Oracle |
+| `azure-route-server` | `.github/skills/azure-route-server/` | Forge |
+
+#### Management & Operations
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-monitor` | `.github/skills/azure-monitor/` | Sentinel, Chronicler |
+| `azure-automation` | `.github/skills/azure-automation/` | Forge, Mender |
+| `azure-backup` | `.github/skills/azure-backup/` | Forge, Oracle |
+| `azure-update-manager` | `.github/skills/azure-update-manager/` | Sentinel, Mender |
+| `azure-service-health` | `.github/skills/azure-service-health/` | Sentinel |
+| `azure-advisor` | `.github/skills/azure-advisor/` | Oracle, Sentinel |
+| `azure-site-recovery` | `.github/skills/azure-site-recovery/` | Forge, Oracle |
+
+#### Cost & Reliability
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-cost-management` | `.github/skills/azure-cost-management/` | Oracle, Sentinel |
+| `azure-reliability` | `.github/skills/azure-reliability/` | Oracle, Challenger |
+| `azure-resiliency` | `.github/skills/azure-resiliency/` | Oracle, Challenger |
+
 ## Approval Gates
 
 6 non-negotiable gates (1, 2, 3, 4, 5, 6). Challenger reviews at gates 1, 2, 4, 5.
