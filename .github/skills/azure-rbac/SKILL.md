@@ -82,3 +82,69 @@ Prefer managed identity over service principals:
 3. **Federated credentials** — For GitHub Actions OIDC (no secrets stored)
 
 Never create service principal secrets for automation. Use OIDC federation or managed identity.
+
+## Microsoft Learn References
+
+> Fetch full content using `mcp_microsoftdocs:microsoft_docs_fetch` with query string `from=learn-agent-skill`, or `fetch_webpage` with `from=learn-agent-skill&accept=text/markdown`.
+
+### Troubleshooting
+
+| Topic | URL |
+|-------|-----|
+| Audit Azure RBAC changes using Activity Log | https://learn.microsoft.com/en-us/azure/role-based-access-control/change-history-report |
+| Resolve common issues with Azure RBAC conditions | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-faq |
+| Troubleshoot Azure RBAC role assignment conditions | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-troubleshoot |
+| Resolve Azure RBAC role and custom role limit issues | https://learn.microsoft.com/en-us/azure/role-based-access-control/troubleshoot-limits |
+| Diagnose and resolve common Azure RBAC issues | https://learn.microsoft.com/en-us/azure/role-based-access-control/troubleshooting |
+
+### Best Practices
+
+| Topic | URL |
+|-------|-----|
+| Apply security-focused best practices for Azure RBAC | https://learn.microsoft.com/en-us/azure/role-based-access-control/best-practices |
+| Example patterns for delegating RBAC with ABAC conditions | https://learn.microsoft.com/en-us/azure/role-based-access-control/delegate-role-assignments-examples |
+| Choose appropriate Azure RBAC scopes for access | https://learn.microsoft.com/en-us/azure/role-based-access-control/scope-overview |
+
+### Decision Making
+
+| Topic | URL |
+|-------|-----|
+| Scale Azure RBAC assignments using ABAC and attributes | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-custom-security-attributes-example |
+| Transfer Azure subscriptions between Entra directories | https://learn.microsoft.com/en-us/azure/role-based-access-control/transfer-subscription |
+
+### Custom Roles
+
+| Topic | URL |
+|-------|-----|
+| Understand and configure Azure RBAC custom roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles |
+| Create Azure custom roles in the portal | https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles-portal |
+
+### Security — Built-in Roles Reference
+
+| Topic | URL |
+|-------|-----|
+| Reference all Azure RBAC built-in roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles |
+| Networking roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/networking |
+| Security roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/security |
+| Storage roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/storage |
+| Identity roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/identity |
+| Management and governance roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/management-and-governance |
+| Privileged roles | https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/privileged |
+
+### Configuration
+
+| Topic | URL |
+|-------|-----|
+| Azure ABAC conditions format and syntax | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-format |
+| ABAC conditions for Azure Blob Storage | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-azure-blob-storage |
+| Manage RBAC conditions via CLI | https://learn.microsoft.com/en-us/azure/role-based-access-control/conditions-role-assignments-cli |
+
+### Integrations & Coding Patterns
+
+| Topic | URL |
+|-------|-----|
+| Assign roles using Azure CLI | https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-cli |
+| Assign roles using PowerShell | https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-powershell |
+| Assign roles using ARM/Bicep templates | https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-template |
+| Assign roles using REST API | https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-rest |
+| List role assignments using Azure CLI | https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-cli |
