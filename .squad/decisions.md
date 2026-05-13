@@ -1,8 +1,13 @@
-# Squad Decisions
+# Danny — Push local main to github/main (2026-05-13T21:01:15.942+00:00)
 
-## Active Decisions
+- **Date:** 2026-05-13T21:01:15.942+00:00
+- **Context:** Yeselam Tesfaye requested: "lets commit and push to github main". Local `main` HEAD was at `f1c6a2c` (1 commit ahead of `github/main` at `e2b6865`), containing Scribe's post-spawn consolidation commit.
+- **Decision:** Execute direct push from local `main` to `github/main` using `git push github main`.
+- **Actions:** Inspected git state (on `main`, HEAD `f1c6a2c`, 1 commit ahead); verified working tree clean (only untracked `.squad/skills/remote-rewind-with-lease/`); pushed with explicit remote; refreshed remote tracking with `git fetch github`; verified outcome.
+- **Result:** ✅ Local HEAD `f1c6a2c` now pushed to `github/main`. Commit: `docs(squad): Scribe post-spawn consolidation — merge inbox decision & update history`. Untracked `.squad/skills/remote-rewind-with-lease/` not included. `origin/main` untouched (remains at `38a5954`).
+- **Operational pattern:** Clean working tree → verify remote state → push with explicit remote + branch → fetch and verify remote ref → confirm both local and remote aligned.
 
-# Danny — Push local main to github/main
+---
 
 - **Date:** 2026-05-13T20:50:39.284+00:00
 - **Context:** Yeselam Tesfaye requested: "lets push this to our github/main". Local `main` HEAD was at `e2b6865` (1 commit ahead of `github/main` at `afdc076`).
