@@ -74,6 +74,72 @@
 
 ---
 
+## Active Decisions (May 2026 - Design/Documentation Flow Audit)
+
+### 2026-05-13T16:13:48.828+00:00: Step 3 Design Flow — Critical Findings and Recommendations
+
+**By:** Basher (Design), Tess (Documentation), Isabel (Challenger)  
+**Type:** Multi-agent design/documentation flow audit  
+**Status:** Proposed  
+
+**Summary:** Basher, Tess, and Isabel conducted a collaborative review of Steps 3 and 7 artifact contracts and gate coverage. Identified 15+ critical gaps including inconsistent artifact naming across 5 sources, missing Challenger gate coverage for design outputs, broken Step 3→Step 7 handoff, and ambiguous skip criteria.
+
+**Key Findings Across All Three:**
+
+1. **[CRITICAL] Artifact naming contract is broken** — Design outputs are specified differently in `AGENTS.md`, `markdown.instructions.md`, `04-design.prompt.md`, `design.md`, and `copilot-instructions.md`. Artisan may not produce `03-design-summary.md` depending on which source it follows, breaking Chronicler's prerequisite.
+
+2. **[CRITICAL] No Challenger review covers Step 3** — Step 3 sits between Gate 2 and Gate 3 with no Challenger pass. Design diagrams can be incomplete, ADRs missing, or inconsistent with architecture assessment — all unreviewed.
+
+3. **[CRITICAL] Step 3 "optional" criteria are undefined** — Design is listed as optional in `design.md` and `docs/workflow.md`, but no criteria govern when to skip. Chronicler detects skip via filesystem check (fragile, implicit).
+
+4. **[CRITICAL] Step 7 TDD has a structural hole when Step 3 is skipped** — Chronicler's TDD template references diagrams from Step 3 with no fallback. If Step 3 is skipped, Architecture Overview section is hollow.
+
+5. **[CRITICAL] Chronicler lacks MCP tools for live validation** — Instructed to query Resource Graph and validate deployed state, but MCP not in tool list. Falls back to artifact reading only, missing drift.
+
+6. **[HIGH] 5 additional medium-severity gaps** — Skill loading order, prompt vs agent definition divergence, artifact path ambiguity, scope of WARA compliance in Step 7, missing prerequisites alignment.
+
+**Minimum Change Set (Must-Fix):**
+- Reconcile artifact naming in AGENTS.md + design.md + documentation.md + prompts
+- Add `03-design-summary.md` as required completion artifact (not optional)
+- Add step_3_status flag to session state (skipped vs completed vs failed)
+- Fix TDD fallback: "Step 3 skipped — architecture from 02-architecture-assessment.md"
+- Add `mcp` to Chronicler's tool list OR explicitly document delegation to Sentinel Step 8
+- Add Challenger review slot for design artifacts (after Step 3, before Step 3.5)
+
+**Should-Fix (Operational Improvements):**
+- Align `04-design.prompt.md` with full agent workflow outputs
+- Define skip criteria: Simple tier → skip; Standard/Complex → required
+- Add self-validation checklist to Phase 2/Phase 4 of `design.md`
+- Define canonical output manifest in both `documentation.md` and Step 7 prompt
+
+**Files to Update:**
+- `.github/agents/design.md` — fix skill load order, add summary artifact checkpoint
+- `.github/agents/documentation.md` — add TDD fallback, add mcp tool, align prerequisites
+- `AGENTS.md` — canonicalize artifact naming, add skip criteria
+- `04-design.prompt.md` — align with full agent workflow
+- `.squad/routing.md` — add step_3_status to session state schema
+
+**Decision Requested:** Approve minimum change set to unblock full Step 3→Step 7 pipeline.
+
+---
+
+### 2026-05-08T23:37:53.627+00:00: User directive — Branch check before changes
+
+**By:** Yeselam Tesfaye  
+**What:** Before making a change, always check which branch you are on first.  
+**Why:** User request — captured for team memory
+
+---
+
+### 2026-05-08T23:06:54Z: PR #63 Lint Failure — Trailing Whitespace
+
+**By:** Reuben (IaC Planner)  
+**Issue:** `.github/workflows/squad-heartbeat.yml` has trailing spaces on lines 60, 66, 75, 91, 97  
+**Recommendation:** Remove trailing whitespace  
+**Status:** Requires merge-blocking fix
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
@@ -694,3 +760,157 @@ All 3 candidates are **viable and complementary**:
 3. **Prioritize** gaps (Terraform track vs. Design agent vs. day-2 runbooks)
 4. **Package** for customer conversations (avoid exposing tool/agent internals; focus on outcome)
 
+
+## Pass 1 Design/Documentation Contract Fixes (2026-05-13)
+
+### 2026-05-13T16:13:48.828+00:00: Design Flow Review — Step 3 Findings
+
+**By:** Basher
+
+**What:** Comprehensive audit of Step 3 (Design / Artisan) workflow across all input artifacts: `design.md`, `04-design.prompt.md`, `docs/workflow.md`, AGENTS.md, `copilot-instructions.md`, `markdown.instructions.md`, and diagram skills. Identified 8 findings across artifact naming, skip criteria, Challenger review gaps, skill loading, and diagram completeness enforcement.
+
+**Key Findings (Highest-Value, Ranked by Severity):**
+
+1. **[HIGH] Step 3 "Optional" with no defined skip criteria** — No definition of what "simple" means; Step 7 has no fallback when diagrams are absent.
+2. **[HIGH] Artifact naming is inconsistent across five documents** — ADR paths conflict (`03-design-adr-*.md` vs `adr/ADR-*.md`); diagram paths conflict (root vs subdirectory).
+3. **[HIGH] Design artifacts have no Challenger gate review** — No adversarial check between Gate 2 and Gate 3.
+4. **[MEDIUM] `04-design.prompt.md` is severely underspecified vs `design.md`** — Prompt is ~30 lines; agent is 200+ lines with a 4-phase workflow.
+5. **[MEDIUM] Skill loading list omits `azure-diagrams` routing skill** — Agent bypasses routing decision tree.
+6. **[MEDIUM] "Use both methods" conflicts with routing skill's decision tree** — No coordination between engine selection and dual-format output.
+7. **[MEDIUM] No diagram completeness enforcement mechanism** — No validator script, no gate checklist.
+8. **[LOW] Step 7 handoff from Step 3 is underspecified** — No schema defined for `03-design-summary.md`; no fallback when design is absent.
+
+**Recommended Next Actions (Priority Order):**
+1. Canonicalize artifact naming in `AGENTS.md` and `markdown.instructions.md`
+2. Update `design.md` skill list to include `azure-diagrams` (first) and `azure-adr`
+3. Define skip criteria (tie to complexity tier: Simple → skip, Standard/Complex → required)
+4. Add self-validation checklist to Phase 2 and Phase 4 of `design.md`
+5. Align `04-design.prompt.md` with full agent workflow outputs
+6. Document Chronicler fallback in `documentation.md` for absent design artifacts
+7. Consider adding design artifact check to Gate 2 Challenger criteria
+
+---
+
+### 2026-05-13T18:47:55.170+00:00: Basher Pass 1 — Step 3 Design Contract
+
+**By:** Basher
+
+**What:** For Basher-owned Step 3 files, the canonical design output contract is:
+- `agent-output/{customer}/03-design-summary.md` is the required completion artifact and authoritative Step 3 to Step 7 handoff manifest.
+- Diagram artifacts live in `agent-output/{customer}/diagrams/` and use the `03-design-<topic>.{drawio|png|md}` naming pattern.
+- ADR artifacts live in `agent-output/{customer}/adr/` and use the `03-design-adr-{NNN}-{slug}.md` naming pattern.
+- `azure-diagrams` routes the request before engine selection; Draw.io remains the editable source for architecture diagrams, PNG remains quick-reference, and Mermaid is only used when an inline markdown diagram is explicitly needed.
+
+**Why:** This resolves the internal Step 3 contract mismatch between the design agent definition and the Step 3 prompt without changing shared workflow files owned by other agents.
+
+**Scope:**
+- Updated: `.github/agents/design.md`
+- Updated: `.github/prompts/04-design.prompt.md`
+- Not changed in this pass: shared workflow docs, `AGENTS.md`, `.github/copilot-instructions.md`, Step 7 files
+
+---
+
+### 2026-05-13T18:47:55.170+00:00: User directive
+
+**By:** Yeselam Tesfaye (via Copilot)
+
+**What:** Prefer using Claude Opus 4.6 1M for agent work unless otherwise specified.
+
+**Why:** User request — captured for team memory
+
+---
+
+### 2026-05-13T18:47:55.170+00:00: Pass 1 workflow contract state and naming
+
+**By:** Danny
+
+**What:** Updated the shared workflow contract so Step 3 optionality is tied to complexity, `step_3_status` is explicit (`skipped`, `completed`, `failed`), and shared-doc artifact references use prefix-based validation families (`03-*` and `07-*`) rather than implicit filesystem skip detection.
+
+**Why:** This removes ambiguous Step 3 control flow, adds validation before downstream consumption, and keeps the shared contract aligned with the markdown naming rule without changing specialist-owned agent files in Pass 1.
+
+---
+
+### 2026-05-13T16:13:48.828+00:00: Design/Documentation Flow Risk Review — Isabel (Challenger)
+
+**By:** Isabel (Challenger)
+
+**Verdict:** **DO NOT ADVANCE** to full documentation pipeline until risks 1–4 are resolved. Risk 5 is advisory but should be encoded before the next Standard or Complex deployment.
+
+**Top 5 Material Risks:**
+
+1. **[HIGH] Chronicler's TDD Has a Structural Hole When Step 3 Is Skipped** — If Step 3 is skipped, the TDD's Architecture Overview section has no source material. Operations teams receive a documentation artifact with a structurally hollow section.
+2. **[HIGH] Artifact Naming Contract Is Broken Across Three Sources** — Prompt produces different files with different names than agent definition. Downstream agent (Chronicler) has a silent dependency on files upstream agent (Artisan) may never produce.
+3. **[HIGH] No Challenger Review Covers Step 3 or Step 7** — Artisan can produce diagrams contradicting the architecture assessment without review. Chronicler can produce compliance summaries misrepresenting security baseline status without gate coverage.
+4. **[HIGH] Chronicler Lacks MCP Tools Required to Fulfill Its Own Mandate** — Instructed to query live Azure Resource Graph but not equipped with MCP tool. Will silently fall back to reading artifact files only — documenting intended state, not actual deployed state.
+5. **[MEDIUM] Step 3 Skip Is an Untracked Branching Condition** — Session state schema does not include `step_3_status` field. Chronicler guesses from filesystem. Mid-run failure is indistinguishable from intentional skip.
+
+**Minimum Change Set (Must-Fix + Should-Fix):**
+- Reconcile artifact naming; adopt `agent-output/{customer}/03-design-summary.md` as Artisan's required artifact
+- Fix Chronicler's TDD fallback when `03-design-summary.md` is absent
+- Add `mcp` to Chronicler tool inventory OR explicitly document live queries are delegated to Sentinel
+- Add session state flag `step_3_status` (Orchestrator writes `"skipped"` or `"completed"`)
+- Add Challenger review slot for Step 3 design artifacts (should-fix)
+- Define and enforce "optional" criteria tied to complexity tier (should-fix)
+
+---
+
+### 2026-05-08T23:06:54.000+00:00: PR #63 Lint Failure Diagnosis
+
+**By:** Reuben (IaC Planner)
+
+**What:** Trailing whitespace in `.github/workflows/squad-heartbeat.yml`:
+- Lines 60, 66, 75, 91, 97: trailing spaces
+
+**Root Cause:** YAML lint failure on `yamllint -c .yamllint.yml` check
+
+**Recommendation:** Remove trailing whitespace from identified lines
+
+**Impact:** Blocks PR #63 merge; Severity: Low (formatting only); Fix effort: Minimal
+
+---
+
+### 2026-05-13T16:13:48.828+00:00: Step 7 Documentation Flow — Findings (Tess)
+
+**By:** Tess (Documentation)
+
+**What:** Full fan-out review of Step 7 (Chronicler) documentation workflow focusing on dependency on Step 3 design outputs. Reviewed: `documentation.md`, `08-as-built.prompt.md`, `docs/workflow.md`, `AGENTS.md`, `docs-writer/SKILL.md`, `azure-diagnostics/SKILL.md`.
+
+**Key Findings (Ranked by Severity):**
+
+1. **[HIGH] Output file names are inconsistent** — Agent definition promises different files than prompt. Naming conflict across `documentation.md`, `08-as-built.prompt.md`, `AGENTS.md`.
+2. **[HIGH] Step 3 design outputs have no graceful-degradation path** — Agent references Step 3 diagrams in TDD without providing fallback. If Step 3 skipped, agent has no instruction.
+3. **[HIGH] Prerequisites block does not match what the prompt actually reads** — Agent definition vs prompt have divergent read behaviors; prompt adds Resource Graph query not in agent.
+4. **[HIGH] WARA compliance summary promised in prompt but absent from agent** — Prompt promises per-pillar WARA pass/fail; agent definition does not cover it.
+5. **[MEDIUM] Artifact output path is ambiguous** — `agent-output/{customer}/deliverables/` vs `agent-output/{customer}/` (flat).
+6. **[MEDIUM] "Cost baseline" artifact defined only in prompt, not in agent** — Prompt lists `07-cost-baseline.md`; agent collapses it into TDD section.
+7. **[MEDIUM] Skills loaded by agent inconsistent with prompt** — `docs-writer` not loaded by agent despite containing output naming conventions.
+8. **[LOW] No explicit handoff signal from Step 7 to Steps 8–9** — No documentation on what Sentinel reads from Step 7 to initialize baseline.
+
+**Recommended Target-State Output Manifest:**
+- `07-technical-design-document.md` — Full as-built architecture
+- `07-operational-runbook.md` — Day-2 ops procedures
+- `07-resource-inventory.md` — Tabular inventory from Resource Graph
+- `07-compliance-summary.md` — Security baseline + WARA (if brownfield) + policy summary
+- `07-cost-baseline.md` — Budget config + estimated monthly cost
+
+All written to: `agent-output/{customer}/deliverables/`
+
+---
+
+### 2026-05-13T18:47:55.170+00:00: Step 7 documentation contract canonicalized
+
+**By:** Tess
+
+**What:** Canonicalized the Step 7 documentation contract in `.github/agents/documentation.md` and `.github/prompts/08-as-built.prompt.md` around a single output path and file set: `agent-output/{customer}/deliverables/07-technical-design-document.md`, `07-operational-runbook.md`, `07-resource-inventory.md`, `07-compliance-summary.md`, and `07-cost-baseline.md`. Also defined explicit Step 3 fallback behavior and clarified that Step 7 uses both deployed-state evidence from Step 6 and artifact-derived context from earlier approved steps.
+
+**Why:** The agent definition and prompt had drifted into incompatible contracts, which caused naming ambiguity, missing-diagram risk when Step 3 is skipped, and unclear expectations about whether Step 7 performs live-state discovery or documents workflow evidence.
+
+---
+
+### 2026-05-08T23:37:53.627+00:00: User directive
+
+**By:** Yeselam Tesfaye (via Copilot)
+
+**What:** Before making a change, always check which branch you are on first.
+
+**Why:** User request — captured for team memory

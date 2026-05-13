@@ -49,8 +49,31 @@ Danny maps to the HVE orchestrator role and owns workflow sequencing.
 - Team consensus awaited on routing model and session state implementation
 - 🔄 Note: `.squad/decisions.md` is the single source of truth for governance decisions
 
+**2026-05-13T18:47:55.170+00:00 — Pass 1 workflow contract fixes:**
+- Shared workflow contract now makes Step 3 optionality explicit by complexity: Simple may skip, Standard and Complex must complete.
+- `docs/session-state.md` now defines `step_3_status` as `skipped`, `completed`, or `failed`; orchestrator state is the source of truth instead of filesystem-based inference.
+- `AGENTS.md` and `docs/workflow.md` now add post-Step-3 and post-Step-7 validation language so partial design or documentation artifacts block downstream use.
+- Canonical shared-doc naming in this pass is prefix-based and aligned to markdown instructions: Step 3 uses `03-*`, Step 7 uses `07-*`.
+- Key files touched for this pass: `AGENTS.md`, `docs/workflow.md`, `docs/session-state.md`, `.squad/decisions/inbox/danny-pass1-workflow-contract.md`.
+
 ## 2026-05-08 — Scrum Master Initialization
 - Scribe merged inbox decisions (4 files)
 - Sprint planning system initialized
 - Ready for Scrum Master coordination
+
+### 2026-05-13T18:47:55.170+00:00 — Pass 1 shared workflow contract
+
+**Task:** Update shared workflow contract to make Step 3 optionality explicit and add session state tracking.
+
+**Actions:**
+- Step 3 optionality tied to complexity: Simple → skip; Standard/Complex → required
+- Added `step_3_status` field to session state schema with values: `skipped`, `completed`, `failed`
+- Artifact validation changed from implicit filesystem checks to prefix-based families (`03-*`, `07-*`)
+
+**Key Files Updated:**
+- `docs/workflow.md`
+- `AGENTS.md` (Step roster table)
+- `.squad/routing.md` (session state schema)
+
+**Pattern:** Shared workflow updates separate from specialist-owned agent contracts, enabling parallel work by Basher (Step 3) and Tess (Step 7).
 

@@ -18,169 +18,116 @@ Tess maps to the HVE documentation role and owns as-built and operational docs.
 
 Day-1 context: documentation should reflect actual decisions, artifacts, and deployed state.
 
-### 2026-05-08 — Documentation Positioning Analysis
+### 2026-05-13T18:47:55.170+00:00 — Step 7 contract pass 1
 
-**Key Insights:**
-1. As-built documentation positioning must emphasize *infrastructure integration* not *paperwork compliance*
-   - TTDs feed into Day-2 monitoring (Step 8 Sentinel, Step 9 Mender)
-   - ADRs provide machine-readable decision rationale (WAF/CAF aligned)
-   - Documentation captures deployed state at Step 6, enabling Step 7, enabling Steps 8-9
-   - This is unique to the accelerator—other ALZ tooling doesn't link docs to continuous monitoring
+**Task:** Align the documentation agent definition and Step 7 prompt to a single canonical output contract without editing shared workflow docs.
 
-2. **TDD generator is production-ready with real artifacts**
-   - agent-output/marekgroup/tdd/ shows 4 landing zones with full TTDs (markdown + .docx + embedded diagrams)
-   - Includes actual deployed resource names, SKUs, network topology, security rules
-   - Resource inventory queried from Azure Resource Graph (not guessed)
+**Key Decisions:**
 
-3. **ADR skill provides strategic documentation**
-   - Captures alternatives with rejection reasons
-   - Maps to CAF design areas (all 8) and WAF pillars (all 5)
-   - Files: 03-des-adr-* (design phase) and 07-ab-adr-* (as-built phase)
-   - Integrates with Agent workflow: Step 2/3 for design, Step 7 for as-built
+1. **Canonical Step 7 path:** `agent-output/{customer}/deliverables/`
+2. **Canonical file set:** `07-technical-design-document.md`, `07-operational-runbook.md`, `07-resource-inventory.md`, `07-compliance-summary.md`, `07-cost-baseline.md`
+3. **Step 3 fallback rule:** If Step 3 artifacts are missing, Step 7 must say "Step 3 was skipped" and use an inline Mermaid diagram synthesized from `02-architecture-assessment.md` and `06-deployment-summary.md`
+4. **Data-source rule:** Step 7 documents both deployed-state evidence from Step 6 and artifact-derived context from earlier approved artifacts; it must label evidence gaps instead of implying live validation
 
-4. **docs-writer skill ensures consistency**
-   - Staleness checks (were all deployed resources documented?)
-   - Link validation (do references point to actual infrastructure?)
-   - Maintains sync between agent/skill inventory and documentation
-   - Updates README.md and AGENTS.md when new agents/skills are added
+**Key File Paths:**
+- `.github/agents/documentation.md`
+- `.github/prompts/08-as-built.prompt.md`
+- `.squad/decisions/inbox/tess-pass1-documentation-contract.md`
 
-5. **Honest gaps to avoid overstating:**
-   - TTDs are snapshots at deployment time (not live dashboards)
-   - Runbooks are template-generated (need team customization for specific alerts/incidents)
-   - No auto-versioning or change tracking built in yet
-   - Diagrams generated at code-gen time (not queried from live topology)
-   - No publishing pipeline to Wiki/SharePoint/Notion yet
-   - Policy compliance validation exists in governance step but not in TTD inventory
+**Pattern:** When a downstream step consumes optional upstream artifacts, define the canonical output manifest, fallback behavior, and evidence model in both the agent definition and the step prompt.
 
-**Key file paths and artifacts:**
-- Step 7 agent: `.github/agents/documentation.md`
-- docs-writer skill: `.github/skills/docs-writer/SKILL.md`
-- azure-adr skill: `.github/skills/azure-adr/SKILL.md`
-- mermaid skill: `.github/skills/mermaid/SKILL.md`
-- Real TDD examples: `agent-output/marekgroup/tdd/TDD_*.md`
-- ADR examples: `agent-output/marekgroup/adr/`
-- Operative structure: `agent-output/README.md`
+### 2026-05-13 — Step 7 Documentation Flow Review
 
-**Positioning statement (final):**
-"As-built documentation is not post-deployment paperwork—it's infrastructure integration leverage. Every deployment decision is captured as executable knowledge: TTDs with embedded diagrams, runbooks tied to deployed state, compliance inventories that feed continuous monitoring."
+**Task:** Fan-out review of the Step 7 documentation workflow and its dependency on Step 3 design outputs.
 
-**Decision doc:** `.squad/decisions/inbox/tess-docs-positioning-20260508.md`
+**Key Findings:**
 
-## 2026-05-08 — Scrum Master Initialization
-- Scribe merged inbox decisions (4 files)
-- Sprint planning system initialized
-- Ready for Scrum Master coordination
+1. **Output file name inconsistency (HIGH):** `documentation.md` and `08-as-built.prompt.md` promise different file names for the same deliverables. No single source of truth. `07-technical-design-document.md` vs `07-design-document.md` is the most critical mismatch.
 
+2. **No Step 3 graceful degradation (HIGH):** The agent references Step 3 diagrams without a fallback. Step 3 is explicitly optional in the workflow — the agent must handle its absence with a Mermaid inline alternative sourced from `02-architecture-assessment.md`.
 
----
+3. **Prompt vs agent definition divergence (HIGH):** `08-as-built.prompt.md` and `documentation.md` describe different read behaviors, different outputs, and different skill loads. They have drifted into describing two different agents.
 
-## 2026-05-08T22:31:56Z: Documentation Positioning Analysis Completed
+4. **WARA compliance gap (HIGH):** The prompt promises per-pillar WARA pass/fail; the agent has no phase for it and loads no WARA skill. Either add it properly or remove the claim.
 
-**Context:** Repository positioning sprint to position as-built documentation as operational asset (not post-deployment paperwork) and identify integration opportunities with Day-2 operations.
+5. **Output path ambiguity (MEDIUM):** `deliverables/` subdirectory vs root `agent-output/{customer}/` — different between agent and prompt.
 
-**Your Contribution:** Analyzed Step 7 (Chronicler) deliverables and workflow integration with Steps 8–9 (monitoring/remediation). Positioned documentation not as compliance artifact but as infrastructure integration leverage.
+6. **Cost baseline artifact (MEDIUM):** Listed as standalone output in the prompt; collapsed to a TDD section in the agent. Needs a decision.
 
-**Positioning Statement:** "As-built documentation is not post-deployment paperwork—it's infrastructure integration leverage."
+7. **Skills inconsistency (MEDIUM):** `docs-writer` and `azure-adr` listed as Chronicler skills in copilot-instructions.md but not loaded in the agent definition.
 
-**Step 7 Deliverables:**
-1. **Technical Design Document** (Markdown + Word) — Deployed topology, resource inventory, compliance state
-2. **Operational Runbook** — Daily ops, incident response, scaling procedures
-3. **Resource Inventory** — Auto-queried from Azure Resource Graph (matches deployed state)
-4. **Compliance Summary** — Security baseline, policy assignments, budget configuration
-5. **ADRs** — Decision rationale with WAF/CAF mapping and alternatives
+8. **Step 7→8 contract (LOW):** No documented contract for what Sentinel reads from Step 7 artifacts. Becomes HIGH when Day-2 automation is enabled.
 
-**Workflow Integration:** Step 6 (Deployment) → Step 7 (TDD/Runbook generation) → Steps 8–9 (Monitoring uses TDD as baseline, Remediation uses compliance summary)
+**Key File Paths:**
+- Agent definition: `.github/agents/documentation.md`
+- Step 7 prompt: `.github/prompts/08-as-built.prompt.md`
+- Workflow reference: `docs/workflow.md`
+- Decision output: `.squad/decisions/inbox/tess-documentation-flow-review.md`
 
-**6 Honest Gaps Documented:**
-1. TTDs are snapshots (not auto-syncing with live state)
-2. Runbooks are template-generated (not auto-enriched from Log Analytics)
-3. No versioning/change tracking
-4. Diagrams generated at code-gen time (not post-deployment)
-5. No publishing pipeline
-6. Compliance inventory is resource-based (not policy-based)
+**Reusable Pattern:** When reviewing agent flow completeness, always cross-check: (1) agent definition prerequisites, (2) step prompt instructions, (3) AGENTS.md artifact naming table, (4) copilot-instructions.md skill mapping. Divergence in any two = a gap.
 
-Each gap includes transparent messaging ("TTDs capture deployed state *at deployment time*") and mitigation path (staleness checks, future enhancements, docs-as-code).
+### 2026-05-13 — Cross-Agent Finding: Chronicler Tool Gap & Step 3 Fallback Missing
 
-**Messaging Rules:** Distinguish between what *is* (snapshots at deployment) and what *will be* (future enhancements). Emphasize operational workflow integration.
+**Insight from system review (Basher + Tess + Isabel):**
 
-**Status:** APPROVED FOR MESSAGING — Honest, differentiating, proof-backed, customer-focused.
+Tess's Finding 2 (no graceful degradation when Step 3 is skipped) and Finding 3 (prerequisites divergence between agent and prompt) align with Isabel's Risk 1 (TDD structural hole) and Risk 4 (Chronicler lacks MCP tool). All three agents independently flagged that:
 
-**Team Coordination:**
-- Linus included documentation generation in Proposition 2 (knowledge capture + CAF alignment)
-- Basher coordinated on embedded diagrams in TDDs
-- Terry positioned docs as underexploited differentiator
+1. When Step 3 is skipped (which is explicitly optional), the TDD's Architecture Overview section has no content rule — a structural hole.
+2. Chronicler is instructed to query live Resource Graph and validate deployed state, but `mcp` is not in its tool list.
+3. The fallback should be: "Step 3 was skipped. Architecture context sourced from `02-architecture-assessment.md`. Diagram generated inline as Mermaid from assessment."
 
-**Team Outcome:** Documentation positioning ready for customer messaging with roadmap for enhancements. Integration with Day-2 ops (Steps 8–9) emphasizes acceleration beyond deployment.
+**Implication for Tess:** The target-state Step 7 flow must include:
+- Explicit conditional in TDD generation: "If `03-design-summary.md` missing → use fallback prose"
+- Decision on `mcp` tool: either add it to Chronicler inventory or explicitly document that Resource Graph queries are delegated to Sentinel (Step 8) and Chronicler reads from deployment summary only
+- Canonical output manifest (agreed with Basher and Orchestrator) covering all 5 deliverables and their paths
 
-**Next Phase:** Sprint S1 will generate sample TDD + diagrams using marekgroup deployment. README will be updated to elevate docs-as-operational-asset positioning.
+**See:** `.squad/orchestration-log/2026-05-13T16-13-48Z-tess-documentation-audit.md` (full findings) and `.squad/decisions.md` (merged decision record).
+
+**Recommended canonical output path:** `agent-output/{customer}/deliverables/07-*.md`
+
+**Recommended canonical file set:** `07-technical-design-document.md`, `07-operational-runbook.md`, `07-resource-inventory.md`, `07-compliance-summary.md`, `07-cost-baseline.md`
+
+### 2026-05-08 — Documentation Positioning & ALZ Comparison Sprint (Archived)
+
+**Summary:** Tess conducted positioning analysis of Step 7 documentation as operational leverage (not post-deployment paperwork) and comparison vs. official Azure Landing Zones.
+
+**Key Finding:** We add value in automation story, operational handoff, brownfield assessment, security baseline enforcement, and quick-start. Official ALZ is stronger in conceptual depth, design principles, and hybrid connectivity guidance.
+
+**Positioning Statement:** "As-built documentation is not post-deployment paperwork—it's infrastructure integration leverage. Every deployment decision is captured as executable knowledge."
+
+**Gap Roadmap:** Day-2 compliance playbooks, app LZ vending, troubleshooting guides, customization docs, WAF checklist.
+
+**See:** `.squad/agents/tess/history-archive.md` for full analysis details and value-add claims.
 
 ---
 
-## 2026-05-08T22:45:22Z — ALZ Documentation Comparison & Gap Analysis
+## 2026-05-13 — Pass 1 Design/Documentation Contract Fixes
 
-**Task:** Compare official Azure Landing Zones documentation to this accelerator's documentation story. Identify value-add, gaps, and positioning.
+### 2026-05-13T18:47:55.170+00:00 — Pass 1 Step 7 documentation contract
 
-**Findings:**
+**Task:** Audit and canonicalize Step 7 (Documentation / Chronicler) workflow contract without editing shared docs.
 
-### Where We Add Value (Beyond Official ALZ)
-1. **Multi-agent orchestration story** — 14-step workflow with artifact handoffs, approval gates, complexity classification (unique)
-2. **Operational handoff** — Post-deployment TDD, runbooks, resource inventory, compliance summary (concrete vs. template)
-3. **Brownfield assessment** — Step 0 with 221-check WARA engine + current-state/target-state docs (official ALZ has none)
-4. **Security baseline enforcement** — 6 non-negotiable rules codified in Bicep/Terraform, validated at 6 enforcement points
-5. **Cost governance** — Budget resources mandatory with parameterized alerts at 80/100/120% (built-in, not optional)
-6. **Quick start & runbooks** — Fork to deployed in <30 min with `gh workflow` + OIDC (no stored secrets)
+**Key Decisions:**
+1. Canonical output path: `agent-output/{customer}/deliverables/`
+2. Output file set (5 files): TDD, runbook, inventory, compliance summary, cost baseline
+3. Step 3 fallback rule: If `03-design-summary.md` absent, TDD generates inline Mermaid topology from `02-architecture-assessment.md` and notes design was skipped
+4. Prerequisites model: 3 hard-stop required, 3 conditional optional
+5. Skills load order: docs-writer, azure-defaults, azure-diagnostics, azure-adr
 
-### Where Official ALZ is Stronger
-1. **Conceptual depth** — Design principles (6) + CAF design area decision frameworks
-2. **Reference architecture** — Hub-spoke vs. vWAN with topology pros/cons
-3. **Policy intent & mapping** — Azure Policy library with effect explanations
-4. **Identity & access governance** — PIM, RBAC, managed identity lifecycle
-5. **Hybrid connectivity** — ExpressRoute, site-to-site VPN patterns
+**Key Findings from Audit:**
+- 8 findings identified (HIGH: 4, MEDIUM: 3, LOW: 1)
+- Output file set inconsistent between agent definition and prompt (6 different file names across sources)
+- No fallback for Step 3 absence despite Step 3 being optional
+- Prerequisites and skill loads diverge between agent and prompt
+- MCP tool (Resource Graph) promised but not in tool inventory
 
-### Top Documentation Gaps (Priority)
-1. **Day-2 compliance & remediation playbooks** (HIGH) — ops playbook for auto-remediation workflows, rollback, escalation
-2. **Application LZ vending playbook** (HIGH) — app team request/approval/deployment workflow
-3. **Troubleshooting guide** (MEDIUM) — common failure modes, OIDC rotation, quota scenarios
-4. **Platform LZ customization guide** (MEDIUM) — how to fork profiles and override parameters
-5. **Well-Architected review checklist** (MEDIUM) — standalone checklist (all 5 pillars, 8 design areas, severity)
+**Blocking Issues Resolved:**
+- ✓ Output file naming (3-way conflict → 1 canonical)
+- ✓ Step 3 dependency handling (undefined → explicit fallback)
+- ✓ Prerequisites model (divergent → aligned)
 
-### Positioning Recommendation
+**Key Files Updated:**
+- `.github/agents/documentation.md`
+- `.github/prompts/08-as-built.prompt.md`
 
-> The Agentic ALZ Accelerator transforms Microsoft's Azure Landing Zone design principles into an **automated, auditable, continuously improving** deployment and operations system. While Microsoft Learn provides foundational architecture and design areas, this accelerator operationalizes them through multi-agent orchestration, Security-Baseline-enforced code generation, real-time WAF assessment, and Day-2 compliance automation. We provide hands-on deployment runbooks, complete operational handoff artifacts (TDD, runbooks, inventory), and brownfield assessment capability that reduces ALZ deployment from weeks of manual effort to hours of guided automation.
-
-### Artifacts Created
-- Decision doc: `.squad/decisions/inbox/tess-alz-docs-comparison.md` (11.6KB, complete with roadmap and metrics)
-
-### Key Insights
-1. Official ALZ docs are strong on *what to build*, we're strong on *how to build it and operate it*
-2. Brownfield assessment is completely missing from official ALZ narrative
-3. Day-2 operations (monitoring, remediation, compliance) are our biggest differentiator vs. official ALZ
-4. Handoff documentation (TDD + runbook) becomes operational leverage when linked to continuous monitoring
-5. Security baseline enforcement (6 rules, 6 validation points) is concrete; official ALZ documents principles
-
-
----
-
-### Session Update: 2026-05-08T22:45:22.602+00:00 — Documentation Comparison & Roadmap Complete
-
-**Status:** Merged to `.squad/decisions.md`
-
-**Key Deliverable:** Value-add analysis + 5 documentation gaps with priority roadmap
-- Where we add value: Automation story, operational handoff, brownfield assessment, enforcement, quick-start
-- Where ALZ is stronger: Conceptual depth, design principles, policy strategy, hybrid connectivity
-
-**Five Priority Gaps to Close:**
-1. (HIGH) Day-2 compliance & auto-remediation playbook — operators need escalation guidance
-2. (HIGH) Application LZ vending playbook — enable self-service app team onboarding
-3. (MEDIUM) Troubleshooting guide — reduce engineering escalations
-4. (MEDIUM) Platform LZ customization guide — self-service profile changes
-5. (MEDIUM) WAF review checklist — governance reference document
-
-**Documentation Roadmap:**
-- Phase 1 (2–3 weeks): Day-2 runbook, troubleshooting, design principles
-- Phase 2 (1–2 months): App vending, WAF checklist, customization guide
-- Phase 3 (ongoing): Policy strategy, identity governance, hybrid connectivity
-
-**Success Metrics:** ~25–30 user-facing docs (from ~15), <1 hour first deploy, >70% app self-service
-
-**Status:** Ready for phase prioritization and documentation team assignment
+**Pattern:** Downstream steps (7) are sensitive to upstream optionality (3); define fallback behavior in both agent and prompt to handle absence gracefully.
