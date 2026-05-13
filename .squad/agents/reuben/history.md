@@ -41,3 +41,8 @@ This confines the canonical contract to the module that owns it.
 - Sprint planning system initialized
 - Ready for Scrum Master coordination
 
+
+**2026-05-13T20:36:56.690+00:00 — Session cleanup and artifact indexer consolidation:**
+- Scribe consolidated Pass 2 apex-recall indexer alignment into decisions.md.
+- Orchestration log created documenting Reuben's Step 7 canonical naming update (07-* prefix family).
+- Indexer changes merged to Pass 2 decisions.

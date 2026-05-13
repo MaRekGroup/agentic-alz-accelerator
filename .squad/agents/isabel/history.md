@@ -114,3 +114,8 @@ Day-1 context: reviewer lockout applies whenever a challenged artifact is reject
 **Key constraint:** `step_3_status` session state field (established by Danny in Pass 1) is the trigger condition for both design and documentation reviews. No new state fields introduced.
 
 **Pattern confirmed:** Design and documentation reviews follow the same must_fix/should_fix/consider severity model and complexity scaling as existing gate reviews. Adding them as named functions (`review_design`, `review_documentation`) in the gate table makes them first-class review contexts without creating new numbered gates.
+
+**2026-05-13T20:36:56.690+00:00 — Session cleanup and cross-agent escalation:**
+- Scribe consolidated Pass 2 Challenger review findings into decisions.md.
+- Orchestration log created documenting Isabel's Pass 2 review coverage expansion to Steps 3 and 7.
+- Minimum change set (must-fix risks 1–4) queued for approval. Awaiting Scribe gate signal.

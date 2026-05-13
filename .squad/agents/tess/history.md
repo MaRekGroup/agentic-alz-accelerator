@@ -149,3 +149,8 @@ Tess's Finding 2 (no graceful degradation when Step 3 is skipped) and Finding 3 
 - `.github/prompts/08-as-built.prompt.md`
 
 **Pattern:** Downstream steps (7) are sensitive to upstream optionality (3); define fallback behavior in both agent and prompt to handle absence gracefully.
+
+**2026-05-13T20:36:56.690+00:00 — Session cleanup and prompt alignment:**
+- Scribe consolidated Pass 2 brownfield prompt alignment into decisions.md.
+- Orchestration log created documenting Tess's as-built prompt alignment to canonical Step 7 contract.
+- Prompt changes merged to Pass 2 decisions. Ready for integration.

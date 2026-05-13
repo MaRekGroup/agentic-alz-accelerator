@@ -101,3 +101,24 @@ Danny maps to the HVE orchestrator role and owns workflow sequencing.
 - Remote bypass note: "Changes must be made through a pull request" — expected given direct push permissions on this repo
 - Remote ref state confirmed: `cf98813` now HEAD on `github/main`
 - Working tree remains dirty (9 modified files: uncommitted changes not staged, as per requirements)
+
+**2026-05-13T20:06:43.554+00:00 — Ship remaining Pass 2 work (Challenger expansion):**
+- Identified remaining Pass 2 file set: 9 modified files covering Challenger agent expansion, prompt updates, tool changes, and squad histories.
+- Staged all 9 files: `.github/agents/challenger.md`, `.github/prompts/as-built-from-azure.prompt.md`, `.github/prompts/challenger-review.prompt.md`, `tests/test_alz_recall_indexer.py`, `tools/apex-recall/src/alz_recall/indexer.py`, plus 4 squad history files.
+- Committed with message: `docs(agents): Pass 2 — expand Challenger for Step 3 design & Step 7 docs review`; Copilot co-author trailer included.
+- Commit SHA: `afdc076`
+- Pushed to `github/main`; remote received `cf98813..afdc076 main -> main` (1 commit, 25 objects).
+- Remote ref state confirmed: `afdc076` now HEAD on `github/main`; both `github/main` and local `main` aligned.
+- **Pass 2 shipping complete:** Challenger agent now covers Step 3 design checks and Step 7 documentation checks with full lockout rules and severity model parity with gate reviews.
+
+**2026-05-13T20:36:56.690+00:00 — Rewind `origin/main` to `38a5954`:**
+- Verified `38a5954bbebb3c06298dfe0c9e798feb86c475c3` exists locally as a commit object before any remote change.
+- Confirmed `origin/main` was at `cf98813f4706a8d2d40f1a7cb829e1c429addb27` and that `38a5954` is its ancestor, so the requested move was a pure rewind with 157 commits removed and no divergence from the target line.
+- Executed the remote-only reset with explicit refspec and lease protection: push targeted `origin` only and did not touch `github/main`.
+- Post-push verification showed `origin/main` resolves to `38a5954`; `github/main` remained at `afdc076`.
+- Reusable safety pattern: for destructive branch rewinds, verify ancestry first, then use `git push --force-with-lease=refs/heads/main:<expected-old-sha> <remote> <target-sha>:refs/heads/main`, and verify with `git ls-remote`.
+
+**2026-05-13T20:36:56.690+00:00 — Session cleanup and decision consolidation:**
+- Scribe consolidated Pass 1 and Pass 2 decisions: merged 7 inbox files into decisions.md.
+- Orchestration logs created documenting danny origin-main reset, commit-push, and Pass 2 final shipping workflow.
+- Reusable pattern documented: origin/main rewinds now use ancestry verification + force-with-lease for safety.
