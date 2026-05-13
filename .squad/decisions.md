@@ -2,6 +2,17 @@
 
 ## Active Decisions
 
+# Danny — Push local main to github/main
+
+- **Date:** 2026-05-13T20:50:39.284+00:00
+- **Context:** Yeselam Tesfaye requested: "lets push this to our github/main". Local `main` HEAD was at `e2b6865` (1 commit ahead of `github/main` at `afdc076`).
+- **Decision:** Execute direct push from local `main` to `github/main` using `git push github main`.
+- **Actions:** Verified local state (on `main`, HEAD `e2b6865`, 1 commit ahead); pushed with explicit refspec; verified outcome with `git ls-remote --heads github main`.
+- **Result:** ✅ Local HEAD `e2b6865` now pushed to `github/main`. Untracked `.squad/skills/remote-rewind-with-lease/` not included. `origin/main` untouched (remains at `38a5954`).
+- **Operational pattern:** Verify working tree → check commit scope via `git log` → confirm target remote → push with explicit refspec → verify with `git ls-remote --heads`.
+
+---
+
 # Danny — origin/main reset protocol
 
 - **Date:** 2026-05-13T20:36:56.690+00:00

@@ -122,3 +122,19 @@ Danny maps to the HVE orchestrator role and owns workflow sequencing.
 - Scribe consolidated Pass 1 and Pass 2 decisions: merged 7 inbox files into decisions.md.
 - Orchestration logs created documenting danny origin-main reset, commit-push, and Pass 2 final shipping workflow.
 - Reusable pattern documented: origin/main rewinds now use ancestry verification + force-with-lease for safety.
+
+**2026-05-13T20:50:39.284+00:00 — Push local main to github/main:**
+- Verified local `main` HEAD: `e2b6865` (1 commit ahead of `github/main`)
+- Prior HEAD `afdc076` was Scribe's latest. New HEAD is cleanup commit: `docs: Scribe post-session cleanup — consolidate Pass 2 decisions`
+- Pushed `e2b6865` to `github/main` explicitly; received: `afdc076..e2b6865 main -> main` (1 commit, 13 objects)
+- Remote ref state confirmed: `e2b6865` now HEAD on `github/main`; did not touch `origin/main` (remains at `38a5954`)
+- Untracked files present (`.squad/skills/remote-rewind-with-lease/`) — not staged, remain local only
+- No blocking issues; push succeeded cleanly.
+
+**2026-05-13T20:50:39.284+00:00 — Scribe post-spawn session close:**
+- Scribe consolidated all squad activity: merged inbox decision for push outcome, created orchestration and session logs.
+- Decision inbox merged: 1 file (`danny-push-github-main.md`) — no conflicts.
+- Decisions.md size after merge: 19,587 bytes (still below 20,480 archive threshold).
+- History files checked: largest is danny/history.md (will reach 15KB after this entry); no summarization triggered yet.
+- Session state: All visible work closed; next agent spawn will find decision consolidation in place.
+- Scribe will commit `.squad/` changes (decisions.md, orchestration-log, log, danny/history.md) with signed trailer.
