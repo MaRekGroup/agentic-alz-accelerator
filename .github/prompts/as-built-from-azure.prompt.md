@@ -93,12 +93,18 @@ Record decisions: `alz-recall decide {customer} --key region --value {discovered
 
 ## Phase 5: Generate Documentation
 
-With pseudo-artifacts in place, generate the as-built documentation suite:
+With pseudo-artifacts in place, generate the canonical Step 7 documentation suite
+in `agent-output/{customer}/deliverables/`:
 
-- `07-design-document.md` — Architecture overview, resource inventory, design decisions
-- `07-operations-runbook.md` — Day-2 operations procedures
-- `07-compliance-matrix.md` — Compliance mapping from discovered policies
-- Architecture diagram (Mermaid) showing resource relationships
+- `07-technical-design-document.md` — Architecture overview, resource inventory, design
+  decisions; include an inline Mermaid diagram of discovered resource relationships
+  (Step 3 was not run in this flow; diagram is synthesized from live-discovered state)
+- `07-operational-runbook.md` — Day-2 operations procedures
+- `07-resource-inventory.md` — Full discovered resource inventory with names, types,
+  regions, SKUs, and tags
+- `07-compliance-summary.md` — Compliance mapping from discovered policies and security scan
+- `07-cost-baseline.md` — Cost baseline sourced from live Azure cost data and budget
+  configuration discovered in Phase 3
 
 ## Constraints
 

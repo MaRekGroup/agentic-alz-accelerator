@@ -99,3 +99,18 @@ Day-1 context: reviewer lockout applies whenever a challenged artifact is reject
 
 **Pattern:** Adversarial review at artifact integration points catches contract mismatches before they cascade to downstream consumers.
 
+
+### 2026-05-13T19:18:08.800+00:00 — Pass 2: Step 3 and Step 7 Review Coverage
+
+**Task:** Implement Pass 2 reviewer/gate coverage for Step 3 (design artifacts) and Step 7 (documentation artifacts).
+
+**Changes delivered:**
+- `.github/agents/challenger.md` — Extended description, argument-hint, Role section, and gate review table. Added `review_design()` (pre-Gate 3) and `review_documentation()` (pre-Step 8) with six enumerated checks each, severity assignments, trigger conditions, and lockout semantics.
+- `.github/prompts/challenger-review.prompt.md` — Added Step 3 Design Artifact Review and Step 7 Documentation Artifact Review sections as tabular checklists with scope rules and explicit lockout enforcement.
+- `.squad/decisions/inbox/isabel-pass2-review-coverage.md` — Team-relevant decision record written.
+
+**Lockout semantics preserved:** Both new review contexts apply reviewer lockout on rejection — Challenger does not revise rejected artifacts; Artisan and Chronicler must correct and resubmit.
+
+**Key constraint:** `step_3_status` session state field (established by Danny in Pass 1) is the trigger condition for both design and documentation reviews. No new state fields introduced.
+
+**Pattern confirmed:** Design and documentation reviews follow the same must_fix/should_fix/consider severity model and complexity scaling as existing gate reviews. Adding them as named functions (`review_design`, `review_documentation`) in the gate table makes them first-class review contexts without creating new numbered gates.

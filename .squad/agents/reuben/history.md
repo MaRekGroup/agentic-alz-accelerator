@@ -18,6 +18,24 @@ Reuben maps to the HVE IaC planner role and owns implementation sequencing.
 
 Day-1 context: planning must reflect approved architecture, governance constraints, and IaC tool choice.
 
+### 2026-05-13T19:18:08.800+00:00 — Pass 2: Step 7 canonical naming in apex-recall indexer
+
+**Decision:** Added `_STEP7_CANONICAL` to `indexer.py` with exact-match patterns for the
+five canonical Step 7 files established by Tess (2026-05-13). Each maps to a distinct
+recall `kind` (`tdd`, `runbook`, `resource-inventory`, `compliance-summary`, `cost-baseline`).
+The `_classify` function checks this list before `ARTIFACT_PATTERNS`, so legacy names
+fall through to the existing `07-*.md → "as-built"` wildcard.
+
+**Pattern learned:** When a broad wildcard already exists in a config-driven classifier,
+add a module-local exact-match table checked first rather than modifying the shared config.
+This confines the canonical contract to the module that owns it.
+
+**Key files:**
+- `tools/apex-recall/src/alz_recall/indexer.py` — `_STEP7_CANONICAL`, updated `_classify`
+- `tests/test_alz_recall_indexer.py` — 7 new tests, 29 total, all passing
+- `.squad/skills/step-output-contracts/SKILL.md` — canonical file list source of truth
+- `.squad/decisions.md` — Tess's Step 7 contract decision (2026-05-13T18:47:55.170+00:00)
+
 ## 2026-05-08 — Scrum Master Initialization
 - Scribe merged inbox decisions (4 files)
 - Sprint planning system initialized

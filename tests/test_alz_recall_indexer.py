@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from alz_recall.indexer import (
     _classify,
+    _STEP7_CANONICAL,
     ensure_db,
     ensure_fresh,
     reindex,
@@ -79,7 +80,31 @@ class TestClassify:
         assert _classify("06-deployment-summary.md") == "deployment-summary"
 
     def test_as_built(self):
+        # Legacy name: still visible as generic as-built kind (backward compat)
         assert _classify("07-design-document.md") == "as-built"
+
+    def test_tdd_canonical(self):
+        # Canonical Step 7 TDD gets a precise kind
+        assert _classify("07-technical-design-document.md") == "tdd"
+
+    def test_runbook_canonical(self):
+        assert _classify("07-operational-runbook.md") == "runbook"
+
+    def test_resource_inventory_canonical(self):
+        assert _classify("07-resource-inventory.md") == "resource-inventory"
+
+    def test_compliance_summary_canonical(self):
+        assert _classify("07-compliance-summary.md") == "compliance-summary"
+
+    def test_cost_baseline_canonical(self):
+        assert _classify("07-cost-baseline.md") == "cost-baseline"
+
+    def test_step7_canonical_list_complete(self):
+        # Ensure every canonical Step 7 entry is reachable via _classify
+        for pattern, expected_kind in _STEP7_CANONICAL:
+            assert _classify(pattern) == expected_kind, (
+                f"_classify({pattern!r}) should return {expected_kind!r}"
+            )
 
     def test_compliance(self):
         assert _classify("08-compliance-report.md") == "compliance"

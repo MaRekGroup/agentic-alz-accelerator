@@ -101,6 +101,24 @@ Tess's Finding 2 (no graceful degradation when Step 3 is skipped) and Finding 3 
 
 ---
 
+## 2026-05-13T19:18:08.800+00:00 — Pass 2: Brownfield Prompt Aligned to Step 7 Contract
+
+**Task:** Bring `.github/prompts/as-built-from-azure.prompt.md` into line with the canonical Pass 1 Step 7 output contract.
+
+**Key Decisions:**
+1. Phase 5 now targets the canonical 5-file set: `07-technical-design-document.md`, `07-operational-runbook.md`, `07-resource-inventory.md`, `07-compliance-summary.md`, `07-cost-baseline.md`
+2. Output path updated to `agent-output/{customer}/deliverables/` (was unspecified)
+3. Standalone Mermaid diagram bullet removed — Mermaid is now inline inside the TDD with explicit "Step 3 was not run" note, satisfying the step-output-contracts fallback rule
+4. Phases 1–4 (brownfield-specific discovery and pseudo-artifact synthesis) are unchanged
+
+**Key File Paths:**
+- `.github/prompts/as-built-from-azure.prompt.md` — only file modified
+- `.squad/decisions/inbox/tess-pass2-brownfield-prompt.md` — decision record
+
+**Pattern:** When a prompt targets a specific workflow step (Step 7 here), its deliverable list and output path must exactly match the canonical contract in the agent definition — even when the prompt is a brownfield/special-path variant. Brownfield intent lives in Phases 1–4; Step 7 output shape is non-negotiable regardless of how inputs were synthesized.
+
+---
+
 ## 2026-05-13 — Pass 1 Design/Documentation Contract Fixes
 
 ### 2026-05-13T18:47:55.170+00:00 — Pass 1 Step 7 documentation contract

@@ -12,6 +12,22 @@ from typing import Any
 from .config import AGENT_OUTPUT_DIR, ARTIFACT_PATTERNS, DB_PATH
 
 # ---------------------------------------------------------------------------
+# Canonical Step 7 artifact names
+# Resolved before the broad "07-*.md" wildcard in ARTIFACT_PATTERNS so that
+# each canonical file gets a precise, queryable kind.  Legacy names (e.g.
+# 07-design-document.md) continue to fall through to the wildcard and are
+# returned as "as-built" — no existing artifact becomes invisible.
+# ---------------------------------------------------------------------------
+
+_STEP7_CANONICAL: list[tuple[str, str]] = [
+    ("07-technical-design-document.md", "tdd"),
+    ("07-operational-runbook.md",       "runbook"),
+    ("07-resource-inventory.md",        "resource-inventory"),
+    ("07-compliance-summary.md",        "compliance-summary"),
+    ("07-cost-baseline.md",             "cost-baseline"),
+]
+
+# ---------------------------------------------------------------------------
 # Schema
 # ---------------------------------------------------------------------------
 
@@ -52,7 +68,15 @@ VALUES (?, ?, ?, ?)
 # ---------------------------------------------------------------------------
 
 def _classify(filename: str) -> str:
-    """Classify an artifact filename using ARTIFACT_PATTERNS."""
+    """Classify an artifact filename into a recall kind.
+
+    Canonical Step 7 names are resolved first so each file gets a precise
+    kind.  All other patterns fall through to ARTIFACT_PATTERNS, which keeps
+    legacy Step 7 names (e.g. 07-design-document.md) visible as "as-built".
+    """
+    for pattern, kind in _STEP7_CANONICAL:
+        if fnmatch.fnmatch(filename, pattern):
+            return kind
     for pattern, kind in ARTIFACT_PATTERNS:
         if fnmatch.fnmatch(filename, pattern):
             return kind
