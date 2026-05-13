@@ -4,6 +4,20 @@
 > For current estate state, use `alz-recall show marekgroup --json`.
 > For current architecture, see [docs/accelerator/architecture.md](accelerator/architecture.md).
 
+## Current workflow state contract
+
+The changelog below remains historical. Current orchestrators also need an explicit workflow state contract for shared step sequencing.
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| `step_3_status` | `skipped` | Step 3 was intentionally bypassed for a Simple workload after Step 2 provided enough downstream context. |
+| `step_3_status` | `completed` | Step 3 finished and the post-Step-3 validation checkpoint passed. |
+| `step_3_status` | `failed` | Step 3 was required or attempted, but the design artifact check failed and downstream steps must stop. |
+
+Do not infer Step 3 disposition from missing `03-*` files. Use `step_3_status` as the source of truth.
+
+Post-Step-3 validation must pass before Step 3.5 or Gate 3 consumes Step 3 outputs. Post-Step-7 validation must pass before Step 8 consumes `07-*.md` artifacts.
+
 ## Completed Work
 - **MCP Overhaul**: Replaced 5 homegrown MCP servers with 3 (APEX azure-pricing-mcp submodule + consolidated azure-platform + drawio)
 - **Python Diagrams Engine**: Added `diagrams` library as Step 3 option (python/svg/drawio), wired into orchestrator

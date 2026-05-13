@@ -38,9 +38,12 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 - Real-time cost estimation via Azure Pricing MCP
 - Output: `02-architecture-assessment.md`
 
-### Step 3: Design (🎨 Artisan) [Optional]
+### Step 3: Design (🎨 Artisan) [Optional for Simple only]
 - Architecture diagrams and ADRs
-- Output: `03-design-*.{drawio,png,md}`
+- Execution rule: required for Standard and Complex workloads; optional only for Simple workloads
+- Status contract: record `step_3_status` as `skipped`, `completed`, or `failed`
+- Validation checkpoint: before Step 3.5 starts, verify the expected `03-*.{drawio,png,md}` artifact set is complete for the selected path
+- Output: `03-*.{drawio,png,md}`
 
 ### Step 3.5: Governance (🛡️ Warden)
 - Azure Policy discovery via REST API
@@ -70,6 +73,7 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 ### Step 7: Documentation (📚 Chronicler)
 - Design document, operations runbook, resource inventory
 - As-built cost estimate, compliance matrix, backup/DR plan
+- Validation checkpoint: before Step 8 starts, verify the required `07-*.md` artifacts are complete for the selected documentation scope and reference the recorded Step 3 disposition
 - Output: `07-*.md` documentation suite
 
 ### Step 8: Monitor (🔭 Sentinel) [Continuous]
@@ -97,6 +101,13 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 | Gate 6 | Deployment | Verify deployed resources |
 
 > **Never skip gates.** The Challenger agent reviews outputs at gates 1, 2, 4, and 5.
+
+## Validation Checkpoints
+
+| Checkpoint | Blocks | Required result |
+|------------|--------|-----------------|
+| Post-Step-3 validation | Step 3.5 and Gate 3 | Step 3 is either `skipped` for a Simple workload or `completed` with a validated `03-*` artifact set |
+| Post-Step-7 validation | Step 8 | Required `07-*.md` artifacts exist, are complete for the chosen scope, and match the deployed state plus recorded Step 3 disposition |
 
 ## MCP Tool Integration
 

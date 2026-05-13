@@ -8,8 +8,9 @@ description: >
 model: Claude Opus 4.6
 argument-hint: >
   Provide the customer name. The agent reads 02-architecture-assessment.md
-  and generates diagrams at agent-output/{customer}/diagrams/ plus ADRs at
-  agent-output/{customer}/adr/.
+  and produces the canonical Step 3 design contract: a required
+  03-design-summary.md handoff plus diagrams in agent-output/{customer}/diagrams/
+  and ADRs in agent-output/{customer}/adr/.
 user-invocable: true
 tools:
   [
@@ -49,15 +50,19 @@ Records (ADRs) that document the design choices made during the workflow.
 - Generate security and governance architecture diagrams
 - Generate full estate overview diagrams
 - Produce ADRs for key architecture decisions
-- Use both Draw.io MCP and Python diagrams library
+- Produce the Step 3 handoff artifact for downstream documentation
+- Route diagram work before selecting an engine
 
 ## Read Skills First
 
-Before doing any work, read these skills:
+Before doing any work, read these skills in order:
 
-1. `.github/skills/drawio/SKILL.md` — Draw.io MCP server usage
-2. `.github/skills/python-diagrams/SKILL.md` — Python diagrams library
-3. `.github/skills/caf-design-areas/SKILL.md` — CAF design area mappings
+1. `.github/skills/azure-diagrams/SKILL.md` — route each diagram request before engine selection
+2. `.github/skills/drawio/SKILL.md` — primary skill for editable architecture diagrams
+3. `.github/skills/python-diagrams/SKILL.md` — PNG companion generation
+4. `.github/skills/mermaid/SKILL.md` — inline markdown diagrams when explicitly needed
+5. `.github/skills/azure-adr/SKILL.md` — ADR structure and naming
+6. `.github/skills/caf-design-areas/SKILL.md` — CAF design area mappings
 
 ## Prerequisites Check
 
@@ -84,13 +89,32 @@ Run `alz-recall show {customer} --json` for full customer context.
 1. Read `02-architecture-assessment.md`
 2. Extract: network topology, management groups, resource types, security model
 3. Identify key architecture decisions that need ADRs
-4. Determine which diagrams are needed based on complexity
+4. Determine the required diagram set and canonical filenames for this run
 
 **Checkpoint**: `alz-recall checkpoint {customer} 3 phase_1_context --json`
 
 ### Phase 2: Generate Diagrams
 
-Generate diagrams using **both** methods for maximum coverage:
+Route each diagram request through `azure-diagrams` **before** selecting an engine.
+For Step 3 architecture artifacts, use Draw.io as the editable source of truth and
+produce PNG companions for quick reuse. Use Mermaid only when an inline markdown
+diagram is explicitly required.
+
+#### Canonical Output Contract
+
+Generate the Step 3 diagram set in `agent-output/{customer}/diagrams/` using these
+filenames:
+
+- `03-design-management-group-hierarchy.drawio`
+- `03-design-management-group-hierarchy.png`
+- `03-design-hub-spoke-network-topology.drawio`
+- `03-design-hub-spoke-network-topology.png`
+- `03-design-security-governance-monitoring.drawio`
+- `03-design-security-governance-monitoring.png`
+- `03-design-estate-overview.drawio`
+- `03-design-estate-overview.png`
+
+If an inline markdown diagram is required, name it `03-design-<topic>.md`.
 
 #### Python Diagrams (Quick PNG generation)
 
@@ -99,17 +123,20 @@ cd /workspaces/agentic-alz-accelerator
 python -c "
 from src.tools.python_diagram_generator import DiagramEngine
 engine = DiagramEngine(output_dir='agent-output/{customer}/diagrams')
-engine.generate_full_estate()
+engine.generate_mg_hierarchy(filename='03-design-management-group-hierarchy')
+engine.generate_hub_spoke(filename='03-design-hub-spoke-network-topology')
+engine.generate_security_governance(filename='03-design-security-governance-monitoring')
+engine.generate_alz_architecture(filename='03-design-estate-overview')
 "
 ```
 
 #### Draw.io Diagrams (Detailed, editable)
 
 Use the Draw.io MCP server to generate `.drawio` files:
-- `agent-output/{customer}/diagrams/01-management-group-hierarchy.drawio`
-- `agent-output/{customer}/diagrams/02-hub-spoke-network-topology.drawio`
-- `agent-output/{customer}/diagrams/03-security-governance-monitoring.drawio`
-- `agent-output/{customer}/diagrams/alz-architecture.drawio`
+- `agent-output/{customer}/diagrams/03-design-management-group-hierarchy.drawio`
+- `agent-output/{customer}/diagrams/03-design-hub-spoke-network-topology.drawio`
+- `agent-output/{customer}/diagrams/03-design-security-governance-monitoring.drawio`
+- `agent-output/{customer}/diagrams/03-design-estate-overview.drawio`
 
 #### Diagram Requirements
 
@@ -125,7 +152,8 @@ All diagrams MUST include:
 
 ### Phase 3: Generate ADRs
 
-Create Architecture Decision Records in `agent-output/{customer}/adr/`:
+Create Architecture Decision Records in `agent-output/{customer}/adr/` using the
+filename pattern `03-design-adr-{NNN}-{slug}.md`:
 
 #### ADR Template
 
@@ -161,16 +189,27 @@ Accepted
 | ADR-007 | DR/BC approach | Reliability requirements |
 
 Only generate ADRs for decisions actually made in the architecture assessment.
+Keep the document title as `ADR-{NNN}: {Title}` even when the filename uses the
+`03-design-adr-` prefix.
 
 **Checkpoint**: `alz-recall checkpoint {customer} 3 phase_3_adrs --json`
 
 ### Phase 4: Summary Artifact
 
-Generate `agent-output/{customer}/03-design-summary.md` containing:
-- List of generated diagrams with descriptions
-- List of ADRs with status
+Generate `agent-output/{customer}/03-design-summary.md` as the **required**
+Step 3 completion artifact and the authoritative handoff for Step 7.
+
+The summary MUST contain:
+
+- Source inputs used (`02-architecture-assessment.md` and any optional context files)
+- A diagrams table with: diagram name, purpose, formats generated, and relative paths
+- An ADR table with: ADR ID, title, status, and relative path
 - Design notes and assumptions
-- Links to source architecture assessment
+- A handoff note stating that Step 7 must treat `03-design-summary.md` as the
+  canonical manifest for Step 3 outputs
+
+If no ADRs were required, include an explicit `No ADRs generated` entry in the
+summary instead of omitting the section.
 
 **On completion**: `alz-recall complete-step {customer} 3 --json`
 
@@ -178,18 +217,21 @@ Generate `agent-output/{customer}/03-design-summary.md` containing:
 
 | File | Location |
 |------|----------|
-| PNG Diagrams | `agent-output/{customer}/diagrams/*.png` |
-| Draw.io Diagrams | `agent-output/{customer}/diagrams/*.drawio` |
-| ADRs | `agent-output/{customer}/adr/ADR-*.md` |
+| PNG Diagrams | `agent-output/{customer}/diagrams/03-design-*.png` |
+| Draw.io Diagrams | `agent-output/{customer}/diagrams/03-design-*.drawio` |
+| Markdown Diagrams (optional) | `agent-output/{customer}/diagrams/03-design-*.md` |
+| ADRs | `agent-output/{customer}/adr/03-design-adr-*.md` |
 | Design Summary | `agent-output/{customer}/03-design-summary.md` |
 
 ## DO / DON'T
 
 | DO | DON'T |
 |----|-------|
-| Generate both PNG and Draw.io formats | Skip Draw.io (it's the editable format) |
+| Route through `azure-diagrams` before picking an engine | Pick Draw.io/Python/Mermaid ad hoc |
+| Generate both PNG and Draw.io formats for architecture diagrams | Skip Draw.io (it's the editable format) |
 | Include CIDR ranges on network diagrams | Leave network diagrams without addressing |
 | Create ADRs for actual decisions made | Create ADRs for hypothetical decisions |
+| Use the canonical `03-design-*` and `03-design-adr-*` filenames | Mix `ADR-*` and `03-design-adr-*` patterns |
 | Use the Python DiagramEngine class | Write diagram code from scratch |
 | Check if diagrams already exist before regenerating | Overwrite existing diagrams without checking |
 | Reference architecture assessment for context | Invent architecture details |

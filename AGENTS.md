@@ -60,7 +60,7 @@ Step 0 runs only for brownfield scenarios.
 | 0 | `assessment` | 🔍 **Assessor** | Brownfield discovery + WAF assessment (brownfield only) | `00-assessment-*` |
 | 1 | `requirements` | 📜 **Scribe** | Captures landing zone requirements through conversation | `01-requirements.md` |
 | 2 | `architect` | 🏛️ **Oracle** | WAF assessment, CAF design area mapping, cost estimation | `02-architecture-assessment.md` |
-| 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs | `03-design-*.{drawio,png,md}` |
+| 3 | `design` | 🎨 **Artisan** | Architecture diagrams and ADRs (required for Standard and Complex; optional for Simple) | `03-*.{drawio,png,md}` |
 | 3.5 | `governance` | 🛡️ **Warden** | Policy discovery, compliance constraints, security baseline | `04-governance-constraints.md/.json` |
 | 4b/4t | `iac-planner` | 📐 **Strategist** | Implementation planning with AVM module selection | `04-implementation-plan.md` |
 | 5b | `bicep-code` | ⚒️ **Forge** | Bicep template generation (AVM-first) | `infra/bicep/{customer}/` |
@@ -145,6 +145,26 @@ Step 0 runs only for brownfield scenarios.
 | **Simple** | ≤3 resource types, single region, no custom policy, single env | 1× at each gate |
 | **Standard** | 4–8 types, multi-region OR multi-env, ≤3 custom policies | 2× at arch + code |
 | **Complex** | >8 types, multi-region + multi-env, >3 custom policies, hub-spoke | 3× at arch + code |
+
+---
+
+## Shared Workflow Contract
+
+### Step 3: Design optionality and validation
+
+- **Simple** workloads may skip Step 3 when Step 2 provides enough architecture context for downstream steps.
+- **Standard** and **Complex** workloads must complete Step 3 before Step 3.5 begins.
+- The orchestrator records explicit Step 3 state as `skipped`, `completed`, or `failed`. Downstream steps must not infer Step 3 disposition from missing files.
+- Before Step 3.5 and Gate 3, validate that the expected `03-*` design artifacts for the chosen path exist and are complete. If validation fails, mark Step 3 as `failed` and stop advancement.
+
+### Step 7: Documentation validation
+
+- Before Step 8 begins, validate that the required `07-*.md` documentation artifacts for the selected scope exist, reflect the current deployment, and reference the recorded Step 3 disposition.
+- Incomplete or inconsistent Step 7 artifacts block Step 8 until corrected.
+
+### Artifact naming note
+
+- In this shared contract, Step 3 outputs use the `03-` prefix and Step 7 outputs use the `07-` prefix. Example filenames are illustrative, not exclusive basenames.
 
 ---
 
