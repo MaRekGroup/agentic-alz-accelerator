@@ -25,7 +25,7 @@ Execute steps in order, enforcing approval gates at each checkpoint:
 0. **Assessment** (🔍 Assessor) → Brownfield discovery + WAF assessment (brownfield only) → `00-assessment-*`
 1. **Requirements** (📜 Scribe) → Gather requirements, map to 8 CAF design areas → `01-requirements.md`
 2. **Architecture** (🏛️ Oracle) → WAF assessment, CAF mapping, cost estimation → `02-architecture-assessment.md`
-3. **Design** (🎨 Artisan) → Architecture diagrams and ADRs → `03-design-*.{drawio,png,md}`
+3. **Design** (🎨 Artisan) → Architecture diagrams and ADRs (required for Standard/Complex; optional for Simple) → `03-design-*.{drawio,png,md}`
 3.5. **Governance** (🛡️ Warden) → Policy discovery, compliance constraints → `04-governance-constraints.md`
 4. **IaC Planning** (📐 Strategist) → AVM module selection, implementation plan → `04-implementation-plan.md`
 5. **Code Generation** (⚒️ Forge) → Bicep/Terraform templates → `infra/{bicep,terraform}/`
@@ -51,5 +51,7 @@ Management (LAW, Automation) → Connectivity (Hub VNet, Bastion) → Identity (
 - Gate 6 after Step 6 — Verify deployment
 
 The Challenger (⚔️) reviews at Gates 1, 2, 4, and 5.
+
+Before advancing to Step 8, validate that all required `07-*.md` artifacts exist, reflect the current deployment, and reference the recorded Step 3 disposition.
 
 ## Ask the user: greenfield or brownfield? Then start with Step 0 (brownfield) or Step 1 (greenfield).

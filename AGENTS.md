@@ -209,7 +209,7 @@ Budget amounts are parameterized per environment. No hardcoded values.
 | Planning | `04-` | `04-implementation-plan.md` |
 | Implementation | `05-` | `05-implementation-reference.md` |
 | Deployment | `06-` | `06-deployment-summary.md` |
-| As-Built | `07-` | `07-design-document.md` |
+| As-Built | `07-` | `07-technical-design-document.md` |
 | Monitoring | `08-` | `08-compliance-report.md` |
 | Remediation | `09-` | `09-remediation-log.md` |
 

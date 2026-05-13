@@ -21,7 +21,7 @@ applyTo: "**/*.md"
 | Governance | `04-gov-` | `04-governance-constraints.md` |
 | Planning | `04-` | `04-implementation-plan.md` |
 | Deployment | `06-` | `06-deployment-summary.md` |
-| As-Built | `07-` | `07-design-document.md` |
+| As-Built | `07-` | `07-technical-design-document.md` |
 
 ## No Hardcoded Counts
 

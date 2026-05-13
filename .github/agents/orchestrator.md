@@ -321,7 +321,7 @@ For **brownfield** (existing environment):
 Assessment → Requirements → Architecture → [Design] → Governance → Plan → Code → Deploy → Docs
 ```
 
-With gates at steps 1, 2, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
+With gates at steps 1, 2, 3, 4, 5, 6. Challenger reviews at gates 1, 2, 4, 5.
 
 ## Agent Delegation
 
@@ -462,11 +462,11 @@ name — no special resume prompt needed.
 | 0 | `00-assessment-*.md/.json` | Brownfield only — discovery + WARA complete? |
 | 1 | `01-requirements.md` | Exists? All 8 CAF areas covered? |
 | 2 | `02-architecture-assessment.md` | WAF scores + cost estimate present? |
-| 3 | `03-design-*.md/.drawio` | Optional — diagrams generated? |
+| 3 | `03-design-*.{drawio,png,md}` | Required for Standard/Complex; optional for Simple — artifacts complete? |
 | 3.5 | `04-governance-constraints.md/.json` | Policy discovery + baseline enforced? |
 | 4 | `04-implementation-plan.md` | AVM modules selected? Dependencies mapped? |
 | 5 | `infra/bicep/{customer}/` or `infra/terraform/{customer}/` | Templates valid? Lint passes? |
 | 6 | `06-deployment-summary.md` | Deployed + verified? |
-| 7 | `07-*.md` | As-built docs generated? |
+| 7 | `07-*.md` | All required `07-*.md` artifacts present and validated before Step 8? |
 | 8 | `08-compliance-report.md` | Compliance scan results? |
 | 9 | `09-remediation-log.md` | Remediation actions logged? |
