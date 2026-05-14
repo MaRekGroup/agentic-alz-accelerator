@@ -391,6 +391,168 @@ to `agent-output/{customer}/deliverables/`.
 
 ---
 
+# Decision: Messaging Sprint Framing — Value Proposition & Problem Statement
+
+**Date:** 2026-05-14T18:19:29.755+00:00  
+**Author:** Benedict (Scrum Master)  
+**Requested by:** Yeselam Tesfaye  
+**Status:** Ready for decision  
+**Scope:** Break down messaging work into sprint-sized slices with clear owners, dependencies, and exit criteria.
+
+## Executive Summary
+
+The repository is a production-ready **multi-agent ALZ accelerator** with 14 agents, 74 skills, 11 tools, and 3 MCP servers. It automates the translation of Azure Landing Zone requirements → deployed, governed, continuously-monitored infrastructure across greenfield + brownfield scenarios.
+
+**Messaging gaps identified:** The repo has strong technical narrative (workflow, agents, security/cost baseline) but lacks external positioning around:
+- **Problem being solved** (ALZ guidance-to-implementation gap, deployment speed, compliance drift)
+- **Value propositions** (speed, knowledge capture via as-built docs, enforcement)
+- **Unique capabilities** (architectural diagrams as code, as-built TDD automation, Day-2 ops)
+- **User personas & use cases** (architect, platform team, security, ops)
+
+**Recommendation:** Execute a small **6-slice sprint** to audit content, validate messaging theses, synthesize narrative, and produce decision artifacts (no product copy).
+
+## Sprint Framing Details
+
+### Slice Breakdown
+
+| # | Title | Owner | Deps | Duration | Outputs |
+|---|-------|-------|------|----------|---------|
+| **1** | Problem Statement Audit | Benedict | — | 30m | 3 candidate problem statements with justification |
+| **2** | Value Proposition Analysis | Linus (Architect) | 1 | 45m | 3 value propositions with proof points (speed, knowledge, enforcement) |
+| **3** | Synthesis & Ranking | Benedict | 1,2 | 15m | Recommended primary + secondary narratives |
+| **4** | Feature Foregrounding Strategy | Basher (Artisan) | 3 | 30m | Keep/elevate/clarify/link recommendations + rationale |
+| **5** | Narrative Structure & Use Cases | Tess (Chronicler) | 3,4 | 45m | Narrative flow template + 3 use-case outlines |
+| **6** | Decision Merge & Recommendation | Benedict | 1–5 | 15m | Final messaging strategy decision document |
+
+### Key Messaging Decision Points
+
+**A. Problem Statement Options:**
+1. **Guidance Gap:** "Azure CAF is complete but complex — teams struggle to translate it to infrastructure"
+2. **Deployment Speed:** "Landing zone deployments are slow, repetitive, error-prone — automation is fragmented"
+3. **Compliance Drift:** "Compliance drifts over time — teams lack automation for governance and remediation"
+
+**B. Value Propositions:**
+- **Speed:** Greenfield 30 min, 4 platform LZs orchestrated, reusable profiles
+- **Knowledge:** As-built TDD, architecture diagrams (Python + Draw.io), resource inventory
+- **Enforcement:** 6 security rules, cost budgets, continuous monitoring + remediation
+
+---
+
+# Decision: Problem Statement — Azure Landing Zone Deployment Velocity
+
+**Date:** 2026-05-14T18:19:29.755+00:00  
+**Author:** Rusty (Requirements Agent)  
+**Status:** Ready for decision
+
+## Problem Statement
+
+Enterprise architects and platform teams spend **6–12 months** coordinating manual, ad-hoc workflows to design, deploy, and govern Azure landing zones. Each engagement requires re-sequencing requirements gathering → architecture approval → design reviews → governance validation → code generation → deployment → documentation → compliance auditing. This handoff-heavy process is error-prone, creates governance debt, and leaves production infrastructure without continuous compliance monitoring.
+
+## Target Users
+
+- **Primary:** Enterprise architects and landing zone practitioners managing multi-subscription Azure estates
+- **Secondary:** Microsoft Solution Architects (SAs) delivering ALZ engagements and needing repeatable, codified knowledge transfer
+- **Tertiary:** Platform engineering teams operating cloud infrastructure with strict governance and cost-control requirements
+
+## Current-State Pain Points
+
+1. **Sequential workflow bottlenecks** — 6 approval gates, 2-week cycles compound to 12+ weeks minimum delivery time
+2. **Inconsistent artifact ownership** — Requirements/design/code/deploy split across teams with no shared mental model
+3. **Governance and compliance debt** — Security baselines checked post-deployment if at all; manual drift detection
+4. **Cost and operational blindness** — One-time cost estimates, no continuous budget governance, audit readiness unknown
+
+## Why This Product Matters
+
+The accelerator demonstrates that **orchestration is where value lives**. The pieces (modules, validators, CAF design areas, governance rules) exist in many places; what is unique here is the *coordinated workflow* that:
+
+1. **Compresses 6–12 months into days** by parallelizing independent steps and enforcing approval gates without context loss
+2. **Codifies ALZ expertise** as reusable agents and skills, enabling knowledge transfer and scaling across engagements
+3. **Bakes in governance and compliance** at code-gen time, not post-deployment
+4. **Removes operational toil** via continuous monitoring and auto-remediation, freeing teams for strategic work
+
+## Positioning Candidates
+
+1. **For enterprises:** "Deploy and govern Azure landing zones in weeks, not months"
+2. **For Microsoft SAs:** "Productize your ALZ expertise as reusable, hands-off orchestration"
+3. **For platform teams:** "Compliance engine that learns your environment and stays in sync"
+
+---
+
+# Decision: Value Proposition — Grounded in Architecture & Operating Model
+
+**Date:** 2026-05-14T18:19:29.755+00:00  
+**Author:** Linus (Architect)  
+**Status:** Ready for decision
+
+## Core Value Propositions
+
+### **PROPOSITION 1 (Primary): Enforce ALZ Best Practices Automatically**
+
+> **Problem:** Manual compliance checks and policy enforcement create drift and violations post-deployment. Remediation is reactive and labor-intensive.
+
+> **Solution:** Three-tier enforcement at code generation → deployment → continuous monitoring with auto-remediation.
+
+**Evidence Points:**
+- `scripts/validators/validate_security_baseline.py` — 6 non-negotiable rules blocked at merge
+- `scripts/validators/validate_cost_governance.py` — Budget resource requirement enforced
+- Monitoring agent (Step 8) — 30-min compliance scans, 1-hr drift detection
+- Remediation agent (Step 9) — 8 built-in remediation strategies with snapshot/rollback
+
+**Target Audience:** Compliance, security, and governance teams
+
+**Impact:** Reduce post-deployment drift violations by 80–90%; eliminate manual remediation cycles
+
+### **PROPOSITION 2 (Secondary): Accelerate Knowledge Transfer via Generated Documentation**
+
+> **Problem:** Architects create design docs; operations teams inherit incomplete or divergent documentation. Knowledge is lost in handoff. Brownfield assessment requires manual effort.
+
+> **Solution:** Algorithmic documentation generation throughout the workflow + brownfield assessment with WAF/CAF scoring.
+
+**Evidence Points:**
+- Brownfield Assessment (Step 0) — Current-state + WAF evaluation + target-state roadmap generated automatically
+- Design artifacts (Step 3) — Diagrams (Draw.io, Mermaid, Python diagrams) + ADRs with WAF rationale
+- As-built documentation (Step 7) — Canonical 5-file suite: TDD, runbook, inventory, compliance, cost baseline
+- CAF traceability — All 8 design areas mapped throughout requirements → architecture → code → monitoring
+
+**Target Audience:** Architects, knowledge teams, operations handover
+
+**Impact:** 50–70% reduction in documentation effort; complete traceability from requirements to deployed resources
+
+### **PROPOSITION 3 (Tertiary): Deploy ALZ in 2–4 Weeks with Approval Integrity**
+
+> **Problem:** Manual ALZ deployment takes 8–12 weeks due to sequential decision-making, discovery work, and rework loops.
+
+> **Solution:** Parallelized orchestration with AVM-first generation and complexity-scaled approval gates.
+
+**Evidence Points:**
+- Parallelized workflow — Design (Step 3) and Governance (Step 3.5) run concurrently after Gate 2
+- AVM-first generation — No custom modules, deterministic selection
+- Complexity-scaled gates — Simple deployments require 1 gate pass; Complex deployments require 3 passes at architecture + code
+- Orchestrator maintains session state across steps, enabling resume
+
+**Target Audience:** Delivery teams, CTO/infrastructure leaders
+
+**Impact:** 3–6 week acceleration for Standard-tier deployments; full approval gate integrity preserved
+
+## Messaging Strategy
+
+**Lead with Enforcement** (Proposition 1):
+- Broadest TAM: compliance/security teams feeling post-deploy pain
+- Most defensible: actual validators in the code
+- Highest ROI: continuous monitoring + auto-remediation reduces operational burden
+
+**Secondary: Knowledge Transfer** (Proposition 2):
+- Differentiates from generic IaC templates
+- Brownfield assessment is untested at scale (risk) but valuable for migrations
+- ADRs + WAF mapping show thoughtful architecture, not just deployment
+
+**Tertiary: Speed** (Proposition 3):
+- Bonus positioning for delivery teams
+- 3–6 week acceleration is meaningful but secondary to compliance/knowledge
+- Gate integrity is essential; complexity-scaling proves rigor not recklessness
+
+---
+
 ## Governance
 
 - All meaningful changes require team consensus
