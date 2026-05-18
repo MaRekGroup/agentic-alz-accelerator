@@ -147,6 +147,14 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-load-balancer` | `.github/skills/azure-load-balancer/` | Forge, Oracle |
 | `azure-route-server` | `.github/skills/azure-route-server/` | Forge |
 
+#### Compute & Containers
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-kubernetes-service` | `.github/skills/azure-kubernetes-service/` | Oracle, Forge, Strategist, Assessor |
+| `azure-virtual-machines` | `.github/skills/azure-virtual-machines/` | Oracle, Forge, Strategist, Assessor |
+| `azure-container-apps` | `.github/skills/azure-container-apps/` | Oracle, Forge, Strategist |
+
 #### Management & Operations
 
 | Skill | Location | Used By |

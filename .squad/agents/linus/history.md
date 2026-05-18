@@ -167,4 +167,21 @@ Reference: `.squad/decisions.md` §"Re-Review Verdict — v2 vs v1 Conditions" f
 
 ## 2026-05-18 — Wave 2 plan landed with APPROVE WITH CONDITIONS
 
-Wave 2 plan (3 skills: AKS, VMs, ACA) accepted by Isabel with 2 majors + 4 minors. Copilot applied 4 surgical fixes (M1: add Identity & Access to VMs; M2: resolve compute-tier-selection.md sequencing; Minor 3 + 4: consistency updates). Scorecard post-closure: AKS PASS / VMs PASS / ACA PASS. Plan cleared for execution. Phase 1A (compute-tier-selection.md ADR) authoring delegated to parallel spawn (linus-2).
+---
+
+## 2026-05-18 (Wave 2): Compute & Containers — 3 parallel SKILL.md drafts
+
+Authored 3 SKILL.md files in parallel under Wave 2 (Compute & Containers theme):
+- azure-kubernetes-service (saul-4, 338 lines, 6 CAF / 5 WAF rows — exceeds floor)
+- azure-virtual-machines (saul-5, 301 lines, 4 CAF / 4 WAF — Identity & Access added per Isabel M1)
+- azure-container-apps (saul-6, 307 lines, 4 CAF / 4 WAF — ADR-anchored at 3 reference points)
+
+All 3 pre-emptively passed Isabel compliance baseline: Scenario S# code in brownfield headline (S8/S3/S8), ≥4 CAF / ≥4 WAF rows, cross-skill sequencing sentence (verbatim per plan), Prerequisites subsection covering 5 hidden assumptions. Boundary discipline: each defers to ADR `docs/decisions/compute-tier-selection.md` for tier selection rather than redefining inline.
+
+Lesson: Pre-emptive compliance baking eliminates the post-draft major-closure cycle. The Wave 1 pattern was "draft → Isabel finds 3 majors → surgical close." Wave 2 pattern is "plan codifies compliance → drafts pass first-time." Will validate at Isabel Wave 2 quality gate next.
+
+## 2026-05-18 (Wave 2 Phase 1A): Compute-tier selection ADR
+
+Authored `docs/decisions/compute-tier-selection.md` (171 lines, 8 sections: Context, Decision Tree, WAF Trade-Off Matrix, Brownfield Assessment Lens, Scenario Mapping, Anti-Patterns, Prerequisites and Caveats, References, Revision History). Spawn ID: linus-2. ADR was the Phase 1A sequential prerequisite before 3 parallel Saul drafters; all 3 Wave 2 SKILL.md files now cross-reference the ADR (10/8/11 occurrences respectively for AKS/VMs/ACA). Boundary discipline held: the ADR defines *when* each tier is appropriate; the 3 SKILL.md files define *how* to configure each tier.
+
+Lesson: Shared decision artifacts authored sequentially BEFORE parallel skill authors fan out is the right pattern when ≥2 skills share a boundary. Saved 3× rework that would have occurred if 3 Sauls each invented their own AKS-vs-ACA tree.

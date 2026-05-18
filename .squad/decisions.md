@@ -2259,3 +2259,94 @@ All 4 fixes verified via grep (line numbers in current plan):
 Plan upgraded from APPROVE WITH CONDITIONS → ready for execution. Authors (Linus for ADR, 3× Saul for SKILL.md drafts) may proceed.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+---
+
+## 2026-05-18 — Wave 2 Drafts Shipped
+
+### Wave 2 — Compute & Containers Skills (Saul × 3 parallel)
+
+Three SKILL.md files authored in parallel by saul-4, saul-5, saul-6 (claude-sonnet-4.6) following the Linus Wave 2 plan + Isabel-cleared compliance baseline. Total: ~946 lines across 3 skills. Pre-emptive Isabel compliance (Scenario S# in brownfield header, ≥4 CAF / ≥4 WAF rows, cross-skill sequencing sentence, Prerequisites subsection with 5 hidden assumptions) was baked in from the start per plan.
+
+#### azure-kubernetes-service (saul-4)
+
+**File created:** `.github/skills/azure-kubernetes-service/SKILL.md`
+**Line count:** 338 lines (target: ~380; within tolerance for prose compression — no content gaps)
+
+| Check | Status | Detail |
+|-------|--------|--------|
+| Brownfield Scenario S# code in section header | ✅ PASS | Section titled exactly `## Brownfield Scenario (Scenario S8: Cloud-Native Modernization)` |
+| CAF table row count (≥4 required) | ✅ PASS | 6 rows: Network Topology & Connectivity, Platform Automation & DevOps, Security, Identity & Access, Resource Organization, Management |
+| WAF table row count (≥4 required) | ✅ PASS | 5 rows: Reliability, Performance Efficiency, Security, Operational Excellence, Cost Optimization |
+| Cross-skill sequencing sentence (verbatim) | ✅ PASS | "Run after `workload-identity-federation` (Wave 1) is integrated. Assess existing AKS clusters for networking mode debt and pod identity migration. Hand off serverless-eligible workloads to `azure-container-apps`." — present in Brownfield Scenario section |
+| Prerequisites subsection present | ✅ PASS | `## Prerequisites and Caveats` section with all 5 hidden assumptions surfaced |
+
+**Hidden Assumptions Coverage:**
+1. ✅ AKS LTS tier pricing — Surfaced in Prerequisites item 1
+2. ✅ GPU node pool quota — Surfaced in Prerequisites item 2
+3. ✅ Defender for Containers paid plan — Surfaced in Prerequisites item 3
+4. ✅ Confidential containers Preview status — Surfaced in Prerequisites item 4
+5. ✅ AKS Edge Essentials / Azure Local out of scope — Surfaced in Prerequisites item 5
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-kubernetes-service` | `.github/skills/azure-kubernetes-service/` | Oracle, Forge, Strategist, Assessor |
+```
+
+#### azure-virtual-machines (saul-5)
+
+**File created:** `.github/skills/azure-virtual-machines/SKILL.md`
+**Line count:** 301 lines (target: ~280 — within spec tolerance)
+
+| Check | Status | Detail |
+|-------|--------|--------|
+| Brownfield Scenario S# code in headline | ✅ PASS | `## Brownfield Scenario (Scenario S3: Regulated Workloads)` |
+| CAF table ≥4 rows | ✅ PASS | 4 rows: Security (Primary), **Identity & Access** (Primary — Isabel M1 fix), Network Topology & Connectivity, Management |
+| WAF table ≥4 rows | ✅ PASS | 4 rows: Reliability (Primary), Security (Primary), Performance Efficiency, Cost Optimization |
+| Cross-skill sequencing sentence present | ✅ PASS | Verbatim in Brownfield section: "Run after Wave 1 identity hardening is complete. Assess VM estate for zone-balancing, right-sizing, and containerization readiness. Hand off container-ready workloads to `azure-kubernetes-service` or `azure-container-apps` based on complexity (see `docs/decisions/compute-tier-selection.md`)." |
+| Prerequisites subsection present | ✅ PASS | `## Prerequisites and Caveats` — 5 hidden assumptions surfaced |
+
+**Hidden Assumptions Coverage:**
+1. ✅ Confidential VM regional availability (DCsv3/ECsv5 not all regions)
+2. ✅ Trusted Launch requires Gen2 only (Gen1 must migrate first)
+3. ✅ Dedicated Host — premium SKU, not all VM SKUs eligible, quota required
+4. ✅ Defender for Servers — paid plan required for JIT/FIM/vuln management
+5. ✅ Spot VMs — 30-second eviction, fault-tolerant workloads only
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-virtual-machines` | `.github/skills/azure-virtual-machines/` | Oracle, Forge, Strategist, Assessor |
+```
+
+#### azure-container-apps (saul-6)
+
+**File created:** `.github/skills/azure-container-apps/SKILL.md`
+**Line count:** 307 lines (target: ~250; expanded due to Dapr building-block table, KEDA scaler table, playbook table depth, and prerequisites table — all substantive content, no padding)
+
+| Check | Status | Detail |
+|---|---|---|
+| Brownfield Scenario S# code in headline | ✅ | `## Brownfield Scenario (Scenario S8: Cloud-Native Modernization)` — exact format |
+| ACA vs AKS S8 sub-narrative distinction | ✅ | Explicit paragraph: ACA = "migrating to serverless"; AKS = "modernizing existing clusters" |
+| CAF table ≥ 4 rows | ✅ | 4 rows: Platform Automation & DevOps, Network Topology & Connectivity, Security, Management |
+| WAF table ≥ 4 rows | ✅ | 4 rows: Performance Efficiency, Cost Optimization, Reliability, Security |
+| Cross-skill sequencing sentence (verbatim) | ✅ | Present in Brownfield section under "Cross-Skill Sequencing" heading |
+| Prerequisites subsection | ✅ | `## Prerequisites and Caveats` — 5 items tabulated |
+| ADR reference in Boundary section | ✅ | Explicit blockquote pointer to `docs/decisions/compute-tier-selection.md` in Boundary section |
+| ADR reference in Brownfield section | ✅ | Referenced in discovery checklist and cross-skill sequencing sentence |
+| ADR reference in Overview paragraph | ✅ | Sentence 3 of intro paragraph names the ADR and explains when to use it |
+
+**Hidden Assumptions Coverage:**
+1. ✅ ACA Workload Profile regional availability — `az containerapp env workload-profile list-supported` command included
+2. ✅ VNET subnet sizing — `/27` Consumption / `/23` Workload Profiles; irreversibility flagged
+3. ✅ Managed certificate rate limits — ISV SaaS wildcard cert recommendation included
+4. ✅ Dapr GA vs Preview (Workflow = Beta, Distributed Lock = Alpha) — component status table in Architecture Patterns + Prerequisites
+5. ✅ Scale-to-zero cold start (1–3s) — min replicas guidance per latency SLO in Anti-Pattern #4 and Prerequisites
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-container-apps` | `.github/skills/azure-container-apps/` | Oracle, Forge, Strategist |
+```
+
+### Wave 2 — Compute-Tier Selection ADR (Linus / linus-2)
+
+Linus authored `docs/decisions/compute-tier-selection.md` (171 lines, 8 sections) as Phase 1A prerequisite to the 3 parallel Saul drafters. Defines AKS-vs-ACA-vs-VMs boundary via decision tree, WAF trade-off matrix, brownfield assessment lens, S1–S8 scenario mapping, 7 anti-patterns, and Prerequisites/Caveats covering all 5 of Isabel's hidden-assumption flags. All 3 Wave 2 SKILL.md files cross-reference this ADR rather than redefining the tier-selection decision tree inline.

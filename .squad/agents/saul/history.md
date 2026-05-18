@@ -66,3 +66,16 @@ The 4-skill sequence is now explicit in every Brownfield Scenario section: `entr
 
 Every brownfield section must (1) cite explicit S# code, (2) name prerequisite skill, (3) name downstream handoff skill. This pattern is now documented in all 4 skills and ready for reuse.
 
+---
+
+## 2026-05-18 (Wave 2): Compute & Containers — 3 parallel SKILL.md drafts
+
+Authored 3 SKILL.md files in parallel under Wave 2 (Compute & Containers theme):
+- azure-kubernetes-service (saul-4, 338 lines, 6 CAF / 5 WAF rows — exceeds floor)
+- azure-virtual-machines (saul-5, 301 lines, 4 CAF / 4 WAF — Identity & Access added per Isabel M1)
+- azure-container-apps (saul-6, 307 lines, 4 CAF / 4 WAF — ADR-anchored at 3 reference points)
+
+All 3 pre-emptively passed Isabel compliance baseline: Scenario S# code in brownfield headline (S8/S3/S8), ≥4 CAF / ≥4 WAF rows, cross-skill sequencing sentence (verbatim per plan), Prerequisites subsection covering 5 hidden assumptions. Boundary discipline: each defers to ADR `docs/decisions/compute-tier-selection.md` for tier selection rather than redefining inline.
+
+Lesson: Pre-emptive compliance baking eliminates the post-draft major-closure cycle. The Wave 1 pattern was "draft → Isabel finds 3 majors → surgical close." Wave 2 pattern is "plan codifies compliance → drafts pass first-time." Will validate at Isabel Wave 2 quality gate next.
+
