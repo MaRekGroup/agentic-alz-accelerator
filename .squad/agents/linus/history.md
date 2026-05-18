@@ -109,3 +109,7 @@ Isabel-4 verdict: APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Find
 ## 2026-05-18 — Wave 3 (Tenant Architecture)
 - Linus-3 (opus-4.6): Authored plan `.squad/decisions/inbox/linus-wave3-plan.md` (309 lines, 9/9 self-grade PASS on W2 checklist). Pivoted scope from Billing & Tenant → Tenant Architecture (justified, awaiting Yeselam authorization). 4 Open Questions raised.
 - Linus-4 (opus-4.6): Authored shared ADR `docs/decisions/billing-tenant-hierarchy.md` (168 lines, 9 sections, mirrors compute-tier-selection.md structure). "Design vs. automate" framing throughout; brownfield lens cross-references MG skill's ⛔ HARD GATE.
+
+## 2025-07-14 — Wave 4 (Data Platform)
+- Linus (opus-4.6): Authored plan `.squad/decisions/inbox/linus-wave4-plan.md` (9 sections, 9/9 self-grade PASS). 3 skills: azure-sql-database (S3), azure-cosmos-db (S2), azure-storage-accounts (S5). ADR: YES (`docs/decisions/data-tier-selection.md`). 5 Open Questions raised for Yeselam. All W1/W2/W3 Isabel majors baked in at template level (H2 brownfield headers, ⛔ HARD GATE annotations, OpsEx WAF row, Identity & Access CAF row, inline cross-skill sequencing).
+- Linus-6 (opus-4.6): Authored shared ADR `docs/decisions/data-tier-selection.md` (173 lines, 9 sections). SQL/Cosmos/Storage decision tree with executable IF/THEN criteria, 5×3 WAF trade-off matrix, brownfield assessment lens cross-referencing all W4 ⛔ HARD GATEs (SQL step 6, Cosmos steps 4+7, Storage steps 5+7). Anti-patterns in paragraph form. "Design vs. automate" framing established.

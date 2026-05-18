@@ -134,3 +134,15 @@ Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All con
 ## 2026-05-18 — Wave 3 Draft Quality Gate (Isabel-6)
 
 **Verdict:** APPROVE CLEAN (0 blockers, 0 majors, 2 minors). All 13 structural checks pass for both skills. ADR mirrors compute-tier-selection.md exactly (9 sections). Both plan-stage majors (M1 brownfield H2 format, M2 ⛔ HARD GATE annotation) confirmed closed. Cross-artifact coherence is airtight — WHERE/HOW framing consistent, boundary discipline clean, no redefinition. Catalog and ledger entries correctly formatted. Cleanest wave submission to date. Recommended: commit and push as-is.
+
+## 2025-07-22 — Wave 4 Plan-Stage Review
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 3 majors, 4 minors). Strong W1/W2/W3 pre-compliance, but three conditions remain before author fan-out: add explicit per-skill DO NOT USE FOR structure, resolve open scope/ADR forks inline, and encode Wave 4-specific traps (SQL serverless HA, Cosmos throughput sharing, Storage SFTP/NFS gating).
+
+## 2026-05-18 — Wave 4 Plan-Stage Review (Isabel-7)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 3 majors, 4 minors). Conditions are boundary discipline (per-skill DO NOT USE FOR explicit), forked execution path (scope/ADR forks inline), and W4-specific traps (SQL serverless HA, Cosmos throughput sharing, Storage SFTP/NFS gating). All majors + minors closed inline via surgical edits to plan v2 before Phase 1A (Linus-6 ADR authoring) began. Ready for parallel Saul fan-out.
+
+## 2026-07-14 — Wave 4 Draft-Stage Quality Gate (Isabel-8)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 1 major, 1 minor). All 3 skills pass 13/13 checklist. ADR passes 8/8. Major: hardcoded "Three" in copilot-instructions.md line 167 — one-word fix. Minor: Cosmos CAF Identity row lacks Primary marker. No structural, coherence, or plan-to-draft drift issues. Condition: close C5 before commit.
