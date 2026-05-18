@@ -2412,3 +2412,24 @@ Wave 2 drafts now meet APPROVE CLEAN bar:
 - ✅ Registration in copilot-instructions.md correct
 
 **Ready for push to `github` remote + PR to `github/main`**
+
+## 2026-05-18 — Wave 3 Drafts Shipped (Tenant Architecture)
+
+**Branch:** `wave3-skills-planning`
+**Plan:** Linus-3 (309 lines, APPROVE WITH CONDITIONS from Isabel-5; 2 majors closed surgically)
+**ADR:** `docs/decisions/billing-tenant-hierarchy.md` (Linus-4, 168 lines, 9 sections)
+**Skills:**
+- `.github/skills/management-group-architecture/SKILL.md` (Saul-7, 280 lines, S4 Brownfield M&A, 9/9 PASS on Isabel W2 checklist, ⛔ HARD GATE at Step 3)
+- `.github/skills/subscription-vending/SKILL.md` (Saul-8, 308 lines, S5 ISV Multi-Tenant SaaS, 9/9 PASS on Isabel W2 checklist)
+
+**Scope shift authorized:** Wave 3 pivoted from "Billing & Tenant" → "Tenant Architecture" per Yeselam approval; existing cost skills (`azure-cost-management`, `azure-cost-optimization`, `cost-governance`) already cover billing visibility. New skills serve CAF Billing & Tenant design area via `subscription-vending` Primary mapping.
+
+**Yeselam Q1-Q4 decisions:**
+- Q1 (skill naming): `management-group-architecture` + `subscription-vending` confirmed
+- Q2 (EA→MCA migration): Deferred to future skill; mentioned only as prereq
+- Q3 (Brownfield S#): S4 for MG, S5 for vending
+- Q4 (ADR depth): Full 9-section ADR mirroring `docs/decisions/compute-tier-selection.md`
+
+**Capacity:** 9 / 14 skills shipped after Wave 3 ships (W1 = 4, W2 = 3, W3 = 2). Remaining: W4 (3), W5 (2).
+
+**Next:** Isabel-6 draft-stage quality gate → commit + push to `github wave3-skills-planning` → PR (gh auth switch to `ytesfaye` first).

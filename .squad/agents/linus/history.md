@@ -85,3 +85,27 @@ Isabel-4 verdict: APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Find
 3. **Wave Planning Methodology:** Start from master table → 10 fields per skill → composite brownfield path → Wave N dependencies → pre-emptive Isabel patterns → concurrency plan → identify ONE coordination point.
 4. **Surgical Major Closure (≤2 majors, <10 new lines each):** Use Isabel-proposed text, apply in-place, verify with grep, no agent re-spawn needed. Pattern: Wave 1 drafts (3 majors, closed) → Wave 2 plan (4 majors, closed) → Wave 2 drafts (2 majors, closed).
 
+### 2026-05-18T19:16:18Z — Wave 3 Plan Drafted (Billing & Tenant)
+
+**Artifact:** `.squad/decisions/inbox/linus-wave3-plan.md`
+
+**Skill picks:** (1) `management-group-architecture` — MG hierarchy design, MG-scoped policy/RBAC inheritance, MG move blast-radius analysis. S4 brownfield. (2) `subscription-vending` — programmatic subscription creation, billing scope, guardrail injection, network injection, decommissioning. S5 brownfield. Both occupy genuinely uncovered territory confirmed via overlap analysis against 3 existing cost skills + azure-policy + azure-rbac.
+
+**ADR decision: YES** — `docs/decisions/billing-tenant-hierarchy.md`. The "hierarchy design vs. hierarchy automation" boundary mirrors Wave 2's "AKS vs ACA vs VMs" boundary — shared placement decision tree requires shared artifact authored before parallel fan-out.
+
+**Key trade-off weighed:** Naming the MG skill. Original P3 plan said `azure-tenant-management` (broad: EA/MCA + MG + tenant settings). Narrowed to `management-group-architecture` because (a) billing hierarchy ownership went into `subscription-vending` via billing-scope patterns, (b) tenant-level settings like multi-tenant federation are future scope (entra-tenant-design), (c) keeping focus tight matches the "one skill, one primary purpose" principle from Wave 1.
+
+**Concern for Isabel:** The MG skill's S4 brownfield playbook is the most complex of any Wave — 8 staged steps with move operations that can break production. Want Isabel to validate that the blast-radius analysis step (step 3) is positioned correctly as a hard gate before any Azure mutations begin.
+
+
+### 2026-05-18 — Wave 3 Shared ADR Authored (Billing & Tenant Hierarchy)
+
+**Artifact produced:** `docs/decisions/billing-tenant-hierarchy.md` (168 lines, 9 sections)
+
+**Key decisions:** (1) "Design vs. automate" framing as unifying mental model — hierarchy pattern = design (`management-group-architecture`), subscription lifecycle = automate (`subscription-vending`); (2) Three hierarchy patterns (Flat, Regional, Workload-Type) with criteria tables mirroring W2 compute-tier pattern; (3) Brownfield lens cross-references MG skill playbook step 3 ⛔ HARD GATE for blast-radius enforcement; (4) 5 anti-patterns in paragraph form (root-MG sprawl, vanity depth, per-team sprawl, manual creation, EA fragmentation); (5) EA→MCA mentioned only as billing-scope prerequisite in §7 (per Yeselam directive — not a migration playbook); (6) Scenario mapping covers S1/S4/S5/S6 with hierarchy+vending per row.
+
+**Open items:** None for this ADR. Phase 2 (Saul skill drafting) and Phase 3 (Scribe count-manifest update) are next.
+
+## 2026-05-18 — Wave 3 (Tenant Architecture)
+- Linus-3 (opus-4.6): Authored plan `.squad/decisions/inbox/linus-wave3-plan.md` (309 lines, 9/9 self-grade PASS on W2 checklist). Pivoted scope from Billing & Tenant → Tenant Architecture (justified, awaiting Yeselam authorization). 4 Open Questions raised.
+- Linus-4 (opus-4.6): Authored shared ADR `docs/decisions/billing-tenant-hierarchy.md` (168 lines, 9 sections, mirrors compute-tier-selection.md structure). "Design vs. automate" framing throughout; brownfield lens cross-references MG skill's ⛔ HARD GATE.

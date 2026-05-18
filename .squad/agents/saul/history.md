@@ -79,3 +79,79 @@ All 3 pre-emptively passed Isabel compliance baseline: Scenario S# code in brown
 
 Lesson: Pre-emptive compliance baking eliminates the post-draft major-closure cycle. The Wave 1 pattern was "draft → Isabel finds 3 majors → surgical close." Wave 2 pattern is "plan codifies compliance → drafts pass first-time." Will validate at Isabel Wave 2 quality gate next.
 
+
+## 2026-05-18 — Wave 3 Skill: management-group-architecture
+
+**Date:** 2026-05-18T00:00:00Z
+**Status:** Complete
+**Requested by:** Coordinator (Wave 3 parallel authoring)
+
+### Deliverable
+
+- **File:** `.github/skills/management-group-architecture/SKILL.md`
+- **Line count:** 280 lines
+- **Sections:** 13 H2 sections + 11 H3 subsections (27 headers total)
+
+### Isabel W2 Checklist Self-Grade (9 items)
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Skill ID and Domain in header table | ✅ PASS | Header table row 1-2: `management-group-architecture`, `Azure Governance / Resource Organization` |
+| 2 | Brownfield Scenario in header table (S4) | ✅ PASS | Header table: `S4 — Brownfield M&A Integration` |
+| 3 | Hard + Soft prereqs in header table | ✅ PASS | Hard: `azure-policy`; Soft: `azure-rbac`, `caf-design-areas` |
+| 4 | CAF Design Area Mapping table ≥4 rows including Identity & Access | ✅ PASS | 5 rows: Resource Organization, Governance, Security, Identity & Access, Platform Automation & DevOps |
+| 5 | WAF Pillar Coverage table ≥4 rows including Operational Excellence | ✅ PASS | 4 rows: Security, Operational Excellence, Reliability, Cost Optimization |
+| 6 | Boundaries explicitly cross-references ADR + sibling Wave 3 skill | ✅ PASS | First two bullets: ADR link + `subscription-vending` SKILL.md |
+| 7 | H2 format for `## Brownfield Scenario (Scenario S4: ...)` | ✅ PASS | Line is `## Brownfield Scenario (Scenario S4: Brownfield M&A Integration)` |
+| 8 | Cross-skill sequencing INLINE in brownfield intro paragraph, NOT in trailing H3 | ✅ PASS | Second sentence of intro paragraph, before the playbook H3 |
+| 9 | Step 3 uses `⛔ HARD GATE` prefix; Steps 4-8 use "Soft rollback" annotation | ✅ PASS | Step 3 verbatim per plan; Steps 4-8 all annotated `*Soft rollback: ...*` |
+
+### ADR Cross-References Audit
+
+- Overview boundary sentence: ✅ references ADR (relative path)
+- Boundaries DO NOT USE FOR: ✅ first bullet with link
+- Brownfield intro paragraph: ✅ references ADR for salvageable-vs-rebuild criteria
+- References table: ✅ first row with relative path link
+
+### Key Architectural Decisions
+
+- S4 (M&A Integration) confirmed as primary brownfield scenario
+- Transitional MG branch pattern (`LZ-Acquired-{Name}`) as operational bridge during integration
+- ⛔ HARD GATE at blast-radius >5% aligns with ADR Brownfield Assessment Lens criteria
+- Diagnostic KQL queries added for: root-parked subscriptions, subscription-scope policy overrides, hierarchy depth per subscription
+
+---
+
+## 2026-05-18 — Wave 3 Skill: subscription-vending
+
+**File created:** `.github/skills/subscription-vending/SKILL.md`
+**Line count:** 308
+**Total sections:** 16 (Overview, When to Use, CAF Mapping, WAF Coverage, Boundaries, Architecture Patterns, Security Baseline Reinforcement, Decision Heuristics, Brownfield Scenario, Prerequisites & Caveats, Hidden Assumptions, Anti-Patterns, Diagnostic Queries, References, Revision History)
+
+### W2 9-Item Checklist Self-Grade
+
+| # | Item | Status | Notes |
+|---|------|--------|-------|
+| 1 | Skill ID and Domain in header table | ✅ PASS | `subscription-vending` / `Azure Landing Zone — Platform Automation & Billing` |
+| 2 | Brownfield Scenario in header table | ✅ PASS | `S5 — ISV Multi-Tenant SaaS` |
+| 3 | Hard + Soft prereqs in header table | ✅ PASS | Hard: `azure-resource-manager`, `azure-policy` / Soft: `management-group-architecture`, `workload-identity-federation` |
+| 4 | CAF table ≥4 rows, Billing & Tenant Primary | ✅ PASS | 5 rows; Billing & Tenant marked `**Primary**` |
+| 5 | WAF table ≥4 rows, Operational Excellence Primary | ✅ PASS | 4 rows; Operational Excellence marked `**Primary**` |
+| 6 | Boundaries cross-refs ADR + sibling skill | ✅ PASS | First DO NOT USE FOR bullet → ADR link; second bullet → `management-group-architecture` SKILL.md |
+| 7 | H2 format for Brownfield Scenario heading | ✅ PASS | `## Brownfield Scenario (Scenario S5: ISV Multi-Tenant SaaS)` — not bold |
+| 8 | Cross-skill sequencing INLINE in brownfield intro | ✅ PASS | Sentence embedded in same paragraph as scenario description, no trailing H3 |
+| 9 | 5 concrete hidden assumptions | ✅ PASS | EA owner model, 202 eventual consistency, 2000-subscription limit, RP registration timing, cancellation ≠ deletion |
+
+**Overall: 9/9 — CLEAN PASS**
+
+### Key Decisions
+
+- EA→MCA migration explicitly DEFERRED per Yeselam Q2 — mentioned only in Boundaries and Prerequisites as prerequisite caveat
+- S5 (ISV Multi-Tenant SaaS) as primary brownfield scenario — 8-step playbook with rollback gates per each step
+- Security Baseline Reinforcement table added showing how all 6 rules are enforced at subscription creation
+- Diagnostic Queries section added (4 KQL queries): root-parked subscriptions, missing mandatory tags, missing budget resources, cancelled-but-not-deleted subscriptions
+- Prerequisites & Caveats table added (separate from Hidden Assumptions) covering EA/MCA, billing scope perms, Global Admin elevation, AVM version pinning, Blueprint deprecation
+
+## 2026-05-18 — Wave 3 (Tenant Architecture)
+- Saul-7 (sonnet-4.6): Authored `.github/skills/management-group-architecture/SKILL.md` (280 lines, 9/9 PASS on Isabel W2 checklist). S4 Brownfield M&A Integration; 8-step playbook with ⛔ HARD GATE at Step 3, Soft rollback on Steps 4-8.
+- Saul-8 (sonnet-4.6): Authored `.github/skills/subscription-vending/SKILL.md` (308 lines, 9/9 PASS on Isabel W2 checklist). S5 ISV Multi-Tenant SaaS; 8-step playbook; Billing & Tenant CAF Primary; Operational Excellence WAF Primary.
