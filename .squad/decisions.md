@@ -790,41 +790,6 @@ to `agent-output/{customer}/deliverables/`.
 
 ---
 
-### 2026-05-08T21:42:35.847+00:00: Subagent scale-out rules for assigned agents
-
-**By:** Danny (Orchestrator)
-
-**What:** An assigned agent may decompose its own workload into multiple subagents when the work can be safely parallelized. Three conditions must all hold: (1) each subagent writes to a unique artifact, (2) no subagent requires another's in-progress output, and (3) the parent agent can deterministically merge all outputs without a human judgment call. Scale-out is prohibited when any two subagents would write the same file, when ordering dependencies exist, when an approval gate is open over the artifact domain, or when a reviewer lockout covers the domain. Reviewer lockout tracks the parent agent assignment — spawning subagents from a locked-out parent is not a workaround. Artifact ownership and gate signals remain with the parent agent exclusively.
-
-**Why:** Yeselam Tesfaye requested this to accelerate task completion when a single agent has a large, decomposable workload. The rules are deliberately conservative around race conditions, gates, and lockouts to preserve the integrity of the HVE approval workflow. The drop-box pattern already in use (`.squad/decisions/inbox/`) is the approved mechanism for concurrent writes to avoid file-level races.
-
-**Files changed:** `.squad/routing.md` (new "Subagent Scale-Out Rules" section + updated Rules list)
-
----
-
-### 2026-05-08T21:42:35.847+00:00: Subagent scale-out rules added to authoritative governance file
-
-**By:** Danny (Orchestrator), requested by Yeselam Tesfaye
-
-**What:** Inserted a full "Subagent Scale-Out Rules" section into `.github/agents/squad.agent.md` — the authoritative governance file for the Squad system. The section covers: permission conditions (independent outputs, no ordering dependency, mergeable at parent), prohibition conditions (overlapping file mutation, shared artifact not yet created, approval-gated work, reviewer lockout, ≤2 logical parts), six explicit race-condition checks, reviewer lockout preservation, approval gate preservation, and artifact ownership rules.
-
-**Consistency:** `.squad/routing.md` was updated in the same pass to add the missing "shared artifact not yet created" check so both files remain in sync.
-
-**Why:** The authoritative governance file was missing these rules despite `.squad/routing.md` already carrying them. This gap meant agents reading only the governance file had no scale-out guidance. The update closes that gap and adds three additional race-condition checks not previously documented.
-
----
-
-### 2026-05-08T21:39:01.743+00:00: Internal Message & Request Routing Model Decision
-
-**By:** Danny (Orchestrator)
-
-**What:** Established a formal internal message and request routing model for the squad: (1) Single-threaded intake via Danny (Orchestrator) to classify all incoming work, (2) Direct routing for single-step HVE work; fan-out routing for multi-step or multi-domain work, (3) Structured handoff format for agent-to-agent communication (not free-form), (4) Synchronous vs asynchronous handoff semantics depending on blocking dependencies, (5) Gate blocker escalation path that routes to both artifact owner and domain expert for fix iteration, (6) Session state tracking via `.squad/session_state.json` to support resume and context recovery, (7) Off-workflow parallel execution for bugs, docs, and tooling without blocking HVE gates.
-
-**Why:** Single intake (Danny) ensures consistency and prevents mis-routing. Structured handoffs provide clarity and auditability. Synchronous + asynchronous semantics allow blocking where coupled and parallelism where independent. Session state enables multi-hour workflows and fault tolerance. The routing model accelerates multi-step/multi-domain work through fan-out while preserving approval gate integrity.
-
-**Status:** Proposed; awaiting team feedback.
-
----
 
 # Decision: Messaging Sprint Framing — Value Proposition & Problem Statement
 
@@ -1196,3 +1161,322 @@ The WAF/CAF analysis is structurally sound. Priority ordering survives adversari
 
 Linus may revise without escalation.
 
+### 2026-05-18T17:08:28Z: User directive — Additive-Only Enhancement Principle
+
+**By:** Yeselam Tesfaye (via Copilot)
+
+**What:** All future work on the accelerator (skills, agents, IaC patterns, governance rules, pipeline changes) must be **strictly additive** — enhance existing capability, never break working flows. The accelerator MUST continue to support BOTH:
+- **Greenfield** — new-environment deployments (Steps 1–7)
+- **Brownfield** — existing-environment scenarios (Step 0 Assessment + Steps 8–9 Day-2 ops via Sentinel + Mender)
+
+No skill, agent, or workflow change may regress brownfield support. Skill scoping must explicitly note brownfield applicability (e.g., migration-from-existing scenarios, retrofit guidance, audit-then-remediate patterns) wherever the skill is relevant to both modes.
+
+**Why:** User correction of Isabel's hidden-assumption framing ("Accelerator optimized for greenfield/clean migration, not brownfield governance retrofit"). The accelerator explicitly supports both modes — AGENTS.md, `assessment` agent (Assessor), `brownfield-discovery` skill, `wara-assessment` skill, `assessment-report` skill, Sentinel (continuous monitoring), Mender (auto-remediation with 8 strategies + snapshot/rollback) all exist for the brownfield/Day-2 path.
+
+**Scope:** Persistent. Applies to:
+- All future architect (Linus, Oracle) recommendations and reviews
+- All future skill drafting (Linus, Reuben)
+- All future challenger (Isabel) verdicts — H1 framing must be revised
+- Wave 1 Identity skills SKILL.md authoring — each skill MUST include a "Brownfield Scenario" subsection
+- Any pipeline change must pass a "does this still work for brownfield assessment + remediation?" check
+
+Complements (does not replace):
+- WAF/CAF directive (2026-05-18T16:12:16Z)
+- Scenario-anchored recommendations directive (2026-05-18T~16:30Z)
+
+# Current vs Target Skills Table — Revision 2
+
+**Author:** Linus (Architect)
+**Date:** 2026-05-18T17:12:04Z
+**Status:** Proposed (revision addressing Isabel APPROVE WITH CONDITIONS verdict)
+**Revision:** 2 of 2 — addresses Isabel APPROVE WITH CONDITIONS verdict (4 majors) + additive-brownfield directive
+
+---
+
+## Revision Summary
+
+This revision addresses all four major conditions from Isabel's Challenger Gate verdict (2026-05-18T16:57:57Z) plus the additive-brownfield directive (2026-05-18T17:08:28Z). Changes from v1: (1) Split `entra-id-identity-governance` into `entra-conditional-access` + `entra-identity-governance` per MAJOR-1, growing Wave 1 from 3→4 skills and master plan from 80→94 total; (2) Reframed all narrative from "filling a void" to "deepening existing `azure-rbac` coverage from reference-collection to architectural-guidance level" per MAJOR-2; (3) Added scoping-vs-delivery distinction to the scenario unblock matrix per MAJOR-3; (4) Added explicit Prerequisites section documenting pipeline-integrity assumptions per MAJOR-4; (5) Added brownfield applicability column and per-skill Brownfield Scenario subsections per the additive-brownfield directive.
+
+---
+
+## Prerequisites Section (MAJOR-4)
+
+### Pipeline-Integrity Items (Orthogonal but Blocking for Downstream Steps 4–6)
+
+The following five items from Isabel's Step 3/7 audit (2026-05-13) remain open. They are **orthogonal** to skills expansion but blocking for downstream IaC execution:
+
+| # | Item | Current State | Required Resolution |
+|---|------|---------------|---------------------|
+| 1 | **Step 3/7 artifact naming contract** | Broken — Artisan may produce files Chronicler doesn't expect | Canonical filename registry enforced by Orchestrator |
+| 2 | **Step 3 Challenger gate coverage** | Missing — design outputs lack adversarial review | Challenger expanded for pre-Gate 3 review (shipped Pass 2) |
+| 3 | **Chronicler MCP tooling** | Absent — instructed to query Resource Graph but lacks tool | MCP azure-platform server provides Resource Graph queries |
+| 4 | **Step 3 skip criteria** | Implicit — filesystem-based detection, not session state | `step_3_status` field in session state (shipped Pass 1) |
+| 5 | **Session state schema** | Incomplete — missing explicit step tracking | Session state doc updated (shipped Pass 1) |
+
+### Execution Model
+
+**Skills work proceeds in parallel with Prerequisites workstream; neither blocks the other, but both must complete before downstream Step 4–6 IaC work.**
+
+The skills plan assumes:
+- TDD/Step 3 shared workflow contract holds (AGENTS.md §"Shared Workflow Contract")
+- MCP tooling is available for agents that consume new skills (azure-platform server)
+- Artifact naming follows the canonical registry (Step prefix convention)
+- Challenger reviews at gates 1, 2, 4, 5 function correctly with expanded scope
+
+---
+
+## Honest Framing Statement (MAJOR-2)
+
+The Identity & Access investment is an **additive enhancement of existing `azure-rbac` coverage**, not a greenfield creation filling a void. The existing `azure-rbac` skill already contains PIM configuration tables (JIT activation settings, approval workflows, eligible vs. active assignments) and a Conditional Access policy baseline (MFA enforcement, device compliance, location-based controls). The existing `entra-app-registration` skill covers service principal identity and workload credential basics. What is missing is not awareness but **architectural guidance depth** — the kind that enables an architect to design a staged ADFS-to-Entra migration for an acquired company (brownfield), scope a zero-trust CA policy set for a regulated workload (greenfield or brownfield), or plan PIM at management-group scale with separation-of-duties proof (both modes). The investment deepens reference-collection coverage into architectural-guidance coverage, applicable to both greenfield deployment AND brownfield retrofit scenarios.
+
+---
+
+## Master Skills Table (94 total: 80 current + 14 new across 5 waves)
+
+| Priority | Skill | Current State | Target State | CAF Design Area | WAF Pillar(s) | Brownfield Applicability | Scenario(s) Unblocked |
+|----------|-------|---------------|--------------|-----------------|---------------|--------------------------|------------------------|
+| **P1** | `entra-conditional-access` | Partial (CA baseline in `azure-rbac` lines 54–61) | Full architectural guidance: policy sets, named locations, auth strength, cross-tenant, CAE | Identity & Access | Security | ✅ Brownfield + Greenfield — audit existing CA gaps, design retrofit policies for acquired estates | S1, S2, S3, S4, S5, S6 |
+| **P1** | `entra-identity-governance` | Partial (PIM tables in `azure-rbac` lines 44–52) | Full architectural guidance: PIM at scale, access reviews, entitlement mgmt, lifecycle workflows | Identity & Access | Security, Operational Excellence | ✅ Brownfield + Greenfield — remediate over-privileged access in existing environments, design lifecycle governance for M&A | S1, S2, S3, S4, S5, S6 |
+| **P1** | `entra-connect-hybrid-identity` | Absent | New: cloud sync, ADFS migration, multi-forest, staged rollout, pass-through auth | Identity & Access | Security, Reliability | ✅ Brownfield + Greenfield — ADFS cutover for existing orgs, hybrid coexistence during migration | S1, S3, S4, S6 |
+| **P1** | `workload-identity-federation` | Partial (basics in `entra-app-registration`) | New: AKS pod identity, cross-cloud (AWS/GCP), managed identity at scale | Identity & Access | Security, Performance Efficiency | ✅ Brownfield + Greenfield — federate existing service principals to managed identity, eliminate credential sprawl in running workloads | S1, S2, S5, S7, S8 |
+| **P2** | `azure-kubernetes-service` | Absent | New: AKS networking, workload identity, AGIC, pod security, node pools | Network Topology & Connectivity | Reliability, Performance Efficiency | ✅ Brownfield + Greenfield — assess/modernize existing AKS clusters, greenfield cluster design | S2, S3, S5, S7, S8 |
+| **P2** | `azure-virtual-machines` | Absent | New: availability zones, VMSS, proximity placement, accelerated networking | Network Topology & Connectivity | Reliability, Performance Efficiency | ✅ Brownfield + Greenfield — right-size/zone-balance existing VMs, greenfield HA design | S2, S3, S5, S7, S8 |
+| **P2** | `azure-container-apps` | Absent | New: serverless containers, KEDA, Dapr, revision management | Platform Automation & DevOps | Performance Efficiency, Cost Optimization | ✅ Brownfield + Greenfield — migrate legacy containers to ACA, greenfield serverless | S2, S5, S8 |
+| **P3** | `subscription-vending` | Absent | New: automated LZ provisioning, API/IaC for subscriptions with guardrails | Billing & Tenant | Operational Excellence, Cost Optimization | ✅ Brownfield + Greenfield — onboard acquired subscriptions into governance, automate new LZ requests | S1, S4, S5, S6 |
+| **P3** | `azure-tenant-management` | Absent | New: EA/MCA enrollment, management group design, tenant-level settings | Billing & Tenant | Operational Excellence, Security | Greenfield-primary (tenant design is typically a Day-0 activity; brownfield tenant restructuring is rare but applicable in M&A) | S1, S4, S5, S6 |
+| **P4** | `azure-sql-database` | Absent | New: SQL DB/MI architecture, failover groups, geo-replication, Entra-only auth | Management | Reliability, Security | ✅ Brownfield + Greenfield — assess existing SQL for security baseline compliance, design failover for DR | S2, S3, S5, S8 |
+| **P4** | `azure-cosmos-db` | Absent | New: multi-region writes, consistency levels, partition strategy | Management | Reliability, Performance Efficiency | ✅ Brownfield + Greenfield — optimize existing Cosmos consistency/partitioning, greenfield multi-region design | S2, S3, S5, S8 |
+| **P4** | `azure-storage-accounts` | Absent | New: blob tiering, lifecycle, immutability, replication, private endpoints | Security | Reliability, Cost Optimization | ✅ Brownfield + Greenfield — remediate public blob access violations, enforce lifecycle policies on existing accounts | S2, S3, S5, S8 |
+| **P5** | `azure-arc-servers` | Absent | New: Arc-enabled servers, machine configuration, extensions, policy | Governance | Operational Excellence, Security | ✅ Brownfield-primary — extends governance to existing on-prem/multi-cloud servers; critical for hybrid estate assessment (Step 0) | S4, S7 |
+| **P5** | `azure-arc-kubernetes` | Absent | New: Arc-enabled K8s, GitOps, policy, extensions | Governance | Operational Excellence, Security | ✅ Brownfield-primary — extends governance to existing K8s clusters outside Azure; strengthens Sentinel/Mender coverage | S4, S7 |
+
+---
+
+## Wave 1 Detail — 4 Skills (Per MAJOR-1 Split)
+
+### 1. `entra-conditional-access`
+
+| Attribute | Value |
+|-----------|-------|
+| **Scope** | CA policies, named locations, authentication strength, cross-tenant access, continuous access evaluation (CAE) |
+| **Explicit Boundary** | NOT: PIM, access reviews, entitlement management (those → `entra-identity-governance`) |
+| **CAF Design Area** | Identity & Access |
+| **WAF Pillar** | Security (primary), Reliability (CAE continuity) |
+| **Extends** | Existing `azure-rbac` CA baseline (lines 54–61) — deepens from reference tables to architectural design patterns |
+| **Agents** | Warden (policy authoring), Oracle (architecture assessment), Challenger (review) |
+| **Scenarios Critical** | S1 Global LZ, S2 AI Platform, S3 Regulated, S4 M&A, S5 ISV SaaS, S6 Sovereign |
+
+#### Brownfield Scenario
+
+**"Zero-trust CA retrofit for regulated workload migration (S3)."** An FSI customer runs 200 Azure subscriptions with legacy CA policies (MFA-only, no device compliance, no named locations). The Assessor (Step 0) discovers the gap via `brownfield-discovery`. The new `entra-conditional-access` skill enables the Oracle to design a phased CA hardening plan: authentication strength migration (password → FIDO2), named location enforcement for SOC compliance, cross-tenant controls for partner access — all without breaking existing user flows. The Sentinel (Step 8) monitors CA sign-in risk; the Mender (Step 9) can remediate non-compliant policies detected via Conditional Access insights.
+
+---
+
+### 2. `entra-identity-governance`
+
+| Attribute | Value |
+|-----------|-------|
+| **Scope** | PIM at scale (management group assignments), access reviews, entitlement management, lifecycle workflows |
+| **Explicit Boundary** | NOT: CA policies (those → `entra-conditional-access`), NOT: RBAC role definitions (those → `azure-rbac`) |
+| **CAF Design Area** | Identity & Access |
+| **WAF Pillar** | Security (primary), Operational Excellence (lifecycle automation) |
+| **Extends** | Existing `azure-rbac` PIM tables (lines 44–52) — deepens from config reference to at-scale governance patterns |
+| **Agents** | Warden (governance enforcement), Oracle (architecture), Sentinel (compliance monitoring) |
+| **Scenarios Critical** | S1 Global LZ, S3 Regulated, S4 M&A, S5 ISV SaaS, S6 Sovereign |
+
+#### Brownfield Scenario
+
+**"PIM remediation for over-privileged M&A integration (S4)."** Post-acquisition, the acquired company has 47 subscriptions with permanent Owner assignments and no access reviews. The Assessor discovers 312 permanently-elevated role assignments via Resource Graph. The new `entra-identity-governance` skill enables the Oracle to design a staged PIM rollout: convert permanent → eligible assignments, configure JIT activation with approval workflows, establish quarterly access reviews for cross-org admins, and define entitlement packages for the integration team. The Sentinel monitors PIM activation anomalies; Mender can auto-revoke expired eligible assignments.
+
+---
+
+### 3. `entra-connect-hybrid-identity`
+
+| Attribute | Value |
+|-----------|-------|
+| **Scope** | Cloud sync (Entra Connect Cloud Sync), ADFS federation migration, multi-forest topology, staged rollout, pass-through authentication |
+| **Explicit Boundary** | NOT: Azure AD Domain Services (AADDS), NOT: B2B/B2C federation |
+| **CAF Design Area** | Identity & Access |
+| **WAF Pillar** | Security (federation trust), Reliability (auth availability during migration) |
+| **Extends** | No direct predecessor — new capability area |
+| **Agents** | Oracle (migration architecture), Warden (trust validation), Assessor (current-state identity discovery) |
+| **Scenarios Critical** | S1 Global LZ, S3 Regulated, S4 M&A, S6 Sovereign |
+
+#### Brownfield Scenario
+
+**"ADFS-to-Entra cutover for acquired company post-M&A (S4)."** The acquired subsidiary runs ADFS 4.0 with 3,000 users across 2 AD forests. The Assessor discovers ADFS reliance via `brownfield-discovery` (claims provider trusts, relying party count, token signing cert expiry). The new `entra-connect-hybrid-identity` skill enables the Oracle to design staged rollout: pilot group → cloud sync with password hash sync → ADFS decommission timeline. Includes multi-forest DirSync topology, conflict resolution for duplicate UPNs, and rollback procedures if auth breaks during cutover. Critical for brownfield because hybrid identity IS the brownfield identity problem.
+
+---
+
+### 4. `workload-identity-federation`
+
+| Attribute | Value |
+|-----------|-------|
+| **Scope** | AKS pod identity (workload identity), cross-cloud federation (AWS IAM → Entra, GCP WIF → Entra), managed identity at scale (VMSS, App Service, Functions) |
+| **Explicit Boundary** | NOT: GitHub Actions OIDC federation (that → `entra-app-registration`), NOT: human identity federation |
+| **CAF Design Area** | Identity & Access |
+| **WAF Pillar** | Security (credential elimination), Performance Efficiency (token caching) |
+| **Extends** | Existing `entra-app-registration` workload credential basics — deepens from single-app to platform-scale patterns |
+| **Agents** | Forge (IaC generation), Warden (policy enforcement), Oracle (cross-cloud architecture) |
+| **Scenarios Critical** | S1 Global LZ, S2 AI Platform, S5 ISV SaaS, S7 Hybrid Edge, S8 Cloud-Native |
+
+#### Brownfield Scenario
+
+**"Credential elimination for existing AKS workloads post-modernization (S8)."** An enterprise runs 15 AKS clusters using legacy pod identity v1 (aad-pod-identity) with stored secrets for cross-service auth. The Assessor discovers secret-based auth patterns via `brownfield-discovery` (Key Vault secret access patterns, service principal client secret expiry). The new `workload-identity-federation` skill enables the Oracle to design migration to workload identity v2 (federated credentials): per-namespace identity mapping, cross-cloud federation for AWS S3 access from Azure AKS, and managed identity consolidation. The Sentinel monitors for secret-based auth regression; Mender can rotate exposed credentials.
+
+---
+
+## Scenario × Wave Unblock Matrix (MAJOR-3)
+
+| Scenario | Wave 1 Scoping Enabled? | Wave 1 Fully Delivers? | Requires Later Waves? | Greenfield Path | Brownfield Path |
+|----------|--------------------------|------------------------|------------------------|-----------------|-----------------|
+| **S1: Global Landing Zone** | ✅ Yes — identity architecture scoping | ❌ No — needs P3 subscription vending for full delivery | P3 (sub vending), P2 (compute) | Steps 1–7: full LZ design with identity-first architecture | Step 0: assess existing LZ identity posture → retrofit CA/PIM |
+| **S2: Multi-Region AI Platform** | ✅ Yes — workload identity + CA for AI services | ❌ No — needs P4 data platform (Cosmos, SQL) for full delivery | P4 (data), P2 (AKS/compute) | Steps 1–7: AI platform with federated identity across regions | Step 0: assess existing AI infra identity → migrate to workload identity federation |
+| **S3: Regulated Workloads** | ✅ Yes — CA hardening + PIM for compliance evidence | ✅ Yes — identity governance IS the primary deliverable for regulated | None for identity scope; P2/P4 for full workload | Steps 1–7: zero-trust identity architecture meeting regulatory requirements | Step 0: audit existing CA/PIM against regulatory framework → gap remediation plan |
+| **S4: Brownfield M&A** | ✅ Yes — hybrid identity migration + PIM remediation | ✅ Yes — M&A identity integration IS the primary deliverable | P3 for sub onboarding at scale | Step 0 → Steps 1–7: assess acquired estate → design identity integration → deploy | Step 0: discover AD forests, ADFS reliance, over-privileged access → migration roadmap |
+| **S5: ISV Multi-Tenant SaaS** | ✅ Yes — workload identity + per-tenant CA isolation | ❌ No — needs P3 (sub vending) + P4 (data isolation) | P3, P4 | Steps 1–7: per-tenant identity isolation architecture | Step 0: assess existing multi-tenant identity boundaries → harden isolation |
+| **S6: Sovereign Cloud** | ✅ Yes — CA named locations + cross-tenant controls | ✅ Yes — sovereign identity controls ARE the primary deliverable | P3 for sovereign sub management | Steps 1–7: sovereignty-compliant identity with data residency controls | Step 0: audit existing CA for data residency compliance → remediate |
+| **S7: Hybrid Edge Platform** | ✅ Yes — workload identity for Arc-enabled K8s | ✅ Yes — identity federation for edge workloads | P5 (Arc) for full hybrid governance | Steps 1–7: federated identity for edge clusters | Step 0: discover existing edge identity patterns → design federation |
+| **S8: Cloud-Native Modernization** | ✅ Yes — workload identity for AKS migration | ❌ No — needs P2 (AKS architecture) for full delivery | P2 (AKS), P4 (data) | Steps 1–7: workload identity-first container architecture | Step 0: assess existing pod identity v1 → migration to v2 plan |
+
+**Summary:** Wave 1 enables scoping for **8/8** scenarios. Wave 1 **fully delivers** the primary identity deliverable for **4/8** scenarios (S3, S4, S6, S7). The remaining 4 scenarios (S1, S2, S5, S8) require P2–P4 investments for complete end-to-end delivery beyond identity scope.
+
+---
+
+## Per-Priority Deep Dives
+
+### Priority 1: Identity & Access — Additive Enhancement (Wave 1, 4 skills)
+
+**Investment framing:** Deepening existing `azure-rbac` coverage (PIM tables + CA baseline) and `entra-app-registration` (workload credential basics) from reference-collection level to architectural-guidance level. This is additive enhancement applicable to both greenfield deployment AND brownfield retrofit — not filling a void.
+
+**CAF Design Area:** Identity & Access (currently 2 skills → target 6 skills)
+**WAF Pillars:** Security (identity-as-perimeter), Operational Excellence (lifecycle automation), Reliability (auth availability)
+
+**What changes:** The accelerator moves from "can list PIM settings" to "can design PIM at management-group scale with SoD proof for regulated industries." From "can reference CA policies" to "can architect a zero-trust CA policy set with authentication strength migration path." From "knows workload identity exists" to "can design cross-cloud federation patterns for AKS, AWS, and GCP workloads."
+
+**Brownfield impact:** All 4 skills serve brownfield scenarios directly. Identity IS the brownfield problem — every acquired company, legacy environment, and hybrid estate has identity debt. The Assessor (Step 0) can discover identity posture; these skills enable the Oracle to prescribe remediation.
+
+**Greenfield impact:** Identity is CAF's "first design decision." These skills enable proper Steps 1–2 scoping for any enterprise LZ engagement.
+
+**Coexistence with existing skills:** `azure-rbac` retains ownership of role assignment patterns, management group RBAC hierarchy, and custom role definitions. `entra-app-registration` retains ownership of app registration lifecycle, service principal management, and GitHub OIDC. New skills extend coverage without duplicating existing content.
+
+---
+
+### Priority 2: Compute & Containers — Workload Layer (Wave 2, 3 skills)
+
+**Investment framing:** Additive enhancement that gives the accelerator's platform landing zones something to host. The platform layer (networking, identity, governance) is deep; the application layer is absent. This investment serves both greenfield (design new AKS clusters) and brownfield (assess/modernize existing compute).
+
+**CAF Design Area:** Network Topology & Connectivity (AKS networking), Platform Automation & DevOps (Container Apps)
+**WAF Pillars:** Reliability (workload HA), Performance Efficiency (autoscaling)
+
+**Brownfield applicability:** Existing AKS clusters need assessment (networking mode, pod identity version, node pool topology). Existing VMs need right-sizing and zone-balancing. The Assessor can discover compute resources; these skills enable architectural recommendations.
+
+**Scenario blast radius:** S2 (AI Platform), S3 (Regulated), S5 (ISV SaaS), S7 (Hybrid Edge), S8 (Cloud-Native) — 5/8 scenarios need compute depth for full delivery.
+
+---
+
+### Priority 3: Billing & Tenant — Subscription Lifecycle (Wave 3, 2 skills)
+
+**Investment framing:** Additive enhancement that closes the gap between "generates IaC for what goes inside a subscription" and "provisions the subscription itself." The canonical "landing zone factory" pattern.
+
+**CAF Design Area:** Billing & Tenant
+**WAF Pillars:** Operational Excellence (automation), Cost Optimization (allocation)
+
+**Brownfield applicability:** `subscription-vending` enables onboarding acquired subscriptions into governance guardrails — a core M&A operation. `azure-tenant-management` is greenfield-primary (tenant architecture is Day-0) but applicable to brownfield M&A tenant consolidation.
+
+**Scenario blast radius:** S1 (Global LZ), S4 (M&A), S5 (ISV SaaS), S6 (Sovereign) — 4/8 scenarios need subscription automation.
+
+---
+
+### Priority 4: Data Platform — Persistence Layer (Wave 4, 3 skills)
+
+**Investment framing:** Additive enhancement providing data-tier architectural guidance. Currently, the security baseline mandates "Azure AD-only SQL auth" (Rule #5) but lacks the architectural context to implement it properly.
+
+**CAF Design Area:** Management (data services monitoring), Security (data protection)
+**WAF Pillars:** Reliability (data HA/DR), Performance Efficiency (tuning), Cost Optimization (tiering)
+
+**Brownfield applicability:** Existing SQL databases need security baseline assessment (is Entra-only auth enabled? are failover groups configured?). Existing storage accounts are the #1 source of "public blob access" violations the Sentinel detects. These skills enable the Oracle to prescribe data-tier remediation — not just flag violations.
+
+**Scenario blast radius:** S2 (AI Platform), S3 (Regulated), S5 (ISV SaaS), S8 (Cloud-Native) — 4/8 scenarios need data platform depth.
+
+---
+
+### Priority 5: Hybrid — Governance Extension (Wave 5, 2 skills)
+
+**Investment framing:** Additive enhancement that extends the accelerator's governance plane beyond the Azure boundary. This is the most brownfield-oriented investment — hybrid estates ARE brownfield by definition.
+
+**CAF Design Area:** Governance (policy at hybrid scale)
+**WAF Pillars:** Operational Excellence (unified governance), Security (cross-boundary posture)
+
+**Brownfield applicability:** This IS the brownfield investment. Arc-enabled servers and Kubernetes extend Step 0 assessment, Step 8 monitoring, and Step 9 remediation to on-prem and multi-cloud resources. Without Arc skills, the Assessor's brownfield discovery stops at the Azure boundary.
+
+**Scenario blast radius:** S4 (M&A), S7 (Hybrid Edge) — 2/8 scenarios are critical, but these are the scenarios where the accelerator's Day-2 ops (Sentinel + Mender) provide the strongest differentiation.
+
+**Note:** No brownfield regression — these skills EXTEND existing `brownfield-discovery`, `wara-assessment`, and Sentinel/Mender capabilities to hybrid estates. They do not modify or replace any existing brownfield path.
+
+---
+
+## Capacity Heatmap
+
+```
+Category            Current  Target   Delta  Visual
+─────────────────────────────────────────────────────────
+Azure Infrastructure   21      27      +6    ████████████████████▓▓▓▓▓▓░
+Governance             22      22       0    ██████████████████████████░░
+Landing Zones          15      17      +2    ███████████████▓▓░░░░░░░░░░
+Hybrid                  3       5      +2    ███▓▓░░░░░░░░░░░░░░░░░░░░░
+AI Infrastructure      19      23      +4    ███████████████████▓▓▓▓░░░
+
+TOTAL                  80      94     +14
+                                      ^^^^
+                                      (was 93 in v1 pre-split; +1 from MAJOR-1 split)
+```
+
+**Wave breakdown:**
+- Wave 1 (P1 Identity): +4 skills (was +3 before MAJOR-1 split)
+- Wave 2 (P2 Compute): +3 skills
+- Wave 3 (P3 Billing): +2 skills
+- Wave 4 (P4 Data): +3 skills
+- Wave 5 (P5 Hybrid): +2 skills
+- **Total expansion: 80 → 94 (17.5% growth)**
+
+---
+
+## Wave PR Naming Pattern
+
+```
+feat(skills): Wave {N} — {theme} ({count} skills)
+
+Examples:
+feat(skills): Wave 1 — Identity & Access depth (4 skills)
+feat(skills): Wave 2 — Compute & Containers (3 skills)
+feat(skills): Wave 3 — Billing & Tenant automation (2 skills)
+feat(skills): Wave 4 — Data Platform architecture (3 skills)
+feat(skills): Wave 5 — Hybrid governance extension (2 skills)
+```
+
+Each Wave PR contains:
+1. SKILL.md files for each skill (with Brownfield Scenario subsection)
+2. Updated count-manifest.json
+3. Agent definition updates (routing new skills to appropriate agents)
+4. Updated AGENTS.md skill tables
+
+---
+
+## Reviewer Response (MAJOR-1 through MAJOR-4 Mapping)
+
+| Isabel's Major | Section Addressing It | How Addressed |
+|----------------|----------------------|---------------|
+| **MAJOR-1** (Skill split) | §Wave 1 Detail — 4 skills with explicit scope + boundary per skill. `entra-conditional-access` owns CA; `entra-identity-governance` owns PIM/access reviews. Master plan total = 94. | Split executed. Boundaries are explicit and non-overlapping. |
+| **MAJOR-2** (Honest framing) | §Honest Framing Statement + all Per-Priority Deep Dives use "additive enhancement" language. Master Table "Current State" column cites existing coverage lines. | Narrative reframed. No "filling a void" language remains. Existing coverage explicitly acknowledged with line references. |
+| **MAJOR-3** (Honest unblock claims) | §Scenario × Wave Unblock Matrix with separate "Scoping Enabled" vs "Fully Delivers" columns + Greenfield/Brownfield path columns. Summary: scoping 8/8, fully delivers 4/8. | Matrix restructured. Aspirational claim removed. Honest distinction preserved. |
+| **MAJOR-4** (Pipeline prerequisites) | §Prerequisites Section — 5 items listed with current state + required resolution. Execution model statement: parallel workstreams, both required before Steps 4–6. | Prerequisites documented. Assumption dependency made explicit. |
+
+**Standing Directives Propagation:**
+- ✅ WAF/CAF lens: Every Master Table row has CAF Design Area + WAF Pillar(s) columns
+- ✅ Scenario-anchored: Every priority deep-dive names specific scenarios; matrix maps all 8
+- ✅ Additive-brownfield: Every Wave 1 skill has Brownfield Scenario subsection; Master Table has Brownfield Applicability column; no skill breaks Assessor/Sentinel/Mender paths
+
+---
+
+*End of artifact. Ready for Challenger re-review at next gate.*

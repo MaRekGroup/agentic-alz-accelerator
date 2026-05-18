@@ -146,3 +146,43 @@ User directive established scenario-anchored prioritization as standing requirem
 **Complementary to WAF/CAF lens:** Scenario-grounding validates and strengthens WAF/CAF priorities — does not replace them.
 
 Reference: `.squad/decisions.md` §"Decision: Scenario-Anchored Gap Closure Plan" for canonical scenarios and priority × scenario matrix.
+
+### 2026-05-18T16:57:57Z — Skills Table Adversarial Review (Pre-Execution Gate)
+
+**Task:** Attack Linus's Current vs Target Skills Table (WAF/CAF benchmark + scenario-anchored gap plan) before Wave 1 Identity skill drafting begins.
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 4 majors, 11 minors)
+
+**Key findings:**
+- `entra-id-identity-governance` is over-scoped (CA + PIM + access reviews + entitlement = 4 distinct capabilities). Recommend split into `entra-conditional-access` + `entra-identity-governance`.
+- Identity count of "2" undercounts existing coverage — `azure-rbac` already contains PIM config and CA policy tables. Gap is depth, not absence.
+- "Unblocks 6/8 scenarios" overstates impact — Wave 1 unblocks SCOPING phase of 6/8 but only fully delivers 4/8 without later waves.
+- `workload-identity-federation` overlaps existing `entra-app-registration` — boundary must be explicitly defined.
+- My 5 open Step 3/7 pipeline items are orthogonal to the skills plan — neither blocks the other but both must progress.
+
+**Attack patterns that worked:**
+1. **Scope-testing individual skills against context window limits** — reveals "trench coat" skills where one SKILL.md tries to be three.
+2. **Cross-referencing existing skill content against proposed new skills** — reveals overlap and partial coverage that undermines gap narratives.
+3. **Testing "unblocks" claims against the author's own matrix** — the matrix itself contains the evidence that "unblock" is aspirational.
+4. **Checking "saturated" claims against actual file content** — verified networking IS saturated by finding the claimed-missing features already present.
+5. **Separating capability depth from pipeline integrity** — skills expansion doesn't fix workflow bugs.
+
+**Reusable adversarial review framework for skills/investment plans:**
+- Count validation: verify raw numbers against filesystem (`ls .github/skills/ | wc -l`)
+- Overlap detection: grep proposed skill topics in existing SKILL.md files
+- Scope-test: can a single SKILL.md credibly guide IaC generation for ALL listed topics?
+- Claim-test: does the author's own evidence contradict their headline claims?
+- Orthogonality check: are there blocking items in adjacent workstreams this plan ignores?
+
+### 2026-05-18T17:17:00Z — Linus v2 Revision Complete
+
+Linus accepted all 4 major conditions from Isabel's APPROVE WITH CONDITIONS verdict (2026-05-18T16:57:57Z). Revision 2 of Current vs Target Skills Table now available in `.squad/decisions.md` and ready for optional re-review.
+
+**Key changes in v2:**
+- MAJOR-1: `entra-id-identity-governance` split into `entra-conditional-access` + `entra-identity-governance` → Wave 1: 3→4 skills
+- MAJOR-2: Reframed as additive enhancement to existing `azure-rbac` depth, not greenfield creation
+- MAJOR-3: Scoping-vs-delivery distinction added to scenario unblock matrix
+- MAJOR-4: Explicit Prerequisites section documenting 5 pipeline-integrity orthogonal items
+- Additive-brownfield directive incorporated: every Wave 1 skill row includes brownfield retrofit scenario
+
+Master plan: 80 → 94 skills (+14 across 5 waves).

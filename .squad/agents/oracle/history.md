@@ -35,3 +35,9 @@ Isabel (Challenger) reviewed Linus's skill expansion plan at Pre-execution Gate.
 **For Wave 2-5 Planning:** Oracle should expect Linus to iterate the scenario × priority matrix as new customer engagements arrive. Scenarios are not static. S9 (Government Defense) or S10 (Energy/Utilities Compliance) may emerge, shifting priorities or revealing new gaps. Standing principle: re-evaluate annually or when deal flow shifts >20%.
 
 Reference: `.squad/decisions.md` §"Reviewer Gate Decision — Skills Table" for Isabel's full analysis, including hidden assumptions and hidden assumptions audit.
+
+### 2026-05-18T17:17:00Z — Linus v2: Brownfield Now First-Class in Skills Plan
+
+Linus completed Revision 2 of the Current vs Target Skills Table, incorporating the additive-brownfield directive (2026-05-18T17:08:28Z). Key change: every Wave 1 skill row now has an explicit "Brownfield Scenario" subsection — brownfield retrofit patterns are no longer implicit but first-class design considerations.
+
+**Impact for Oracle:** Future architecture assessments should expect brownfield applicability to be front-and-center in skill guidance. The accelerator officially supports both greenfield AND brownfield paths in equal standing. When assessing gap closure priorities, greenfield-only recommendations will be challenged as incomplete.
