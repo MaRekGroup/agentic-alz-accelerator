@@ -48,3 +48,21 @@ Enforced via DO NOT USE FOR:
 - Isabel quality gate ready (APPROVE CLEAN)
 
 ---
+
+## 2026-05-18 — Wave 1 Quality Gate Major Closures
+
+**Date:** 2026-05-18T18:00:00Z  
+**Status:** Complete
+
+### Summary
+
+Wave 1 quality gate majors closed in same commit as Isabel verdict. All 3 critical gaps resolved: (1) Scenario S# codes added to brownfield headings in 3 skills (S3 for CA, S4 for governance, S8 for workload federation); (2) workload-identity-federation CAF/WAF tables expanded from 2×2 to 4×4 (CAF: +Security, +Governance; WAF: +Reliability, +Cost Optimization); (3) Cross-skill sequencing threaded through every Brownfield Scenario section with explicit prereq/handoff naming.
+
+### Composite Brownfield Path
+
+The 4-skill sequence is now explicit in every Brownfield Scenario section: `entra-connect-hybrid-identity` → `entra-identity-governance` → `entra-conditional-access` → `workload-identity-federation` → (Steps 8/9 Sentinel/Mender).
+
+### Pattern for Wave 2
+
+Every brownfield section must (1) cite explicit S# code, (2) name prerequisite skill, (3) name downstream handoff skill. This pattern is now documented in all 4 skills and ready for reuse.
+

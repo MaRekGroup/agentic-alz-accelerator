@@ -1705,3 +1705,83 @@ Drafted `.github/skills/workload-identity-federation/SKILL.md` for Wave 1 as an 
 - Diagnostic guidance: Entra audit logs, `AADServicePrincipalSignInLogs`, `AADManagedIdentitySignInLogs` references
 
 ---
+
+---
+
+## 2026-05-18T17:55:00Z — Isabel: Wave 1 Quality Gate
+
+**Owner:** Isabel  
+**Requester:** Scribe  
+**Scope:** 4 SKILL.md files (entra-conditional-access, entra-identity-governance, entra-connect-hybrid-identity, workload-identity-federation)  
+**Status:** APPROVE WITH CONDITIONS
+
+### Verdict
+
+All 4 skills pass the M2 architectural-guidance bar and deliver substantive brownfield content. **No blockers.** Three majors must be resolved before Wave 2 begins: scenario codes must be explicit, workload-identity-federation CAF/WAF must be expanded, and cross-skill brownfield sequencing must be threaded.
+
+### Per-Skill Scorecard
+
+| Skill | Arch Depth | Brownfield | CAF/WAF | Boundaries | Scenarios | Anti-Patterns | Verdict |
+|-------|-----------|-----------|---------|------------|-----------|---------------|---------|
+| entra-conditional-access | PASS | PASS | PASS | PASS | PARTIAL | PASS | ✅ |
+| entra-identity-governance | PASS | PASS | PASS | PASS | PARTIAL | PASS | ✅ |
+| entra-connect-hybrid-identity | PASS | PASS | PASS | PASS | PASS | PASS | ✅ |
+| workload-identity-federation | PASS | PASS | PARTIAL | PASS | PARTIAL | PASS | ⚠️ |
+
+### Majors (must-fix before Wave 2)
+
+1. **Missing explicit scenario codes in 3 of 4 skills.** `entra-connect-hybrid-identity` correctly cites "Scenario S4" at line 148. The other 3 skills have brownfield scenarios mapping to S3, S4, and S8 per v2 table but never name the scenario code. Fix: add scenario code to Brownfield Scenario heading in each skill.
+
+2. **workload-identity-federation CAF/WAF tables too narrow.** Only 2 CAF areas and 2 WAF pillars mapped (lines 22–32). Add Governance (credential lifecycle policy enforcement) and Security as separate CAF row. Add Reliability (token exchange failure modes) and Cost Optimization (eliminated secret rotation costs) to WAF.
+
+3. **No cross-skill scenario threading in Brownfield sections.** Each brownfield scenario is self-contained with no reference to prerequisite skill or downstream handoff. Example: "Run after `entra-connect-hybrid-identity` completes sync stabilization; hand off CA hardening to `entra-conditional-access`."
+
+### Minors (nice-to-fix; defer to Wave 2)
+
+1. `entra-conditional-access` at 335 lines (2.2× `azure-rbac`). Bicep deploymentScript example (lines 103–155) could move to examples/ directory.
+2. `entra-identity-governance` lacks Bicep/Terraform snippets. A note explaining "No ARM-native resource model for PIM" would clarify the gap.
+3. `entra-connect-hybrid-identity` CLI examples use `az ad group` without noting that Cloud Sync configuration requires Microsoft Entra admin center or PowerShell.
+4. Skill-authoring-pattern template needs update: actual skills add Security Baseline Reinforcement, Staged Rollout Procedure, Pre-Migration Discovery Checklist.
+5. `entra-conditional-access` CAE pattern provides no Graph API or CLI snippet for enablement or revocation.
+6. All 4 skills use `version: "1.0"` in frontmatter. Consider date-based version (e.g., `2026.05.18`).
+7. `entra-identity-governance` line ranges (lines 44–53, 54–61) are brittle. Use section-heading anchors instead.
+8. 4 new skills registered in `.github/copilot-instructions.md` under "Agent Governance & Context Skills". `entra-connect-hybrid-identity` and `workload-identity-federation` are identity architecture skills — move to new "### Identity Skills" table or "#### Security".
+
+### Composite Brownfield Story
+
+Sequence verified: (1) `entra-connect-hybrid-identity` stabilizes sync and migrates auth from ADFS to PHS; (2) `entra-identity-governance` converts permanent assignments to PIM-eligible; (3) `entra-conditional-access` layers zero-trust policies; (4) `workload-identity-federation` eliminates remaining service principal secrets on AKS and PaaS workloads. Logically sound and non-conflicting. **However, no skill currently names this ordering** — Major #3 addresses this gap.
+
+### Cross-Skill Boundary Integrity
+
+No ownership conflicts detected. PIM for service principals is an acceptable gap for Wave 1.
+
+### No Regression on Existing Skills
+
+- `azure-rbac` unchanged and still owns: MG scope strategy, least-privilege patterns, PIM baseline config, CA baseline, built-in roles, managed identity strategy.
+- `entra-app-registration` unchanged and still owns: GitHub Actions OIDC, app registration lifecycle, federated credential for CI/CD.
+
+### Hidden Assumptions (Acceptable for Wave 1)
+
+1. Assumes Entra ID P2 licensing (buried in parentheticals; consider explicit "Prerequisites" section for Wave 2).
+2. Assumes Intune/MDM enrollment for device compliance.
+3. Assumes single-tenant architecture (multi-tenant, ISV SaaS, and CSP scenarios may find gaps).
+
+---
+
+### Copilot — Wave 1 Majors Closure (2026-05-18T18:00:00Z)
+
+All 3 majors from Isabel's Wave 1 quality gate closed in the same commit:
+
+**Major 1 (Scenario codes):** RESOLVED. Added explicit `Scenario S#` codes to brownfield headings in all 3 affected skills:
+- `entra-conditional-access` line ~224: "Scenario S3 (Regulated Workloads)"
+- `entra-identity-governance` line ~151: "Scenario S4 (Brownfield M&A)"
+- `workload-identity-federation` line ~73: "Scenario S8 (Cloud-Native Modernization)"
+
+**Major 2 (workload-identity-federation CAF/WAF too narrow):** RESOLVED. Expanded both tables to 4 rows each:
+- CAF added: Security (credential attack surface), Governance (policy enforcement against secret-based auth)
+- WAF added: Reliability (token exchange + OIDC issuer availability), Cost Optimization (eliminated cert renewal toil)
+
+**Major 3 (no cross-skill sequencing):** RESOLVED. Added **Cross-skill sequencing:** sentence at the top of every Brownfield Scenario section in all 4 skills, naming prerequisite + downstream handoff. Sequence is: `entra-connect-hybrid-identity` → `entra-identity-governance` → `entra-conditional-access` → `workload-identity-federation` → (Steps 8/9 Sentinel/Mender).
+
+Status: ready for Wave 2 planning. Minors 1-8 deferred per Isabel's classification.
+

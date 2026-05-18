@@ -104,3 +104,10 @@ User directive: Scenario-anchored prioritization required for all architect reco
 
 Created `.squad/orchestration-log/2026-05-18T17:25:00Z-isabel.md` documenting v2 re-review gate sign-off.
 
+
+## 2026-05-18 — Wave 1 Quality Gate Learning
+
+**Date:** 2026-05-18T17:55:00Z
+
+**Learning:** Wave 1 quality gate pattern worked: 0 blockers / 3 majors / 8 minors with PASS/PARTIAL/FAIL per-skill scorecard enabled rapid closure (all majors fixed within minutes of verdict). The composite-brownfield analysis ("does the 4-skill path work end-to-end?") surfaced the cross-skill sequencing gap that per-skill review alone would have missed — keep this cross-cutting check for future Wave gates.
+

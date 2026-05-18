@@ -22,6 +22,8 @@ For this accelerator, **Security Baseline rule #4 — Managed Identity preferred
 | CAF Design Area | How this skill applies |
 |-----------------|------------------------|
 | Identity & Access | Selects managed identity type, defines trust boundaries for FIC, and removes service principal secrets from workloads |
+| Security | Eliminates stored client secrets, certificates, and connection strings as a primary credential attack surface across the workload estate |
+| Governance | Enables policy enforcement against secret-based service principal usage (e.g., Azure Policy "deny secret-based auth" at MG scope) and supports credential-lifecycle compliance |
 | Platform Automation & DevOps | Standardizes secretless runtime auth for AKS, PaaS connectors, and cross-cloud service integrations |
 
 ## WAF Pillar Mapping
@@ -29,7 +31,9 @@ For this accelerator, **Security Baseline rule #4 — Managed Identity preferred
 | WAF Pillar | Contribution |
 |------------|--------------|
 | Security | Primary pillar. Eliminates client secrets, constrains issuer/subject/audience, and reduces credential theft blast radius |
+| Reliability | Token exchange depends on OIDC issuer availability; design issuer redundancy, token refresh resilience, and explicit failure-mode handling in SDKs |
 | Operational Excellence | Removes credential rotation runbooks, simplifies brownfield retrofit, and benefits runtime efficiency through token caching |
+| Cost Optimization | Eliminates certificate renewal toil, secret rotation runbooks, and the operational cost of credential-incident response |
 
 ## Identity Selection Decision Tree
 
@@ -64,7 +68,9 @@ For this accelerator, **Security Baseline rule #4 — Managed Identity preferred
 
 ## Brownfield Scenario
 
-### Migrating an existing AKS cluster from secret-based service principals (deployed before workload identity GA) to workload identity federation without downtime
+**Cross-skill sequencing:** Run after `entra-conditional-access` has established baseline CA and `entra-identity-governance` has cleaned up human privileged paths — workload identity is the final layer that closes secret-based authentication estate-wide. No downstream Wave 1 skill follows this; ongoing operations transition to Sentinel monitoring (Step 8) and Mender remediation (Step 9).
+
+### Scenario S8 (Cloud-Native Modernization): Migrating an existing AKS cluster from secret-based service principals (deployed before workload identity GA) to workload identity federation without downtime
 
 Use this retrofit when an existing cluster still relies on `aad-pod-identity`, service principal secrets, or mounted client credentials.
 

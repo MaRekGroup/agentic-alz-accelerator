@@ -145,6 +145,8 @@ az ad group show \
 
 ## Brownfield Scenario
 
+**Cross-skill sequencing:** This is the entry point for a hybrid identity retrofit — no Wave 1 skill must run before it. Once sync stabilizes and federated domains are converted to managed authentication, hand off privileged-access governance to `entra-identity-governance`, then layer CA via `entra-conditional-access`, then close out workload secrets via `workload-identity-federation`.
+
 **Scenario S4 (Brownfield M&A): "ADFS-to-Entra cutover for an acquired 3,000-person subsidiary with 47 Azure subscriptions post-M&A."**
 
 This is the canonical retrofit use case for this skill: the acquired subsidiary already runs AD FS, has its own AD forest footprint, and must be integrated into the landing zone without breaking user sign-in, privileged admin flows, or subscription governance.

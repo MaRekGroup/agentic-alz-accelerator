@@ -219,7 +219,9 @@ Break-glass exclusions are a safety valve, not a convenience tier. If a policy r
 
 ## Brownfield Scenario
 
-### Layering CA on an existing Entra tenant without locking out admins or breaking legacy workflows
+**Cross-skill sequencing:** Run after `entra-identity-governance` has converted permanent privileged assignments to PIM-eligible — CA policies are most effective when applied to the active-session window, not standing privilege. Once baseline CA is enforced, hand off workload-credential cleanup to `workload-identity-federation`.
+
+### Scenario S3 (Regulated Workloads): Layering CA on an existing Entra tenant without locking out admins or breaking legacy workflows
 
 Use this retrofit playbook when the tenant already has live productivity traffic, partial CA coverage, and unknown dependency on legacy protocols.
 

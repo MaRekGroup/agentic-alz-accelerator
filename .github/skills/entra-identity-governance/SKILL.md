@@ -146,7 +146,9 @@ az rest --method post \
 
 ## Brownfield Scenario
 
-### PIM retrofit on a tenant with 5,000+ existing permanent role assignments and inherited group sprawl from years of M&A
+**Cross-skill sequencing:** Run after `entra-connect-hybrid-identity` completes sync stabilization and authentication is on a managed auth path. Once PIM-eligible assignments and access reviews are stable, hand off zero-trust policy hardening to `entra-conditional-access`.
+
+### Scenario S4 (Brownfield M&A): PIM retrofit on a tenant with 5,000+ existing permanent role assignments and inherited group sprawl from years of M&A
 
 1. Run Step 0 discovery to inventory direct role assignments, privileged groups, inactive guests, and duplicated admin paths across management groups and subscriptions.
 2. Classify assignments into keep, convert-to-eligible, collapse-into-group, or remove; protect break-glass identities with separate controls and logging.
