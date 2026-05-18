@@ -1480,3 +1480,126 @@ Each Wave PR contains:
 ---
 
 *End of artifact. Ready for Challenger re-review at next gate.*
+# Re-Review Verdict — v2 vs v1 Conditions
+
+**Reviewer:** Isabel (Challenger)
+**Date:** 2026-05-18T17:21:00Z
+**Artifact:** Current vs Target Skills Table — Revision 2 (Linus, 2026-05-18T17:12:04Z)
+**Review Type:** Focused gate re-review (4 majors from v1 verdict 2026-05-18T16:57:57Z)
+
+---
+
+## TL;DR Verdict
+
+✅ **APPROVE CLEAN** — All 4 majors closed substantively. v2 ready for downstream work (drafting 4 stubs).
+
+---
+
+## Per-Major Verification
+
+### M1: Skill Split (`entra-id-identity-governance` → CA + governance)
+
+**Criterion:** v2 has BOTH `entra-conditional-access` AND `entra-identity-governance` as separate Wave 1 rows with explicit "NOT X" boundary statements. Wave 1 count = 4.
+
+**Evidence:**
+- §"Wave 1 Detail — 4 Skills (Per MAJOR-1 Split)" (line 1255) — title confirms count of 4
+- `entra-conditional-access` (line 1257): Scope = "CA policies, named locations, authentication strength, cross-tenant access, continuous access evaluation (CAE)". Boundary = "NOT: PIM, access reviews, entitlement management (those → `entra-identity-governance`)" (line 1262)
+- `entra-identity-governance` (line 1275): Scope = "PIM at scale, access reviews, entitlement management, lifecycle workflows". Boundary = "NOT: CA policies (those → `entra-conditional-access`), NOT: RBAC role definitions (those → `azure-rbac`)" (line 1280)
+- Master Table (lines 1238–1239): Both skills appear as separate P1 rows
+- Cross-boundary referencing is bidirectional — each skill's NOT clause names the other skill as the owner
+
+**Score: PASS**
+
+---
+
+### M2: Honest Framing (deepening existing coverage, not filling a void)
+
+**Criterion:** v2 has a Honest Framing Statement that names `azure-rbac`'s existing PIM + CA baseline coverage AND positions investment as "deepening reference-collection to architectural-guidance level." Not just adjective swap.
+
+**Evidence:**
+- §"Honest Framing Statement (MAJOR-2)" (line 1228): "The Identity & Access investment is an **additive enhancement of existing `azure-rbac` coverage**, not a greenfield creation filling a void."
+- Explicitly names existing coverage: "PIM configuration tables (JIT activation settings, approval workflows, eligible vs. active assignments)" and "Conditional Access policy baseline (MFA enforcement, device compliance, location-based controls)" — these are concrete capabilities, not vague gestures
+- Names `entra-app-registration` existing coverage: "service principal identity and workload credential basics"
+- Positions gap as depth: "What is missing is not awareness but **architectural guidance depth**"
+- Uses the exact framing requested: "deepens reference-collection coverage into architectural-guidance coverage"
+- Master Table (lines 1238–1239): "Current State" column cites specific line ranges in existing `azure-rbac` skill (lines 54–61 for CA, lines 44–52 for PIM) — verifiable citations, not hand-waving
+- Per-Priority Deep Dive (line 1348–1350): repeats "additive enhancement" framing with both greenfield and brownfield applicability
+
+**Score: PASS**
+
+---
+
+### M3: Honest Unblock Claims (scoping vs delivery distinction)
+
+**Criterion:** v2 scenario matrix has separate columns: "Scoping Enabled?" and "Fully Delivered?" Counts honest (likely 6/8 scoping, ~4/8 full delivery).
+
+**Evidence:**
+- §"Scenario × Wave Unblock Matrix (MAJOR-3)" (line 1329): Table has 5 columns: "Wave 1 Scoping Enabled?", "Wave 1 Fully Delivers?", "Requires Later Waves?", "Greenfield Path", "Brownfield Path"
+- Scoping count: 8/8 (all ✅ Yes) — slightly more generous than my predicted 6/8 but each cell provides specific justification (e.g., S8: "workload identity for AKS migration")
+- Full delivery count: 4/8 (S3, S4, S6, S7 = ✅ Yes; S1, S2, S5, S8 = ❌ No) — matches the honest range I expected
+- Each ❌ cell names the specific later wave required (e.g., S2: "needs P4 data platform (Cosmos, SQL)")
+- Summary statement (line 1342) is explicit and honest: "Wave 1 enables scoping for 8/8 scenarios. Wave 1 fully delivers the primary identity deliverable for 4/8 scenarios."
+- The "Requires Later Waves?" column creates accountability for downstream delivery — prevents the "scoping unblocks" claim from being confused with "done"
+
+**Score: PASS**
+
+---
+
+### M4: Prerequisites Section (pipeline-integrity items)
+
+**Criterion:** v2 Prerequisites section actually lists 5 Step 3/7 audit items with current state + required resolution. Plus statement that skills + prerequisites proceed in parallel.
+
+**Evidence:**
+- §"Prerequisites Section (MAJOR-4)" (line 1202): Present and substantive
+- Table (lines 1208–1214) lists exactly 5 items:
+  1. Step 3/7 artifact naming contract — "Broken" → "Canonical filename registry enforced by Orchestrator"
+  2. Step 3 Challenger gate coverage — "Missing" → "Challenger expanded for pre-Gate 3 review (shipped Pass 2)"
+  3. Chronicler MCP tooling — "Absent" → "MCP azure-platform server provides Resource Graph queries"
+  4. Step 3 skip criteria — "Implicit" → "`step_3_status` field in session state (shipped Pass 1)"
+  5. Session state schema — "Incomplete" → "Session state doc updated (shipped Pass 1)"
+- These match my original 5 items from the 2026-05-13 audit exactly (cross-verified against my history.md entries)
+- Items 2, 4, 5 note "shipped" status — honest about what's already resolved vs what's pending
+- Execution model (line 1218): "Skills work proceeds in parallel with Prerequisites workstream; neither blocks the other, but both must complete before downstream Step 4–6 IaC work." — clear parallel execution with convergence point
+
+**Score: PASS**
+
+---
+
+## Additive-Brownfield Verification
+
+**Criterion:** Master Skills Table has "Brownfield Applicability" column populated for every row. Wave 1 skills each have a "Brownfield Scenario" subsection naming a specific retrofit/migration/audit use case. Scenario matrix has "Greenfield Path" + "Brownfield Path" columns. No skill breaks existing Step 0/8/9 brownfield workflows.
+
+**Evidence:**
+1. **Master Table column:** "Brownfield Applicability" column present (line 1236 header) and populated for all 14 rows (lines 1238–1251). Each cell names specific brownfield applicability, not generic. Example: P5 `azure-arc-servers` = "Brownfield-primary — extends governance to existing on-prem/multi-cloud servers; critical for hybrid estate assessment (Step 0)"
+2. **Wave 1 Brownfield Scenarios:** All 4 skills have dedicated "#### Brownfield Scenario" subsections:
+   - `entra-conditional-access` (line 1269): "Zero-trust CA retrofit for regulated workload migration (S3)" — references Assessor Step 0 discovery, Sentinel Step 8 monitoring, Mender Step 9 remediation
+   - `entra-identity-governance` (line 1287): "PIM remediation for over-privileged M&A integration (S4)" — references Assessor Resource Graph discovery, Sentinel monitoring, Mender auto-revoke
+   - `entra-connect-hybrid-identity` (line 1305): "ADFS-to-Entra cutover for acquired company post-M&A (S4)" — references Assessor `brownfield-discovery`
+   - `workload-identity-federation` (line 1323): "Credential elimination for existing AKS workloads (S8)" — references Assessor `brownfield-discovery`, Sentinel monitoring, Mender credential rotation
+3. **Scenario matrix columns:** "Greenfield Path" and "Brownfield Path" columns present (line 1331) and populated for all 8 scenarios
+4. **No breakage to existing brownfield workflows:** Each brownfield scenario explicitly integrates with Step 0 (Assessor discovery), Step 8 (Sentinel monitoring), and Step 9 (Mender remediation). Skills are additive to existing `brownfield-discovery` and `wara-assessment` skills — they provide identity-domain depth that those assessment skills can invoke, not conflicting paths
+
+**Verdict: PASS** — additive-brownfield directive fully propagated.
+
+---
+
+## Anything Worse in v2 than v1
+
+None identified. v2 is strictly additive to v1 content (no deletions that weaken the plan). The skill count increase (3→4 in Wave 1, total 80→94) is justified by the split and doesn't introduce scope creep — it's the same capability surface distributed across better boundaries.
+
+---
+
+## New Minors (if any)
+
+None raised. v2 changes are clean and scoped precisely to the 4 majors + brownfield directive. No new issues introduced by the revision.
+
+---
+
+## Gate Recommendation
+
+**Yes — Coordinator should proceed to draft the 4 Wave 1 SKILL.md stubs.** All 4 majors are substantively closed, the additive-brownfield directive is fully propagated, and no regressions or new blockers were introduced. The plan is architecturally sound and honestly framed.
+
+---
+
+*End of re-review. No lockout triggered. Drafting agents (Saul, Reuben, Tess as appropriate) are cleared to proceed.*
+---

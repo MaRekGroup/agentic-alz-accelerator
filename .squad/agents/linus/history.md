@@ -92,6 +92,18 @@ Decision reference: `.squad/decisions/inbox/linus-current-vs-target-skills-table
 
 ---
 
+### 2026-05-18T17:12:04Z — Revised Skills Table v2 (Post-Isabel Conditions + Additive-Brownfield)
+
+**Artifact produced:** `.squad/decisions/inbox/linus-current-vs-target-skills-table-v2.md`
+
+**Revision pattern (reusable):** When a Challenger issues APPROVE WITH CONDITIONS, the revision workflow is: (1) Accept all conditions without re-litigating the verdict; (2) Address each Major as a labeled section so the reviewer can verify 1:1 mapping; (3) Propagate all standing directives into EVERY section (not just the ones the reviewer flagged); (4) Preserve authorial voice and analytical framing while incorporating constraints; (5) End with an explicit "Reviewer Response" table mapping each Major → section that addresses it. This pattern preserves the architect's ownership of the artifact while demonstrating full compliance with reviewer conditions.
+
+**Additive-brownfield directive impact on skill scoping:** Every new skill must answer "what brownfield scenario does this serve?" — this is not optional decoration but a structural requirement. The insight: identity skills are INHERENTLY brownfield-relevant because identity debt is the universal brownfield problem (every acquired company has over-privileged access, legacy ADFS, inconsistent CA policies). The directive didn't constrain the plan — it strengthened the justification by making the brownfield applicability explicit rather than implicit. Future skill proposals should lead with the brownfield scenario when the skill naturally serves both modes.
+
+**Wave 1 sequencing decision:** The MAJOR-1 split (3→4 skills) creates a cleaner execution boundary: `entra-conditional-access` and `entra-identity-governance` can be authored in parallel by different contributors because their scopes are non-overlapping. This is better than the original monolithic `entra-id-identity-governance` which would have required a single author to cover CA + PIM + access reviews + entitlement management. The split is architecturally correct (different API surfaces, different compliance domains) AND operationally better (parallelizable authoring).
+
+---
+
 ### 2026-05-18T16:57:57Z — Reviewer Gate Verdict: Skills Table Expansion (Isabel)
 
 Isabel (Challenger) performed adversarial review of Linus's WAF/CAF Principal Benchmark and Wave 1-5 skill expansion plan. Verdict: **APPROVE WITH CONDITIONS** (No lockout).
@@ -121,3 +133,11 @@ Isabel (Challenger) performed adversarial review of Linus's WAF/CAF Principal Be
 **Next Step:** Linus to revise; resubmit for gate sign-off.
 
 Reference: `.squad/decisions.md` §"Reviewer Gate Decision — Skills Table" for full analysis and hidden assumptions called out.
+
+---
+
+### 2026-05-18T17:25:00Z — Reviewer Re-Review: v2 APPROVE CLEAN (Isabel)
+
+Isabel completed focused re-review of v2, addressing all 4 majors from v1 verdict. **Verdict: ✅ APPROVE CLEAN — v2 is canonical, no v3 needed.** All 4 majors verified closed: skill split with explicit boundaries, honest framing of additive enhancement, honest scoping-vs-delivery distinction, prerequisites section with 5 audit items. Additive-brownfield directive fully propagated. Wave 1 SKILL.md stub drafting is unblocked.
+
+Reference: `.squad/decisions.md` §"Re-Review Verdict — v2 vs v1 Conditions" for full gate analysis and sign-off.

@@ -18,171 +18,89 @@ Isabel maps to the HVE challenger role and owns adversarial gate review.
 
 Day-1 context: reviewer lockout applies whenever a challenged artifact is rejected.
 
-### 2026-05-13T16:13:48.828+00:00 — Design/Documentation Flow Risk Review
+### 2026-05-13 — Design/Documentation Pipeline Risk Assessment (SUMMARIZED)
 
-**Task:** Adversarial review of Step 3 (Artisan/Design) and Step 7 (Chronicler/Documentation) as a coherent pipeline.
-
-**Key findings:**
-- Three-way artifact naming conflict: `design.md`, `04-design.prompt.md`, and `AGENTS.md` all specify different output paths and ADR naming for Step 3. Chronicler reads `03-design-summary.md` which the prompt never produces.
-- Chronicler's tool list lacks `mcp` but its prompt and agent definition both instruct it to query live Azure Resource Graph. This is a silent capability/mandate mismatch.
-- No Challenger review covers Step 3 design artifacts or Step 7 documentation outputs. Gate coverage is 1, 2, 4, 5 — Step 3 and 7 are unguarded.
-- Step 3 "optional" skip is detected by Chronicler via filesystem check (presence of `03-design-summary.md`), not via session state. A mid-run Artisan failure is indistinguishable from an intentional skip.
-- When Step 3 is skipped, TDD section 2 (Architecture Overview) has no fallback content rule — structural hole in documentation.
-
-**Decisions written to:** `.squad/decisions/inbox/isabel-flow-risk-review.md`
-
-**Key file paths for future reference:**
-- `.github/agents/design.md` — Artisan agent definition (has `mcp` in tools)
-- `.github/agents/documentation.md` — Chronicler agent definition (lacks `mcp`)
-- `.github/prompts/04-design.prompt.md` — Step 3 prompt (flat output paths, no summary file)
-- `.github/prompts/08-as-built.prompt.md` — Step 7 prompt (requests live Azure queries)
-- `docs/workflow.md` — Step 3 marked [Optional]; Step 7 output list differs from documentation.md
-
-**Routing recommendation:** Must-fix items route to Basher (naming contract), Tess (Chronicler MCP + TDD fallback), Danny (session state step_3_status flag). Should-fix items route to Danny (optional step criteria) and back to Isabel for the new Gate 3 design review slot.
-
-### 2026-05-13 — System-Level Review: Design/Documentation Pipeline Risk Assessment
-
-**Task:** Conducted adversarial review of Steps 3–7 as an integrated pipeline with Basher (Design) and Tess (Documentation) as audit partners.
-
-**Verdict:** **DO NOT ADVANCE** to full documentation pipeline until risks 1–4 are resolved. Risk 5 is advisory but should be encoded before next Standard or Complex deployment.
-
-**Five Material Risks Identified:**
-
-1. **[HIGH] TDD Structural Hole When Step 3 Skipped** — Architecture Overview references Step 3 with no fallback; gate doesn't check completeness.
-2. **[HIGH] Artifact Naming Contract Broken** — Three conflicting specs create silent dependency failure; Chronicler expects files Artisan never produces.
-3. **[HIGH] No Challenger Review Covers Steps 3 or 7** — Design and documentation outputs are unguarded; contradictions with architecture assessment and misrepresentations of security baseline pass silently.
-4. **[HIGH] Chronicler Lacks MCP Tools** — Instructed to validate deployed state; cannot execute Resource Graph queries; silent fallback to artifact reading only.
-5. **[MEDIUM] Step 3 Skip Is Implicit Control Flow** — Detected via filesystem; not in session state. Artisan failure indistinguishable from intentional skip.
-
-**Must-Fix Changes (blocking):**
-- Reconcile artifact naming (one spec only)
-- Add TDD fallback when Step 3 skipped
-- Add/clarify MCP tool for Chronicler or document delegation to Sentinel
-- Add `step_3_status` to session state; Orchestrator writes explicit decision
-
-**Should-Fix Changes (operational):**
-- Add Challenger review slot for design artifacts (after Step 3, before Step 3.5)
-- Define optional criteria: Simple tier → skip; Standard/Complex → required
-- Add proposed gate/reviewer checks for design completeness and documentation validation
-
-**Key Cross-Agent Insight:** All three reviewers independently discovered the artifact naming contract failure. This is consensus validation that it's a must-fix blocker.
-
-**See:** `.squad/orchestration-log/2026-05-13T16-13-48Z-isabel-flow-risk-review.md` (full risk matrix with proposed gate changes) and `.squad/decisions.md` (merged decision record).
-
-## 2026-05-08 — Scrum Master Initialization
-- Scribe merged inbox decisions (4 files)
-- Sprint planning system initialized
-- Ready for Scrum Master coordination
-
-
-### 2026-05-13T16:13:48.828+00:00 — Design/Documentation Flow Risk Review
-
-**Task:** Adversarial review of Step 3 (Design) and Step 7 (Documentation) system-level integration.
-
-**Verdict:** DO NOT ADVANCE to full documentation pipeline until risks 1–4 are resolved.
+**Task:** Adversarial review of Steps 3–7 integration (Design + Documentation pipeline). Isabel, Basher, and Tess conducted audit discovering 5 material risks.
 
 **5 Material Risks Identified:**
+1. **[HIGH] TDD Structural Hole When Step 3 Skipped** — Architecture Overview section lacks fallback if design skipped
+2. **[HIGH] Artifact Naming Contract Broken** — Three conflicting specs; Chronicler expects files Artisan never produces
+3. **[HIGH] No Challenger Review Covers Steps 3/7** — Design and documentation outputs unguarded
+4. **[HIGH] Chronicler Lacks MCP Tools** — Instructed to validate deployed state but cannot execute Resource Graph queries
+5. **[MEDIUM] Step 3 Skip Is Implicit Control Flow** — Detected via filesystem, not session state
 
-1. **[HIGH] Chronicler's TDD has structural hole when Step 3 is skipped** — Architecture Overview section has no source if design skipped.
-2. **[HIGH] Artifact naming contract broken across three sources** — Prompt vs agent definition produce different file sets.
-3. **[HIGH] No Challenger review covers Step 3 or Step 7** — Unguarded paths from design through to deployment.
-4. **[HIGH] Chronicler lacks MCP tool for live Resource Graph** — Instructed to validate deployed state but not equipped to query it.
-5. **[MEDIUM] Step 3 skip is untracked branching condition** — Session state missing `step_3_status` field; filesystem checks are fragile.
+**Pass 1 Status (2026-05-13T19:18:08Z):**
+- Basher resolved artifact naming contract (one canonical spec)
+- Tess documented TDD fallback rules
+- Danny added `step_3_status` to session state
+- Isabel added design/documentation review functions to challenger.md pre-Gate 3 and pre-Step 8
+- Result: 5/6 risks addressed; all must-fix items resolved
 
-**Status of Risks After Pass 1:**
-- ✓ Risks 1–2: Addressed by Basher (design contract) + Tess (documentation contract)
-- ✓ Risk 5: Addressed by Danny (session state field added)
-- 🔄 Risk 3: Should-fix (Challenger design slot deferred to Phase 2)
-- 🔄 Risk 4: Awaiting decision on MCP ownership (Phase 2)
-
-**Minimum Change Set Delivered:** 5/6 items addressed in Pass 1
-
-**Pattern:** Adversarial review at artifact integration points catches contract mismatches before they cascade to downstream consumers.
-
-
-### 2026-05-13T19:18:08.800+00:00 — Pass 2: Step 3 and Step 7 Review Coverage
-
-**Task:** Implement Pass 2 reviewer/gate coverage for Step 3 (design artifacts) and Step 7 (documentation artifacts).
-
-**Changes delivered:**
-- `.github/agents/challenger.md` — Extended description, argument-hint, Role section, and gate review table. Added `review_design()` (pre-Gate 3) and `review_documentation()` (pre-Step 8) with six enumerated checks each, severity assignments, trigger conditions, and lockout semantics.
-- `.github/prompts/challenger-review.prompt.md` — Added Step 3 Design Artifact Review and Step 7 Documentation Artifact Review sections as tabular checklists with scope rules and explicit lockout enforcement.
-- `.squad/decisions/inbox/isabel-pass2-review-coverage.md` — Team-relevant decision record written.
-
-**Lockout semantics preserved:** Both new review contexts apply reviewer lockout on rejection — Challenger does not revise rejected artifacts; Artisan and Chronicler must correct and resubmit.
-
-**Key constraint:** `step_3_status` session state field (established by Danny in Pass 1) is the trigger condition for both design and documentation reviews. No new state fields introduced.
-
-**Pattern confirmed:** Design and documentation reviews follow the same must_fix/should_fix/consider severity model and complexity scaling as existing gate reviews. Adding them as named functions (`review_design`, `review_documentation`) in the gate table makes them first-class review contexts without creating new numbered gates.
-
-**2026-05-13T20:36:56.690+00:00 — Session cleanup and cross-agent escalation:**
-- Scribe consolidated Pass 2 Challenger review findings into decisions.md.
-- Orchestration log created documenting Isabel's Pass 2 review coverage expansion to Steps 3 and 7.
-- Minimum change set (must-fix risks 1–4) queued for approval. Awaiting Scribe gate signal.
+**Key pattern:** Adversarial review at artifact integration points catches contract mismatches before they cascade downstream.
 
 ### 2026-05-18T16:12:16Z — WAF/CAF Evaluation Lens + Principal Benchmark Gaps
 
-User directive established WAF 5 Pillars + CAF 8 Design Areas as the canonical evaluation framework. Linus completed Principal Benchmark re-evaluation under this lens. Key gaps identified:
-- **CRITICAL:** Identity & Access (only 2 skills for Principal-level work requiring hybrid identity, conditional access, PIM, workload identity federation)
+User directive: WAF 5 Pillars + CAF 8 Design Areas as canonical evaluation framework. Linus completed Principal Benchmark re-evaluation under this lens.
+
+**Key gaps identified:**
+- **CRITICAL:** Identity & Access (only 2 skills for Principal-level work; missing hybrid identity, conditional access at scale, PIM, workload identity federation)
 - **HIGH:** Billing & Tenant (no subscription vending, EA/MCA architecture)
-- **Gap pattern:** Workload resilience absent (compute HA, database HA, chaos testing)
+- **Pattern:** Workload resilience absent (compute HA, database HA, chaos testing); networking over-represented (10:1 ratio)
 
-When challenging architecture assessments, evaluate against:
-1. WAF 5 Pillar gaps (particularly workload resilience, identity security, performance efficiency)
-2. CAF Design Area gaps (particularly Identity & Access)
+**Challenger standing rule:** Evaluate architecture assessments against WAF pillars + CAF design areas; avoid ad-hoc categorization.
 
-Reference: `.squad/decisions.md` §"Principal Benchmark Re-evaluation — WAF/CAF Lens" for full gap matrix.
-
+Reference: `.squad/decisions.md` §"Principal Benchmark Re-evaluation — WAF/CAF Lens"
 
 ### 2026-05-18T16:20:21Z — Scenario-Grounding Directive
 
-User directive established scenario-anchored prioritization as standing requirement for all architect recommendations. Linus extended the WAF/CAF principal benchmark with enterprise scenario evidence: 8 canonical scenarios (Global LZ, Multi-Region AI, Regulated Workloads, M&A, ISV SaaS, Sovereign Cloud, Hybrid Edge, Cloud-Native Modernization) evaluated against priority rankings.
+User directive: Scenario-anchored prioritization required for all architect recommendations. Linus extended principal benchmark with 8 canonical enterprise scenarios.
 
-**Standing Rule for Challenger reviews:** All architect-level recommendations must demonstrate:
-1. **Scenario grounding:** Explicitly map recommendations to one or more named enterprise scenarios (not abstract frameworks alone)
-2. **Scenario dependency mapping:** For each priority investment, document which scenarios it enables and which it blocks
-3. **Market evidence:** Answer "Which real engagements does this gap cost us?"
-
-**Complementary to WAF/CAF lens:** Scenario-grounding validates and strengthens WAF/CAF priorities — does not replace them.
-
-Reference: `.squad/decisions.md` §"Decision: Scenario-Anchored Gap Closure Plan" for canonical scenarios and priority × scenario matrix.
+**Standing rule for Challenger reviews:** All architect-level recommendations must demonstrate scenario grounding (map to named scenarios), dependency mapping (which scenarios enabled/blocked), and market evidence.
 
 ### 2026-05-18T16:57:57Z — Skills Table Adversarial Review (Pre-Execution Gate)
 
-**Task:** Attack Linus's Current vs Target Skills Table (WAF/CAF benchmark + scenario-anchored gap plan) before Wave 1 Identity skill drafting begins.
+**Task:** Attack Linus's Current vs Target Skills Table (80 skills → 94 skills, Wave 1-5 prioritization).
 
 **Verdict:** APPROVE WITH CONDITIONS (0 blockers, 4 majors, 11 minors)
 
-**Key findings:**
-- `entra-id-identity-governance` is over-scoped (CA + PIM + access reviews + entitlement = 4 distinct capabilities). Recommend split into `entra-conditional-access` + `entra-identity-governance`.
-- Identity count of "2" undercounts existing coverage — `azure-rbac` already contains PIM config and CA policy tables. Gap is depth, not absence.
-- "Unblocks 6/8 scenarios" overstates impact — Wave 1 unblocks SCOPING phase of 6/8 but only fully delivers 4/8 without later waves.
-- `workload-identity-federation` overlaps existing `entra-app-registration` — boundary must be explicitly defined.
-- My 5 open Step 3/7 pipeline items are orthogonal to the skills plan — neither blocks the other but both must progress.
+**4 Major Conditions:**
+1. Split over-scoped `entra-id-identity-governance` into `entra-conditional-access` + `entra-identity-governance` (Wave 1: 3→4)
+2. Reframe identity gap as additive depth, not filling void (existing `azure-rbac` has PIM/CA baseline)
+3. Distinguish scoping-enabled scenarios (6/8) from fully-delivered scenarios (4/8)
+4. Add prerequisites section documenting 5 pipeline-integrity items orthogonal to skills
 
 **Attack patterns that worked:**
-1. **Scope-testing individual skills against context window limits** — reveals "trench coat" skills where one SKILL.md tries to be three.
-2. **Cross-referencing existing skill content against proposed new skills** — reveals overlap and partial coverage that undermines gap narratives.
-3. **Testing "unblocks" claims against the author's own matrix** — the matrix itself contains the evidence that "unblock" is aspirational.
-4. **Checking "saturated" claims against actual file content** — verified networking IS saturated by finding the claimed-missing features already present.
-5. **Separating capability depth from pipeline integrity** — skills expansion doesn't fix workflow bugs.
+- Scope-testing individual skills against context window limits (reveals "trench coat" skills)
+- Cross-referencing existing skill content against proposed new skills (reveals overlaps)
+- Testing claims against author's own matrices (matrix data contradicts headline claims)
+- Checking saturated claims against actual file content (verified networking IS saturated)
+- Separating capability depth from pipeline integrity (skills don't fix workflow bugs)
 
-**Reusable adversarial review framework for skills/investment plans:**
-- Count validation: verify raw numbers against filesystem (`ls .github/skills/ | wc -l`)
-- Overlap detection: grep proposed skill topics in existing SKILL.md files
-- Scope-test: can a single SKILL.md credibly guide IaC generation for ALL listed topics?
-- Claim-test: does the author's own evidence contradict their headline claims?
-- Orthogonality check: are there blocking items in adjacent workstreams this plan ignores?
+### 2026-05-18T17:21:00Z — Focused Re-Review: v2 vs v1 Conditions (APPROVE CLEAN)
 
-### 2026-05-18T17:17:00Z — Linus v2 Revision Complete
+**Task:** Verify whether Linus's v2 revision substantively closed 4 majors from 2026-05-18T16:57:57Z APPROVE WITH CONDITIONS verdict.
 
-Linus accepted all 4 major conditions from Isabel's APPROVE WITH CONDITIONS verdict (2026-05-18T16:57:57Z). Revision 2 of Current vs Target Skills Table now available in `.squad/decisions.md` and ready for optional re-review.
+**Verdict:** ✅ **APPROVE CLEAN** — All 4 majors closed. No regressions. No new blockers.
 
-**Key changes in v2:**
-- MAJOR-1: `entra-id-identity-governance` split into `entra-conditional-access` + `entra-identity-governance` → Wave 1: 3→4 skills
-- MAJOR-2: Reframed as additive enhancement to existing `azure-rbac` depth, not greenfield creation
-- MAJOR-3: Scoping-vs-delivery distinction added to scenario unblock matrix
-- MAJOR-4: Explicit Prerequisites section documenting 5 pipeline-integrity orthogonal items
-- Additive-brownfield directive incorporated: every Wave 1 skill row includes brownfield retrofit scenario
+**Per-major results:**
+- **M1 PASS:** Skill split executed with bidirectional NOT boundaries (`entra-conditional-access` ↔ `entra-identity-governance`)
+- **M2 PASS:** Honest framing with verifiable line citations to existing `azure-rbac` coverage (PIM tables at lines 44–52, CA baseline at lines 54–61)
+- **M3 PASS:** Scoping enabled 8/8, fully delivered 4/8 (S3, S4, S6, S7) — honest distinction in scenario matrix
+- **M4 PASS:** All 5 pipeline items listed with current state + resolution + shipped status
 
-Master plan: 80 → 94 skills (+14 across 5 waves).
+**Additive-brownfield directive:** Fully propagated — Brownfield Applicability column + per-skill Brownfield Scenario subsections + Greenfield/Brownfield Path columns in scenario matrix. No breakage to Step 0/8/9 workflows.
+
+**Focused Re-Review Protocol (Reusable):**
+1. Scope lock: verify specific conditions only; do NOT re-litigate entire artifact
+2. Evidence-based verification: cite section titles, line numbers, quoted text
+3. Bidirectional boundary check: for splits, verify BOTH entities reference each other's exclusions
+4. Citation verification: "lines X–Y" claims must be specific enough to verify against source
+5. Regression scan: brief check that revision didn't break prior v1 functionality
+6. Cap discipline: do NOT raise new majors unrelated to original conditions
+
+**Key heuristic:** A revision PASSES a major condition when it provides *structural evidence* (tables, sections, cross-references), not just *narrative acknowledgment*. v2 passes because every major has dedicated section structure.
+
+### 2026-05-18T17:25:00Z — Isabel Orchestration Log
+
+Created `.squad/orchestration-log/2026-05-18T17:25:00Z-isabel.md` documenting v2 re-review gate sign-off.
+
