@@ -141,3 +141,30 @@ Reference: `.squad/decisions.md` §"Reviewer Gate Decision — Skills Table" for
 Isabel completed focused re-review of v2, addressing all 4 majors from v1 verdict. **Verdict: ✅ APPROVE CLEAN — v2 is canonical, no v3 needed.** All 4 majors verified closed: skill split with explicit boundaries, honest framing of additive enhancement, honest scoping-vs-delivery distinction, prerequisites section with 5 audit items. Additive-brownfield directive fully propagated. Wave 1 SKILL.md stub drafting is unblocked.
 
 Reference: `.squad/decisions.md` §"Re-Review Verdict — v2 vs v1 Conditions" for full gate analysis and sign-off.
+
+---
+
+### 2026-05-18T18:08:02Z — Wave 2 Skills Plan Drafted (Compute & Containers)
+
+**Artifact produced:** `.squad/decisions/inbox/linus-wave2-plan.md`
+
+**Key decisions:**
+1. Wave 2 = 3 skills (`azure-kubernetes-service`, `azure-virtual-machines`, `azure-container-apps`) per the v2 master table. No deviation from original plan — the scenario evidence and WAF/CAF mapping held up under detailed analysis.
+2. Composite brownfield path is sequential (VM assess → AKS modernize → ACA replatform) but authoring is parallelizable because each skill owns its own directory.
+3. Hard dependency on Wave 1: `workload-identity-federation` must be merged before AKS identity section is authored. This is structural (AKS Workload Identity IS the federation pattern applied to pods).
+4. Pre-emptive Isabel compliance: baked all 3 Wave 1 majors in from the start (scenario codes in headlines, CAF ≥3 / WAF ≥4 per skill, cross-skill sequencing sentence in every brownfield section).
+
+**Reusable pattern — Wave planning methodology:**
+1. Start from the v2 master table (don't re-derive priorities)
+2. For each candidate skill: specify 10 fields (boundary, CAF, WAF, scenarios, brownfield, sequencing, size, anti-patterns, justification)
+3. Define composite brownfield path (sequence within the wave)
+4. Map Wave N → Wave N-1 hard dependencies explicitly
+5. Pre-answer likely Isabel objections by baking in prior major closure patterns
+6. Define author concurrency plan against Subagent Scale-Out Rules
+7. Identify the ONE coordination point that could cause merge conflicts (here: AKS-vs-ACA decision boundary)
+
+**Coordination risk identified:** AKS and ACA share a decision boundary ("when to use which"). This must be resolved as a shared artifact or pre-agreed boundary statement BEFORE parallel authoring begins. Pattern: when two skills share a decision tree, create the decision tree first as a standalone coordination artifact.
+
+## 2026-05-18 — Wave 2 plan landed with APPROVE WITH CONDITIONS
+
+Wave 2 plan (3 skills: AKS, VMs, ACA) accepted by Isabel with 2 majors + 4 minors. Copilot applied 4 surgical fixes (M1: add Identity & Access to VMs; M2: resolve compute-tier-selection.md sequencing; Minor 3 + 4: consistency updates). Scorecard post-closure: AKS PASS / VMs PASS / ACA PASS. Plan cleared for execution. Phase 1A (compute-tier-selection.md ADR) authoring delegated to parallel spawn (linus-2).
