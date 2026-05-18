@@ -1,4 +1,6 @@
-# Project Context
+# Linus — Architect Role
+
+## Project Context
 
 - **Owner:** Yeselam Tesfaye
 - **Project:** agentic-alz-accelerator
@@ -10,134 +12,76 @@
 
 Linus maps to the HVE architect role and owns target-state design reasoning.
 
-## Recent Updates
-
-📌 Team hired on 2026-05-08T21:31:32.689+00:00 by Yeselam Tesfaye
-
 ## Current Status
 
-**2026-05-18:** Messaging positioning sprint completed. Three value propositions confirmed and decision merged to `.squad/decisions.md`. Awaiting Yeselam validation before sprint slice execution (S1: problem audit + value prop analysis).
-
-## Key Learnings
-
-**Three Differentiated Value Propositions (Confirmed across 2026-05-08 to 2026-05-14):**
-
-1. **Enforcement (PRIMARY):** Three-tier (code → deploy → monitor+remediate)
-   - Code-gen validators: 6 security rules + cost governance block PRs
-   - Deployment gates: What-if preview + complexity-scaled approval
-   - Continuous ops: 30-min compliance scans, 1-hr drift detection, auto-remediation with rollback
-   - Unique vs ALZ: Official ALZ provides templates; we enforce compliance post-deployment continuously
-
-2. **Knowledge Transfer (SECONDARY):** Algorithmic documentation with CAF traceability
-   - Brownfield assessment (Step 0): Current-state + WAF/CAF evaluation + target-state roadmap
-   - Greenfield workflow (Steps 1-7): Generated artifacts (requirements → architecture → design → code → deployment → docs)
-   - CAF design area traceability: 8 areas mapped through every artifact end-to-end
-   - Unique vs ALZ: Official ALZ is greenfield reference; we generate as-built docs + assess existing estates algorithmically
-
-3. **Timeline (TERTIARY):** Parallelized orchestration with complexity-scaled gates
-   - Concurrency: Design (Step 3) and Governance (Step 3.5) run parallel after Gate 2
-   - Complexity tiers: Simple (1× pass), Standard (2×), Complex (3×)
-   - AVM-first generation prevents rework loops
-   - Impact: 8–12 weeks (manual) → 2–4 weeks (orchestrated)
-
-**Messaging Strategy:** Lead with enforcement (broadest TAM: compliance/security teams), secondary knowledge (differentiates from generic IaC), tertiary speed (bonus for delivery teams).
-
-**Full positioning analysis:** Archived to `.squad/agents/linus/history-archive.md`
-
-## Learnings
-
-**WAF/CAF as Primary Evaluation Lens (2026-05-18):**
-
-Per standing directive `copilot-directive-2026-05-18T161216Z.md`: All architect evaluations now use WAF 5 Pillars + CAF 8 Design Areas as the structuring framework — not ad-hoc skill categories. Key insight: The categorical view ("Azure Infra meets at 21") masked that 19/21 skills served a single CAF design area (Network Topology & Connectivity) while Identity & Access had only 2. Count-based metrics without framework alignment create false confidence. The prior "Wave 1 = Arc" priority was solving a secondary problem while the structural gap (Identity & Access = 2 skills for a foundational CAF design area) went unnamed. Pattern: whenever a category "meets" by count, validate coverage ACROSS the frameworks it maps to — count without distribution is meaningless.
-
-Decision reference: `.squad/decisions/inbox/linus-principal-benchmark-waf-caf.md`
-
-**Skills Categorization Principle (2026-05-18):**
-
-One-skill-one-category, primary-purpose rule: A skill belongs to the ONE category that describes its primary purpose — what it exists to do, not what systems it touches or which agents invoke it. An Azure service skill (e.g., azure-monitor) belongs in the category matching the service's architectural role (Governance: observability), not the accelerator layer that consumes it (AI Infrastructure). This corrects the prior v1 over-counting of AI Infrastructure by ~6 skills that were actually Azure platform services used BY agents, not agent orchestration skills themselves.
-
-Decision reference: `.squad/decisions/inbox/linus-skills-categorization-v2.md`
-
-**Principal Azure Infrastructure Architect Benchmark Framework (2026-05-18):**
-
-Reference standard for measuring project skill maturity against industry expectations (Microsoft L65/L66 or Principal Consultant at major SI). Minimum thresholds per category:
-
-| Category | Principal Minimum | Key Composition Requirements |
-|----------|-------------------|------------------------------|
-| Azure Infrastructure | 18–22 | Must span compute+network+storage+identity+database (not monocultural) |
-| Governance | 15–20 | Must cover policy authoring, RBAC design, cost governance (FinOps), security posture, observability platform, compliance mapping |
-| Landing Zones | 12–16 | Must include CAF/WAF, dual IaC, brownfield assessment, subscription vending, ADR process |
-| Hybrid | 8–12 | Must include Arc (servers+K8s+data), hybrid identity, multi-cloud governance, edge compute |
-| AI Infrastructure | 10–14 | Must include orchestration, context management, workflow contracts, evaluation, safety (emerging domain — originality > breadth) |
-
-Key differentiator principle: Principal ≠ "knows more services." Principal = designs for regulated industries at scale with trade-off articulation, failure mode analysis, and multi-stakeholder justification. The gap between Senior and Principal is composability under constraint.
-
-Project gap priorities (as of 2026-05-18): Hybrid is the structural deficit (-5 to -9). Azure Infra meets count but is networking-monocultural. Governance and AI Infrastructure are surplus. Landing Zones are stable.
-
-Decision reference: `.squad/decisions/inbox/linus-principal-benchmark.md`
-
-**Scenario-Anchored Prioritization Methodology (2026-05-18):**
-
-Defined 8 canonical enterprise scenarios the accelerator must credibly deliver: (1) Global Landing Zone, (2) Multi-Region AI Platform, (3) Regulated Workloads, (4) Brownfield M&A Integration, (5) ISV Multi-Tenant SaaS, (6) Sovereign Cloud, (7) Hybrid Edge Platform, (8) Cloud-Native Modernization. Evaluated each Priority (P1–P5) against each scenario as Critical/Important/Optional/N/A. Result: scenario-weighted ranking fully confirmed the WAF/CAF ranking (P1 Identity = 6 Critical, P2 Compute = 5 Critical, P3 Billing = 4 Critical, P4 Data = 4 Critical, P5 Hybrid = 2 Critical).
-
-Key insight: scenario-anchored prioritization complements (not replaces) the WAF/CAF lens. Frameworks identify structural gaps; scenarios prove those gaps cost real deals. When both lenses agree, confidence is high — invest without hesitation. When they disagree, investigate whether the framework is detecting a structural weakness invisible to current deal flow, or vice versa.
-
-Decision reference: `.squad/decisions/inbox/linus-scenario-anchored-gap-plan.md`
-
-**Current vs Target Skills Table Synthesis (2026-05-18):**
-
-Methodology for producing a decision-grade "current vs target" artifact: (1) Master table with one row per priority area PLUS saturated/surplus areas for full-picture context — columns must bridge both standing directives (CAF design area + WAF pillar + scenario blast radius in one row). (2) Per-priority deep-dive tables with ✅/❌ status per skill and explicit scenario citations. (3) Capacity heatmap using block characters for at-a-glance portfolio view. (4) Headline numbers as executive callout with quotable bottom line. Pattern: always show BOTH the gap areas AND the surplus areas — showing only gaps without surplus context makes the investment seem larger than it is. The 80 → 93 framing (16% expansion) is more persuasive than "13 skills needed" because it anchors against the existing base. The 10:1 networking-to-identity ratio is the single most compelling data point for explaining the structural imbalance.
-
-Decision reference: `.squad/decisions/inbox/linus-current-vs-target-skills-table.md`
+**2026-05-18:** Wave 2 Skills Plan → 3 parallel Saul SKILL.md drafts (AKS, VMs, ACA) + Linus compute-tier ADR completed. All three drafts achieved APPROVE WITH CONDITIONS → surgical major closures. Ready for decision merge and push.
 
 ---
 
-### 2026-05-18T17:12:04Z — Revised Skills Table v2 (Post-Isabel Conditions + Additive-Brownfield)
+## Historical Summary (Entries 2026-05-08 through 2026-05-18T17:12:04Z)
 
-**Artifact produced:** `.squad/decisions/inbox/linus-current-vs-target-skills-table-v2.md`
+**2026-05-08–2026-05-14:** Value proposition capture (3 differentiated propositions confirmed: Enforcement, Knowledge Transfer, Timeline). Validated through messaging positioning sprint with user. Archival: `.squad/agents/linus/history-archive.md`.
 
-**Revision pattern (reusable):** When a Challenger issues APPROVE WITH CONDITIONS, the revision workflow is: (1) Accept all conditions without re-litigating the verdict; (2) Address each Major as a labeled section so the reviewer can verify 1:1 mapping; (3) Propagate all standing directives into EVERY section (not just the ones the reviewer flagged); (4) Preserve authorial voice and analytical framing while incorporating constraints; (5) End with an explicit "Reviewer Response" table mapping each Major → section that addresses it. This pattern preserves the architect's ownership of the artifact while demonstrating full compliance with reviewer conditions.
+**2026-05-18T16:12:16Z:** User directive captured — WAF/CAF as primary evaluation lens (all architect evaluations must use Azure Well-Architected Framework 5 pillars + Cloud Adoption Framework 8 design areas as primary structuring framework).
 
-**Additive-brownfield directive impact on skill scoping:** Every new skill must answer "what brownfield scenario does this serve?" — this is not optional decoration but a structural requirement. The insight: identity skills are INHERENTLY brownfield-relevant because identity debt is the universal brownfield problem (every acquired company has over-privileged access, legacy ADFS, inconsistent CA policies). The directive didn't constrain the plan — it strengthened the justification by making the brownfield applicability explicit rather than implicit. Future skill proposals should lead with the brownfield scenario when the skill naturally serves both modes.
+**2026-05-18 (Principal Benchmark phase):** Executed WAF/CAF principal architect benchmark re-evaluation. Mapped all ~80 existing skills across WAF 5 pillars + CAF 8 design areas. Key finding: networking-dominant portfolio (19 CAF Network Topology skills) vs. identity-sparse (2 CAF Identity & Access skills). Gap analysis identified 5 priority areas: P1 Identity & Access (Critical), P2 Compute (High), P3 Billing & Tenant (High), P4 Data Management (Medium), P5 Hybrid (Medium). Scenario-anchored validation across 8 canonical enterprise scenarios confirmed WAF/CAF ranking.
 
-**Wave 1 sequencing decision:** The MAJOR-1 split (3→4 skills) creates a cleaner execution boundary: `entra-conditional-access` and `entra-identity-governance` can be authored in parallel by different contributors because their scopes are non-overlapping. This is better than the original monolithic `entra-id-identity-governance` which would have required a single author to cover CA + PIM + access reviews + entitlement management. The split is architecturally correct (different API surfaces, different compliance domains) AND operationally better (parallelizable authoring).
+**2026-05-18T16:57:57Z–2026-05-18T17:25:00Z:** Wave 1 Skills Plan (4 skills: entra-conditional-access, entra-identity-governance, entra-connect-hybrid-identity, workload-identity-federation) underwent Isabel Challenger review. APPROVE WITH CONDITIONS → surgical closures (skill boundary splits, honest framing, prerequisites documented) → re-review APPROVE CLEAN. Wave 1 plan finalized.
 
----
-
-### 2026-05-18T16:57:57Z — Reviewer Gate Verdict: Skills Table Expansion (Isabel)
-
-Isabel (Challenger) performed adversarial review of Linus's WAF/CAF Principal Benchmark and Wave 1-5 skill expansion plan. Verdict: **APPROVE WITH CONDITIONS** (No lockout).
-
-**Findings Summary:**
-- 0 blockers, 4 majors, 11 minors
-- Confirms WAF/CAF prioritization is sound
-- Confirms scenario-anchored methodology is valid
-- Flags skill scoping issue: `entra-id-identity-governance` conflates 4 distinct Azure services
-
-**Conditional Revisions Required (Majors):**
-1. Split `entra-id-identity-governance` → `entra-conditional-access` + `entra-identity-governance` (Wave 1: 3 → 4 skills)
-2. Reframe identity count narrative: existing `azure-rbac` contains partial PIM/CA coverage; investment is deepening, not filling void
-3. Reframe "unblocks 6/8 scenarios" → "enables scoping phase for 6/8"; full delivery requires multiple waves (S1 needs P3, S2/S5 need P4)
-4. Add prerequisites section documenting pipeline assumptions (TDD/Step 3 contract, artifact naming, MCP tooling must resolve in parallel)
-
-**Authority:** Reviewer Gate (Pre-execution). Conditional approval. Linus may revise without escalation.
-
-**Recommended Wave 1 (4 skills):**
-| Skill | Scope | Boundary |
-|-------|-------|----------|
-| entra-conditional-access | CA policies, named locations, authentication strength, cross-tenant, continuous access eval | NOT: PIM, access reviews |
-| entra-identity-governance | PIM at scale, access reviews, entitlement mgmt, lifecycle workflows | NOT: CA policies, RBAC |
-| entra-connect-hybrid-identity | Cloud sync, ADFS federation, multi-forest, staged rollout, pass-through auth | NOT: AADDS, B2B/B2C |
-| workload-identity-federation | AKS pod identity, cross-cloud (AWS/GCP), managed identity at scale | NOT: GitHub OIDC (use entra-app-registration) |
-
-**Next Step:** Linus to revise; resubmit for gate sign-off.
-
-Reference: `.squad/decisions.md` §"Reviewer Gate Decision — Skills Table" for full analysis and hidden assumptions called out.
+**2026-05-18T17:12:04Z–2026-05-18T18:08:02Z:** Wave 2 Skills Plan (3 skills: azure-kubernetes-service, azure-virtual-machines, azure-container-apps) drafted with pre-emptive Isabel compliance (Scenario S# codes, ≥4 CAF/≥4 WAF rows, cross-skill sequencing, Prerequisites documented per plan). Compute-tier ADR (docs/decisions/compute-tier-selection.md) authored as Phase 1A sequential prerequisite to 3 parallel Saul drafters (coordination risk: AKS-vs-ACA decision boundary shared across skills; resolved via ADR).
 
 ---
+
+## Recent Updates (Most Recent 5 Entries)
 
 ### 2026-05-18T17:25:00Z — Reviewer Re-Review: v2 APPROVE CLEAN (Isabel)
 
-Isabel completed focused re-review of v2, addressing all 4 majors from v1 verdict. **Verdict: ✅ APPROVE CLEAN — v2 is canonical, no v3 needed.** All 4 majors verified closed: skill split with explicit boundaries, honest framing of additive enhancement, honest scoping-vs-delivery distinction, prerequisites section with 5 audit items. Additive-brownfield directive fully propagated. Wave 1 SKILL.md stub drafting is unblocked.
+Isabel completed focused re-review of Wave 1 v2, addressing all 4 majors from v1 verdict. **Verdict: ✅ APPROVE CLEAN — v2 is canonical, no v3 needed.** All 4 majors verified closed: skill split with explicit boundaries (entra-conditional-access vs entra-identity-governance scopes clear, no overlap), honest framing of additive enhancement (investment deepens existing coverage, not filling void), honest scoping-vs-delivery distinction (S1 needs P3 + P4 for full value, multiple waves required), prerequisites section with 5 audit items (TDD/Step 3 contract, artifact naming, MCP tooling, policy discovery timing, hidden assumption flags). Additive-brownfield directive fully propagated across all sections. Wave 1 SKILL.md stub drafting is unblocked.
 
-Reference: `.squad/decisions.md` §"Re-Review Verdict — v2 vs v1 Conditions" for full gate analysis and sign-off.
+### 2026-05-18T18:08:02Z — Wave 2 Skills Plan Drafted (Compute & Containers)
+
+**Artifact produced:** `.squad/decisions/inbox/linus-wave2-plan.md`
+
+**Key decisions:** (1) Wave 2 = 3 skills per master table, no deviation — scenario evidence + WAF/CAF mapping held up; (2) Composite brownfield path sequential but authoring parallelizable; (3) Hard dependency on Wave 1: workload-identity-federation must merge before AKS identity authored; (4) Pre-emptive Isabel compliance baked in (Scenario S# codes in brownfield headers, ≥4 CAF / ≥4 WAF per skill, cross-skill sequencing inline in every brownfield section, Prerequisites documenting 5 hidden assumptions).
+
+**Reusable pattern (Wave planning methodology):** Start from master table → specify 10 fields per skill (boundary, CAF, WAF, scenarios, brownfield, sequencing, size, anti-patterns, justification) → define composite brownfield path → map Wave N dependencies → bake in Isabel patterns pre-emptively → author concurrency plan → identify ONE coordination point. **Coordination risk:** AKS and ACA share decision boundary ("when to use which") — resolved by creating ADR first before parallel skill authors fan out.
+
+### 2026-05-18 (Wave 2 Phase 1A): Compute-Tier Selection ADR (Linus / linus-2)
+
+**Artifact:** `docs/decisions/compute-tier-selection.md` (171 lines, 8 sections: Context, Decision Tree, WAF Trade-Off Matrix, Brownfield Assessment Lens, Scenario Mapping, Anti-Patterns, Prerequisites and Caveats, References, Revision History)
+
+**Role:** Phase 1A sequential prerequisite before 3 parallel Saul drafters (saul-4 AKS, saul-5 VMs, saul-6 ACA). ADR defines **when** each compute tier is appropriate (executable decision tree with explicit "Choose X When" criteria). 3 SKILL.md files define **how** to configure each tier and defer tier-selection boundary questions to ADR. Cross-reference coverage: AKS (10 occurrences), VMs (8 occurrences), ACA (11 occurrences). Pattern validation: Shared decision artifacts authored sequentially BEFORE parallel skill authors fan out is the right coordination pattern when ≥2 skills share a boundary — eliminates 3× rework that would occur if each Saul invented independent AKS-vs-ACA trees.
+
+### 2026-05-18 (Wave 2): Compute & Containers — 3 Parallel SKILL.md Drafts (saul-4, saul-5, saul-6)
+
+**Files created:** 
+- `.github/skills/azure-kubernetes-service/SKILL.md` (338 lines, 6 CAF / 5 WAF — saul-4)
+- `.github/skills/azure-virtual-machines/SKILL.md` (301 lines, 4 CAF / 4 WAF — saul-5)
+- `.github/skills/azure-container-apps/SKILL.md` (307 lines, 4 CAF / 4 WAF — saul-6)
+
+**Compliance baseline achieved:** All 3 pre-emptively passed Isabel baseline: Scenario S# codes in brownfield headers (S8/S3/S8), ≥4 CAF / ≥4 WAF rows, cross-skill sequencing sentence present (verbatim per plan), Prerequisites subsection with 5 hidden assumptions documented. Boundary discipline held: each defers tier-selection decisions to ADR rather than redefining inline.
+
+**Lesson:** Pre-emptive compliance baking eliminates the post-draft major-closure cycle. Wave 1 pattern was "draft → Isabel finds 3 majors → surgical close." Wave 2 pattern demonstrates "plan codifies compliance → drafts pass baseline first-time" — validated at Isabel-4 draft-stage quality gate (APPROVE WITH CONDITIONS → surgical closures of M1 + M2).
+
+### 2026-05-18 — Wave 2 Drafts: Isabel Quality Gate → Majors Closed → APPROVE CLEAN
+
+Isabel-4 verdict: APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Findings: All 3 Wave 1 majors remain absent in W2. Composite VM→AKS→ACA story coherent. All 15 hidden assumptions present. No boundary collisions. Copilot closed both majors via surgical edits: (M1) added Operational Excellence WAF row to VMs SKILL.md; (M2) added inline cross-skill sequencing sentence to ACA brownfield intro. All majors verified closed. **Ready for push to `github` remote + PR to `github/main`.**
+
+---
+
+## Key Learnings (Cross-Session)
+
+- **WAF/CAF as structuring framework:** All evaluations now use WAF 5 Pillars + CAF 8 Design Areas as primary lens, not ad-hoc categorization. Directional impact: forces explicit trade-off articulation and multi-pillar coverage validation.
+- **Skills categorization principle:** One-skill-one-category, primary-purpose rule. A skill belongs to the category matching its primary purpose (what it exists to do), not secondary uses or systems it touches.
+- **Principal architect benchmark:** Minimum thresholds per category for Principal-level capability (L65/L66 standard). Principal ≠ "knows more services" but rather "designs for regulated industries at scale with trade-off articulation + failure mode analysis + multi-stakeholder justification."
+- **Scenario-anchored prioritization:** Frame-locking decisions — when WAF/CAF lens and scenario-anchored ranking both agree, confidence is high; when they disagree, investigate whether framework detects structural weakness invisible to current deal flow.
+- **Pre-emptive compliance baking:** Codifying compliance in the plan (before authoring) eliminates post-draft major-closure cycles. Saul Wave 2 achieved baseline pass first-time by following Isabel-cleared patterns from Wave 1.
+- **Shared decision artifacts sequenced before fan-out:** When ≥2 agents share a decision boundary, create the shared artifact first (ADR) before parallel authoring begins. Eliminates merge-conflict rework and ensures coherence.
+
+## Reusable Patterns
+
+1. **Skills Table Synthesis Methodology:** Master table with all priority areas (gaps + surplus) → per-priority deep-dive tables with status per skill + scenario citations → capacity heatmap → headline numbers as executive callout.
+2. **Revision pattern for APPROVE WITH CONDITIONS:** Accept all conditions → address each Major with labeled section → propagate standing directives → preserve authorial voice → end with 1:1 Major→section mapping table.
+3. **Wave Planning Methodology:** Start from master table → 10 fields per skill → composite brownfield path → Wave N dependencies → pre-emptive Isabel patterns → concurrency plan → identify ONE coordination point.
+4. **Surgical Major Closure (≤2 majors, <10 new lines each):** Use Isabel-proposed text, apply in-place, verify with grep, no agent re-spawn needed. Pattern: Wave 1 drafts (3 majors, closed) → Wave 2 plan (4 majors, closed) → Wave 2 drafts (2 majors, closed).
+

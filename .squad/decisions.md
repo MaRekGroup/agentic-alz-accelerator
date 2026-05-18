@@ -1785,3 +1785,630 @@ All 3 majors from Isabel's Wave 1 quality gate closed in the same commit:
 
 Status: ready for Wave 2 planning. Minors 1-8 deferred per Isabel's classification.
 
+
+## 2026-05-18 — Wave 2 Plan
+
+### Wave 2 Plan (Linus)
+
+# Linus — Wave 2 Skills Plan
+
+**Date:** 2026-05-18
+**Branch:** wave2-skills-planning
+**Author:** Linus (Architect)
+**Reviewing:** Wave 1 outcomes (commits 5f802db + 6487c46), Isabel Wave 1 verdict, v2 master table
+
+## Executive Summary
+
+Wave 2 adds 3 skills under the theme **Compute & Containers** — closing the structural gap where the accelerator delivers perfect platform landing zones but cannot guide what goes inside them. This wave unblocks 5/8 scenarios (S2, S3, S5, S7, S8) and depends on Wave 1's `workload-identity-federation` being complete (AKS workload identity requires the federation skill as prerequisite). The composite brownfield path is: assess existing compute → modernize AKS → migrate VMs → adopt serverless containers.
+
+## Wave 2 Master Table
+
+| Priority | Skill | Owning Agent | CAF (count) | WAF (count) | Scenarios | Wave 1 Prereq | Wave 2 Internal Order | Brownfield Scenario Code |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `azure-kubernetes-service` | Saul | 4 | 4 | S2, S3, S5, S7, S8 | `workload-identity-federation` | First (others reference AKS patterns) | S8 |
+| 2 | `azure-virtual-machines` | Saul | 4 | 4 | S2, S3, S5, S7, S8 | None (independent) | Parallel with AKS | S3 |
+| 3 | `azure-container-apps` | Saul | 4 | 4 | S2, S5, S8 | `workload-identity-federation` (soft) | After AKS (decision-tree references AKS boundary) | S8 |
+
+## Per-Skill Detail
+
+### Skill 1: `azure-kubernetes-service`
+
+**1. Skill name & owning agent:** `azure-kubernetes-service` — Saul (governance/security owner; AKS has deep policy, security, and identity surface)
+
+**2. Boundary statement:**
+- **USE FOR:** AKS cluster architecture (networking modes: kubenet vs Azure CNI vs CNI Overlay vs CNI Powered by Cilium), node pool topology (system/user/GPU/spot), workload identity integration, pod security standards (PSS/PSA), network policy (Azure vs Calico vs Cilium), ingress architecture (AGIC, nginx, Contour), service mesh (Istio, OSM), autoscaling (HPA/VPA/KEDA/cluster autoscaler), AKS private cluster patterns, AKS backup/DR, GitOps (Flux v2), and AKS landing zone accelerator alignment.
+- **DO NOT USE FOR:** General networking topology (use `azure-virtual-network`), firewall rules for AKS egress (use `azure-firewall`), workload identity federation setup (use `workload-identity-federation`), container registry security (future: `azure-container-registry`), Arc-enabled K8s on-prem (use future `azure-arc-kubernetes`), Container Apps serverless patterns (use `azure-container-apps`).
+
+**3. CAF Design Area mapping:**
+
+| CAF Design Area | Justification |
+|---|---|
+| Network Topology & Connectivity | AKS networking mode, private endpoint, DNS integration, ingress/egress |
+| Platform Automation & DevOps | GitOps (Flux v2), AKS deployment pipelines, cluster bootstrap |
+| Security | Pod security standards, network policy, secrets (CSI driver), image integrity |
+| Identity & Access | Workload identity, RBAC for K8s API, Microsoft Entra integration |
+
+**4. WAF Pillar mapping:**
+
+| WAF Pillar | Justification |
+|---|---|
+| Reliability | Pod disruption budgets, zone-redundant node pools, cluster upgrade strategy, multi-cluster DR |
+| Performance Efficiency | HPA/VPA/KEDA autoscaling, node pool sizing, GPU scheduling, proximity placement |
+| Security | Pod security admission, network policy, image scanning, Key Vault CSI, private cluster |
+| Operational Excellence | GitOps, observability (Container Insights, Prometheus), upgrade cadence, node image auto-upgrade |
+
+**5. Scenarios unblocked:**
+- **S2 (Multi-Region AI Platform):** Cannot deliver model hosting on GPU node pools or inference scaling without AKS architecture depth.
+- **S3 (Regulated Workloads):** Cannot architect compliant AKS (pod sandboxing, network policy, private cluster) without this skill — regulation mandates workload isolation.
+- **S5 (ISV Multi-Tenant SaaS):** Cannot design deployment stamps or per-tenant compute isolation without AKS multi-tenancy patterns.
+- **S7 (Hybrid Edge):** Cannot architect Azure Arc-connected edge clusters without understanding AKS primitives they extend.
+- **S8 (Cloud-Native Modernization):** Cannot deliver "containerize and deploy" without AKS cluster design — this is THE cloud-native compute platform.
+
+**6. Brownfield retrofit headline:** *Scenario S8 — Assess existing AKS clusters for networking mode debt, deprecated pod identity (AAD Pod Identity v1 → Workload Identity), under-utilized node pools, and missing pod disruption budgets; produce modernization roadmap aligned with AKS release cadence.*
+
+**7. Cross-skill sequencing:**
+- **Wave 1 prereq:** `workload-identity-federation` (AKS workload identity design references the federation patterns).
+- **Wave 2 internal:** First — both `azure-virtual-machines` and `azure-container-apps` reference AKS as comparison point in their decision trees.
+- **Downstream handoff:** Feeds `azure-arc-kubernetes` (Wave 5) for Arc extension patterns; feeds Forge/Strategist for IaC generation.
+
+**8. Estimated SKILL.md size:** ~380 lines | **Complexity tier:** Large (broadest API surface, most anti-patterns, most brownfield debt scenarios)
+
+**9. Anti-patterns to call out:**
+1. **"Kubenet because it's simpler"** — Kubenet cannot support network policy or Windows nodes; defaults to Azure CNI Overlay for new clusters.
+2. **"Single system node pool for everything"** — Mix of system and workload pods causes resource starvation; always separate system and user node pools.
+3. **"AAD Pod Identity v1 in 2026"** — Deprecated; must migrate to Workload Identity Federation (references Wave 1 skill).
+4. **"AKS without private endpoint"** — Violates security baseline rule #6 (public network disabled in prod).
+5. **"Manual kubectl applies in production"** — Must use GitOps (Flux v2) for declarative state; manual apply is drift source.
+
+**10. Why Wave 2 (not Wave 3+):** AKS is the #1 compute workload in enterprise landing zones and is critical for 5/8 scenarios. Without AKS depth, the platform landing zone is "an empty parking garage" (per the v2 narrative). Identity (Wave 1) feeds directly into AKS workload identity — the dependency chain is immediate. Delaying to Wave 3+ would mean scenarios S2, S3, S5, S8 remain undeliverable despite having platform + identity complete.
+
+---
+
+### Skill 2: `azure-virtual-machines`
+
+**1. Skill name & owning agent:** `azure-virtual-machines` — Saul (VM security hardening, availability zone strategy, and Defender for Servers integration require governance depth)
+
+**2. Boundary statement:**
+- **USE FOR:** VM availability architecture (zones, availability sets, VMSS Flex), proximity placement groups, accelerated networking, VM SKU selection guidance, Trusted Launch / Confidential VMs, Azure Dedicated Host, VM backup and DR (ASR integration), OS disk encryption (PMK/CMK/DES), VM extensions strategy, Update Manager integration, and Azure Compute Gallery.
+- **DO NOT USE FOR:** AKS node pool VMs (use `azure-kubernetes-service`), VM networking (NSGs, UDRs — use `azure-virtual-network`), Azure Backup vault configuration (use `azure-backup`), Azure Site Recovery replication setup (use `azure-site-recovery`), Azure Bastion connection (use `azure-bastion`), Azure Monitor agent configuration (use `azure-monitor`).
+
+**3. CAF Design Area mapping:**
+
+| CAF Design Area | Justification |
+|---|---|
+| Network Topology & Connectivity | Accelerated networking, proximity placement, multi-NIC patterns |
+| Security | Trusted Launch, Confidential VMs, disk encryption, host-level isolation |
+| Identity & Access | Managed identity for VMs (Security Baseline rule #4), RBAC for operator access, JIT VM access via Defender for Cloud, disk encryption key vault integration |
+| Management | Update Manager, extensions, monitoring, maintenance control |
+
+**4. WAF Pillar mapping:**
+
+| WAF Pillar | Justification |
+|---|---|
+| Reliability | Zone-redundant VMSS, availability sets for legacy, fault domain strategy, VM DR with ASR |
+| Performance Efficiency | SKU right-sizing, proximity placement, accelerated networking, ephemeral OS disk |
+| Security | Trusted Launch, Confidential VMs, disk encryption (PMK/CMK), host isolation |
+| Cost Optimization | Spot VMs, reserved instances, VMSS scale-in policy, right-sizing recommendations |
+
+**5. Scenarios unblocked:**
+- **S2 (Multi-Region AI Platform):** Cannot architect GPU VM pools for model training or NC-series placement without VM availability guidance.
+- **S3 (Regulated Workloads):** Cannot deliver Confidential VMs or Dedicated Hosts for compliance workloads without this skill — HIPAA/FedRAMP require attestation.
+- **S5 (ISV Multi-Tenant SaaS):** Cannot design per-tenant VM isolation or VMSS stamp patterns without availability architecture.
+- **S7 (Hybrid Edge):** Cannot architect Azure Stack HCI VMs or guide VM-to-container migration path.
+- **S8 (Cloud-Native Modernization):** Cannot assess existing VMs for containerization readiness — the "lift and shift" starting point.
+
+**6. Brownfield retrofit headline:** *Scenario S3 — Right-size existing VMs using Advisor data, zone-balance unprotected workloads, enable Trusted Launch on Gen2-compatible VMs, and enforce disk encryption (CMK via Key Vault) to meet regulatory compliance baselines.*
+
+**7. Cross-skill sequencing:**
+- **Wave 1 prereq:** None directly (VMs use managed identity but that's existing `azure-rbac` scope, not Wave 1 depth).
+- **Wave 2 internal:** Parallel with `azure-kubernetes-service` — no dependency between them. Decision tree in `azure-container-apps` references VM comparison for "lift-and-shift vs replatform" guidance.
+- **Downstream handoff:** Feeds `azure-arc-servers` (Wave 5) for hybrid VM governance extension; feeds Assessor for brownfield VM inventory classification.
+
+**8. Estimated SKILL.md size:** ~280 lines | **Complexity tier:** Medium (well-understood platform, fewer anti-patterns than AKS, but deep availability/security surface)
+
+**9. Anti-patterns to call out:**
+1. **"Availability set for new deployments"** — Availability zones supersede sets for new workloads; sets are legacy compatibility only.
+2. **"Single-instance VM in production"** — No SLA guarantee; must use zone-redundant VMSS Flex or multi-zone deployment.
+3. **"Platform-managed keys are sufficient for regulated"** — Compliance mandates CMK with customer-controlled Key Vault for audit trail.
+4. **"Gen1 VMs in 2026"** — Cannot enable Trusted Launch; blocks security baseline enforcement. Migrate to Gen2.
+5. **"Over-sized SKU 'just in case'"** — Right-size using Advisor + 90-day utilization data; reserved instances only after stabilization.
+
+**10. Why Wave 2 (not Wave 3+):** VMs remain the dominant compute in enterprise estates (>80% of Azure spend per Microsoft reporting). Every brownfield engagement starts with VM assessment. S3 (Regulated) specifically requires Confidential VM and Dedicated Host guidance that no existing skill covers. Deferring leaves the accelerator unable to advise on the most common workload type.
+
+---
+
+### Skill 3: `azure-container-apps`
+
+**1. Skill name & owning agent:** `azure-container-apps` — Saul (ACA has deep integration with identity, networking, and Dapr — governance-adjacent decisions)
+
+**2. Boundary statement:**
+- **USE FOR:** Container Apps Environment architecture (workload profiles vs consumption), KEDA autoscaling rules, Dapr component integration, revision management (blue-green, traffic splitting), custom domain + managed certificate, Container Apps Jobs, multi-container apps, health probes, observability (structured logging, distributed tracing), and Container Apps landing zone patterns.
+- **DO NOT USE FOR:** AKS cluster architecture (use `azure-kubernetes-service`), container registry (future: `azure-container-registry`), Azure Functions containerized (future skill), general virtual network design (use `azure-virtual-network`), App Service / Web Apps (different compute; future skill), workload identity federation setup (use `workload-identity-federation`).
+
+**3. CAF Design Area mapping:**
+
+| CAF Design Area | Justification |
+|---|---|
+| Platform Automation & DevOps | CI/CD revision deployment, blue-green, container lifecycle |
+| Network Topology & Connectivity | VNET injection, private DNS, internal-only environments |
+| Security | Managed identity, secret references (Key Vault), mTLS (Dapr) |
+| Management | Structured logging, distributed tracing, health probes, scaling metrics |
+
+**4. WAF Pillar mapping:**
+
+| WAF Pillar | Justification |
+|---|---|
+| Performance Efficiency | KEDA auto-scaling (queue-based, HTTP concurrent, custom metrics), workload profile sizing |
+| Cost Optimization | Consumption plan (pay-per-request), scale-to-zero, spot workload profiles |
+| Reliability | Multi-revision traffic splitting, health probes, zone redundancy, min replicas |
+| Security | Managed identity, secret management, VNET isolation, internal-only ingress |
+
+**5. Scenarios unblocked:**
+- **S2 (Multi-Region AI Platform):** Cannot architect serverless inference endpoints or event-driven AI pipelines without ACA scaling patterns.
+- **S5 (ISV Multi-Tenant SaaS):** Cannot design per-tenant microservices with noisy-neighbor isolation using Dapr + workload profiles without this skill.
+- **S8 (Cloud-Native Modernization):** Cannot deliver "replatform without K8s complexity" — ACA is the simpler path for teams that don't need full K8s. The "AKS vs ACA" decision tree is load-bearing.
+
+**6. Brownfield retrofit headline:** *Scenario S8 — Migrate existing Docker Compose or legacy container workloads from App Service containers / ACI to Container Apps with KEDA scaling, replacing manual scaling rules with event-driven autoscale and eliminating idle compute costs through scale-to-zero.*
+
+**7. Cross-skill sequencing:**
+- **Wave 1 prereq:** `workload-identity-federation` (ACA managed identity references the broader federation patterns for cross-service auth).
+- **Wave 2 internal:** After `azure-kubernetes-service` — the "AKS vs ACA" decision tree requires AKS scope to be defined first so boundaries are clear. Can be authored in parallel if the decision tree section is coordinated.
+- **Downstream handoff:** Feeds Forge for ACA Bicep/Terraform module selection; feeds Strategist for compute tier decisions in implementation plans.
+
+**8. Estimated SKILL.md size:** ~250 lines | **Complexity tier:** Medium (newer service with smaller API surface than AKS, but Dapr + KEDA patterns add depth)
+
+**9. Anti-patterns to call out:**
+1. **"ACA for everything"** — ACA cannot replace AKS for workloads needing custom CNI, DaemonSets, or privileged containers. Include decision tree.
+2. **"Consumption plan for predictable high-throughput"** — Workload profiles with dedicated compute are cheaper at sustained load; consumption is for burst/idle patterns.
+3. **"Dapr without understanding sidecar overhead"** — Dapr adds ~128MB RAM per replica; factor into scaling calculations.
+4. **"Ignoring scale-to-zero cold start"** — Min replicas = 0 saves cost but adds latency; set min = 1 for latency-sensitive paths.
+5. **"Single revision with in-place updates"** — Must use multi-revision + traffic splitting for zero-downtime deployments.
+
+**10. Why Wave 2 (not Wave 3+):** ACA is the fastest-growing Azure compute service and the "easy on-ramp" for teams modernizing without K8s expertise. S8 (Cloud-Native Modernization) explicitly needs the AKS-vs-ACA decision tree. Deferring to Wave 3+ creates a gap where the accelerator can architect AKS but cannot offer the simpler alternative — forcing every modernization into K8s complexity regardless of need.
+
+---
+
+## Composite Wave 2 Brownfield Path
+
+**Named sequence:** `azure-virtual-machines` (assess existing estate) → `azure-kubernetes-service` (assess/modernize existing AKS) → `azure-container-apps` (migrate suitable workloads from VMs/AKS to serverless)
+
+**Rationale:** Brownfield engagements typically start with VM inventory (the legacy workloads), then assess containerized workloads (existing AKS clusters), then identify migration candidates for simpler compute (ACA). This mirrors the modernization journey: lift → shift → replatform.
+
+**Cross-skill sequencing sentence (to embed in each SKILL.md):**
+- `azure-virtual-machines`: "Run after Wave 1 identity hardening is complete. Assess VM estate for zone-balancing, right-sizing, and containerization readiness. Hand off container-ready workloads to `azure-kubernetes-service` or `azure-container-apps` based on complexity."
+- `azure-kubernetes-service`: "Run after `workload-identity-federation` (Wave 1) is integrated. Assess existing AKS clusters for networking mode debt and pod identity migration. Hand off serverless-eligible workloads to `azure-container-apps`."
+- `azure-container-apps`: "Run after `azure-kubernetes-service` assessment determines which workloads don't need full K8s. Migrate identified candidates from VMs or over-engineered AKS deployments to ACA with KEDA scaling."
+
+## Wave 2 → Wave 1 Integration
+
+| Wave 2 Skill | Wave 1 Dependency | Nature of Dependency |
+|---|---|---|
+| `azure-kubernetes-service` | `workload-identity-federation` | **Hard** — AKS workload identity IS the federation pattern applied to pods. The AKS skill's identity section directly references federation skill patterns. |
+| `azure-virtual-machines` | None | **Soft** — VMs use managed identity (existing `azure-rbac` scope). No Wave 1 depth required. |
+| `azure-container-apps` | `workload-identity-federation` | **Soft** — ACA managed identity references federation for cross-service auth, but ACA SKILL.md can be authored without the federation skill being final. |
+
+**Implication:** Wave 1 must be fully shipped (all 4 SKILL.md files merged, Isabel quality-gated) before `azure-kubernetes-service` authoring begins its identity section. The AKS brownfield scenario also references the `workload-identity-federation` → Workload Identity migration path.
+
+## Author Concurrency Plan
+
+| Skill | Can Start Immediately? | Shared Artifacts | Serialization Risk |
+|---|---|---|---|
+| `azure-kubernetes-service` | Yes (after Wave 1 merge) | None | Low — owns its directory |
+| `azure-virtual-machines` | Yes (parallel with AKS) | None | Low — no file conflicts |
+| `azure-container-apps` | Yes (parallel, with coordination) | AKS-vs-ACA decision tree must be consistent across both skills | **Medium** — the decision boundary between AKS and ACA must match in both SKILL.md files |
+
+**Recommendation:** Author all 3 in parallel per Subagent Scale-Out Rules. The AKS-vs-ACA decision tree is the one coordination point — resolve it as a shared decision BEFORE authoring begins (add to this plan as an appendix or create a mini-ADR). No file conflicts exist since each skill owns `.github/skills/{name}/SKILL.md` exclusively.
+
+**Concurrency ceiling:** 3 skills × 1 author (Saul) = safe. If splitting across Saul + another contributor, the ACA author must wait for or pre-agree on the AKS boundary statement.
+
+## Pre-Authoring Sequencing
+
+Per Subagent Scale-Out Rules and Yeselam's Q1 decision (2026-05-18 post-plan), the AKS-vs-ACA decision tree lives in a shared artifact that both skills reference. This artifact MUST exist before the 3 parallel Saul instances spawn — otherwise both AKS and ACA authors will race to define the boundary, producing inconsistent decision trees.
+
+### Sequenced steps
+
+1. **Step A (sequential, pre-fan-out):** Create `docs/decisions/compute-tier-selection.md` as a mini-ADR. Owning agent: Linus (architectural decisions) or Saul (skill author lineage). Author choice deferred to orchestrator.
+2. **Step B (parallel fan-out):** Spawn 3 Saul instances for the 3 SKILL.md files. Each instance is told: "Reference `docs/decisions/compute-tier-selection.md` for the AKS-vs-ACA boundary — do NOT redefine it in your SKILL.md."
+
+### Skeleton content for `docs/decisions/compute-tier-selection.md`
+
+```markdown
+# ADR: Compute Tier Selection (AKS vs ACA vs VMs)
+
+## Context
+Enterprise landing zones host workloads spanning legacy VMs, containerized microservices, and event-driven serverless functions. The "right" compute tier depends on workload characteristics, team K8s expertise, scaling profile, and operational tolerance.
+
+## Decision Tree
+
+### Choose AKS when:
+- Workload requires custom CNI (e.g., Calico, Cilium) for network policy depth
+- DaemonSets needed (per-node agents like log forwarders, security scanners)
+- Privileged containers required (host access, custom kernels)
+- StatefulSets at scale (databases, message brokers with persistent identity)
+- Multi-cluster federation needed (multi-region active-active)
+- Service mesh required at the cluster level (Istio, OSM)
+- Team has K8s operational expertise OR will invest in it
+
+### Choose ACA when:
+- HTTP microservices with simple ingress requirements
+- Event-driven workloads (queue, blob, custom KEDA scalers)
+- Scale-to-zero is acceptable (cost over latency)
+- Dapr building blocks fit the architecture
+- Team prefers managed runtime over cluster ownership
+- Per-app revision/blue-green is the deployment model
+
+### Choose VMs when:
+- Legacy workload not yet containerized (lift-and-shift path)
+- License requires bare-OS access (per-VM ISV licensing)
+- Specialized hardware (HPC, GPU with custom drivers, FPGA)
+- Confidential VMs or Dedicated Hosts required for compliance
+- Application not container-friendly (Windows GUI, heavy stateful)
+
+### Mixed estate (most enterprises):
+- Different workloads in same estate map to different tiers
+- AKS for stateful platform services; ACA for stateless API tiers; VMs for legacy
+- Decision is per-workload, not per-environment
+
+## References
+- `.github/skills/azure-kubernetes-service/SKILL.md` — AKS-specific architecture
+- `.github/skills/azure-container-apps/SKILL.md` — ACA-specific architecture
+- `.github/skills/azure-virtual-machines/SKILL.md` — VM-specific architecture
+```
+
+### Race avoidance
+
+If Step A is skipped or parallelized, the AKS and ACA SKILL.md drafts will diverge on the decision boundary, requiring Isabel to flag M-level findings post-authoring. Sequential pre-creation is the cheap insurance.
+
+## Pre-emptive Isabel Compliance
+
+Isabel flagged 3 majors in Wave 1. Wave 2 bakes all 3 in from the start:
+
+| Wave 1 Major | How Wave 2 Prevents It |
+|---|---|
+| **Major 1: Missing scenario codes in brownfield headings** | Every brownfield section above specifies `Scenario S#` explicitly in the headline. Template for authors: "Brownfield Scenario (Scenario S#: {name})" |
+| **Major 2: CAF/WAF tables too narrow** | Every skill specifies ≥3 CAF areas and ≥4 WAF pillars with explicit justification per row. Minimum threshold is documented. |
+| **Major 3: No cross-skill sequencing** | Every brownfield section includes the cross-skill sequencing sentence naming prereq + handoff. Composite path is defined above. |
+
+**Additional pre-emptive mitigations:**
+- Isabel noted hidden licensing assumptions in Wave 1 — Wave 2 skills must include explicit "Prerequisites" subsection (AKS tier, VM Gen2 requirement, ACA workload profile availability).
+- Isabel noted workload-identity-federation was too narrow (2 CAF, 2 WAF) — all Wave 2 skills start at 3+ CAF, 4 WAF as floor.
+- Isabel noted skills registered under wrong copilot-instructions.md section — Wave 2 skills should register under a new "### Compute & Containers" section in copilot-instructions.md.
+
+## Capacity Heatmap (Updated)
+
+| Wave | Theme | Skills | Cumulative Shipped | Remaining (94 total) |
+|---|---|---|---|---|
+| 1 (Identity) | Identity & Access depth | 4 | 4 | 90 |
+| **2 (this plan)** | **Compute & Containers** | **3** | **7** | **87** |
+| 3 (Billing) | Billing & Tenant automation | 2 | 9 | 85 |
+| 4 (Data) | Data Platform architecture | 3 | 12 | 82 |
+| 5 (Hybrid) | Hybrid governance extension | 2 | 14 | 80 |
+
+**Post-Wave 5 remaining:** 80 skills are existing/already-shipped (the baseline 80 from v2 table). The 14 new skills complete the expansion to 94.
+
+## Wave 2 PR Naming Pattern
+
+```
+feat(skills): Wave 2 — Compute & Containers (3 skills)
+```
+
+PR contains:
+1. `.github/skills/azure-kubernetes-service/SKILL.md`
+2. `.github/skills/azure-virtual-machines/SKILL.md`
+3. `.github/skills/azure-container-apps/SKILL.md`
+4. Updated `count-manifest.json`
+5. Updated `.github/copilot-instructions.md` (new "### Compute & Containers" section)
+6. Agent definition updates (routing skills to Oracle, Forge, Strategist, Assessor)
+
+## Decisions Confirmed Post-Plan (Yeselam, 2026-05-18)
+
+The original "Open Questions" section asked Yeselam 3 questions. All 3 have been answered before Wave 2 authoring begins:
+
+1. **AKS-vs-ACA decision boundary (Q1 — RESOLVED):** Create a shared decision-tree artifact at `docs/decisions/compute-tier-selection.md` that both AKS and ACA SKILL.md files reference. See "Pre-Authoring Sequencing" section above for sequenced creation steps and skeleton content.
+
+2. **Author assignment (Q2 — RESOLVED):** Single author — Saul × 3 parallel instances. Saul references existing `azure-networking` skill for AKS networking depth rather than split authorship. Rationale: single voice + fastest path + Saul's governance/security depth covers all 3 skills cleanly.
+
+3. **Wave 2 timing relative to Wave 1 PR merge (Q3 — RESOLVED):** Wave 1 is already shipped to `github/main` (commits 5f802db + 6487c46, majors closed at 2026-05-18T18:00:00Z). Wave 2 authoring proceeds on branch `wave2-skills-planning` (already checked out from main HEAD). No rebase risk.
+
+### Wave 2 Plan Quality Gate Verdict (Isabel)
+
+# Isabel — Wave 2 Plan Quality Gate Verdict
+
+**Date:** 2026-05-18
+**Reviewing:** `.squad/decisions/inbox/linus-wave2-plan.md`
+**Verdict:** APPROVE WITH CONDITIONS
+**Blockers:** 0 | **Majors:** 2 | **Minors:** 4
+
+## Verdict Summary
+
+The plan is structurally sound and significantly better-organized than Wave 1's pre-authoring state. Linus has pre-emptively addressed all 3 Wave 1 majors at the template level. Two new majors emerge from the plan itself: (1) `azure-virtual-machines` has only 3 CAF rows, violating the stated "≥3 CAF" floor but actually passing by count — however it's missing the most obvious CAF area (Identity & Access) for a compute resource that uses managed identity and RBAC extensively, making the mapping incomplete; (2) the shared `docs/decisions/compute-tier-selection.md` artifact is referenced in the "Open Questions" section (line 254) as a *question*, not as a *decision* — yet the Author Concurrency Plan (line 207) assumes it exists. This creates a sequencing gap that will block 3 Saul instances from producing consistent AKS-vs-ACA decision trees.
+
+## Per-Skill Scorecard
+
+| Skill | Master Table | CAF/WAF Width | Scenario Anchoring | Brownfield S# | Cross-Skill Sequencing | Boundary Clean | Anti-Patterns | OVERALL |
+|---|---|---|---|---|---|---|---|---|
+| azure-kubernetes-service | PASS | PASS (4 CAF / 4 WAF) | PASS | PASS (S8) | PASS | PASS | PASS | ✅ PASS |
+| azure-virtual-machines | PASS | PARTIAL (3 CAF / 4 WAF — missing Identity & Access) | PASS | PASS (S3) | PASS | PASS | PASS | ⚠️ PARTIAL |
+| azure-container-apps | PASS | PASS (4 CAF / 4 WAF) | PASS | PASS (S8) | PASS | PASS | PASS | ✅ PASS |
+
+## Composite Story Check
+
+The VM→AKS→ACA brownfield journey (lines 178-187) is architecturally coherent. Starting from VM estate assessment (the universal brownfield starting point), through AKS modernization (containerized workloads), to ACA replatform (serverless simplification) mirrors the real-world modernization gradient. The cross-skill sequencing sentences (lines 184-187) explicitly name prereqs and handoffs. Greenfield path also works: each skill is independently usable for new deployments without requiring the brownfield chain.
+
+## Blockers (must fix before any draft authoring begins)
+
+None.
+
+## Majors (must fix before final approval)
+
+**M1: `azure-virtual-machines` missing Identity & Access CAF row.**
+
+Lines 85-89 list only 3 CAF areas: Network Topology & Connectivity, Security, Management. VMs are first-class consumers of managed identity (Security Baseline rule #4), RBAC role assignments for operator access, and JIT VM access (Defender for Cloud). The omission is inconsistent with AKS (which correctly includes Identity & Access) and with the stated "≥3 CAF" floor — while technically passing by count, the *wrong 3* are chosen. A VM skill that doesn't map Identity & Access to CAF will produce drafts that lack managed identity architecture guidance in the CAF alignment section.
+
+**Fix:** Add a 4th CAF row: `| Identity & Access | Managed identity for VMs, RBAC for operator access, JIT VM access, disk encryption key vault integration |`
+
+**M2: Shared decision artifact `docs/decisions/compute-tier-selection.md` is unresolved.**
+
+Line 254 asks: "Should we create a shared decision-tree artifact... that both skills reference?" But the Author Concurrency Plan (line 207) states: "the AKS-vs-ACA decision tree must be consistent across both skills" and recommends "resolve it as a shared decision BEFORE authoring begins." This is circular — the plan assumes the artifact will exist but defers its creation to an "open question." The user answered Q1 (shared artifact approach confirmed), but Linus's plan text still shows the question as open.
+
+**Fix:** Remove Q1 from "Open Questions" (line 254). Add a section (or appendix) titled "## Pre-Authoring Sequencing" that explicitly states: (a) create `docs/decisions/compute-tier-selection.md` FIRST as a sequential step, (b) both AKS and ACA SKILL.md files reference it, (c) define the skeleton content of the decision tree (AKS-when vs ACA-when criteria). This makes the concurrency plan executable without ambiguity for 3 Saul instances.
+
+## Minors (deferred or quick-fix)
+
+1. **Lines 228-236 — Capacity heatmap arithmetic.** "Post-Wave 5 remaining: 80 skills are existing/already-shipped" is confusing — the existing baseline was 80, new target is 94, so 14 new skills across 5 waves. The table correctly shows this but the prose sentence could be misread as "80 remain to ship." Suggest rewording to: "The baseline 80 skills were already shipped before Wave 1. Waves 1–5 add 14 new skills to reach 94 total."
+
+2. **AKS and ACA share Brownfield Scenario Code "S8".** Line 14-18: both AKS and ACA use S8 (Cloud-Native Modernization). This is fine semantically (both serve S8), but means the Brownfield Scenario *headline* format ("Scenario S8: ...") appears in 2 of 3 skills. Authors should differentiate the sub-narrative: AKS = "assess existing clusters," ACA = "migrate to serverless." Currently the plan does this (lines 55 vs 158) — just flag for author awareness.
+
+3. **`azure-container-apps` Wave 1 prereq inconsistency.** Master Table line 18 says "None (but references AKS for comparison)" yet field #7 (line 161) says `workload-identity-federation` is a prereq. The Integration Table (line 195) correctly classifies it as "Soft." Reconcile: Master Table should say `workload-identity-federation (soft)` for consistency.
+
+4. **Open Question #3 (timing relative to Wave 1 merge)** should be removed from the plan. The user already answered: Wave 1 is shipped (commits 5f802db + 6487c46, majors closed at 2026-05-18T18:00:00Z). This question is stale.
+
+## Boundary Collision Check
+
+| Wave 2 Skill | Existing Skill Checked | Collision Risk | Resolution |
+|---|---|---|---|
+| azure-kubernetes-service | azure-networking | None | AKS DO NOT USE correctly defers "general networking topology" to `azure-virtual-network`. `azure-networking` covers hub-spoke design — AKS covers AKS-specific networking modes (CNI variants). Clean boundary. |
+| azure-kubernetes-service | azure-virtual-network | None | AKS boundary statement excludes "NSGs, UDRs" which are `azure-virtual-network` scope. |
+| azure-kubernetes-service | azure-firewall | None | AKS DO NOT USE explicitly defers "firewall rules for AKS egress" to `azure-firewall`. Line 28. |
+| azure-kubernetes-service | workload-identity-federation | None | AKS DO NOT USE explicitly defers "workload identity federation setup" to `workload-identity-federation`. AKS USES the pattern but doesn't TEACH it. |
+| azure-kubernetes-service | entra-app-registration | None | `entra-app-registration` owns GitHub Actions OIDC. AKS covers AKS workload identity (pod-level), not deployment pipeline identity. |
+| azure-virtual-machines | azure-virtual-network | None | VM DO NOT USE explicitly defers "NSGs, UDRs" to `azure-virtual-network`. Line 81. |
+| azure-virtual-machines | azure-backup | None | Explicit deferral at line 81. |
+| azure-virtual-machines | azure-site-recovery | None | Explicit deferral at line 81. |
+| azure-virtual-machines | azure-bastion | None | Explicit deferral at line 81. |
+| azure-virtual-machines | azure-monitor | None | Explicit deferral at line 81. |
+| azure-container-apps | azure-kubernetes-service | Low | Decision boundary is the key coordination point. Plan addresses via shared `compute-tier-selection.md`. Bidirectional DO NOT USE statements are clean (AKS line 28 excludes ACA; ACA line 133 excludes AKS). |
+| azure-container-apps | azure-virtual-network | None | ACA DO NOT USE defers "general virtual network design." |
+| azure-container-apps | workload-identity-federation | None | ACA DO NOT USE defers "workload identity federation setup." |
+
+## Pre-emptive Compliance Verification
+
+| Wave 1 Major | Linus's Mitigation (plan lines) | Will it actually prevent recurrence? | Verdict |
+|---|---|---|---|
+| M1: Missing Scenario S# codes | Line 217: "Every brownfield section specifies `Scenario S#` explicitly in the headline. Template: 'Brownfield Scenario (Scenario S#: {name})'" | **Yes.** Verified: AKS=S8 (line 55), VMs=S3 (line 107), ACA=S8 (line 158). All present in field #6. Template instructions are explicit. | ✅ PASS |
+| M2: Narrow CAF/WAF | Lines 218, 223: "≥3 CAF areas and ≥4 WAF pillars... minimum threshold documented" | **Partially.** AKS=4/4 ✅, ACA=4/4 ✅, VMs=3/4 ⚠️ (see Major M1 above — count passes but Identity & Access is missing). The floor IS enforced numerically but the *selection* of CAF areas needs one correction. | ⚠️ PARTIAL |
+| M3: No cross-skill sequencing | Line 219: "Every brownfield section includes the cross-skill sequencing sentence naming prereq + handoff. Composite path is defined." | **Yes.** Lines 184-187 provide the three cross-skill sequencing sentences. Each names prereq and handoff explicitly. Field #7 per skill additionally provides Wave 1 prereq + Wave 2 internal ordering + downstream handoff. Structural improvement over Wave 1. | ✅ PASS |
+
+## Hidden Assumptions Audit
+
+1. **AKS LTS tier vs Standard tier.** Line 62 estimates "~380 lines, Large complexity" but doesn't flag that AKS LTS (Long Term Support) is a paid add-on channel. Authors should call out: "LTS tier requires Premium pricing; guidance in this skill applies to both Standard and LTS channels, with LTS-specific notes flagged."
+
+2. **Confidential VM regional availability.** `azure-virtual-machines` field #6 (line 107) recommends enabling Trusted Launch on Gen2 VMs — fine, widely available. But field #2 (line 80) also mentions "Confidential VMs" — these are NOT available in all regions. Authors must include a "Regional Availability" caveat for DCsv3/DCdsv3/ECsv5 SKUs.
+
+3. **ACA Workload Profile GA status.** The plan assumes workload profiles are GA (line 148 references "workload profile sizing"). This IS GA as of late 2024, so no issue — but authors should note that Dedicated workload profiles in specific regions may have limited SKU options.
+
+4. **GPU node pool availability.** AKS S2 scenario (line 49) mentions "GPU node pools for model hosting." NC/ND-series VMs have constrained regional availability and quota limits. Authors should flag quota pre-provisioning as a prerequisite.
+
+5. **No Premium licensing flag.** Unlike Wave 1 (which assumed Entra P2 silently), Wave 2 has no hidden licensing assumptions — AKS, VMs, and ACA are consumption-based. However, AKS Defender for Containers integration and VM Defender for Servers both require Defender plans (paid). Authors should note this in the Prerequisites subsection.
+
+## Recommendations for Author Spawn
+
+1. **Create `docs/decisions/compute-tier-selection.md` BEFORE spawning the 3 Saul instances.** This is the one sequencing dependency. A simple decision tree (AKS when: custom CNI, DaemonSets, privileged, StatefulSets at scale, multi-cluster federation; ACA when: HTTP microservices, event-driven, scale-to-zero, Dapr, simpler ops) plus "both when: different workloads in same estate" gives authors the shared reference they need.
+
+2. **Pass both Majors (M1 and M2) as explicit author instructions.** Tell each Saul instance: "VMs must include Identity & Access as 4th CAF row" and "Both AKS and ACA SKILL.md files must cross-reference `docs/decisions/compute-tier-selection.md` rather than embedding the full decision tree inline."
+
+3. **Include the 5 hidden assumptions as a 'Prerequisites & Caveats' checklist** in the spawn prompt. Authors should surface: AKS LTS pricing, Confidential VM regions, ACA workload profile availability, GPU quota, and Defender plan costs. This prevents Wave 2 from repeating Wave 1's hidden-assumption pattern.
+
+### Wave 2 Plan Closure Note (Copilot)
+
+# Copilot — Wave 2 Plan Closure Note
+
+**Date:** 2026-05-18
+**Closing:** Isabel Wave 2 plan verdict (`.squad/decisions/inbox/isabel-wave2-plan-verdict.md`)
+**Branch:** `wave2-skills-planning`
+**Verdict resolution:** APPROVE WITH CONDITIONS → all conditions closed; plan cleared for execution
+
+## Summary
+
+Isabel's Wave 2 plan review returned APPROVE WITH CONDITIONS with 0 blockers, 2 majors, and 4 minors. Yeselam authorized inline surgical fixes (Wave 1 pattern). All 2 majors and 2 of 4 minors closed in 4 surgical edits to `.squad/decisions/inbox/linus-wave2-plan.md`. Per-skill scorecard now: AKS ✅ PASS · VMs ✅ PASS (was ⚠️ PARTIAL) · ACA ✅ PASS.
+
+## Edits applied
+
+| # | Isabel finding | Severity | Fix location | Change |
+|---|---|---|---|---|
+| 1 | M1: `azure-virtual-machines` missing Identity & Access CAF row | Major | Master Table line 17 + CAF table line 89 | Added 4th CAF row: "Managed identity for VMs (Security Baseline rule #4), RBAC for operator access, JIT VM access via Defender for Cloud, disk encryption key vault integration". Updated master table CAF count `3 → 4`. |
+| 2 | M2: Shared `compute-tier-selection.md` artifact unresolved (circular reference in plan) | Major | New section "Pre-Authoring Sequencing" between Author Concurrency Plan and Pre-emptive Isabel Compliance | Added explicit sequenced steps (Step A: sequential ADR creation; Step B: parallel fan-out) + skeleton content for the ADR (decision tree for AKS/ACA/VMs/mixed estates) + race-avoidance note. |
+| 3 | Minor 3: ACA master-table Wave 1 prereq inconsistent with field #7 | Minor | Master Table line 18 | Changed "None (but references AKS for comparison)" → "`workload-identity-federation` (soft)". |
+| 4 | Minor 4: Stale Open Questions (Q1, Q2, Q3 all answered by Yeselam) | Minor | Section "Open Questions for Yeselam" → "Decisions Confirmed Post-Plan (Yeselam, 2026-05-18)" | Replaced 3 open questions with the 3 resolved decisions (Q1: shared ADR approach; Q2: Saul × 3 single-author; Q3: Wave 1 already shipped, no rebase risk). |
+
+## Deferred minors (not blocking)
+
+- **Minor 1** (Capacity heatmap prose ambiguity, line 230): Cosmetic. Will revisit if Wave 5 capacity planning becomes a discussion topic.
+- **Minor 2** (AKS and ACA both use Scenario S8 in brownfield headlines): Acknowledged as semantically correct per Isabel; passed to Saul authors as awareness item for sub-narrative differentiation ("assess existing clusters" vs "migrate to serverless").
+
+## Pre-emptive author instructions (carried into Saul spawn prompts)
+
+Per Isabel's "Recommendations for Author Spawn":
+1. ✅ Pre-Authoring Sequencing section added — Linus will author `docs/decisions/compute-tier-selection.md` first (Phase 1A), then 3 Saul instances reference it (Phase 2).
+2. ✅ Both M1 + M2 baked into plan; no need to re-pass as author instructions.
+3. ⏳ **Will pass to Saul spawn prompts:** 5 hidden assumptions checklist (AKS LTS pricing, Confidential VM regional availability, ACA workload profile regional limits, GPU node pool quota pre-provisioning, Defender plan costs) — each Saul instance must surface these in a "Prerequisites" subsection in their respective SKILL.md.
+
+## Verification
+
+All 4 fixes verified via grep (line numbers in current plan):
+
+- Line 17: `| 2 | azure-virtual-machines | Saul | 4 | 4 | ...` ✅
+- Line 18: `| 3 | azure-container-apps | Saul | 4 | 4 | ... | workload-identity-federation (soft) | ...` ✅
+- Line 89: `| Identity & Access | Managed identity for VMs ...` ✅
+- Line 212: `## Pre-Authoring Sequencing` (new section) ✅
+- Line 311: `## Decisions Confirmed Post-Plan (Yeselam, 2026-05-18)` (replaces "Open Questions for Yeselam") ✅
+- "## Open Questions for Yeselam" — no longer present ✅
+
+## Status
+
+Plan upgraded from APPROVE WITH CONDITIONS → ready for execution. Authors (Linus for ADR, 3× Saul for SKILL.md drafts) may proceed.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+---
+
+## 2026-05-18 — Wave 2 Drafts Shipped
+
+### Wave 2 — Compute & Containers Skills (Saul × 3 parallel)
+
+Three SKILL.md files authored in parallel by saul-4, saul-5, saul-6 (claude-sonnet-4.6) following the Linus Wave 2 plan + Isabel-cleared compliance baseline. Total: ~946 lines across 3 skills. Pre-emptive Isabel compliance (Scenario S# in brownfield header, ≥4 CAF / ≥4 WAF rows, cross-skill sequencing sentence, Prerequisites subsection with 5 hidden assumptions) was baked in from the start per plan.
+
+#### azure-kubernetes-service (saul-4)
+
+**File created:** `.github/skills/azure-kubernetes-service/SKILL.md`
+**Line count:** 338 lines (target: ~380; within tolerance for prose compression — no content gaps)
+
+| Check | Status | Detail |
+|-------|--------|--------|
+| Brownfield Scenario S# code in section header | ✅ PASS | Section titled exactly `## Brownfield Scenario (Scenario S8: Cloud-Native Modernization)` |
+| CAF table row count (≥4 required) | ✅ PASS | 6 rows: Network Topology & Connectivity, Platform Automation & DevOps, Security, Identity & Access, Resource Organization, Management |
+| WAF table row count (≥4 required) | ✅ PASS | 5 rows: Reliability, Performance Efficiency, Security, Operational Excellence, Cost Optimization |
+| Cross-skill sequencing sentence (verbatim) | ✅ PASS | "Run after `workload-identity-federation` (Wave 1) is integrated. Assess existing AKS clusters for networking mode debt and pod identity migration. Hand off serverless-eligible workloads to `azure-container-apps`." — present in Brownfield Scenario section |
+| Prerequisites subsection present | ✅ PASS | `## Prerequisites and Caveats` section with all 5 hidden assumptions surfaced |
+
+**Hidden Assumptions Coverage:**
+1. ✅ AKS LTS tier pricing — Surfaced in Prerequisites item 1
+2. ✅ GPU node pool quota — Surfaced in Prerequisites item 2
+3. ✅ Defender for Containers paid plan — Surfaced in Prerequisites item 3
+4. ✅ Confidential containers Preview status — Surfaced in Prerequisites item 4
+5. ✅ AKS Edge Essentials / Azure Local out of scope — Surfaced in Prerequisites item 5
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-kubernetes-service` | `.github/skills/azure-kubernetes-service/` | Oracle, Forge, Strategist, Assessor |
+```
+
+#### azure-virtual-machines (saul-5)
+
+**File created:** `.github/skills/azure-virtual-machines/SKILL.md`
+**Line count:** 301 lines (target: ~280 — within spec tolerance)
+
+| Check | Status | Detail |
+|-------|--------|--------|
+| Brownfield Scenario S# code in headline | ✅ PASS | `## Brownfield Scenario (Scenario S3: Regulated Workloads)` |
+| CAF table ≥4 rows | ✅ PASS | 4 rows: Security (Primary), **Identity & Access** (Primary — Isabel M1 fix), Network Topology & Connectivity, Management |
+| WAF table ≥4 rows | ✅ PASS | 4 rows: Reliability (Primary), Security (Primary), Performance Efficiency, Cost Optimization |
+| Cross-skill sequencing sentence present | ✅ PASS | Verbatim in Brownfield section: "Run after Wave 1 identity hardening is complete. Assess VM estate for zone-balancing, right-sizing, and containerization readiness. Hand off container-ready workloads to `azure-kubernetes-service` or `azure-container-apps` based on complexity (see `docs/decisions/compute-tier-selection.md`)." |
+| Prerequisites subsection present | ✅ PASS | `## Prerequisites and Caveats` — 5 hidden assumptions surfaced |
+
+**Hidden Assumptions Coverage:**
+1. ✅ Confidential VM regional availability (DCsv3/ECsv5 not all regions)
+2. ✅ Trusted Launch requires Gen2 only (Gen1 must migrate first)
+3. ✅ Dedicated Host — premium SKU, not all VM SKUs eligible, quota required
+4. ✅ Defender for Servers — paid plan required for JIT/FIM/vuln management
+5. ✅ Spot VMs — 30-second eviction, fault-tolerant workloads only
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-virtual-machines` | `.github/skills/azure-virtual-machines/` | Oracle, Forge, Strategist, Assessor |
+```
+
+#### azure-container-apps (saul-6)
+
+**File created:** `.github/skills/azure-container-apps/SKILL.md`
+**Line count:** 307 lines (target: ~250; expanded due to Dapr building-block table, KEDA scaler table, playbook table depth, and prerequisites table — all substantive content, no padding)
+
+| Check | Status | Detail |
+|---|---|---|
+| Brownfield Scenario S# code in headline | ✅ | `## Brownfield Scenario (Scenario S8: Cloud-Native Modernization)` — exact format |
+| ACA vs AKS S8 sub-narrative distinction | ✅ | Explicit paragraph: ACA = "migrating to serverless"; AKS = "modernizing existing clusters" |
+| CAF table ≥ 4 rows | ✅ | 4 rows: Platform Automation & DevOps, Network Topology & Connectivity, Security, Management |
+| WAF table ≥ 4 rows | ✅ | 4 rows: Performance Efficiency, Cost Optimization, Reliability, Security |
+| Cross-skill sequencing sentence (verbatim) | ✅ | Present in Brownfield section under "Cross-Skill Sequencing" heading |
+| Prerequisites subsection | ✅ | `## Prerequisites and Caveats` — 5 items tabulated |
+| ADR reference in Boundary section | ✅ | Explicit blockquote pointer to `docs/decisions/compute-tier-selection.md` in Boundary section |
+| ADR reference in Brownfield section | ✅ | Referenced in discovery checklist and cross-skill sequencing sentence |
+| ADR reference in Overview paragraph | ✅ | Sentence 3 of intro paragraph names the ADR and explains when to use it |
+
+**Hidden Assumptions Coverage:**
+1. ✅ ACA Workload Profile regional availability — `az containerapp env workload-profile list-supported` command included
+2. ✅ VNET subnet sizing — `/27` Consumption / `/23` Workload Profiles; irreversibility flagged
+3. ✅ Managed certificate rate limits — ISV SaaS wildcard cert recommendation included
+4. ✅ Dapr GA vs Preview (Workflow = Beta, Distributed Lock = Alpha) — component status table in Architecture Patterns + Prerequisites
+5. ✅ Scale-to-zero cold start (1–3s) — min replicas guidance per latency SLO in Anti-Pattern #4 and Prerequisites
+
+**Proposed copilot-instructions.md registration row:**
+```
+| `azure-container-apps` | `.github/skills/azure-container-apps/` | Oracle, Forge, Strategist |
+```
+
+### Wave 2 — Compute-Tier Selection ADR (Linus / linus-2)
+
+Linus authored `docs/decisions/compute-tier-selection.md` (171 lines, 8 sections) as Phase 1A prerequisite to the 3 parallel Saul drafters. Defines AKS-vs-ACA-vs-VMs boundary via decision tree, WAF trade-off matrix, brownfield assessment lens, S1–S8 scenario mapping, 7 anti-patterns, and Prerequisites/Caveats covering all 5 of Isabel's hidden-assumption flags. All 3 Wave 2 SKILL.md files cross-reference this ADR rather than redefining the tier-selection decision tree inline.
+
+---
+
+## 2026-05-18 — Wave 2 Drafts: Isabel Quality Gate → Majors Closed → APPROVE CLEAN
+
+### Isabel-4 Verdict (Draft-Stage Quality Gate)
+
+**Reviewer:** Isabel (Challenger)  
+**Files reviewed:** 3 SKILL.md (AKS, VMs, ACA) + ADR (compute-tier-selection) + copilot-instructions.md registration  
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors)
+
+**Key findings:**
+- Pre-emptive compliance largely delivered — all 3 Wave 1 majors are fully absent from Wave 2 drafts (Scenario S# codes in headers, ≥4 CAF/WAF rows, cross-skill sequencing inline, Prerequisites documented)
+- ADR is excellent (executable decision tree, complete WAF trade-off matrix, 6-row brownfield assessment lens, S1–S8 scenario mapping, 7 anti-patterns, hidden assumptions table)
+- Composite VM→AKS→ACA brownfield story coherent across 3 files (VM assess → graduate container-ready → AKS assess → graduate over-engineered → ACA receive from both)
+- 15/15 hidden assumptions present (AKS: LTS pricing, GPU quota, Defender for Containers paid, Confidential containers Preview, Arc-K8s out-of-scope; VMs: Confidential VM regional availability, Trusted Launch Gen2, Dedicated Host SKU, Defender for Servers paid, Spot VM 30s eviction; ACA: Workload Profile regional limits, VNET subnet sizing, managed cert throttling, Dapr GA vs Preview, scale-to-zero cold start)
+- No boundary collisions detected (all 3 skills correctly defer to ADR + existing skills)
+- copilot-instructions.md registration correct (placement logical, skill assignments match content)
+
+**Majors flagged:**
+1. **M1 (azure-virtual-machines):** WAF table missing "Operational Excellence" pillar (4 rows instead of 5). VMs have highest operational burden per-workload of all 3 compute tiers; omitting Operational Excellence creates asymmetry with ADR trade-off matrix.
+2. **M2 (azure-container-apps):** Cross-skill sequencing structurally separated from brownfield narrative. Unlike AKS (line 236) and VMs (line 235), ACA's sequencing appears under separate H3 subsection at line 274, placed after the Staged Rollout Playbook. Agents reading the browfield intro without scrolling past the playbook will miss the sequencing context.
+
+**Minors deferred (no action required):**
+- m1: AKS line count 338 vs plan target 380 (-11%, within ±20% tolerance)
+- m2: VMs Performance Efficiency / Cost Optimization rows not bolded (Secondary pillars, acceptable)
+- m3: ADR uses table format for anti-patterns vs SKILL.md expanded-paragraph format (acceptable for ADR scope)
+
+### Copilot Closure (Surgical Edits Applied)
+
+**Disposition:** Both majors closed via surgical edits on `wave2-skills-planning` branch (no agent re-spawn required).
+
+**M1 fix applied** to `.github/skills/azure-virtual-machines/SKILL.md`:
+- Inserted new 5th row in WAF Pillar Mapping table immediately after Cost Optimization
+- Content: `| **Operational Excellence** | **Primary** | Update Manager maintenance windows eliminate unplanned patch drift; Azure Compute Gallery image versioning provides reproducible VM state; extension governance prevents configuration sprawl; OS-level diagnostic settings close the observability loop. Highest operational investment of all compute tiers. |`
+- WAF row count: 4 → 5 (all 5 official pillars now represented)
+
+**M2 fix applied** to `.github/skills/azure-container-apps/SKILL.md`:
+- Inserted inline cross-skill sequencing paragraph between brownfield intro (ending "Migration to ACA is only correct when the workload genuinely does not need Kubernetes.") and `### Pre-Migration Discovery Checklist`
+- Content: `**Cross-skill sequencing:** Run after `azure-kubernetes-service` assessment determines which workloads don't need full K8s. Receive migration candidates from `azure-virtual-machines` (containerized lift-and-shift output) or from over-engineered AKS deployments. References `docs/decisions/compute-tier-selection.md` for tier selection criteria.`
+- Existing `### Cross-Skill Sequencing` H3 subsection retained as reinforcement (Isabel verdict accepted "keep as repeat")
+
+**Verification (all green):**
+- ✅ VMs WAF row count = 5 (Reliability, Security, Performance Efficiency, Cost Optimization, Operational Excellence)
+- ✅ ACA brownfield intro now contains inline "Cross-skill sequencing:" sentence
+- ✅ ACA cross-skill sentence references ADR
+- ✅ AKS SKILL.md untouched (PASS per Isabel scorecard)
+- ✅ ADR untouched (PASS per Isabel ADR scorecard)
+- ✅ copilot-instructions.md registration untouched (PASS per Isabel registration verdict)
+
+### Outcome
+
+Wave 2 drafts now meet APPROVE CLEAN bar:
+- ✅ All 3 Wave 1 majors still absent in W2
+- ✅ Isabel-3 plan-stage conditions still met (VM Identity & Access CAF row, ADR sequential, compliance baseline reflected)
+- ✅ Both isabel-4 draft-stage majors closed
+- ✅ 15/15 hidden assumptions still present (unchanged from APPROVE WITH CONDITIONS)
+- ✅ Composite VM→AKS→ACA story still coherent (sequencing now reinforced in ACA inline + trailing subsection)
+- ✅ No boundary collisions
+- ✅ Registration in copilot-instructions.md correct
+
+**Ready for push to `github` remote + PR to `github/main`**

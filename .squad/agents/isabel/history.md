@@ -111,3 +111,15 @@ Created `.squad/orchestration-log/2026-05-18T17:25:00Z-isabel.md` documenting v2
 
 **Learning:** Wave 1 quality gate pattern worked: 0 blockers / 3 majors / 8 minors with PASS/PARTIAL/FAIL per-skill scorecard enabled rapid closure (all majors fixed within minutes of verdict). The composite-brownfield analysis ("does the 4-skill path work end-to-end?") surfaced the cross-skill sequencing gap that per-skill review alone would have missed — keep this cross-cutting check for future Wave gates.
 
+### 2026-05-18T18:20:00Z — Wave 2 Plan Quality Gate
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers / 2 majors / 4 minors). Plan is structurally sound; Linus pre-closed all 3 Wave 1 majors at template level. Two new majors: (1) `azure-virtual-machines` missing Identity & Access CAF row (incomplete mapping), (2) shared `compute-tier-selection.md` artifact referenced but unresolved in plan text (sequencing gap for parallel authors). Boundary collision check clean across all existing skills. Key lesson: "open questions" sections in plans create sequencing ambiguity when concurrency plans assume the answers — catch these circular references before author spawn.
+
+
+## 2026-05-18 — Wave 2 plan verdict accepted; surgical fixes closed all conditions
+
+Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All conditions closed via 4 surgical edits: (1) Identity & Access added to VMs; (2) compute-tier-selection.md sequencing resolved; (3-4) ACA prereq + stale questions consistency updated. Draft-stage quality gate to follow after 3 Saul instances ship Phase 2 SKILL.md drafts.
+
+## 2026-05-18 — Wave 2 Drafts Quality Gate (isabel-wave2-drafts)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Pre-emptive compliance delivered: all 3 W1 majors absent, hidden assumptions 15/15 present, composite story coherent, ADR excellent. Two new majors: (1) VMs missing Operational Excellence WAF row, (2) ACA cross-skill sequencing structurally separated from brownfield intro. Both are 1-2 line surgical fixes. Key lesson: pre-emptive compliance works at the structural level but WAF pillar completeness and inline sequencing placement need explicit checklist verification — plans can't catch formatting-level omissions.
