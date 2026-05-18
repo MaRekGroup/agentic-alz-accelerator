@@ -119,3 +119,17 @@ Day-1 context: reviewer lockout applies whenever a challenged artifact is reject
 - Scribe consolidated Pass 2 Challenger review findings into decisions.md.
 - Orchestration log created documenting Isabel's Pass 2 review coverage expansion to Steps 3 and 7.
 - Minimum change set (must-fix risks 1–4) queued for approval. Awaiting Scribe gate signal.
+
+### 2026-05-18T16:12:16Z — WAF/CAF Evaluation Lens + Principal Benchmark Gaps
+
+User directive established WAF 5 Pillars + CAF 8 Design Areas as the canonical evaluation framework. Linus completed Principal Benchmark re-evaluation under this lens. Key gaps identified:
+- **CRITICAL:** Identity & Access (only 2 skills for Principal-level work requiring hybrid identity, conditional access, PIM, workload identity federation)
+- **HIGH:** Billing & Tenant (no subscription vending, EA/MCA architecture)
+- **Gap pattern:** Workload resilience absent (compute HA, database HA, chaos testing)
+
+When challenging architecture assessments, evaluate against:
+1. WAF 5 Pillar gaps (particularly workload resilience, identity security, performance efficiency)
+2. CAF Design Area gaps (particularly Identity & Access)
+
+Reference: `.squad/decisions.md` §"Principal Benchmark Re-evaluation — WAF/CAF Lens" for full gap matrix.
+
