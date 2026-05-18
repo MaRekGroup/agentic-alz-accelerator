@@ -314,7 +314,7 @@ python scripts/validators/validate_cost_governance.py infra/
 │   │   ├── reusable-deploy.yml      # Shared: resolve → validate → plan → deploy → verify
 │   │   └── assign-role.yml          # Utility: RBAC role assignments to SPN
 │   ├── agents/                # Agent definition files
-│   ├── skills/                # 35 skill SKILL.md entry points
+│   ├── skills/                # Skill SKILL.md entry points
 │   └── instructions/          # Per-filetype coding instructions
 ├── pipelines/                 # Legacy / Azure DevOps pipelines
 ├── docs/                      # Security baseline, cost governance, workflow

@@ -86,6 +86,10 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `context-optimizer` | `.github/skills/context-optimizer/` | Conductor (audits) |
 | `count-registry` | `.github/skills/count-registry/` | All agents (entity counts) |
 | `entra-app-registration` | `.github/skills/entra-app-registration/` | Warden, Envoy |
+| `entra-conditional-access` | `.github/skills/entra-conditional-access/` | Warden, Oracle, Sentinel, Challenger |
+| `entra-connect-hybrid-identity` | `.github/skills/entra-connect-hybrid-identity/` | Warden, Oracle, Forge, Assessor |
+| `entra-identity-governance` | `.github/skills/entra-identity-governance/` | Warden, Oracle, Sentinel, Challenger |
+| `workload-identity-federation` | `.github/skills/workload-identity-federation/` | Warden, Forge, Strategist, Envoy |
 
 ### Assessment Skills (Brownfield)
 

@@ -1603,3 +1603,105 @@ None raised. v2 changes are clean and scoped precisely to the 4 majors + brownfi
 
 *End of re-review. No lockout triggered. Drafting agents (Saul, Reuben, Tess as appropriate) are cleared to proceed.*
 ---
+
+## 2026-05-18T17:34:00Z — Saul: Entra Conditional Access Skill (Wave 1)
+
+**Owner:** Saul  
+**Requester:** Yeselam Tesfaye  
+**Status:** Complete
+
+### Decision
+
+Drafted `.github/skills/entra-conditional-access/SKILL.md` for Wave 1 identity skills.
+
+### Why
+
+- Foundational CA coverage for zero-trust device compliance, admin protection, cross-tenant B2B trust, and CAE enablement
+- Follows strict boundary enforcement: explicit `DO NOT USE FOR` clauses keep PIM/access reviews/entitlement management in `entra-identity-governance`, hybrid identity in `entra-connect-hybrid-identity`, workload identity in `workload-identity-federation`, and app/service principal work in `entra-app-registration`
+- Implements the additive-brownfield directive with a mandatory `Brownfield Scenario` subsection
+
+### Outputs
+
+- Added `.github/skills/entra-conditional-access/SKILL.md` (335 lines)
+- Key patterns: baseline CA policy set, admin protection, zero-trust device compliance, cross-tenant B2B trust, CAE enablement, staged rollout, break-glass strategy, diagnostics with KQL, anti-patterns, and Microsoft Learn references
+- Brownfield scenario: **Layering CA on an existing Entra tenant without locking out admins or breaking legacy workflows** with a 5-step retrofit playbook
+- Bonus: Created `.squad/skills/skill-authoring-pattern/SKILL.md` as a reusable template for Wave 2+ authors
+
+---
+
+## 2026-05-18T17:34:00Z — Saul: Entra Identity Governance Skill (Wave 1)
+
+**Owner:** Saul  
+**Requester:** Yeselam Tesfaye  
+**Status:** Complete
+
+### Decision
+
+Drafted `.github/skills/entra-identity-governance/SKILL.md` as a Wave 1 identity-governance skill with architectural-guidance depth.
+
+### Why
+
+- Deepens `azure-rbac` PIM coverage instead of replacing RBAC role-mapping guidance
+- Keeps Isabel M1 boundaries explicit: no Conditional Access, hybrid identity sync, workload identity federation, or baseline Azure RBAC role mapping overlap
+- Implements the additive-brownfield directive with a named retrofit scenario and a six-step migration playbook
+
+### Outputs
+
+- Added `.github/skills/entra-identity-governance/SKILL.md` (214 lines)
+- Key patterns: PIM at scale, access reviews, entitlement management, lifecycle workflows, separation of duties
+- Brownfield scenario: Six-step migration playbook for PIM adoption
+- Downstream notes: Warden and Oracle keep `azure-rbac` for scope and role selection, then use this skill for PIM policy, reviews, entitlement management, lifecycle automation, and separation of duties
+
+---
+
+## 2026-05-18T17:34:00Z — Saul: Entra Connect Hybrid Identity Skill (Wave 1)
+
+**Owner:** Saul  
+**Requester:** Yeselam Tesfaye  
+**Status:** Complete
+
+### Decision
+
+Drafted `.github/skills/entra-connect-hybrid-identity/SKILL.md` for Wave 1 as brownfield-leaning additive coverage.
+
+### Why
+
+- Brownfield-first skill for hybrid identity sync, Cloud Sync, ADFS migration, multi-forest, and sync DR
+- Implements explicit YAML frontmatter boundaries with `USE FOR` and `DO NOT USE FOR` clauses per Isabel M1
+- Mandatory brownfield scenario: ADFS-to-Entra cutover for an acquired 3,000-person subsidiary with 47 Azure subscriptions post-M&A
+
+### Outputs
+
+- Added `.github/skills/entra-connect-hybrid-identity/SKILL.md` (249 lines)
+- Key patterns: Cloud Sync, Entra Connect Sync, PTA, PHS, Seamless SSO, source anchor strategy, multi-forest topology, scoping filters, sync DR guidance
+- Governance notes: Cloud Sync framed as default modern path; federation as exception with explicit justification and exit plan
+- Scope: Excludes Conditional Access, identity governance, workload identity federation, and Azure AD Domain Services
+
+---
+
+## 2026-05-18T17:34:00Z — Saul: Workload Identity Federation Skill (Wave 1)
+
+**Owner:** Saul  
+**Requester:** Yeselam Tesfaye  
+**Status:** Complete
+
+### Decision
+
+Drafted `.github/skills/workload-identity-federation/SKILL.md` for Wave 1 as an additive deepening of existing identity coverage.
+
+### Why
+
+- Covers AKS Workload Identity, cross-cloud federation to AWS/GCP, Service Connector managed identity flows, and secret-to-managed-identity migration
+- Enforces the strict boundary that GitHub Actions OIDC remains in `entra-app-registration`; this skill only covers FIC for non-GitHub workloads
+- Anchors guidance to **Security Baseline rule #4: Managed Identity preferred**
+- Implements the mandatory brownfield retrofit scenario for migrating an existing AKS cluster from secret-based service principals and pod identity v1 to workload identity federation without downtime
+
+### Outputs
+
+- Added `.github/skills/workload-identity-federation/SKILL.md` (240 lines)
+- Key patterns: AKS workload identity, cross-cloud FIC, Service Connector managed identity flows, managed identity selection at scale, federated identity credentials, token exchange, secret-to-managed-identity migration
+- Brownfield scenario: Retrofit existing AKS cluster without downtime
+- Includes Bicep and Terraform snippets for AKS workload identity enablement and user-assigned managed identity + federated identity credential patterns
+- Diagnostic guidance: Entra audit logs, `AADServicePrincipalSignInLogs`, `AADManagedIdentitySignInLogs` references
+
+---
