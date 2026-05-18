@@ -155,6 +155,13 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-virtual-machines` | `.github/skills/azure-virtual-machines/` | Oracle, Forge, Strategist, Assessor |
 | `azure-container-apps` | `.github/skills/azure-container-apps/` | Oracle, Forge, Strategist |
 
+#### Tenant Architecture
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `management-group-architecture` | `.github/skills/management-group-architecture/` | Warden, Oracle, Strategist, Assessor |
+| `subscription-vending` | `.github/skills/subscription-vending/` | Warden, Strategist, Envoy, Forge |
+
 #### Management & Operations
 
 | Skill | Location | Used By |

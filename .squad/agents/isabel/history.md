@@ -123,3 +123,14 @@ Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All con
 ## 2026-05-18 — Wave 2 Drafts Quality Gate (isabel-wave2-drafts)
 
 **Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Pre-emptive compliance delivered: all 3 W1 majors absent, hidden assumptions 15/15 present, composite story coherent, ADR excellent. Two new majors: (1) VMs missing Operational Excellence WAF row, (2) ACA cross-skill sequencing structurally separated from brownfield intro. Both are 1-2 line surgical fixes. Key lesson: pre-emptive compliance works at the structural level but WAF pillar completeness and inline sequencing placement need explicit checklist verification — plans can't catch formatting-level omissions.
+
+## 2026-05-18 — Wave 3 Plan Quality Gate (isabel-wave3-plan-verdict)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Highest-quality plan submission to date — all W1+W2 majors pre-closed at template level, hidden assumptions 10/10 concrete, CAF/WAF coverage complete (Identity & Access + Op Excellence both present), boundary discipline clean against 6 existing skills. Two majors: (1) brownfield headers use bold-text format instead of shipped H2 pattern (Sauls would copy wrong format), (2) MG Step 3 hard gate not structurally differentiated from other rollback gates. Scope shift (Billing→Tenant Architecture) is well-justified and recommended for Yeselam approval. Cross-wave pattern: plan quality is improving wave-over-wave — W1 had 3 majors, W2 had 2 majors (one structural), W3 has 2 majors (both formatting-level). The pre-emptive compliance mechanism is working.
+
+## 2026-05-18 — Wave 3 Plan-Stage Review
+- Isabel-5 (opus-4.6): Plan-stage quality gate on Linus-3's `.squad/decisions/inbox/linus-wave3-plan.md`. Verdict: APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Majors: M1 (brownfield H2 header format), M2 (Step 3 ⛔ HARD GATE annotation). Both closed surgically by Coordinator before Sauls fanned out. Scope shift recommendation: YES (Billing & Tenant → Tenant Architecture well-justified).
+
+## 2026-05-18 — Wave 3 Draft Quality Gate (Isabel-6)
+
+**Verdict:** APPROVE CLEAN (0 blockers, 0 majors, 2 minors). All 13 structural checks pass for both skills. ADR mirrors compute-tier-selection.md exactly (9 sections). Both plan-stage majors (M1 brownfield H2 format, M2 ⛔ HARD GATE annotation) confirmed closed. Cross-artifact coherence is airtight — WHERE/HOW framing consistent, boundary discipline clean, no redefinition. Catalog and ledger entries correctly formatted. Cleanest wave submission to date. Recommended: commit and push as-is.
