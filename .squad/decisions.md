@@ -1,3 +1,572 @@
+# Decision: Principal Azure Infrastructure Architect Benchmark & Gap Analysis
+
+**Author:** Linus (Architect)
+**Requested by:** Yeselam Tesfaye
+**Date:** 2026-05-18T16:05:35.626+00:00
+**Status:** Proposed
+
+## Purpose
+
+Define the capability benchmark for a **Principal Azure Infrastructure Architect** (Microsoft L65/L66 equivalent, or Principal Consultant at Accenture/Avanade/WTW/HCLTech) across the same 5 categories used in the project's v2 skills categorization. Then gap-analyze the project's skill inventory against that benchmark.
+
+---
+
+## Category 1: Azure Infrastructure
+
+### Capability Benchmark
+
+A Principal-level architect in Azure Infrastructure can:
+
+- Design **production hub-spoke and Virtual WAN topologies** for Fortune 500 — including asymmetric routing, forced tunneling, and UDR chains across 10+ spokes
+- Architect **AKS for regulated industries** with AGIC, Calico/Cilium network policies, Kyverno/OPA Gatekeeper, workload identity, confidential containers, and multi-tenant isolation
+- Design **AVD/Azure Virtual Desktop** at scale (1000+ users) with FSLogix, image management, and Entra ID conditional access integration
+- Specify **storage tiering strategies** across Blob (hot/cool/archive), Azure NetApp Files, Managed Lustre, and HPC cache for data-intensive workloads
+- Architect **Azure SQL Managed Instance** HA/DR (auto-failover groups, geo-replication, link feature for hybrid) and **Cosmos DB** multi-region writes with conflict resolution
+- Design **Azure Stack HCI** deployments bridging edge and cloud with Arc integration
+- Size and architect **SAP on Azure** (HANA Large Instances, ANF for /hana/shared, proximity placement groups, accelerated networking)
+
+### Minimum Skill Count: 18–22 services with deep familiarity
+
+A Principal knows 18+ Azure infrastructure services at the "I've designed production for it" level, not just "I've read the docs."
+
+### Principal vs Senior Differentiators
+
+| Dimension | Senior | Principal |
+|-----------|--------|-----------|
+| Networking | Designs hub-spoke for 1-3 spokes | Designs 20+ spoke topologies with transit, NVA HA, and BGP route optimization |
+| Compute | Deploys AKS with standard settings | Architects AKS with service mesh, AGIC, pod sandboxing, confidential nodes, and custom CNI |
+| Storage | Configures blob accounts | Designs multi-tier data platforms (ANF + Blob + Data Lake) with lifecycle policies |
+| Identity | Configures RBAC and PIM | Designs cross-tenant Entra ID with B2B/B2C, conditional access graph, and workload identity federation |
+| Database | Deploys SQL/Cosmos | Architects globally distributed Cosmos with custom consistency, and SQL MI failover groups across sovereign clouds |
+| Edge | Awareness of IoT Hub | Production Azure Stack HCI + Arc-enabled data services |
+
+### Industry Signals
+
+- AZ-700, AZ-305, AZ-104 (table stakes)
+- **AZ-720** (Troubleshooting) or equivalent depth
+- Published reference architecture on Azure Architecture Center
+- Conference talks at Microsoft Ignite/Build or equivalent (HashiConf, KubeCon)
+- Led 3+ production hub-spoke or vWAN deployments for enterprises
+- OSS contributions to AVM modules or Azure/azure-quickstart-templates
+
+---
+
+## Category 2: Governance
+
+### Capability Benchmark
+
+A Principal-level architect in Azure Governance can:
+
+- Design **management group hierarchies** for 500+ subscription enterprises with inheritance chains, exclusion scopes, and policy exemption workflows
+- Author **custom Azure Policy** definitions with effects beyond audit/deny — including deployIfNotExists with remediation tasks, modify, and append
+- Implement **Azure RBAC** at scale with PIM, access reviews, custom roles scoped to management groups, and just-in-time elevation for break-glass
+- Design **Defender for Cloud** posture management including custom CSPM recommendations, regulatory compliance dashboards (CIS 2.0, NIST 800-53 r5, PCI-DSS 4.0), and multi-cloud connectors
+- Architect **cost governance** with Azure Cost Management exports, FinOps practices (showback/chargeback), reservation utilization analysis, and anomaly detection
+- Design **centralized logging** with Log Analytics workspace architecture (resource-centric vs workspace-centric), diagnostic settings at scale via policy, and Sentinel workspace manager for multi-tenant MSSP scenarios
+- Implement **Azure Monitor** observability including custom metrics, autoscale rules, workbooks, and AIOps (smart detection + dynamic thresholds)
+- Design **backup governance** with Azure Business Continuity Center, cross-region restore, immutable vaults, and RPO/RTO compliance validation
+
+### Minimum Skill Count: 15–20 governance domains with design authority
+
+### Principal vs Senior Differentiators
+
+| Dimension | Senior | Principal |
+|-----------|--------|-----------|
+| Policy | Assigns built-in policies | Authors custom policy with deployIfNotExists + remediation + exemption lifecycle |
+| RBAC | Configures role assignments | Designs RBAC model for 50+ teams with custom roles, PIM, and conditional access policies for elevation |
+| Cost | Sets budgets | Architects FinOps practice with showback per BU, reservation management, and savings plan strategy |
+| Compliance | Maps to CIS benchmark | Designs multi-framework compliance (simultaneous CIS + NIST + PCI) with automated evidence collection |
+| Observability | Configures alerts | Designs observability platform (workspace topology, retention tiers, cross-workspace queries, data collection rules) |
+| Security posture | Enables Defender plans | Custom CSPM, attack path analysis, governance rules for auto-assignment |
+
+### Industry Signals
+
+- **AZ-500** (Security) + SC-100 (Cybersecurity Architect) combined
+- FinOps Foundation certification (FinOps Certified Practitioner or Professional)
+- Published governance frameworks adopted by consulting practice
+- Led enterprise-wide policy rollouts (100+ policy definitions, 500+ subscriptions)
+- Designed Sentinel analytics rules for production SOC
+
+---
+
+## Category 3: Landing Zones
+
+### Capability Benchmark
+
+A Principal-level architect in Landing Zones can:
+
+- Design and deploy **Enterprise-Scale/ALZ reference architecture** with full customization — including platform (Management, Connectivity, Identity) and application landing zones
+- Author **Architecture Decision Records** that capture trade-offs with WAF pillar mapping (not just "we chose X")
+- Conduct **WAF assessments** across all 5 pillars with specific, actionable recommendations tied to services and SKUs
+- Design **brownfield migration strategies** including dependency mapping, blast radius analysis, subscription vending, and phased cutover plans
+- Implement **IaC at scale** with either Bicep (module registries, deployment stacks, AVM) or Terraform (workspace strategies, state management, provider version pinning, AVM-TF)
+- Design **subscription vending machines** (automated LZ provisioning) with guardrails, network injection, and identity bootstrapping
+- Assess against all **8 CAF design areas** with specific gap identification and remediation roadmap
+
+### Minimum Skill Count: 12–16 LZ patterns/frameworks with implementation authority
+
+### Principal vs Senior Differentiators
+
+| Dimension | Senior | Principal |
+|-----------|--------|-----------|
+| ALZ | Deploys ALZ accelerator from portal | Customizes ALZ reference for regulated industry (removes/adds MGs, custom policies, connectivity variants) |
+| IaC | Writes Bicep/TF modules | Designs module registry strategy, version lifecycle, testing pyramid (unit → integration → e2e), and deployment orchestration |
+| Assessment | Runs WAF review questionnaire | Conducts programmatic WAF assessment with KQL queries, Resource Graph analysis, and automated scoring |
+| Brownfield | Identifies non-compliant resources | Designs migration waves with dependency graphs, rollback strategies, and parallel-run validation |
+| ADR | Documents decisions after the fact | Drives decision-making through ADR process with alternatives, consequences, and WAF-mapped justification |
+| CAF | Knows the 8 design areas | Maps every design area to specific IaC modules, policy assignments, and validation checks |
+
+### Industry Signals
+
+- **Microsoft FastTrack** or **Microsoft Unified Support** architect experience
+- Led 5+ ALZ deployments across different industries (FSI, healthcare, government)
+- Published CAF/WAF assessment frameworks or tools
+- Contributor to Azure/Enterprise-Scale or Azure/ALZ-Bicep repos
+- HashiCorp Ambassador or Terraform Registry module publisher
+
+---
+
+## Category 4: Hybrid
+
+### Capability Benchmark
+
+A Principal-level architect in Hybrid can:
+
+- Design **ExpressRoute** topologies including Global Reach, multiple circuits for resiliency, and traffic engineering with AS-path prepending and MED manipulation
+- Architect **Azure Arc** at scale — Arc-enabled servers (5000+), Arc-enabled Kubernetes, Arc-enabled data services (SQL MI, PostgreSQL), and Arc-enabled app services
+- Design **hybrid identity** with Entra Connect Cloud Sync, seamless SSO, password hash sync vs federation, and staged rollout from ADFS
+- Implement **Azure Virtual WAN** with SD-WAN partner integration (Cisco Viptela, Fortinet, Palo Alto Prisma), routing intent, and inter-hub peering
+- Design **multi-cloud governance** using Azure Arc + Azure Policy for AWS/GCP resources (Arc-enabled servers across clouds)
+- Architect **Azure Stack HCI** for edge/branch (2-node clusters, stretched clusters, cloud witness, and HCI-integrated Azure services)
+- Design **DNS resolution** in hybrid scenarios (conditional forwarders, Private DNS resolver, split-brain DNS)
+
+### Minimum Skill Count: 8–12 hybrid patterns with production implementation experience
+
+### Principal vs Senior Differentiators
+
+| Dimension | Senior | Principal |
+|-----------|--------|-----------|
+| ExpressRoute | Provisions a circuit | Designs dual-circuit + VPN failover with BGP communities, Global Reach mesh, and traffic symmetry |
+| Arc | Onboards servers | Designs Arc governance at scale (5000+ nodes) with machine configuration, custom policy, and extension management |
+| Identity | Configures Entra Connect | Designs ADFS → cloud auth migration, multi-forest sync, and cross-tenant collaboration models |
+| Multi-cloud | Awareness of Arc for AWS | Architects unified governance (single policy set) across Azure + AWS + GCP using Arc + Defender for Cloud multicloud |
+| vWAN | Deploys vWAN hub | Integrates SD-WAN partners, designs routing intent policies, and manages inter-region hub routing |
+| Edge | Knows Azure Stack exists | Designs HCI solutions with Azure Kubernetes on HCI, Windows Admin Center, and workload migration |
+
+### Industry Signals
+
+- Cisco/Juniper network certifications alongside Azure (hybrid requires both worlds)
+- Led ExpressRoute deployments for enterprise (multiple circuits, Global Reach)
+- Designed Arc-at-scale implementations (1000+ servers)
+- Conference content on hybrid identity migration
+- Published multi-cloud governance patterns
+- Microsoft Hybrid Cloud Partner advisory engagement
+
+---
+
+## Category 5: AI Infrastructure
+
+### Capability Benchmark
+
+A Principal-level architect in AI Infrastructure (agentic systems / platform engineering) can:
+
+- Design **multi-agent orchestration** systems with DAG-based workflows, approval gates, idempotent state management, and graceful failure/retry semantics
+- Architect **prompt engineering systems** at scale — not individual prompts but reusable patterns: skill injection, context compression, token budget management, and prompt versioning
+- Design **context management** strategies including window optimization (shredding tiers), session state persistence, cross-agent context handoff contracts, and memory hierarchies
+- Implement **workflow contracts** with formal input/output schemas, gate enforcement, artifact validation, and complexity-scaled review depth
+- Architect **evaluation and testing** frameworks for agent systems (deterministic validators, adversarial review patterns, regression testing for prompt changes)
+- Design **tool orchestration** patterns — MCP server composition, tool capability discovery, rate limiting, caching, and error propagation
+- Implement **safety and governance** for AI systems — output validation, hallucination detection, PII filtering, and audit trails for agent actions
+- Design **platform-as-product** abstractions that let multiple teams consume AI infrastructure without understanding implementation details
+
+### Minimum Skill Count: 10–14 AI/agent patterns with production implementation
+
+This is an emerging domain; the bar is lower in absolute numbers but higher in originality. Production experience matters more than breadth.
+
+### Principal vs Senior Differentiators
+
+| Dimension | Senior | Principal |
+|-----------|--------|-----------|
+| Orchestration | Chains agents sequentially | Designs DAG orchestration with conditional branching, parallel execution, state checkpoints, and idempotent replay |
+| Prompting | Writes effective prompts | Architects prompt systems: template registries, variable injection, version control, A/B testing, and regression detection |
+| Context | Manages token counts | Designs multi-tier context strategies (golden context → compressed → shredded) with formal handoff contracts |
+| Testing | Manually reviews outputs | Designs automated evaluation: deterministic validators, adversarial challenger patterns, and quality regression CI |
+| Tools | Uses MCP tools | Designs MCP server composition, capability registries, tool routing, and error propagation strategies |
+| Safety | Adds basic guardrails | Architects governance framework: output validation, audit trails, PII detection, and escalation policies |
+
+### Industry Signals
+
+- Published agent orchestration frameworks or significant OSS contributions (LangGraph, AutoGen, CrewAI, or custom)
+- Conference talks on production AI systems (not demos — production with SLAs)
+- Designed prompt engineering platforms used by 10+ developers
+- Authored workflow contract specifications adopted by team/org
+- Patent filings or technical publications on agent systems
+- Built evaluation frameworks that caught regressions before production
+
+---
+
+## Gap Analysis: Project v2 Inventory vs Principal Benchmark
+
+### Baseline (from v2 categorization)
+
+| Category | Project v2 Count | Principal Minimum | Status |
+|----------|-----------------|-------------------|--------|
+| Azure Infrastructure | 21 | 18–22 | ✅ **Meets** |
+| Governance | 22 | 15–20 | ✅ **Surplus** |
+| Landing Zones | 15 | 12–16 | ✅ **Meets** |
+| Hybrid | 3 | 8–12 | ❌ **Gap** (5–9 short) |
+| AI Infrastructure | 19 | 10–14 | ✅ **Surplus** |
+
+### Detailed Category Analysis
+
+#### Azure Infrastructure: MEETS (21 vs 18–22 target)
+
+**Strengths:** Exceptional networking depth (14/21 skills are networking). Full coverage of ALZ connectivity services.
+
+**Critical Gaps:**
+- ❌ **Compute:** No AKS, Azure Virtual Machines, Azure Functions, Azure App Service, AVD, or Container Apps skill
+- ❌ **Storage:** No Azure Storage, Azure NetApp Files, Azure Data Lake, or Managed Disks skill
+- ❌ **Database:** No Azure SQL, Cosmos DB, Azure Database for PostgreSQL/MySQL skill
+- ❌ **Edge/HPC:** No Azure Stack HCI, Azure IoT Hub, or HPC skill
+
+**Assessment:** Meets count threshold but the composition is **networking-monocultural**. A Principal's 18+ spans compute+network+storage+identity+database. The project has 14 networking + 3 security appliances + 2 identity + 2 other. This technically meets but is structurally narrow.
+
+#### Governance: SURPLUS (22 vs 15–20 target)
+
+**Strengths:** Complete coverage — policy, RBAC, compliance frameworks, cost, security posture, observability, backup, audit, patching, reliability.
+
+**No significant gaps.** This is the project's strongest pillar and exceeds Principal-level expectations in both count and diversity. Every governance subdomain (policy authoring, cost governance, security posture, observability, compliance mapping, backup, update management) has dedicated skill coverage.
+
+#### Landing Zones: MEETS (15 vs 12–16 target)
+
+**Strengths:** Full CAF/WAF coverage, dual IaC framework support (Bicep + Terraform), brownfield assessment, ADR process, profile management.
+
+**Minor Gaps:**
+- ⚠️ No explicit **subscription vending** skill (covered implicitly by profile-management but not formalized)
+- ⚠️ No explicit **ALZ customization** skill (the project IS the ALZ accelerator, but documenting customization patterns as a skill would strengthen it)
+
+**Assessment:** Solid. The gaps are about formalization rather than missing capability.
+
+#### Hybrid: GAP (3 vs 8–12 target)
+
+**Existing:** ExpressRoute, VPN Gateway, Virtual WAN — all connectivity-only.
+
+**Critical Gaps:**
+- ❌ **Azure Arc** (servers, Kubernetes, data services, app services) — the entire Arc portfolio is absent
+- ❌ **Hybrid Identity** (Entra Connect Cloud Sync, ADFS migration, multi-forest) — no skill at all
+- ❌ **Multi-cloud governance** (Arc for AWS/GCP, Defender multicloud connectors) — absent
+- ❌ **Azure Stack HCI** — no edge compute skill
+- ❌ **Hybrid DNS** (Private DNS Resolver for hybrid resolution) — partially in azure-dns but not formalized
+- ❌ **SD-WAN integration** patterns — absent from virtual-wan skill
+
+**Assessment:** This is the project's most critical deficit relative to Principal expectations. Enterprises with hybrid estates cannot use the accelerator for their most common scenario (on-prem → cloud migration with coexistence). **5–9 skills short of minimum threshold.**
+
+#### AI Infrastructure: SURPLUS (19 vs 10–14 target)
+
+**Strengths:** Comprehensive orchestration layer — workflow engine, context management (2-tier: optimizer + shredding), session state, golden principles, evaluation (challenger pattern), diagram generation (3 engines), documentation automation.
+
+**Minor Gaps:**
+- ⚠️ No explicit **prompt versioning/regression** skill
+- ⚠️ No explicit **AI safety/PII filtering** skill (partially covered by golden-principles)
+- ⚠️ No explicit **agent evaluation metrics** skill (challenger is adversarial review but not quantitative measurement)
+
+**Assessment:** Well above Principal threshold. The squad-discovered skills (6) represent genuine emergent IP. The gaps are refinements, not structural deficits.
+
+---
+
+## Summary Table
+
+| Category | Principal Min | Project v2 | Status | Critical Gaps |
+|----------|--------------|-----------|--------|---------------|
+| Azure Infrastructure | 18–22 | 21 | ✅ Meets (narrow) | Compute (AKS, VMs, containers), Storage (Blob, ANF), Database (SQL, Cosmos) |
+| Governance | 15–20 | 22 | ✅ Surplus (+2–7) | None critical |
+| Landing Zones | 12–16 | 15 | ✅ Meets | Subscription vending (minor) |
+| Hybrid | 8–12 | 3 | ❌ **Gap** (-5 to -9) | Azure Arc, Hybrid Identity, Multi-cloud, Stack HCI, SD-WAN |
+| AI Infrastructure | 10–14 | 19 | ✅ Surplus (+5–9) | Prompt versioning, AI safety (minor) |
+
+---
+
+## Top 3 Gap-Closure Investments
+
+### 1. Hybrid: Azure Arc Suite (Impact: HIGH — unblocks brownfield value prop)
+
+**What:** Add skills for Arc-enabled servers, Arc-enabled Kubernetes, and Arc-enabled data services.
+
+**Rationale:** The project's #2 value proposition is **brownfield assessment and knowledge transfer**. Most brownfield estates are hybrid. Without Arc skills, the accelerator cannot govern, assess, or remediate hybrid workloads — which is exactly what enterprises with existing estates need. This directly strengthens the project's differentiated brownfield story.
+
+**Effort:** 3 skills (azure-arc-servers, azure-arc-kubernetes, azure-arc-data-services)
+**Impact on ALZ value-prop:** Unlocks hybrid brownfield assessment. Moves Hybrid from "Developing" to "Functional."
+
+### 2. Azure Infrastructure: Compute + Containers (Impact: HIGH — enables application LZ)
+
+**What:** Add skills for AKS (azure-kubernetes-service) and Container Apps (azure-container-apps), plus Virtual Machines (azure-virtual-machines).
+
+**Rationale:** The project currently deploys platform landing zones (networking, governance) but cannot assess or generate application-layer infrastructure. AKS is the #1 workload in enterprise ALZ deployments. Without compute skills, the accelerator hands off at exactly the point where customers need the most help. This is the natural expansion path after platform LZ.
+
+**Effort:** 3 skills (azure-kubernetes-service, azure-container-apps, azure-virtual-machines)
+**Impact on ALZ value-prop:** Enables application landing zone generation. Addresses the compute monoculture in Azure Infra.
+
+### 3. Hybrid: Identity + Multi-cloud (Impact: MEDIUM-HIGH — enterprise table stakes)
+
+**What:** Add skills for hybrid identity (entra-connect-hybrid-identity) and multi-cloud governance (azure-arc-multicloud).
+
+**Rationale:** Every enterprise ALZ engagement starts with "how does this work with our Active Directory?" and increasingly "we also have AWS accounts." Without hybrid identity, the accelerator cannot handle the Identity & Access CAF design area for hybrid organizations. Without multi-cloud, the governance surplus (22 skills) only applies to Azure-native — which is a shrinking percentage of enterprise estates.
+
+**Effort:** 2 skills (entra-connect-hybrid-identity, azure-arc-multicloud-governance)
+**Impact on ALZ value-prop:** Completes the Identity & Access design area for hybrid. Extends governance value prop to multi-cloud.
+
+---
+
+## Combined Investment Impact
+
+If all 3 investments are executed (8 new skills):
+
+| Category | Before | After | Status Change |
+|----------|--------|-------|---------------|
+| Hybrid | 3 | 8 | ❌ Gap → ✅ Meets minimum |
+| Azure Infrastructure | 21 | 24 | ✅ Meets → ✅ Surplus (balanced) |
+| Total | 80 | 88 | +10% coverage |
+
+**Priority order:** #1 (Arc) → #3 (Identity/Multi-cloud) → #2 (Compute)
+
+Rationale: The project's PRIMARY value prop is enforcement + compliance. Hybrid governance (Arc + identity) directly extends that value prop to the hybrid estate. Compute is the natural NEXT value prop expansion but doesn't strengthen the current core.
+
+---
+
+## Recommendation
+
+Accept this benchmark as the reference standard for measuring project maturity against industry expectations. Use it to:
+1. Prioritize skill creation in the next sprint (Arc suite + hybrid identity)
+2. Validate that "Meets" categories have compositional balance (not just count)
+3. Track progress toward Principal-ready across all 5 categories
+
+---
+
+# Decision: Skills Categorization v2 — Corrected Single-Category Assignment
+
+**Author:** Linus (Architect)
+**Requested by:** Yeselam Tesfaye
+**Date:** 2026-05-18
+**Status:** Proposed
+
+## Decision
+
+Re-categorize all project skills using strict single-category, primary-purpose-only assignment. Corrects the prior over-counting of "AI Infrastructure" which erroneously included Azure platform services.
+
+## Principle
+
+> A skill belongs to the ONE category that describes its **primary purpose** — what it exists to do, not what systems it touches or which agents invoke it. An Azure service skill (e.g., azure-monitor) belongs in the category matching the service's architectural role, not the accelerator layer that uses it.
+
+---
+
+## Category 1: Azure Infrastructure
+
+**Definition:** Compute, networking, storage, identity, database, edge services. The "what you deploy" layer.
+
+| # | Skill | Notes |
+|---|-------|-------|
+| 1 | azure-application-gateway | L7 load balancing / WAF ingress |
+| 2 | azure-bastion | Secure VM access |
+| 3 | azure-ddos-protection | Network protection service |
+| 4 | azure-dns | DNS zones and resolution |
+| 5 | azure-firewall | Network security appliance |
+| 6 | azure-firewall-manager | Firewall policy management |
+| 7 | azure-front-door | Global L7 load balancer / CDN |
+| 8 | azure-key-vault | Secrets / keys / certs management |
+| 9 | azure-load-balancer | L4 load balancing |
+| 10 | azure-nat-gateway | Outbound connectivity |
+| 11 | azure-networking | General networking patterns |
+| 12 | azure-network-watcher | Network diagnostics |
+| 13 | azure-private-link | Private endpoint connectivity |
+| 14 | azure-resource-manager | ARM deployment engine |
+| 15 | azure-route-server | BGP route exchange |
+| 16 | azure-virtual-network | VNet design and subnetting |
+| 17 | azure-virtual-network-manager | Network governance at scale |
+| 18 | azure-web-application-firewall | WAF rules and policies |
+| 19 | entra-app-registration | Entra ID app/service principal identity |
+| 20 | azure-automation | Runbook and DSC automation |
+| 21 | azure-site-recovery | DR replication service |
+
+**Count: 21**
+**Maturity: Deep (10+, broad coverage across networking, identity, compute)**
+
+---
+
+## Category 2: Governance
+
+**Definition:** Policy, RBAC, compliance, cost, security posture, monitoring/observability, backup, audit. The "how you control it" layer.
+
+| # | Skill | Notes |
+|---|-------|-------|
+| 1 | azure-advisor | Recommendations / best practices |
+| 2 | azure-backup | Data protection / retention policies |
+| 3 | azure-compliance | Regulatory framework mapping (CIS, NIST, PCI) |
+| 4 | azure-cost-management | Billing / budgets / exports |
+| 5 | azure-cost-optimization | SKU right-sizing / reserved instances |
+| 6 | azure-defender-for-cloud | Security posture management |
+| 7 | azure-diagnostics | Log analytics / diagnostic settings |
+| 8 | azure-governance-discovery | Policy assignment discovery |
+| 9 | azure-monitor | Observability / alerts / metrics |
+| 10 | azure-policy | Policy authoring and enforcement |
+| 11 | azure-quotas | Usage limits / capacity planning |
+| 12 | azure-rbac | Role assignments / PIM / identity governance |
+| 13 | azure-reliability | Reliability patterns / SLA design |
+| 14 | azure-resiliency | Resiliency testing / chaos |
+| 15 | azure-resource-graph | Cross-subscription querying / audit |
+| 16 | azure-security | Security development practices |
+| 17 | azure-sentinel | SIEM / SOAR / threat detection |
+| 18 | azure-service-health | Service incident / planned maintenance |
+| 19 | azure-update-manager | Patch compliance / update orchestration |
+| 20 | azure-validate | Pre-deployment validation checks |
+| 21 | cost-governance | Budget enforcement rules / alert thresholds |
+| 22 | security-baseline | Non-negotiable security rules (TLS, HTTPS, MI) |
+
+**Count: 22**
+**Maturity: Deep (10+, comprehensive governance coverage)**
+
+---
+
+## Category 3: Landing Zones
+
+**Definition:** CAF, WAF, ALZ patterns, IaC frameworks, assessment, architecture decisions. The "how you organize and deliver" layer.
+
+| # | Skill | Notes |
+|---|-------|-------|
+| 1 | assessment-report | Brownfield assessment report generation |
+| 2 | azure-adr | Architecture Decision Records |
+| 3 | azure-architecture | Reference architectures / patterns |
+| 4 | azure-bicep-patterns | Bicep IaC patterns / AVM modules |
+| 5 | azure-cloud-adoption-framework | CAF strategy / planning / readiness |
+| 6 | azure-defaults | Naming, tags, AVM-first, region defaults |
+| 7 | azure-well-architected | WAF 5-pillar assessment / optimization |
+| 8 | brownfield-discovery | KQL inventory collectors for existing estates |
+| 9 | caf-design-areas | CAF design area mapping |
+| 10 | iac-common | Shared IaC conventions / module organization |
+| 11 | profile-management | LZ profile config (base → size → env) |
+| 12 | terraform-patterns | Terraform IaC patterns / AVM-TF modules |
+| 13 | terraform-search-import | Brownfield Terraform import discovery |
+| 14 | terraform-test | Terraform test authoring / execution |
+| 15 | wara-assessment | WAF 5-pillar check catalog / scoring |
+
+**Count: 15**
+**Maturity: Deep (10+, strong CAF/WAF/IaC coverage)**
+
+---
+
+## Category 4: Hybrid
+
+**Definition:** Connectivity between Azure and non-Azure (on-prem, multi-cloud, edge). ExpressRoute, VPN, Arc, hybrid identity.
+
+| # | Skill | Notes |
+|---|-------|-------|
+| 1 | azure-expressroute | Private peering to on-prem/colo |
+| 2 | azure-vpn-gateway | S2S/P2S VPN tunnels |
+| 3 | azure-virtual-wan | Global WAN hub for hybrid |
+
+**Count: 3**
+**Maturity: Developing (2-4 skills, solid for connectivity but lacks Arc/hybrid-identity/multi-cloud)**
+
+---
+
+## Category 5: AI Infrastructure
+
+**Definition:** Agent orchestration, prompt engineering, context management, workflow contracts, diagram generation. The accelerator's META layer — NOT Azure services that happen to support AI workloads.
+
+| # | Skill | Notes |
+|---|-------|-------|
+| 1 | azure-diagrams | Diagram routing skill (delegates to engines) |
+| 2 | azure-resource-visualizer | Resource Graph → Mermaid visualization |
+| 3 | context-optimizer | Agent context window auditing |
+| 4 | context-shredding | Runtime context compression (3 tiers) |
+| 5 | count-registry | Canonical entity counts from globs |
+| 6 | docs-writer | Documentation accuracy / freshness |
+| 7 | drawio | Draw.io MCP diagram generation |
+| 8 | github-operations | Git/PR workflow conventions |
+| 9 | golden-principles | Agent-first operating principles |
+| 10 | mermaid | Mermaid diagram generation |
+| 11 | python-diagrams | Python diagrams library generation |
+| 12 | session-resume | Workflow session state restoration |
+| 13 | workflow-engine | DAG-based workflow / gate enforcement |
+| 14 | alz-differentiation-framework | (.squad) Differentiation evaluation |
+| 15 | diagram-generation-patterns | (.squad) Diagram patterns / multi-engine |
+| 16 | remote-rewind-with-lease | (.squad) Safe git rewind patterns |
+| 17 | step-output-contracts | (.squad) Agent step output contracts |
+| 18 | value-proposition-grounding | (.squad) Value prop → code evidence |
+| 19 | workflow-contract-hardening | (.squad) Workflow contract stabilization |
+
+**Count: 19**
+**Maturity: Deep (10+, strong orchestration/context/visualization layer)**
+
+---
+
+## Summary Table
+
+| Category | Count | Maturity | Prior Count (v1) | Delta |
+|----------|-------|----------|-----------------|-------|
+| Azure Infrastructure | 21 | Deep | ~15 | +6 (gained azure-automation, azure-site-recovery, entra-app-registration, etc.) |
+| Governance | 22 | Deep | ~16 | +6 (gained azure-monitor, azure-sentinel, azure-validate, azure-resource-graph, etc.) |
+| Landing Zones | 15 | Deep | ~15 | ≈0 (stable) |
+| Hybrid | 3 | Developing | ~3 | 0 |
+| AI Infrastructure | 19 | Deep | ~25 | -6 (shed Azure services that were mis-categorized) |
+| **TOTAL** | **80** | — | 80 | 0 |
+
+---
+
+## Cross-Category Flags
+
+These skills have legitimate secondary-category relevance but are assigned to ONE primary:
+
+| Skill | Primary | Secondary | Rationale |
+|-------|---------|-----------|-----------|
+| azure-validate | Governance | Landing Zones | Validates IaC but its PURPOSE is governance enforcement |
+| azure-resource-graph | Governance | AI Infrastructure | Used by agents for queries but its purpose is audit/discovery |
+| azure-virtual-network-manager | Azure Infra | Governance | Enforces network rules at scale but IS a network service |
+| azure-firewall-manager | Azure Infra | Governance | Policy management for firewalls but IS an infra service |
+| azure-defaults | Landing Zones | AI Infrastructure | Consumed by all agents but defines LZ conventions |
+| github-operations | AI Infrastructure | Landing Zones | Supports LZ delivery but its primary role is agent workflow |
+| docs-writer | AI Infrastructure | Landing Zones | Supports LZ docs but is an agent tooling skill |
+| azure-resource-visualizer | AI Infrastructure | Governance | Queries resources but purpose is visualization for agents |
+| brownfield-discovery | Landing Zones | Governance | Discovers compliance state but primary is LZ assessment |
+
+---
+
+## Insights: What the Corrected Distribution Reveals
+
+### 1. The "AI Infrastructure" inflation was real but modest
+
+The prior v1 categorization inflated AI Infrastructure to ~25 skills by absorbing Azure services that agents *use* (azure-monitor, azure-sentinel, azure-automation, azure-validate, azure-resource-manager, entra-app-registration). Under the primary-purpose rule, these return to their natural homes (Infrastructure or Governance). The corrected AI Infrastructure count (19) is still **Deep** — the accelerator genuinely has a substantial meta-layer.
+
+### 2. Governance is the project's actual strongest pillar
+
+At 22 skills, Governance edges out Azure Infrastructure (21) as the densest category. This aligns with the project's core value proposition: **enforcement and continuous compliance**, not just deployment. The project has more skills for controlling infrastructure than deploying it.
+
+### 3. Azure Infrastructure coverage is networking-heavy
+
+Of 21 infra skills, 14 are networking-related. Compute, storage, and database are conspicuously absent. This is appropriate for a Landing Zone accelerator (networking IS the platform layer) but reveals gaps if the project expands to application landing zones.
+
+### 4. Hybrid remains the clearest gap
+
+Only 3 skills cover hybrid connectivity. No Azure Arc, no hybrid identity (Entra Connect), no multi-cloud patterns. For organizations with on-prem estates, this is the most likely friction point.
+
+### 5. Landing Zones are stable and complete
+
+15 skills cover CAF, WAF, IaC patterns, assessment, and profile management. This is the project's intellectual core and was correctly categorized in v1.
+
+### 6. The meta-layer (AI Infrastructure) is genuinely differentiated
+
+Even after shedding 6 mis-assigned skills, 19 remain — including 6 squad-discovered skills that represent emergent project knowledge. This confirms the accelerator isn't just "ALZ with agents on top" — it has a substantial orchestration and context-management layer that constitutes real IP.
+
+---
+
+## Recommendation
+
+Accept this categorization as the canonical reference. Use it to:
+1. Identify investment areas (Hybrid is the clear gap)
+2. Guide new skill creation (compute/storage gaps in Azure Infra)
+3. Prevent future mis-categorization (apply the primary-purpose rule)
+
+---
+
 # Danny — Push local main to github/main (2026-05-13T21:01:15.942+00:00)
 
 - **Date:** 2026-05-13T21:01:15.942+00:00
