@@ -1141,3 +1141,58 @@ When a COO says "We have 200 factory sites with on-premises Kubernetes clusters 
 ## Methodology Note
 
 This analysis uses **scenario-anchored prioritization**: define the engagements the accelerator must win, evaluate each gap against each engagement, count criticality, and let market evidence confirm or challenge framework-derived priorities. The scenario lens complements (not replaces) the WAF/CAF lens — frameworks identify structural gaps; scenarios prove those gaps cost real deals.
+
+---
+
+# Reviewer Gate Decision — Skills Table (Pre-Execution Wave 1 Gate)
+
+**Reviewer:** Isabel (Challenger Agent)
+**Review Date:** 2026-05-18T16:57:57.410+00:00
+**Artifact:** Linus's WAF/CAF Principal Benchmark + Scenario-Anchored Gap Closure Plan
+**Verdict:** **APPROVE WITH CONDITIONS** (No lockout invoked)
+
+## Summary
+
+The WAF/CAF analysis is structurally sound. Priority ordering survives adversarial challenge. Scenario evidence confirms Identity as P1 investment. Three material conditions must be addressed before Wave 1 skill stub drafting.
+
+**Blocker Count:** 0 | **Major Conditions:** 4 | **Minor Notes:** 11
+
+## Major Conditions
+
+**MAJOR-1: `entra-id-identity-governance` underscopes.** The proposed skill conflates Conditional Access, PIM, access reviews, and entitlement management — four distinct Azure services with different APIs, compliance, RBAC surfaces. Recommends split into `entra-conditional-access` + `entra-identity-governance`. Wave 1 expands from 3 to 4 skills.
+
+**MAJOR-2: Identity coverage count undercounts existing skills.** `azure-rbac` already contains PIM configuration (lines 44-52) and Conditional Access policy tables (lines 54-61). `entra-app-registration` covers workload identity federation. Existing coverage is surface-level, not absent. Reframe investment as "deepening" not "filling void."
+
+**MAJOR-3: "Unblocks 6/8 scenarios" is overstated.** S1 (Global LZ) requires P3 (subscription vending) for delivery; S2 (AI) needs P4 (data); S5 (ISV) needs P3 + P4. Wave 1 unblocks SCOPING phase for 6/8, but full delivery requires multiple waves. Reframe: "enables scoping phase for 6/8 scenarios."
+
+**MAJOR-4: Workflow pipeline integrity gaps are orthogonal to skills expansion.** Five blocking items remain unresolved (TDD/Step 3 contract, artifact naming, Challenger review coverage, MCP tooling, Step 3 skip tracking). Skills expansion assumes pipeline works correctly. Add explicit "Prerequisites" section documenting pipeline assumptions.
+
+## Minor Notes (11 items)
+
+- **MINOR-1:** `workload-identity-federation` overlaps existing `entra-app-registration`. Define boundary: GitHub OIDC → app-reg; AKS/cross-cloud → new skill.
+- **MINOR-2:** `azure-ad-domain-services` (AADDS) missing from Wave 1 for legacy NTLM/Kerberos bridge. Acceptable to defer; acknowledge in narrative.
+- **MINOR-3 through MINOR-11:** Governance categorization slightly inflated; Performance Efficiency gap honest; Identity ↛ Reliability mapping incomplete; Networking saturation confirmed; Networking/Governance skill counts defensible; brownfield/greenfield bias in scenarios; skill execution-heavy vs theory-light.
+
+## Recommended Wave 1 Skill List (4 skills)
+
+| Skill | Scope | Boundary |
+|-------|-------|----------|
+| `entra-conditional-access` | CA policies, named locations, authentication strength, cross-tenant access, continuous access evaluation | NOT: PIM, access reviews, entitlement |
+| `entra-identity-governance` | PIM at scale, access reviews, entitlement management, lifecycle workflows | NOT: CA policies, RBAC |
+| `entra-connect-hybrid-identity` | Cloud sync, ADFS federation migration, multi-forest, staged rollout | NOT: AADDS, B2B/B2C |
+| `workload-identity-federation` | AKS pod identity, cross-cloud federation (AWS/GCP), managed identity at scale | NOT: GitHub Actions OIDC |
+
+## Hidden Assumptions Called Out
+
+1. Accelerator optimized for greenfield/clean migration, not brownfield governance retrofit.
+2. "Closing the gap" means Bicep/Terraform patterns, not Learn doc link collections.
+3. New identity skills coexist with existing `azure-rbac` partial coverage (deduplication strategy unspecified).
+4. Linear priority = serial execution (customers may request P2 before P1 is complete).
+5. Agent pipeline routing updates required to invoke new skills (not proposed in plan).
+
+## Reviewer Gate Authority
+
+**Verdict Status:** Conditional Approval. Revision permitted. No reviewer lockout.
+
+Linus may revise without escalation.
+
