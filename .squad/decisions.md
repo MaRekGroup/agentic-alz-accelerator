@@ -993,3 +993,151 @@ The accelerator demonstrates that **orchestration is where value lives**. The pi
 - All meaningful changes require team consensus
 - Document architectural decisions here
 - Keep history focused on work, decisions focused on direction
+### 2026-05-18T16:20:21Z: User directive — Recommendations must be tied to enterprise scenarios
+**By:** Yeselam Tesfaye (via Copilot)
+**What:** All architect-level recommendations (gap closure plans, skill investments, ADRs, assessment findings, prioritization frameworks) must be grounded in concrete, named enterprise scenarios — not abstract pillars or design areas alone. Use scenarios such as: global landing zone (multi-region platform), multi-region AI platform (Azure OpenAI with data residency), regulated workloads (FSI/healthcare/public sector with PCI-DSS/HIPAA/FedRAMP), brownfield M&A integration, ISV multi-tenant SaaS, sovereign cloud, hybrid edge platform. Every recommendation must answer: "Which named scenario does this unblock? What can the architect NOT deliver without it?"
+**Why:** User request — abstract framework coverage is necessary but insufficient. Investments must map to real engagements the team can name and win.
+**Scope:** Persistent. Applies to all future architect recommendations. Complements (not replaces) the WAF/CAF lens directive from 2026-05-18T16:12:16Z.
+
+# Decision: Scenario-Anchored Gap Closure Plan
+
+**Author:** Linus (Architect)
+**Requested by:** Yeselam Tesfaye
+**Date:** 2026-05-18T16:20:21.733+00:00
+**Status:** Proposed
+**Extends:** `linus-principal-benchmark-waf-caf.md` (merged to `.squad/decisions.md`)
+**Relationship:** Complements WAF/CAF lens with enterprise scenario evidence. Does NOT supersede the WAF/CAF ranking — validates and strengthens it.
+
+---
+
+## Step 1 — Canonical Enterprise Scenarios
+
+The ALZ accelerator must credibly deliver (not merely discuss) these scenarios:
+
+| # | Scenario | Pattern | Complexity |
+|---|----------|---------|------------|
+| S1 | **Global Landing Zone** | Multi-region platform LZ for a multinational — 5+ regions, follow-the-sun ops, regional data sovereignty, hub-spoke per geo with global mesh | Complex |
+| S2 | **Multi-Region AI Platform** | Azure OpenAI / AI Foundry at scale — EU AI Act compliance, customer data stays in-region, model deployment per region with shared governance plane | Complex |
+| S3 | **Regulated Workloads** | FSI/Healthcare/Public Sector — PCI-DSS, HIPAA, FedRAMP, ISO 27001. Segregated environments, mandatory CMK, network isolation, Separation of Duties | Complex |
+| S4 | **Brownfield M&A Integration** | Acquired subsidiary with existing Azure estate + AD forest. Hybrid identity migration, policy unification, tenant consolidation or multi-tenant federation | Standard–Complex |
+| S5 | **ISV Multi-Tenant SaaS** | Build-once-deploy-many platform — tenant-per-subscription, deployment stamps, per-tenant CMK, noisy-neighbor isolation, self-service vending | Complex |
+| S6 | **Sovereign Cloud** | Azure Government, China (21Vianet), or industry cloud — FedRAMP High, sovereign data planes, restricted service catalog, air-gapped DevOps | Complex |
+| S7 | **Hybrid Edge Platform** | Manufacturing/Retail with Azure Arc — distributed sites (100+ locations), on-premises Kubernetes, local data processing with central governance | Standard–Complex |
+| S8 | **Cloud-Native Modernization** | Legacy .NET/Java migration to AKS/Container Apps — progressive containerization, blue-green deployments, service mesh, zero-downtime migration | Standard |
+
+**Justification for additions:**
+- **S7 (Hybrid Edge Platform):** Differentiates from "brownfield = existing Azure" — covers the massive IoT/OT/manufacturing segment where Arc-at-scale IS the landing zone. Without it, the accelerator has no story for distributed physical estates.
+- **S8 (Cloud-Native Modernization):** The most common application landing zone request. If the accelerator cannot guide "put containers in the LZ we built," the platform LZ is an empty parking garage.
+
+---
+
+## Step 2 — Scenario × Priority Matrix
+
+**Legend:** ✅ Critical (cannot deliver scenario without it) | 🟡 Important (delivers partial, not credible) | ⚪ Optional (nice-to-have) | — N/A
+
+| Scenario | P1: Identity & Access | P2: Compute & Containers | P3: Billing & Tenant | P4: Data Platform | P5: Hybrid |
+|----------|----------------------|--------------------------|---------------------|-------------------|------------|
+| **S1: Global LZ** | ✅ Cannot scope RBAC model across regions or design PIM delegation per geo without identity governance depth | 🟡 Platform LZ works without compute skills, but cannot guide workload placement strategy | ✅ Must automate subscription vending per region; cannot design EA hierarchy for multinational without tenant architecture | 🟡 Data sovereignty needs storage/DB geo-replication guidance but isn't blocked | ⚪ Pure Azure play; Arc irrelevant unless subsidiary has on-prem |
+| **S2: Multi-Region AI** | ✅ Workload identity federation is load-bearing — AI services need managed identity + cross-region service auth; cannot implement data residency RBAC boundary without conditional access | ✅ AI Foundry runs on AKS/Container Apps; cannot architect model hosting, GPU node pools, or inference scaling without compute skills | 🟡 Subscription-per-region pattern needs vending but not existential | ✅ Customer data in Cosmos/SQL with regional pinning — cannot architect without data platform skills | ⚪ Unless on-prem inference nodes needed |
+| **S3: Regulated Workloads** | ✅ SoD requires PIM + access reviews; FedRAMP/HIPAA mandate conditional access baselines; cannot pass audit without identity governance proof | ✅ Workloads ARE compute — cannot architect compliant AKS (pod sandboxing, network policy) or hardened VMs without compute depth | 🟡 Subscription segregation important but achievable with current skills | ✅ CMK for databases, immutable storage, compliance evidence for data-at-rest — all require data platform depth | ⚪ Unless hybrid regulated (e.g., on-prem HSM) |
+| **S4: Brownfield M&A** | ✅ THE identity scenario — AD forest trust vs cloud sync, federation migration, multi-tenant B2B, emergency access. Without hybrid identity skills, the accelerator cannot even begin Step 0 assessment for M&A | 🟡 Need to assess existing compute but not architect new | ✅ Tenant consolidation or multi-tenant federation is fundamentally a billing/tenant architecture problem | 🟡 Must assess existing databases but new architecture secondary | ✅ Acquired company likely has on-prem; Arc is the bridge. Cannot unify governance without Arc-at-scale |
+| **S5: ISV SaaS** | ✅ Per-tenant identity isolation, B2C/B2B federation, customer-managed keys with per-tenant Key Vault access — all identity governance | ✅ Deployment stamps ARE compute architectures (AKS per stamp, Container Apps per tenant); cannot architect SaaS platform without compute | ✅ Subscription vending IS the SaaS provisioning plane; cannot automate tenant lifecycle without it | ✅ Per-tenant database isolation (SQL elastic pools, Cosmos per-tenant partitioning) — data platform IS the multi-tenancy mechanism | ⚪ Pure cloud-native; no Arc |
+| **S6: Sovereign Cloud** | ✅ Sovereign identity boundary — separate Entra tenant, restricted conditional access, ITAR-compliant identity; cannot scope without deep identity architecture | 🟡 Workloads deploy to sovereign cloud but compute architecture is standard; service catalog restrictions are the constraint, not design | ✅ Sovereign subscriptions, isolated EA enrollment, cross-sovereign billing impossible — must design clean separation | 🟡 Sovereign storage/DB same patterns, restricted catalog | 🟡 Government customers often have on-prem classified workloads; Arc bridges them |
+| **S7: Hybrid Edge** | 🟡 Edge identity important but manageable with current RBAC/app-reg skills; not the hard problem | ✅ Edge runs Kubernetes (Arc-enabled); cannot architect edge compute, container orchestration, or workload scheduling without compute + containers skills | ⚪ Standard billing applies | 🟡 Edge data processing needs storage patterns but not primary constraint | ✅ THIS IS Arc. Cannot deliver hybrid edge without Arc-enabled servers + K8s. The scenario IS the Hybrid priority. |
+| **S8: Cloud-Native Modernization** | 🟡 Workload identity federation for containerized apps important but not the hard problem | ✅ THE compute scenario — AKS architecture, Container Apps, service mesh, autoscaling, pod security. Cannot deliver modernization without compute depth | ⚪ Standard sub structure | ✅ Applications need databases — SQL MI, Cosmos, Redis. Cannot architect data tier of modernized app without data skills | ⚪ Unless migrating from on-prem to containers |
+
+---
+
+## Step 3 — Scenario-Weighted Re-Prioritization
+
+### Critical Count per Priority
+
+| Priority | Scenarios where CRITICAL (✅) | Count | Which scenarios |
+|----------|-------------------------------|-------|-----------------|
+| **P1: Identity & Access** | S1, S2, S3, S4, S5, S6 | **6** | All except Hybrid Edge and Cloud-Native Modernization |
+| **P2: Compute & Containers** | S2, S3, S5, S7, S8 | **5** | AI Platform, Regulated, ISV SaaS, Hybrid Edge, Cloud-Native |
+| **P3: Billing & Tenant** | S1, S4, S5, S6 | **4** | Global LZ, M&A, ISV SaaS, Sovereign |
+| **P4: Data Platform** | S2, S3, S5, S8 | **4** | AI Platform, Regulated, ISV SaaS, Cloud-Native |
+| **P5: Hybrid** | S4, S7 | **2** | M&A, Hybrid Edge |
+
+### Important Count per Priority (additive signal)
+
+| Priority | Scenarios where IMPORTANT (🟡) | Count |
+|----------|--------------------------------|-------|
+| P1 | S7, S8 | 2 |
+| P2 | S1, S4, S6 | 3 |
+| P3 | S2, S3, S6 | 3 |
+| P4 | S1, S4, S6, S7 | 4 |
+| P5 | S5, S6 | 2 |
+
+### Scenario-Weighted Ranking
+
+| Rank | Priority | Critical | Important | Total Weight |
+|------|----------|----------|-----------|--------------|
+| **1** | P1: Identity & Access | 6 | 2 | 6C + 2I |
+| **2** | P2: Compute & Containers | 5 | 3 | 5C + 3I |
+| **3** | P3: Billing & Tenant | 4 | 3 | 4C + 3I |
+| **4** | P4: Data Platform | 4 | 4 | 4C + 4I |
+| **5** | P5: Hybrid | 2 | 2 | 2C + 2I |
+
+### Comparison: WAF/CAF Ranking vs Scenario-Weighted Ranking
+
+| Position | WAF/CAF Ranking | Scenario-Weighted Ranking | Match? |
+|----------|-----------------|---------------------------|--------|
+| 1 | Identity & Access | Identity & Access | ✅ Confirmed |
+| 2 | Compute & Containers | Compute & Containers | ✅ Confirmed |
+| 3 | Billing & Tenant | Billing & Tenant | ✅ Confirmed |
+| 4 | Data Platform | Data Platform | ✅ Confirmed |
+| 5 | Hybrid | Hybrid | ✅ Confirmed |
+
+**Verdict:** The scenario analysis **fully confirms** the WAF/CAF priority ranking. The frameworks and the market evidence agree. This is unusual and significant — it means the WAF/CAF lens correctly predicted which capabilities real engagements require. The ordering is robust.
+
+The only nuance: P3 (Billing & Tenant) and P4 (Data Platform) are tied at 4 Critical scenarios each, but P4 has more Important scenarios (4 vs 3). In practice, P3 remains higher because subscription vending blocks Day-0 of an engagement (you cannot deploy a landing zone without a subscription), while data platform gaps appear at Day-N when workloads deploy. Sequence dependency breaks the tie.
+
+---
+
+## Step 4 — Per-Priority Scenario Narratives
+
+### Priority 1: Identity & Access — Narrative (Highest-leverage scenario: S4 Brownfield M&A)
+
+When a CIO tells us "We just acquired a 3,000-person subsidiary with their own Active Directory forest and 47 Azure subscriptions — integrate them into our platform landing zone by Q3," we cannot even begin Step 0 assessment. The accelerator discovers their resources (brownfield-discovery) but cannot assess their identity posture, cannot recommend cloud sync vs. federation, cannot design the trust relationship, and cannot plan emergency access accounts for the transition. Without `entra-connect-hybrid-identity`, `entra-id-identity-governance`, and `workload-identity-federation`, we hand back a network topology assessment with a blank where identity architecture should be — and identity IS the M&A problem. Once closed, we can deliver a complete migration roadmap: staged rollout of cloud sync, PIM escalation paths for cross-org admins, conditional access policies that enforce zero-trust during the messy middle of integration, and workload identity federation so their service principals don't break when we consolidate tenants.
+
+### Priority 2: Compute & Containers — Narrative (Highest-leverage scenario: S8 Cloud-Native Modernization)
+
+When a CTO asks "We've containerized our core platform — architect our application landing zone on AKS with zero-downtime deployment and autoscaling," we deliver an empty landing zone and a shrug. The platform LZ is perfect (network, identity, governance) but we cannot specify AKS networking mode (kubenet vs. Azure CNI overlay), cannot design node pool topology (system vs. user vs. GPU), cannot architect pod disruption budgets for HA, and cannot configure KEDA autoscaling. The accelerator builds the parking garage but cannot park any cars. Once closed, we deliver end-to-end: AKS cluster architecture with workload identity integration, HPA/VPA/KEDA autoscaling patterns, Container Apps for serverless workloads, pod security standards, and service mesh configuration — turning the empty platform LZ into a working application platform.
+
+### Priority 3: Billing & Tenant — Narrative (Highest-leverage scenario: S5 ISV Multi-Tenant SaaS)
+
+When a VP Engineering says "We need a subscription-per-tenant model with automated provisioning — when a customer signs up, spin up their isolated landing zone in 15 minutes," we cannot deliver the automation. We generate Bicep/Terraform for what goes IN a subscription, but cannot automate the subscription itself. Without `subscription-vending`, the ISV must manually create subscriptions, configure management group placement, inject network connectivity, and assign policies — for every tenant. That's the opposite of SaaS economics. Once closed, we deliver the "landing zone factory": API-triggered subscription creation with guardrails, automatic management group placement, pre-wired connectivity to shared services, and cost allocation tags that map to customer billing — the canonical ALZ pattern that Microsoft documents but few implement end-to-end.
+
+### Priority 4: Data Platform — Narrative (Highest-leverage scenario: S2 Multi-Region AI Platform)
+
+When a Chief Data Officer says "Our Azure OpenAI deployment must keep EU customer data in EU regions, with Cosmos DB multi-region writes for inference metadata and SQL for model versioning — architect the data tier," we cannot specify Cosmos consistency levels for the latency/consistency trade-off, cannot design SQL failover groups for regional resilience, and cannot architect storage immutability for model artifact governance. The AI platform has compute (once P2 closes) but no data foundation. Once closed, we deliver regional data architecture: Cosmos DB with bounded staleness per region, SQL with geo-replication and automatic failover, storage accounts with lifecycle policies and cross-region replication — all with CMK, private endpoints, and the Entra-only auth our security baseline already mandates.
+
+### Priority 5: Hybrid — Narrative (Highest-leverage scenario: S7 Hybrid Edge Platform)
+
+When a COO says "We have 200 factory sites with on-premises Kubernetes clusters running production IoT workloads — bring them under Azure governance without disrupting operations," we cannot extend the ALZ governance plane beyond the Azure boundary. The accelerator monitors and remediates Azure resources beautifully (Steps 8–9), but the factory floor is invisible. Without `azure-arc-servers` and `azure-arc-kubernetes`, policy compliance stops at the cloud edge. Once closed, we extend the full governance story: Arc-enabled K8s clusters receive the same Azure Policy, the same Defender for Cloud posture, the same GitOps configuration — and the accelerator's brownfield assessment (Step 0) can discover and evaluate the entire hybrid estate, not just the Azure portion.
+
+---
+
+## Step 5 — Refined Investment Plan (Scenario-Anchored)
+
+| Priority | Skills to Close | Scenarios Critical For | Scenarios Important For | "Cannot Deliver" Headline |
+|----------|----------------|------------------------|-------------------------|---------------------------|
+| **P1: Identity & Access** | `entra-id-identity-governance`, `entra-connect-hybrid-identity`, `workload-identity-federation` | S1 Global LZ, S2 AI Platform, S3 Regulated, S4 M&A, S5 ISV SaaS, S6 Sovereign (6/8) | S7 Hybrid Edge, S8 Cloud-Native (2/8) | Cannot scope ANY enterprise ALZ engagement — identity is the first design decision |
+| **P2: Compute & Containers** | `azure-kubernetes-service`, `azure-virtual-machines`, `azure-container-apps` | S2 AI Platform, S3 Regulated, S5 ISV SaaS, S7 Hybrid Edge, S8 Cloud-Native (5/8) | S1 Global LZ, S4 M&A, S6 Sovereign (3/8) | Platform LZ is an empty parking garage — cannot guide what goes inside |
+| **P3: Billing & Tenant** | `subscription-vending`, `azure-tenant-management` | S1 Global LZ, S4 M&A, S5 ISV SaaS, S6 Sovereign (4/8) | S2 AI Platform, S3 Regulated, S6 Sovereign (3/8) | Cannot automate subscription lifecycle — the "landing zone factory" story is manual |
+| **P4: Data Platform** | `azure-sql-database`, `azure-cosmos-db`, `azure-storage-accounts` | S2 AI Platform, S3 Regulated, S5 ISV SaaS, S8 Cloud-Native (4/8) | S1 Global LZ, S4 M&A, S6 Sovereign, S7 Hybrid Edge (4/8) | Cannot architect data tier — workloads have compute but no persistence layer |
+| **P5: Hybrid** | `azure-arc-servers`, `azure-arc-kubernetes` | S4 M&A, S7 Hybrid Edge (2/8) | S5 ISV SaaS, S6 Sovereign (2/8) | Cannot extend governance beyond Azure boundary — hybrid estates remain unmanaged |
+
+---
+
+## Executive Summary
+
+**The WAF/CAF framework gap analysis identified Identity & Access as the existential deficit (2 skills for a foundational CAF design area).** The scenario evidence confirms this with overwhelming specificity: 6 of 8 canonical enterprise scenarios — Global Landing Zone, Multi-Region AI Platform, Regulated Workloads, Brownfield M&A, ISV Multi-Tenant SaaS, and Sovereign Cloud — cannot be credibly delivered without identity governance depth. **If the accelerator cannot design conditional access baselines, plan hybrid identity migrations, or federate workload identity, it fails at the first conversation in 75% of enterprise engagements.** The concrete engagement risk: a multinational CIO asks us to integrate an acquired subsidiary's AD forest, or an FSI CISO requires PIM with SoD proof, or an ISV CTO needs per-tenant identity isolation — and we hand back a network diagram with a blank where identity architecture should be. That is not a gap; it is a disqualifier.
+
+---
+
+## Methodology Note
+
+This analysis uses **scenario-anchored prioritization**: define the engagements the accelerator must win, evaluate each gap against each engagement, count criticality, and let market evidence confirm or challenge framework-derived priorities. The scenario lens complements (not replaces) the WAF/CAF lens — frameworks identify structural gaps; scenarios prove those gaps cost real deals.

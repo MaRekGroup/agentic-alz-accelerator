@@ -133,3 +133,16 @@ When challenging architecture assessments, evaluate against:
 
 Reference: `.squad/decisions.md` §"Principal Benchmark Re-evaluation — WAF/CAF Lens" for full gap matrix.
 
+
+### 2026-05-18T16:20:21Z — Scenario-Grounding Directive
+
+User directive established scenario-anchored prioritization as standing requirement for all architect recommendations. Linus extended the WAF/CAF principal benchmark with enterprise scenario evidence: 8 canonical scenarios (Global LZ, Multi-Region AI, Regulated Workloads, M&A, ISV SaaS, Sovereign Cloud, Hybrid Edge, Cloud-Native Modernization) evaluated against priority rankings.
+
+**Standing Rule for Challenger reviews:** All architect-level recommendations must demonstrate:
+1. **Scenario grounding:** Explicitly map recommendations to one or more named enterprise scenarios (not abstract frameworks alone)
+2. **Scenario dependency mapping:** For each priority investment, document which scenarios it enables and which it blocks
+3. **Market evidence:** Answer "Which real engagements does this gap cost us?"
+
+**Complementary to WAF/CAF lens:** Scenario-grounding validates and strengthens WAF/CAF priorities — does not replace them.
+
+Reference: `.squad/decisions.md` §"Decision: Scenario-Anchored Gap Closure Plan" for canonical scenarios and priority × scenario matrix.

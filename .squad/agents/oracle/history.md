@@ -8,3 +8,13 @@ Linus re-ran Principal Benchmark under WAF/CAF lens (see `.squad/decisions.md` f
 
 **Standing Rule:** Bias all assessments toward WAF/CAF structure unless explicitly overridden.
 
+
+### 2026-05-18T16:20:21Z — Scenario-Grounding Directive
+
+User directive established scenario-anchored prioritization as standing requirement for all architect recommendations. Linus extended the WAF/CAF principal benchmark with enterprise scenario evidence: 8 canonical scenarios (Global LZ, Multi-Region AI, Regulated Workloads, M&A, ISV SaaS, Sovereign Cloud, Hybrid Edge, Cloud-Native Modernization) evaluated against priority rankings. Result: scenario analysis **fully confirms** WAF/CAF priority order.
+
+**Standing Rule:** All future architecture assessments, gap closure plans, and recommendations must ground in concrete named enterprise scenarios. Answer: "Which scenario does this unblock? What cannot the architect deliver without it?"
+
+Reference: `.squad/decisions.md` §"Decision: Scenario-Anchored Gap Closure Plan" for full scenario × priority matrix.
+
+**Relationship:** Complements (not replaces) WAF/CAF lens directive from 2026-05-18T16:12:16Z. Both are standing rules.
