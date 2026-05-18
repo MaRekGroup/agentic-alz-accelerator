@@ -237,6 +237,8 @@ ACA's S8 narrative differs from AKS's S8 narrative. AKS S8 addresses **modernizi
 
 The goal is to reduce operational burden and eliminate idle cost by moving appropriately-scoped workloads to a managed runtime. Before performing any migration, verify the workload does not meet "Choose AKS When" criteria in `docs/decisions/compute-tier-selection.md`. Migration to ACA is only correct when the workload genuinely does not need Kubernetes.
 
+**Cross-skill sequencing:** Run after `azure-kubernetes-service` assessment determines which workloads don't need full K8s. Receive migration candidates from `azure-virtual-machines` (containerized lift-and-shift output) or from over-engineered AKS deployments. References `docs/decisions/compute-tier-selection.md` for tier selection criteria.
+
 ### Pre-Migration Discovery Checklist
 
 Audit each candidate workload for the following before selecting ACA as the migration target:

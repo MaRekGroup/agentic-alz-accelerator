@@ -66,6 +66,7 @@ Before applying this skill, confirm with `docs/decisions/compute-tier-selection.
 | **Security** | **Primary** | Trusted Launch hardens the boot chain; CMK disk encryption satisfies regulatory audit requirements; Confidential VMs provide hardware-backed memory encryption for sensitive regulated workloads |
 | Performance Efficiency | Secondary | SKU right-sizing avoids over-provisioned waste; proximity placement groups and accelerated networking minimize east-west latency; ephemeral OS disks reduce IOPS bottlenecks for stateless VMs |
 | Cost Optimization | Secondary | Right-sizing via Advisor + 90-day utilization data; reserved instances post-stabilization; Spot VMs for fault-tolerant batch workloads; VMSS scale-in policy alignment to avoid idle instances |
+| **Operational Excellence** | **Primary** | Update Manager maintenance windows eliminate unplanned patch drift; Azure Compute Gallery image versioning provides reproducible VM state; extension governance prevents configuration sprawl; OS-level diagnostic settings close the observability loop. Highest operational investment of all compute tiers. |
 
 ## Scenarios Unblocked
 

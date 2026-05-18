@@ -2350,3 +2350,65 @@ Three SKILL.md files authored in parallel by saul-4, saul-5, saul-6 (claude-sonn
 ### Wave 2 — Compute-Tier Selection ADR (Linus / linus-2)
 
 Linus authored `docs/decisions/compute-tier-selection.md` (171 lines, 8 sections) as Phase 1A prerequisite to the 3 parallel Saul drafters. Defines AKS-vs-ACA-vs-VMs boundary via decision tree, WAF trade-off matrix, brownfield assessment lens, S1–S8 scenario mapping, 7 anti-patterns, and Prerequisites/Caveats covering all 5 of Isabel's hidden-assumption flags. All 3 Wave 2 SKILL.md files cross-reference this ADR rather than redefining the tier-selection decision tree inline.
+
+---
+
+## 2026-05-18 — Wave 2 Drafts: Isabel Quality Gate → Majors Closed → APPROVE CLEAN
+
+### Isabel-4 Verdict (Draft-Stage Quality Gate)
+
+**Reviewer:** Isabel (Challenger)  
+**Files reviewed:** 3 SKILL.md (AKS, VMs, ACA) + ADR (compute-tier-selection) + copilot-instructions.md registration  
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors)
+
+**Key findings:**
+- Pre-emptive compliance largely delivered — all 3 Wave 1 majors are fully absent from Wave 2 drafts (Scenario S# codes in headers, ≥4 CAF/WAF rows, cross-skill sequencing inline, Prerequisites documented)
+- ADR is excellent (executable decision tree, complete WAF trade-off matrix, 6-row brownfield assessment lens, S1–S8 scenario mapping, 7 anti-patterns, hidden assumptions table)
+- Composite VM→AKS→ACA brownfield story coherent across 3 files (VM assess → graduate container-ready → AKS assess → graduate over-engineered → ACA receive from both)
+- 15/15 hidden assumptions present (AKS: LTS pricing, GPU quota, Defender for Containers paid, Confidential containers Preview, Arc-K8s out-of-scope; VMs: Confidential VM regional availability, Trusted Launch Gen2, Dedicated Host SKU, Defender for Servers paid, Spot VM 30s eviction; ACA: Workload Profile regional limits, VNET subnet sizing, managed cert throttling, Dapr GA vs Preview, scale-to-zero cold start)
+- No boundary collisions detected (all 3 skills correctly defer to ADR + existing skills)
+- copilot-instructions.md registration correct (placement logical, skill assignments match content)
+
+**Majors flagged:**
+1. **M1 (azure-virtual-machines):** WAF table missing "Operational Excellence" pillar (4 rows instead of 5). VMs have highest operational burden per-workload of all 3 compute tiers; omitting Operational Excellence creates asymmetry with ADR trade-off matrix.
+2. **M2 (azure-container-apps):** Cross-skill sequencing structurally separated from brownfield narrative. Unlike AKS (line 236) and VMs (line 235), ACA's sequencing appears under separate H3 subsection at line 274, placed after the Staged Rollout Playbook. Agents reading the browfield intro without scrolling past the playbook will miss the sequencing context.
+
+**Minors deferred (no action required):**
+- m1: AKS line count 338 vs plan target 380 (-11%, within ±20% tolerance)
+- m2: VMs Performance Efficiency / Cost Optimization rows not bolded (Secondary pillars, acceptable)
+- m3: ADR uses table format for anti-patterns vs SKILL.md expanded-paragraph format (acceptable for ADR scope)
+
+### Copilot Closure (Surgical Edits Applied)
+
+**Disposition:** Both majors closed via surgical edits on `wave2-skills-planning` branch (no agent re-spawn required).
+
+**M1 fix applied** to `.github/skills/azure-virtual-machines/SKILL.md`:
+- Inserted new 5th row in WAF Pillar Mapping table immediately after Cost Optimization
+- Content: `| **Operational Excellence** | **Primary** | Update Manager maintenance windows eliminate unplanned patch drift; Azure Compute Gallery image versioning provides reproducible VM state; extension governance prevents configuration sprawl; OS-level diagnostic settings close the observability loop. Highest operational investment of all compute tiers. |`
+- WAF row count: 4 → 5 (all 5 official pillars now represented)
+
+**M2 fix applied** to `.github/skills/azure-container-apps/SKILL.md`:
+- Inserted inline cross-skill sequencing paragraph between brownfield intro (ending "Migration to ACA is only correct when the workload genuinely does not need Kubernetes.") and `### Pre-Migration Discovery Checklist`
+- Content: `**Cross-skill sequencing:** Run after `azure-kubernetes-service` assessment determines which workloads don't need full K8s. Receive migration candidates from `azure-virtual-machines` (containerized lift-and-shift output) or from over-engineered AKS deployments. References `docs/decisions/compute-tier-selection.md` for tier selection criteria.`
+- Existing `### Cross-Skill Sequencing` H3 subsection retained as reinforcement (Isabel verdict accepted "keep as repeat")
+
+**Verification (all green):**
+- ✅ VMs WAF row count = 5 (Reliability, Security, Performance Efficiency, Cost Optimization, Operational Excellence)
+- ✅ ACA brownfield intro now contains inline "Cross-skill sequencing:" sentence
+- ✅ ACA cross-skill sentence references ADR
+- ✅ AKS SKILL.md untouched (PASS per Isabel scorecard)
+- ✅ ADR untouched (PASS per Isabel ADR scorecard)
+- ✅ copilot-instructions.md registration untouched (PASS per Isabel registration verdict)
+
+### Outcome
+
+Wave 2 drafts now meet APPROVE CLEAN bar:
+- ✅ All 3 Wave 1 majors still absent in W2
+- ✅ Isabel-3 plan-stage conditions still met (VM Identity & Access CAF row, ADR sequential, compliance baseline reflected)
+- ✅ Both isabel-4 draft-stage majors closed
+- ✅ 15/15 hidden assumptions still present (unchanged from APPROVE WITH CONDITIONS)
+- ✅ Composite VM→AKS→ACA story still coherent (sequencing now reinforced in ACA inline + trailing subsection)
+- ✅ No boundary collisions
+- ✅ Registration in copilot-instructions.md correct
+
+**Ready for push to `github` remote + PR to `github/main`**

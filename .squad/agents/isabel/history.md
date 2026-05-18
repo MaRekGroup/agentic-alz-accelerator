@@ -119,3 +119,7 @@ Created `.squad/orchestration-log/2026-05-18T17:25:00Z-isabel.md` documenting v2
 ## 2026-05-18 — Wave 2 plan verdict accepted; surgical fixes closed all conditions
 
 Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All conditions closed via 4 surgical edits: (1) Identity & Access added to VMs; (2) compute-tier-selection.md sequencing resolved; (3-4) ACA prereq + stale questions consistency updated. Draft-stage quality gate to follow after 3 Saul instances ship Phase 2 SKILL.md drafts.
+
+## 2026-05-18 — Wave 2 Drafts Quality Gate (isabel-wave2-drafts)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 minors). Pre-emptive compliance delivered: all 3 W1 majors absent, hidden assumptions 15/15 present, composite story coherent, ADR excellent. Two new majors: (1) VMs missing Operational Excellence WAF row, (2) ACA cross-skill sequencing structurally separated from brownfield intro. Both are 1-2 line surgical fixes. Key lesson: pre-emptive compliance works at the structural level but WAF pillar completeness and inline sequencing placement need explicit checklist verification — plans can't catch formatting-level omissions.
