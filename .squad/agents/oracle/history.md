@@ -18,3 +18,20 @@ User directive established scenario-anchored prioritization as standing requirem
 Reference: `.squad/decisions.md` §"Decision: Scenario-Anchored Gap Closure Plan" for full scenario × priority matrix.
 
 **Relationship:** Complements (not replaces) WAF/CAF lens directive from 2026-05-18T16:12:16Z. Both are standing rules.
+
+---
+
+### 2026-05-18T16:57:57Z — Reviewer Gate Verdict: Skills Table Expansion (Isabel)
+
+Isabel (Challenger) reviewed Linus's skill expansion plan at Pre-execution Gate. Verdict: **APPROVE WITH CONDITIONS**. No lockout.
+
+**Pattern Observed:** Isabel's challenge to Linus reveals working hypothesis validation method for architect-role agents:
+1. Challenger doesn't propose solutions — only tests whether proposed plan survives adversarial dissection
+2. When WAF/CAF lens + scenario evidence + skill count analysis all align (as they do here), confidence in priority ordering is high
+3. Conditional approval with scoping refinements (3 skills → 4) is the expected gate outcome for complex portfolio decisions
+
+**Key Takeaway for Oracle:** When a peer architect (Linus) produces a recommendation under WAF/CAF + scenario lens, Oracle's role shifts from "second-guessing the framework" to "assuming the framework is sound and validating downstream implications." Isabel's gate is where framework validity gets challenged. If Isabel approves, downstream execution (Strategist, Forge, Envoy) can assume the framework is robust.
+
+**For Wave 2-5 Planning:** Oracle should expect Linus to iterate the scenario × priority matrix as new customer engagements arrive. Scenarios are not static. S9 (Government Defense) or S10 (Energy/Utilities Compliance) may emerge, shifting priorities or revealing new gaps. Standing principle: re-evaluate annually or when deal flow shifts >20%.
+
+Reference: `.squad/decisions.md` §"Reviewer Gate Decision — Skills Table" for Isabel's full analysis, including hidden assumptions and hidden assumptions audit.
