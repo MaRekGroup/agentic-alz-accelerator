@@ -2433,3 +2433,26 @@ Wave 2 drafts now meet APPROVE CLEAN bar:
 **Capacity:** 9 / 14 skills shipped after Wave 3 ships (W1 = 4, W2 = 3, W3 = 2). Remaining: W4 (3), W5 (2).
 
 **Next:** Isabel-6 draft-stage quality gate → commit + push to `github wave3-skills-planning` → PR (gh auth switch to `ytesfaye` first).
+
+## 2026-05-18 — Wave 4 Drafts Shipped — Data Platform
+
+**Branch:** `wave4-skills-planning`
+**Plan:** Linus-5 (343 lines, plan stage complete); Linus-6 ADR + implementations follow
+**ADR:** `docs/decisions/data-tier-selection.md` (Linus-6, 173 lines, 4 sections — decision boundaries for SQL / Cosmos / Storage)
+**Skills:**
+- `.github/skills/azure-sql-database/SKILL.md` (Saul-9, 306 lines, S3 Regulated Financial Services, ⛔ HARD GATE on Entra-only auth migration)
+- `.github/skills/azure-cosmos-db/SKILL.md` (Saul-10, 287 lines, S2 Multi-Region AI Platform, ⛔ HARD GATEs on consistency-level change + key-based auth disable)
+- `.github/skills/azure-storage-accounts/SKILL.md` (Saul-11, 291 lines, S5 ISV Multi-Tenant SaaS, ⛔ HARD GATEs on public-access + shared-key disable)
+
+**Plan-stage review (Isabel-7):** APPROVE WITH CONDITIONS — 0 blockers, 3 majors (boundary discipline, forked execution path, W4-specific traps), 4 minors. All majors + minors closed inline via surgical edits to plan v2 before Phase 1A (Linus-6 ADR authoring) began.
+
+**Yeselam Q1-Q5 decisions:**
+- Q1 (skill naming): Unified `azure-sql-database` covering SQL DB + MI approved
+- Q2 (scope exclusion): Standard storage workloads only (HNS/ADLS Gen2/NetApp/Premium Files explicitly excluded)
+- Q3 (Brownfield S#): S3 for SQL, S2 for Cosmos, S5 for Storage confirmed
+- Q4 (ADR depth): Full 4-section ADR with explicit decision boundaries
+- Q5 (out-of-scope): Each SKILL.md includes explicit Boundaries section declaring W4-specific exclusions
+
+**Capacity:** 12 / 14 skills shipped after Wave 4 ships (W1 = 4, W2 = 3, W3 = 2, W4 = 3). Remaining: W5 (2).
+
+**Next:** Phase 4 (Isabel-8 draft-stage quality gate) → commit + push to `github wave4-skills-planning` → PR via `ytesfaye` account against `MaRekGroup/agentic-alz-accelerator`.

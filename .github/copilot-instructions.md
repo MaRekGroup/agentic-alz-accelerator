@@ -162,6 +162,16 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `management-group-architecture` | `.github/skills/management-group-architecture/` | Warden, Oracle, Strategist, Assessor |
 | `subscription-vending` | `.github/skills/subscription-vending/` | Warden, Strategist, Envoy, Forge |
 
+#### Data Platform
+
+The W4 data platform skills cover the Azure persistence layer for the data platform tier. Use these together with `docs/decisions/data-tier-selection.md` (ADR), which locks the "Choose SQL when / Cosmos when / Storage when" decision boundary.
+
+- **`azure-sql-database`** — Relational persistence for regulated estates (S3). Covers SQL Database and Managed Instance topologies: failover groups, Hyperscale, Entra-only auth, TDE with CMK, MI lift-and-shift. Brownfield playbook includes a ⛔ HARD GATE on Entra-only auth migration (irrevocable).
+- **`azure-cosmos-db`** — Globally distributed document tier for multi-region AI platforms (S2). Covers multi-region writes, consistency levels, partition key design, RU provisioning (manual/autoscale/serverless plus database-shared vs container-dedicated), and continuous backup. Brownfield playbook includes ⛔ HARD GATEs on consistency-level change (time-windowed) and key-based auth disable (irrevocable).
+- **`azure-storage-accounts`** — Blob/Queue/Table/Files platform for ISV multi-tenant SaaS estates (S5). Covers multi-tenant blob isolation, lifecycle tiering, immutability, private endpoints, disable shared key, and SFTP/NFS/HNS feature-gating assessment. Brownfield playbook includes ⛔ HARD GATEs on account-level public-access disable (time-windowed) and shared-key disable (invalidates existing SAS tokens). HNS/ADLS Gen2, Azure NetApp Files, Azure Managed Disks, and Azure Files Premium are explicitly out of W4 scope.
+
+When the Oracle assesses an existing data estate, sequence: `data-tier-selection.md` (ADR — decide which service tier is appropriate) → per-skill brownfield playbook (assess + harden the chosen tier).
+
 #### Management & Operations
 
 | Skill | Location | Used By |

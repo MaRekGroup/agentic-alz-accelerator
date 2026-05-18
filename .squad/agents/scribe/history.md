@@ -48,3 +48,7 @@ Initial roster mapped one member to each HVE role.
 - No history files > 15KB threshold; no summarization needed
 - Created: `.squad/orchestration-log/2026-05-13T21-01-15Z-danny.md`, `.squad/log/2026-05-13T21-01-15Z-scribe.md`
 - Ready for final git commit of `.squad/` files
+
+## 2026-05-18 — Wave 4 Consolidation (Scribe-13)
+
+Wave 4 drafts shipped: Added `#### Data Platform` subsection to `.github/copilot-instructions.md`, appended W4 closure entry to `.squad/decisions.md` (1,825 bytes, 16 lines), verified Linus/Saul/Isabel history files current, staged 9 files (azure-sql-database, azure-cosmos-db, azure-storage-accounts, data-tier-selection.md, copilot-instructions.md, decisions.md, linus/history.md, saul/history.md, isabel/history.md, scribe/history.md). Reuben history left untracked (out-of-scope for W4). Session health + remote-rewind skills remain untracked (gitignored).
