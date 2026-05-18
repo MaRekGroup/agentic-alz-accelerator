@@ -52,3 +52,5 @@ Initial roster mapped one member to each HVE role.
 ## 2026-05-18 — Wave 4 Consolidation (Scribe-13)
 
 Wave 4 drafts shipped: Added `#### Data Platform` subsection to `.github/copilot-instructions.md`, appended W4 closure entry to `.squad/decisions.md` (1,825 bytes, 16 lines), verified Linus/Saul/Isabel history files current, staged 9 files (azure-sql-database, azure-cosmos-db, azure-storage-accounts, data-tier-selection.md, copilot-instructions.md, decisions.md, linus/history.md, saul/history.md, isabel/history.md, scribe/history.md). Reuben history left untracked (out-of-scope for W4). Session health + remote-rewind skills remain untracked (gitignored).
+
+**2026-05-18 — Scribe — W4 session close** — PR #69 merged, main synced, branch wave4-skills-planning cleaned, decisions.md appended (193.6K), identity/now.md updated. No history summarization needed (all active agents <15K). Pre-Wave 5 housekeeping complete.

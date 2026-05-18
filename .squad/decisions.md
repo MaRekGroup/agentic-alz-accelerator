@@ -2456,3 +2456,36 @@ Wave 2 drafts now meet APPROVE CLEAN bar:
 **Capacity:** 12 / 14 skills shipped after Wave 4 ships (W1 = 4, W2 = 3, W3 = 2, W4 = 3). Remaining: W5 (2).
 
 **Next:** Phase 4 (Isabel-8 draft-stage quality gate) → commit + push to `github wave4-skills-planning` → PR via `ytesfaye` account against `MaRekGroup/agentic-alz-accelerator`.
+
+---
+
+## 2026-05-18 — Wave 4 Session Close — PR #69 Merged
+
+**Event:** PR #69 (Wave 4 — Data Platform tier) merged to `github/main` at 2026-05-18T~23:00Z by Yeselam
+**Commit:** 25e18af (HEAD -> main, github/main, github/HEAD) feat(skills): Wave 4 — Data Platform tier (3 skills + shared ADR) (#69)
+**Branch cleaned:** `wave4-skills-planning` deleted locally + remote pruned
+
+**Files shipped in Wave 4:**
+- `.github/skills/azure-sql-database/SKILL.md` (306 lines, S3 Regulated Financial Services, 3 HARD GATEs on Entra-only auth + key mgmt)
+- `.github/skills/azure-cosmos-db/SKILL.md` (287 lines, S2 Multi-Region AI Platform, 3 HARD GATEs on consistency + auth)
+- `.github/skills/azure-storage-accounts/SKILL.md` (291 lines, S5 ISV Multi-Tenant SaaS, 3 HARD GATEs on public access + shared key)
+- `docs/decisions/data-tier-selection.md` (ADR, 173 lines, 4 sections: overview, decision tree, trade-off matrix, anti-patterns)
+- `.github/copilot-instructions.md` (updated skill catalog — 3 new rows added)
+- `.squad/decisions.md` (this ledger — appended Wave 4 entries)
+- `.squad/agents/linus/history.md` (appended: Linus-5 plan + Linus-6 ADR work notes)
+- `.squad/agents/saul/history.md` (appended: Saul-9/10/11 SKILL.md work notes)
+- `.squad/agents/isabel/history.md` (appended: Isabel-7 plan review + Isabel-8 draft-stage verdict)
+- `.squad/agents/scribe/history.md` (appended: Wave 4 merge consolidation notes)
+
+**Totals:** +1,124 lines across 7 committed files; 3 SKILL.md files add data-tier skills; shared ADR establishes decision boundaries (SQL vs Cosmos vs Storage).
+
+**Skill capacity update:** 12 / 14 shipped (W1=4 identity, W2=3 compute, W3=2 tenant, W4=3 data). Remaining: W5 (2 hybrid skills).
+
+**Pre-Wave 5 housekeeping notes:**
+- `.squad/decisions.md` reached ~193K bytes post-append. Triggered ARCHIVE HARD GATE (>=51,200 bytes → no entries older than 7 days found; all entries from 2026-05-18 kept)
+- `.squad/agents/linus/history.md` at 13.3K bytes (approaching 15K summarize threshold); will be checked after history append step
+- `.squad/agents/saul/history.md` at 10.2K (safe); `.squad/agents/isabel/history.md` at 10.6K (safe); `.squad/agents/scribe/history.md` at 2.6K (safe)
+
+**Session context:** Yeselam stopping for today after Wave 4 ship. Next session will run Wave 5 closure (2 hybrid skills remaining). Identity/now.md updated with next-session focus.
+
+---
