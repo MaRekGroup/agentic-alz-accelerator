@@ -352,13 +352,17 @@ jobs:
         run: |
           python -c "
           import asyncio, json
-          from src.agents.orchestrator import AgentOrchestrator
+          from azure.identity import DefaultAzureCredential
+          from semantic_kernel import Kernel
+          from src.agents.remediation_agent import RemediationAgent
           from src.config.settings import Settings
 
           async def main():
               settings = Settings()
               settings.monitor.auto_remediate = True
-              orchestrator = AgentOrchestrator(settings)
+              credential = DefaultAzureCredential()
+              kernel = Kernel()
+              agent = RemediationAgent(kernel, credential, settings)
 
               # Load violations from compliance report
               try:
@@ -370,7 +374,7 @@ jobs:
 
               if violations:
                   print(f'Remediating {len(violations)} violations...')
-                  result = await orchestrator.remediation_agent.remediate(violations)
+                  result = await agent.remediate(violations)
                   print(f'Remediation complete: {json.dumps(result, indent=2, default=str)[:1000]}')
               else:
                   print('No violations to remediate')
@@ -385,7 +389,7 @@ jobs:
 
               if drifted > 0:
                   print(f'Correcting {drifted} drifted resources...')
-                  result = await orchestrator.remediation_agent.correct_drift(drift.get('details', []))
+                  result = await agent.correct_drift(drift.get('details', []))
                   print(f'Drift correction complete')
 
           asyncio.run(main())
