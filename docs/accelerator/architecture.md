@@ -1,8 +1,6 @@
 # Current-State Architecture — Agentic ALZ Accelerator
 
-> **Date:** 2026-05-07
-> **Branch:** `main`
-> **Scope:** Describes the system as it exists today — full greenfield + brownfield capability.
+> **Scope:** Describes the accelerator **framework** as it exists today — the agents, tools, skills, MCP servers, IaC modules, pipelines, and data flows shipped on `main`. This is **not** a per-customer deployment record; for the live state of any specific deployment, see `agent-output/{customer}/00-estate-state.json`. A reference deployment (`marekgroup`) is called out separately in the [Reference Deployment](#reference-deployment) section.
 
 ## Overview
 
@@ -73,16 +71,16 @@ Tools under `src/tools/` provide Azure integration capabilities:
 ### Skills
 
 Skills under `.github/skills/` provide domain knowledge to agents as structured
-Markdown. 35 skills across these categories:
+Markdown. The catalog grows over time; see [`.github/skills/README.md`](../../.github/skills/README.md)
+and [`.github/copilot-instructions.md`](../../.github/copilot-instructions.md) for the full inventory.
+Top-level categories:
 
-- **Azure infrastructure** — defaults, naming, tagging, AVM-first policy, quotas
-- **IaC patterns** — Bicep and Terraform module examples, testing
-- **Security & compliance** — baseline rules, compliance framework mapping, RBAC, Entra ID
-- **Cost** — governance enforcement, optimization patterns
-- **Operations** — diagnostics, session resume, workflow engine, context optimization
-- **Tooling** — Draw.io, Python diagrams, Mermaid, GitHub operations, docs writer
-- **Assessment** — brownfield discovery, WARA checks, report generation
-- **Governance** — golden principles, context shredding, count registry, resource visualizer
+- **Core** — `caf-design-areas`, `security-baseline`, `cost-governance`, `profile-management`, `workflow-engine`
+- **Azure & IaC** — naming/tagging defaults, Bicep + Terraform patterns, diagnostics, RBAC, compliance mapping, cost optimization, quotas, iac-common, terraform-test, terraform-search-import
+- **Tooling & Operations** — diagram generation (Python, Draw.io, Mermaid), ADRs, GitHub operations, docs writer, session resume
+- **Agent Governance & Context** — golden principles, context shredding/optimizer, validation, governance discovery, count registry, workload identity federation
+- **Assessment (Brownfield)** — discovery, WARA, report generation
+- **Microsoft Learn — Azure Services** — Governance & Architecture, Security, Identity (W1), Networking, Compute (W2), Tenant Architecture (W3), Data Platform (W4), Hybrid (W5), Management & Operations, Cost & Reliability
 
 ### MCP Servers
 
@@ -132,18 +130,21 @@ compose modules based on landing zone profile configuration.
 
 ### Pipelines
 
-GitHub Actions workflows under `.github/workflows/`:
+GitHub Actions workflows under `.github/workflows/`. Primary deployment + Day-2 ops workflows:
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `1-bootstrap.yml` | Manual | MG hierarchy creation, subscription moves, provider registration |
 | `2-platform-deploy.yml` | Manual | Sequential platform LZ deployment with approval gates |
 | `3-app-deploy.yml` | Manual + callable | Application LZ deployment from `subscriptions.json` |
-| `monitor.yml` | Schedule + manual | Compliance (30min), drift (hourly), full audit (daily 6AM) |
+| `4-monitor.yml` | Schedule + manual | Canonical Day-2 ops: compliance (30 min), drift (hourly), full audit (daily 06:00 UTC) + auto-remediation + alerts (covers all platform + app subs) |
+| `monitor.yml` | Daily 04:00 UTC + manual | Lightweight Policy Insights diagnostic baseline scan (4 platform subs, no agent dependencies) |
 | `5-pr-validate.yml` | Pull request | Lint, security validator, cost validator, pytest |
 | `reusable-deploy.yml` | Callable | Validate → plan → deploy → verify pipeline |
 | `assess.yml` | Manual | Brownfield WAF-aligned assessment (discover → WARA → reports) |
 | `assign-role.yml` | Manual | Utility: RBAC role assignment |
+
+Operational automation workflows (`deploy-on-merge`, `deploy-docs`, `generate-diagrams`, `cleanup-old-rg`, `squad-*`, `sync-squad-labels`) handle repo maintenance and are not part of the deployment lifecycle.
 
 Reference copies also exist under `pipelines/github-actions/` and an Azure DevOps
 pipeline under `pipelines/azure-devops/`.
@@ -159,7 +160,7 @@ Pre-merge enforcement scripts under `scripts/validators/`:
 
 ### Tests
 
-197 tests across 13 test files under `tests/` cover all agents (assessment,
+200+ tests across 13 test files under `tests/` cover all agents (assessment,
 deployment, monitoring, remediation), tools (discovery, WARA engine, report
 generator, validators), and the `alz-recall` CLI. Tests use mocked Azure SDK
 clients and Semantic Kernel.
@@ -204,13 +205,17 @@ with its own subscription secret.
 ### Continuous Operations (Day-2)
 
 ```
-Schedule trigger (monitor.yml)
+Schedule trigger (4-monitor.yml)
   → [Sentinel] Compliance scan (Policy) every 30 min
   → [Sentinel] Drift detection (Resource Graph) every hour
-  → [Sentinel] Full audit (Defender + Policy + Resource Graph) daily 6 AM
+  → [Sentinel] Full audit (Defender + Policy + Resource Graph) daily 06:00 UTC
   → If violations found:
     → Critical/High → [Mender] Auto-remediate (snapshot → fix → verify)
     → Medium/Low → Report for human review
+
+Schedule trigger (monitor.yml — diagnostic)
+  → Daily 04:00 UTC: direct PolicyInsights SDK scan across 4 platform subs
+  → Baseline check independent of MonitoringAgent abstraction
 ```
 
 ## Security Model
@@ -259,10 +264,10 @@ Schedule trigger (monitor.yml)
 landing zone estate:
 
 - Estate metadata (prefix, region, IaC tool)
-- Platform LZ statuses (all 4 deployed)
-- Application LZ inventory (empty)
-- Management group hierarchy (12 MGs under `mrg`)
-- Cross-cutting governance status (policies: not started, RBAC: not started, budgets: deployed)
+- Platform LZ statuses (Management, Connectivity, Identity, Security)
+- Application LZ inventory
+- Management group hierarchy (CAF-aligned structure under the configured prefix)
+- Cross-cutting governance status (policies, RBAC, budgets)
 - Day-2 operations status
 - Deploy history with run IDs
 
@@ -287,51 +292,44 @@ and gate approvals. Production config specifies Azure Table Storage for persiste
 | `infra/bicep/{customer}/parameters/` | Bicep parameter files per platform LZ |
 | `infra/terraform/{customer}/environments/` | Terraform variable files per environment |
 
-## Current Deployment State
+## Reference Deployment
 
-| Platform LZ | Status | Subscription | Key Resources |
-|-------------|--------|-------------|---------------|
-| Management | ✅ Deployed | `PLATFORM_MGMT_SUBSCRIPTION_ID` | LAW (`mrg-law`), Automation Account |
-| Connectivity | ✅ Deployed | `PLATFORM_CONN_SUBSCRIPTION_ID` | Hub VNet, Bastion, Private DNS zones |
-| Identity | ✅ Deployed | `PLATFORM_IDTY_SUBSCRIPTION_ID` | Managed Identities, RBAC |
-| Security | ✅ Deployed | `PLATFORM_SEC_SUBSCRIPTION_ID` | Sentinel, Defender (12 plans), Key Vault |
+The accelerator is continuously validated against a **reference deployment** (`marekgroup`) — a real Azure tenant where every accelerator capability is exercised end-to-end. The reference deployment is **not part of the framework**; it serves as the integration test surface for accelerator changes and provides realistic IaC examples under `infra/{bicep,terraform}/marekgroup/`.
 
-**Management Group Hierarchy:** 12 MGs under `mrg` prefix (migrated from `alz-*`).
+| Aspect | Reference deployment |
+|---|---|
+| Customer prefix | `mrg` |
+| Platform LZs deployed | Management, Connectivity, Identity, Security |
+| Application LZs | None deployed yet |
+| Management group hierarchy | CAF-aligned structure under `mrg` prefix |
+| IaC frameworks exercised | Bicep and Terraform |
 
-**Application LZs:** None deployed yet.
+For the live current state of the reference deployment — deployment dates, resource inventory, compliance scans, open findings — see:
+
+- `agent-output/marekgroup/00-estate-state.json` — single source of truth
+- `agent-output/marekgroup/assessment/` — most recent WAF assessment outputs
+- `infra/bicep/marekgroup/` and `infra/terraform/marekgroup/` — deployed IaC artifacts
+
+Customer-specific deployments based on the accelerator should follow the same `agent-output/{customer}/` layout for their own state tracking.
 
 ## Known Constraints and Gaps
 
-### Resolved (formerly gaps)
+### Resolved (formerly framework gaps)
 
-The following were previously gaps and are now fully implemented:
+The following were previously framework gaps and are now fully implemented:
 
 - ✅ **Brownfield assessment** — Step 0 with discovery, 221-check WARA engine, and report generation
 - ✅ **WAF/Well-Architected scoring** — All 5 pillars scored via APRL-synced catalog
 - ✅ **Current-state architecture docs** — Auto-generated from live Azure state
 - ✅ **CAF assessment output** — Design area alignment included in assessment reports
+- ✅ **Day-2 ops separation** — `4-monitor.yml` (canonical) and `monitor.yml` (diagnostic) split with non-colliding schedules
+- ✅ **Skills catalog surfacing** — W1–W5 Microsoft Learn skills exposed on README + Astro docs + `.github/skills/README.md`
+- ✅ **Hook + lefthook + commitlint documentation** — Local development hooks fully documented for users
 
-### Remaining Gaps
+### Open framework limitations
 
-#### Cross-Cutting Governance
-
-- **Policy assignments:** Not started — only budget policies are deployed
-- **RBAC assignments:** Not started
-- **Tagging enforcement:** Missing required tags (Owner, CostCenter, Project)
-
-#### Security Gaps (from Assessment — 5 must_fix)
-
-- Defender for Cloud not fully enabled across all subscriptions (SEC-010)
-- Azure Firewall disabled in connectivity parameter file (OPE-006)
-- No budget resources deployed (COS-001)
-- Insecure storage defaults (SEC-029)
-- Missing diagnostic settings on platform resources
-
-#### Operational Gaps
-
-- Single-region deployment only (no HA/DR)
-- Empty SOAR playbooks in security LZ
-- Threat Intelligence connector pending permissions
+- **Single-region default** — `AZURE_DEPLOYMENT_REGION` is a single value; multi-region active-active topology requires manual composition
+- **IaC framework parity** — Bicep is the primary framework with full module coverage; Terraform parity is ongoing in select modules
 
 ## Assumptions and Non-Goals
 
@@ -339,7 +337,7 @@ The following were previously gaps and are now fully implemented:
 
 - Azure tenant with Entra ID is available
 - GitHub repository with Actions enabled
-- Self-hosted runner (`vm-github-runner-01`) with Azure CLI access
+- Self-hosted or GitHub-hosted runner with Azure CLI access (set `vars.RUNNER_LABEL` to use a custom runner; defaults to `ubuntu-latest`)
 - OIDC federated identity configured per `scripts/setup-oidc.sh`
 - Separate subscriptions for each platform LZ
 
