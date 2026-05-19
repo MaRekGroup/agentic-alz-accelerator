@@ -2658,3 +2658,33 @@ not "skill router auto-invokes by description metadata".
 **PR:** [#72](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/72) — merged 2026-05-19T16:46Z as `1864d4c` (squash merge, 12 files, +265/-1)
 
 **Follow-up advisory captured (NOT in PR #72):** Scribe-9 flagged that `.github/copilot-instructions.md` lists the 4 W1 Identity skills under "Agent Governance & Context Skills" rather than a dedicated `#### Identity` subsection. `AGENTS.md` now has a clean `### Identity` subsection (PR #72) — `copilot-instructions.md` could be normalized to match in a future pass. Not blocking; left for next session if reactivated.
+
+## 2026-05-19 — Closure: copilot-instructions.md W1 Identity normalized
+
+**Trigger:** Scribe-9 follow-up advisory after PR #72 wiring merge. AGENTS.md
+had clean `### Identity` subsection but `copilot-instructions.md` still listed
+4 W1 entra-* skills mid-table in "Agent Governance & Context Skills".
+
+**Decision:** Direct Coordinator action (no Scribe dispatch — single-file move,
+~5 min). Mirror AGENTS.md by extracting the 4 entra-* rows into a new
+`#### Identity` subsection under `### Microsoft Learn Skills (Azure Services)`.
+Placement: between `#### Security` and `#### Networking` (defensive-layering
+taxonomy — Governance → Security → Identity → Networking → Compute).
+
+**Scope held tight:**
+- Moved: 4 W1 entra-* skills (entra-app-registration, entra-conditional-access,
+  entra-connect-hybrid-identity, entra-identity-governance)
+- NOT moved: workload-identity-federation — stays in Agent Governance & Context
+  Skills, matching AGENTS.md authoritative scope. Workload identity is non-human
+  OIDC federation with a different audience pattern than human Entra ID controls.
+
+**Verification:** Each of the 4 entra-* skills appears exactly once in the file
+post-edit. Total skill-row count unchanged (pure move). Agent Governance table
+preserved with 7 remaining skills intact.
+
+**PR:** [#73](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/73) —
+merged 2026-05-19T16:52Z as `cd4ceda` (1 file, +11/-4).
+
+**Result:** AGENTS.md and copilot-instructions.md now fully symmetric on the
+W1-W5 skill catalog organization. Closes the last open advisory from the
+2026-05-19 session.
