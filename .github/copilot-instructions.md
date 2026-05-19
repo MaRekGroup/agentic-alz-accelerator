@@ -85,10 +85,6 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-governance-discovery` | `.github/skills/azure-governance-discovery/` | Warden |
 | `context-optimizer` | `.github/skills/context-optimizer/` | Conductor (audits) |
 | `count-registry` | `.github/skills/count-registry/` | All agents (entity counts) |
-| `entra-app-registration` | `.github/skills/entra-app-registration/` | Warden, Envoy |
-| `entra-conditional-access` | `.github/skills/entra-conditional-access/` | Warden, Oracle, Sentinel, Challenger |
-| `entra-connect-hybrid-identity` | `.github/skills/entra-connect-hybrid-identity/` | Warden, Oracle, Forge, Assessor |
-| `entra-identity-governance` | `.github/skills/entra-identity-governance/` | Warden, Oracle, Sentinel, Challenger |
 | `workload-identity-federation` | `.github/skills/workload-identity-federation/` | Warden, Forge, Strategist, Envoy |
 
 ### Assessment Skills (Brownfield)
@@ -122,6 +118,17 @@ the agent names below (e.g., `@requirements`, `@governance`, `@orchestrator`).
 | `azure-defender-for-cloud` | `.github/skills/azure-defender-for-cloud/` | Warden, Sentinel, Mender |
 | `azure-sentinel` | `.github/skills/azure-sentinel/` | Sentinel, Chronicler |
 | `azure-key-vault` | `.github/skills/azure-key-vault/` | Warden, Forge |
+
+#### Identity
+
+The W1 Identity skills cover the 4 Entra ID surface areas most commonly encountered in Azure Landing Zone deployments: app registration and workload federation, Conditional Access policy governance, hybrid identity synchronization, and identity lifecycle governance (PIM, access reviews, entitlement management). Mirrors `AGENTS.md` `### Identity`.
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `entra-app-registration` | `.github/skills/entra-app-registration/` | Warden, Envoy |
+| `entra-conditional-access` | `.github/skills/entra-conditional-access/` | Warden, Oracle, Sentinel, Challenger |
+| `entra-connect-hybrid-identity` | `.github/skills/entra-connect-hybrid-identity/` | Warden, Oracle, Forge, Assessor |
+| `entra-identity-governance` | `.github/skills/entra-identity-governance/` | Warden, Oracle, Sentinel, Challenger |
 
 #### Networking
 
