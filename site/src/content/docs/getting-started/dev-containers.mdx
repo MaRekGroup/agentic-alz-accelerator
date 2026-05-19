@@ -45,3 +45,25 @@ gh auth login
 
 The Dev Container is configured with GitHub Copilot agent definitions in `.github/agents/`.
 Use `@workspace` in Copilot Chat to invoke the orchestrator or individual agents.
+
+## Local Development Guardrails
+
+The devcontainer automatically installs [Lefthook](https://github.com/evilmartians/lefthook) via `npx --yes lefthook install` in `postCreateCommand`. Lefthook enforces quality gates at three git hook stages:
+
+| Hook | Checks |
+|------|--------|
+| **pre-commit** | Security baseline validation (Bicep/Terraform), cost governance validation, `terraform fmt`, `terraform validate`, `ruff` (Python lint), `yamllint` |
+| **commit-msg** | Conventional Commits format via `commitlint` |
+| **pre-push** | Full security + cost scans, `pytest` |
+
+Commit messages must follow Conventional Commits format (`feat:`, `fix:`, `docs:`, `chore:`, etc.). See `commitlint.config.js` for the full list of accepted types.
+
+:::note[Bypass when needed]
+The pre-push `pytest` job currently has pre-existing collection errors unrelated to most contributions. Use `git push --no-verify` to bypass pre-push hooks when needed. CI re-runs the same validators on every PR via `.github/workflows/5-pr-validate.yml`.
+:::
+
+### Copilot Runtime Hooks (Separate Concept)
+
+The git hooks above are distinct from **Copilot runtime hooks** in `.github/hooks/`. Runtime hooks wrap Copilot sessions with guards (tool-guardian, secrets-scanner) and telemetry — they are not triggered by git operations.
+
+See [`.github/hooks/README.md`](https://github.com/MaRekGroup/agentic-alz-accelerator/blob/main/.github/hooks/README.md) for the runtime hook inventory.

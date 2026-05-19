@@ -1245,6 +1245,51 @@
       </div>
     </div>
 
+    <!-- ═══ SKILLS ═══ -->
+    <div id="section-skills" class="section">
+      <div class="section-header">
+        <h2>Agent Skills (.github/skills/)</h2>
+        <p>Domain knowledge modules that agents load on demand during workflow execution.</p>
+      </div>
+
+      <p style="margin-bottom:18px">Skills are <code>SKILL.md</code> files containing patterns, decision heuristics, IaC samples, and cross-references for specific problem domains. Agents invoke skills automatically — users do not call them directly.</p>
+
+      <div class="grid grid-3" style="margin-bottom:22px">
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">🎯 Core</h3>
+          <p style="font-size:13px;color:var(--muted)">CAF design areas, security baseline, cost governance, profile management, workflow engine</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">🔧 Azure &amp; IaC</h3>
+          <p style="font-size:13px;color:var(--muted)">Naming/tagging defaults, Bicep patterns, Terraform patterns, diagnostics, RBAC, compliance</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">🛠️ Tooling &amp; Ops</h3>
+          <p style="font-size:13px;color:var(--muted)">Diagram generation (Python, Draw.io, Mermaid), ADRs, GitHub operations, documentation</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">🛡️ Governance</h3>
+          <p style="font-size:13px;color:var(--muted)">Golden principles, context optimization, governance discovery, workload identity federation</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">🔍 Assessment</h3>
+          <p style="font-size:13px;color:var(--muted)">Brownfield discovery, WAF-aligned assessment, report generation</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;font-size:15px">📚 Azure Services</h3>
+          <p style="font-size:13px;color:var(--muted)">Identity (W1), Compute (W2), Tenant (W3), Data (W4), Hybrid (W5), Security, Networking, Management</p>
+        </div>
+      </div>
+
+      <div class="card card-accent" style="border-top-color:var(--ms-blue)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div class="card-icon bg-blue" style="margin-bottom:0;width:32px;height:32px;font-size:16px">📖</div>
+          <h3 style="margin-bottom:0;font-size:15px">Skill Catalog</h3>
+        </div>
+        <p style="font-size:13px">The full agent→skill mapping table is in <code>.github/copilot-instructions.md</code>. For skill structure and authoring guidance, see <code>.github/skills/README.md</code>.</p>
+      </div>
+    </div>
+
     <!-- ═══ PREREQUISITES ═══ -->
     <div id="section-prereqs" class="section">
       <div class="section-header">
@@ -1256,7 +1301,7 @@
         <div class="card">
           <h3 style="margin-bottom:14px">Required</h3>
           <ul class="checklist">
-            <li><span class="check-icon check-req">✓</span><div><strong>Python 3.11+ (3.13 recommended)</strong><br/><span style="color:var(--muted);font-size:12px">Agent framework runs on Python 3.11 or higher; 3.13 recommended for full compatibility</span></div></li>
+            <li><span class="check-icon check-req">✓</span><div><strong>Python 3.11+ (3.13 in CI)</strong><br/><span style="color:var(--muted);font-size:12px">Agent framework requires Python 3.11 or higher. CI workflows pin Python 3.13; the devcontainer ships Python 3.14 for early-version testing.</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure CLI (az)</strong><br/><span style="color:var(--muted);font-size:12px">Authenticated via <code>az login</code> before running agents</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure Subscription</strong><br/><span style="color:var(--muted);font-size:12px">Owner or Contributor role on the target subscription</span></div></li>
             <li><span class="check-icon check-req">✓</span><div><strong>Azure OpenAI</strong><br/><span style="color:var(--muted);font-size:12px">GPT-4o deployment (or compatible model) for agent intelligence</span></div></li>
@@ -2064,7 +2109,7 @@ resource budget <span class="str">'Microsoft.Consumption/budgets@2023-05-01'</sp
     category: <span class="str">'Cost'</span>
     amount: budgetAmountUSD   <span class="comment">// Parameterized — never hardcoded</span>
     timeGrain: <span class="str">'Monthly'</span>
-    timePeriod: { startDate: <span class="str">'2025-01-01'</span> }
+    timePeriod: { startDate: <span class="str">'2025-01-01'</span> }  <span class="comment">// Illustrative — set to your budget period start date</span>
     notifications: {
       forecast80: {
         enabled: true

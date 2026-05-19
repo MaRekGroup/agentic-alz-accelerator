@@ -82,6 +82,24 @@ Every IaC module maps to an official Azure Landing Zone design area:
 | Azure Platform | Resource Graph, Policy, Deployment, Monitor, RBAC, WARA Assessment (27 tools, consolidated) | All agents |
 | Draw.io | Architecture diagram generation with Azure icons | Artisan |
 
+## Skills
+
+Agents load specialized domain knowledge from **skills** during workflow execution.
+Each skill is a `SKILL.md` file in `.github/skills/` that the Copilot runtime
+auto-discovers — users do not invoke skills directly.
+
+Skills cover six categories:
+
+- **Core** — CAF design areas, security baseline, cost governance, profile management, workflow engine
+- **Azure & IaC** — Naming/tagging defaults, Bicep patterns, Terraform patterns, diagnostics, RBAC, compliance mapping
+- **Tooling & Operations** — Diagram generation (Python, Draw.io, Mermaid), ADRs, GitHub operations, documentation
+- **Governance & Context** — Golden principles, context optimization, governance discovery, workload identity federation
+- **Assessment (Brownfield)** — Brownfield discovery, WAF-aligned assessment, report generation
+- **Microsoft Learn (Azure Services)** — Identity (W1), Compute (W2), Tenant Architecture (W3), Data Platform (W4), Hybrid (W5), plus Governance, Security, Networking, Management, and Cost & Reliability
+
+The full agent→skill catalog is in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+For skill structure and authoring guidance, see [`.github/skills/README.md`](.github/skills/README.md).
+
 ## Security Baseline
 
 Non-negotiable rules enforced at code generation, deployment preflight, and monitoring:
@@ -194,7 +212,7 @@ Checklist**.
 
 ### Prerequisites
 
-- Python 3.11+ (3.13 recommended)
+- Python 3.11+ (Python 3.13 used in CI; the devcontainer ships Python 3.14 for early-version testing)
 - Azure CLI (`az`) authenticated
 - Bicep CLI or Terraform CLI
 - Azure subscription with Owner role
@@ -238,6 +256,22 @@ python scripts/validators/validate_security_baseline.py infra/
 # Cost governance
 python scripts/validators/validate_cost_governance.py infra/
 ```
+
+### Local Development Guardrails
+
+The repository enforces quality gates at commit, push, and CI via `lefthook.yml` and GitHub Actions:
+
+| Hook | Checks |
+|------|--------|
+| **pre-commit** | Security baseline (Bicep/TF), cost governance (Bicep/TF), `terraform fmt`, `terraform validate`, `ruff` (Python lint), `yamllint` |
+| **commit-msg** | Conventional Commits format via `commitlint` |
+| **pre-push** | Full security + cost scans, `pytest` |
+
+**Setup:** The devcontainer runs `npx --yes lefthook install` automatically in `postCreateCommand`. Outside the devcontainer, run `npx --yes lefthook install` after cloning.
+
+**Bypass:** The pre-push `pytest` job currently has pre-existing collection errors unrelated to most contributions. Use `git push --no-verify` to bypass pre-push hooks when needed; CI re-runs the same validators on every PR.
+
+> **Note:** These are git-level hooks managed by Lefthook. For Copilot runtime guards (tool-guardian, secrets-scanner, etc.), see [`.github/hooks/README.md`](.github/hooks/README.md).
 
 ## Project Structure
 

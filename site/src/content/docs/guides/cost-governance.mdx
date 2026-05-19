@@ -74,7 +74,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-05-01' = {
     category: 'Cost'
     amount: budgetAmountUSD   // Parameterized — never hardcoded
     timeGrain: 'Monthly'
-    timePeriod: { startDate: '2025-01-01' }
+    timePeriod: { startDate: '2025-01-01' }  // Illustrative — set to your budget period start date
     notifications: {
       forecast80: {
         enabled: true

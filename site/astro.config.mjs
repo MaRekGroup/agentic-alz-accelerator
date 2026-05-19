@@ -97,6 +97,7 @@ export default defineConfig({
             },
             { label: "Agent Roster", slug: "reference/agents" },
             { label: "Agent Tools", slug: "reference/tools" },
+            { label: "Agent Skills", slug: "reference/skills" },
             { label: "MCP Servers", slug: "reference/mcp-servers" },
           ],
         },
@@ -105,7 +106,7 @@ export default defineConfig({
           collapsed: true,
           items: [
             { label: "Contributing", slug: "project/contributing" },
-            { label: "Changelog", slug: "project/changelog" },
+            { label: "Release Notes", slug: "project/changelog" },
           ],
         },
       ],

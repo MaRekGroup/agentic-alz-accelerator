@@ -205,3 +205,15 @@ your tenant. Update:
 | Deployment skipped | Check that the GitHub environment exists and has no pending reviewers |
 | Wrong region | Set `AZURE_DEPLOYMENT_REGION` repo variable |
 | `prefix` mismatch | Ensure `AZURE_MANAGEMENT_GROUP_PREFIX` matches your MG hierarchy |
+
+## Commit Message Format
+
+This repo enforces [Conventional Commits](https://www.conventionalcommits.org/) via a `commit-msg` hook. Commit messages must follow the format:
+
+```
+type(scope): subject
+```
+
+Accepted types include `feat`, `fix`, `docs`, `chore`, `ci`, `test`, `refactor`, and others defined in `commitlint.config.js`.
+
+The hook runs automatically in the devcontainer. If you work outside the devcontainer, run `npx --yes lefthook install` after cloning.
