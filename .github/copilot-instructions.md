@@ -208,6 +208,30 @@ When the Assessor (Step 0) discovers a hybrid estate or the Oracle assesses a wo
 | `azure-reliability` | `.github/skills/azure-reliability/` | Oracle, Challenger |
 | `azure-resiliency` | `.github/skills/azure-resiliency/` | Oracle, Challenger |
 
+## Hooks (Runtime Guards)
+
+The Copilot runtime auto-discovers hooks from `.github/hooks/*/hooks.json` and
+wraps every session with guard + telemetry. See
+[`.github/hooks/README.md`](hooks/README.md) for the full inventory, lifecycle
+events, and environment variables.
+
+| Hook | Event(s) | Purpose | Blocking? |
+|------|----------|---------|-----------|
+| `tool-guardian` | `PreToolUse` | Deny destructive tool calls + protect `.github/hooks/` | `GUARD_MODE=block` only |
+| `post-edit-format` | `PostToolUse` | `az bicep lint`, `terraform fmt`, `py_compile`, `markdownlint-cli2` | advisory |
+| `secrets-scanner` | `Stop` | Regex-scan changed files for credentials | `SCAN_MODE=block` only |
+| `governance-audit` | `SessionStart` / `Stop` / `UserPromptSubmit` | Append audit metadata (no prompt content) | non-blocking |
+| `session-logger` | `SessionStart` / `Stop` / `UserPromptSubmit` | Session telemetry | non-blocking |
+| `subagent-validation` | `SubagentStop` | Validate Challenger output shape | advisory |
+
+> **Important**: `tool-guardian` blocks any tool call that edits files under
+> `.github/hooks/`. To change a hook, route the work through a human-reviewed PR.
+
+Local developers also get git-level hooks via `lefthook.yml` (security baseline,
+cost governance, ruff, terraform fmt, yamllint, conventional commits, pytest).
+The devcontainer runs `npx lefthook install` automatically; CI re-runs the same
+checks in `.github/workflows/5-pr-validate.yml`.
+
 ## Approval Gates
 
 6 non-negotiable gates (1, 2, 3, 4, 5, 6). Challenger reviews at gates 1, 2, 4, 5.
