@@ -23,7 +23,7 @@ Each LZ follows: Resolve → Validate → Plan → Deploy → Verify
 | Management | Log Analytics Workspace, Automation Account, Action Groups | `{prefix}-management-{region}-rg` | — |
 | Connectivity | Hub VNet, Bastion, Private DNS Zones (9), optional Firewall & VPN/ER Gateways | `{prefix}-conn-hub-{region}-rg`, `-gateways-`, `-dns-` | Management |
 | Identity | Domain Controllers, Managed Identities, RBAC assignments | `{prefix}-identity-{region}-rg` | Connectivity |
-| Security | Microsoft Sentinel, Defender for Cloud (11 plans), Key Vault, 4 SOAR Playbooks | `{prefix}-sec-soc-`, `-posture-`, `-automation-`, `-governance-` | Identity |
+| Security | Microsoft Sentinel, Defender for Cloud (plans configurable per profile), Key Vault, 4 SOAR Playbooks | `{prefix}-sec-soc-`, `-posture-`, `-automation-`, `-governance-` | Identity |
 
 :::tip
 The `{prefix}` defaults to `mrg` (configurable via the `AZURE_MANAGEMENT_GROUP_PREFIX` variable) and `{region}` defaults to `southcentralus` (configurable via `AZURE_DEPLOYMENT_REGION`).

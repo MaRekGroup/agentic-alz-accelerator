@@ -294,7 +294,7 @@ and gate approvals. Production config specifies Azure Table Storage for persiste
 | Management | ✅ Deployed | `PLATFORM_MGMT_SUBSCRIPTION_ID` | LAW (`mrg-law`), Automation Account |
 | Connectivity | ✅ Deployed | `PLATFORM_CONN_SUBSCRIPTION_ID` | Hub VNet, Bastion, Private DNS zones |
 | Identity | ✅ Deployed | `PLATFORM_IDTY_SUBSCRIPTION_ID` | Managed Identities, RBAC |
-| Security | ✅ Deployed | `PLATFORM_SEC_SUBSCRIPTION_ID` | Sentinel, Defender (11 plans), Key Vault |
+| Security | ✅ Deployed | `PLATFORM_SEC_SUBSCRIPTION_ID` | Sentinel, Defender (12 plans), Key Vault |
 
 **Management Group Hierarchy:** 12 MGs under `mrg` prefix (migrated from `alz-*`).
 

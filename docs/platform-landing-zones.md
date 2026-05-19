@@ -169,7 +169,7 @@ Dedicated security operations subscription — enforces separation of duties bet
 | Resource | Details |
 |---------|---------|
 | Microsoft Sentinel | Dedicated workspace, 90-day retention (configurable), onboarding + solution, TI connector (requires Sentinel Contributor role) |
-| Microsoft Defender for Cloud | 11 plans enabled (Api plan excluded — requires subPlan), security contacts with alert notifications |
+| Microsoft Defender for Cloud | Plans configurable per profile (see `src/config/profiles/` for defaults), security contacts with alert notifications |
 | SOAR Playbooks (Logic Apps) | Block-SuspiciousIP, Isolate-CompromisedVM, Revoke-EntraIDSession, Enrich-ThreatIntel |
 | Security Key Vault | Private endpoint only, purge protection, RBAC-authorized |
 | Automation Account | SecurityBaseline-Check runbook, SecurityPosture-Report (weekly) |
@@ -302,10 +302,12 @@ read this file dynamically at runtime, so no workflow YAML changes are needed.
 
 #### Prerequisites
 
-**Before you begin**, complete the **Bootstrap Settings Checklist** (`docs/ALZ_Bootstrap_Settings_Checklist.xlsx`)
-to gather all required values — tenant ID, subscription IDs, management group prefix,
-IP addressing, connectivity topology, policy decisions, and approval gate reviewers.
-The checklist has three tabs:
+**Before you begin**, complete the **Bootstrap Settings Checklist** (see the
+checklist section in the root [`README.md`](../README.md#bootstrap-settings-checklist)
+or the interactive checklist in [`docs/guide.html`](guide.html) under
+Prerequisites) to gather all required values — tenant ID, subscription IDs,
+management group prefix, IP addressing, connectivity topology, policy
+decisions, and approval gate reviewers. The checklist covers three areas:
 
 | Tab | Purpose |
 |-----|---------|

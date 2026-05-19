@@ -5,7 +5,7 @@ description: GitHub Actions workflows for the full deployment lifecycle.
 
 ## Workflow Overview
 
-10 GitHub Actions workflows with OIDC auth, environment approval gates, and automated compliance validation. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
+Primary GitHub Actions deployment workflows with OIDC auth, environment approval gates, and automated compliance validation. The repo also includes operational automation workflows (`deploy-on-merge`, `squad-*`, `sync-squad-labels`, `cleanup-old-rg`, `generate-diagrams`) not covered here. Deploy 4 platform + configurable application landing zones. App LZ names, profiles, and subscriptions are defined in `environments/subscriptions.json` — no workflow YAML changes needed.
 
 | Workflow | Trigger | Scope | Key Feature |
 |----------|---------|-------|-------------|
