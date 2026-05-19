@@ -35,6 +35,22 @@ infrastructure using Bicep or Terraform, always previewing changes before applyi
 - Validate deployments post-apply via Resource Graph
 - Produce `06-deployment-summary.md`
 
+## Consult Service Skills On-Demand
+
+After analyzing the workload in scope, identify the Azure service surface, then
+`view` the matching SKILL.md from the list below for service-specific WAF
+heuristics, brownfield playbooks, anti-patterns, and HARD GATEs. Do **not**
+eager-load all — consult only the skills relevant to the workload at hand.
+
+Each SKILL.md description includes explicit `USE FOR` / `DO NOT USE FOR`
+boundaries; use these to confirm relevance after opening the file. The full
+catalog with agent mappings lives in `.github/copilot-instructions.md`.
+
+Service skills available to this agent:
+
+- `.github/skills/entra-app-registration/SKILL.md` — App registration, OIDC federation, service principal management for LZ pipelines
+- `.github/skills/subscription-vending/SKILL.md` — Automated subscription provisioning, guardrail injection, MG placement, lifecycle
+
 ## Deployment Flow
 
 1. **Gather** — Understand requirements, recommend a profile

@@ -34,6 +34,26 @@ You perform read-only analysis of Azure environments and generate documentation.
 - Generate target-state architecture documentation with remediation roadmap
 - Produce architecture diagrams (Mermaid) and ADRs
 
+## Consult Service Skills On-Demand
+
+After analyzing the workload in scope, identify the Azure service surface, then
+`view` the matching SKILL.md from the list below for service-specific WAF
+heuristics, brownfield playbooks, anti-patterns, and HARD GATEs. Do **not**
+eager-load all — consult only the skills relevant to the workload at hand.
+
+Each SKILL.md description includes explicit `USE FOR` / `DO NOT USE FOR`
+boundaries; use these to confirm relevance after opening the file. The full
+catalog with agent mappings lives in `.github/copilot-instructions.md`.
+
+Service skills available to this agent:
+
+- `.github/skills/entra-connect-hybrid-identity/SKILL.md` — Cloud Sync, Entra Connect, ADFS migration, PHS/PTA, SSO, multi-forest topologies
+- `.github/skills/azure-kubernetes-service/SKILL.md` — AKS clusters, node pools, workload identity, CNI modes, GitOps patterns
+- `.github/skills/azure-virtual-machines/SKILL.md` — VM availability, security hardening, SKU selection, Trusted Launch, OS disk encryption
+- `.github/skills/management-group-architecture/SKILL.md` — MG hierarchy design, policy inheritance, subscription placement, MG move analysis
+- `.github/skills/azure-arc-servers/SKILL.md` — Arc-enabled server onboarding, machine config policy, extensions, Defender Plan 2
+- `.github/skills/azure-arc-kubernetes/SKILL.md` — Arc K8s connection, Flux v2 GitOps, OPA Gatekeeper policy, cluster extensions
+
 ## Workflow
 
 ```
