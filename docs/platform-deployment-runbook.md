@@ -301,7 +301,7 @@ After bootstrap completes:
    Or assign manually via the Azure portal. Allow 10-15 minutes for RBAC propagation.
 4. **Set app subscription secrets** — when ready to deploy application landing zones
 5. **Re-run bootstrap** with `move-subscriptions-only` to place app subs
-6. **Run compliance scan** — `gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all`
+6. **Run compliance scan** — `gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=all-subscriptions`
 
 ---
 

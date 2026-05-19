@@ -13,7 +13,7 @@ under the customer's `{prefix}` management group hierarchy and report violations
 All subscriptions under the customer's `{prefix}` management group hierarchy:
 - Platform LZs: management, connectivity, identity, security
 - Application LZs: all deployed app landing zones
-- Trigger via GitHub Actions: `gh workflow run monitor.yml -f scan_type=compliance -f scan_scope=all`
+- Trigger via GitHub Actions: `gh workflow run 4-monitor.yml -f scan_type=compliance -f scope=all-subscriptions`
 
 ## Scan Types
 

@@ -125,18 +125,21 @@ Every deployment includes budget alerts — **no budget, no merge**:
 
 ## CI/CD Pipelines
 
-8 GitHub Actions workflows orchestrate the full lifecycle:
+Primary GitHub Actions workflows for the deployment + Day-2 ops lifecycle:
 
 | Workflow | Trigger | Scope |
 |----------|---------|-------|
 | `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
 | `2-platform-deploy.yml` | Manual | 4 platform LZs (Mgmt → Conn → Ident → Sec) with cascade or targeted deploy |
 | `3-app-deploy.yml` | Manual | Config-driven app LZs from `subscriptions.json` (parallel) |
-| `monitor.yml` | Cron + Manual | Compliance scan across all 4 platform subscriptions in parallel |
+| `4-monitor.yml` | Cron (30 min / 1 h / daily 06:00 UTC) + Manual | Canonical Day-2 ops: compliance scan, drift detection, auto-remediation (`environment: remediation` gate), Teams alerts, GH issue creation. Covers 4 platform + 6 app subscriptions via `MonitoringAgent` + `RemediationAgent`. |
+| `monitor.yml` | Daily 04:00 UTC + Manual | Lightweight diagnostic: direct Azure Policy Insights SDK scan across 4 platform subscriptions in parallel. No agent dependencies — useful as a baseline check independent of the agent framework. |
 | `5-pr-validate.yml` | PR to main | Lint, security, cost, tests, what-if preview |
 | `reusable-deploy.yml` | Called by 2 & 3 | DRY: resolve → validate → plan → deploy → verify |
 | `assign-role.yml` | Manual (utility) | Assign/remove RBAC roles on platform subscriptions |
 | `assess.yml` | Manual | Brownfield WAF-aligned assessment (discovery + WARA + reports) |
+
+The repo also ships operational automation workflows (`deploy-on-merge`, `squad-*`, `sync-squad-labels`, `cleanup-old-rg`, `generate-diagrams`, `deploy-docs`) not detailed here.
 
 ### Self-Hosted Runner Support
 
@@ -178,17 +181,17 @@ gh workflow run "2-platform-deploy.yml" -f framework=bicep -f action=deploy \
 
 ### Compliance Monitoring
 
-The monitor workflow scans all deployed subscriptions for policy compliance:
+The canonical Day-2 ops workflow (`4-monitor.yml`) scans all deployed subscriptions for policy compliance, detects drift, and routes critical violations through auto-remediation:
 
 ```bash
-# Full compliance scan across all 4 platform subscriptions
-gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+# Full Day-2 ops scan across all 10 subscriptions (platform + app)
+gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=all-subscriptions
 
-# Scan a single LZ
-gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=security
+# Scan only the 4 platform subscriptions
+gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=platform-only
 ```
 
-Results include per-subscription compliance percentages and detailed violation listings.
+Results include per-subscription compliance percentages, drift detection, detailed violation listings, Teams alerts, and auto-created GitHub issues for critical violations. For a lightweight daily diagnostic baseline that bypasses the agent framework, see `monitor.yml` (runs at 04:00 UTC).
 
 ### Bootstrap Settings Checklist
 
