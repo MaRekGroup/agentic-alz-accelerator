@@ -178,7 +178,7 @@ resource "azurerm_arc_kubernetes_cluster" "this" {
 }
 ```
 
-## Brownfield Playbook — S8: Brownfield K8s Fleet
+## Brownfield Scenario (Scenario S8: Brownfield K8s Fleet)
 
 **Scenario S8** covers existing heterogeneous Kubernetes fleets — on-premises clusters, EKS/GKE/RKE running off-Azure, and edge clusters — that require unified GitOps, Policy, and Monitor governance under an existing Azure Landing Zone. This scenario is the primary brownfield use case for Arc-enabled Kubernetes per [`docs/decisions/hybrid-onboarding-strategy.md`](../../../docs/decisions/hybrid-onboarding-strategy.md) §8.
 

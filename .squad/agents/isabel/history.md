@@ -143,6 +143,10 @@ Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All con
 
 **Verdict:** APPROVE WITH CONDITIONS (0 blockers, 3 majors, 4 minors). Conditions are boundary discipline (per-skill DO NOT USE FOR explicit), forked execution path (scope/ADR forks inline), and W4-specific traps (SQL serverless HA, Cosmos throughput sharing, Storage SFTP/NFS gating). All majors + minors closed inline via surgical edits to plan v2 before Phase 1A (Linus-6 ADR authoring) began. Ready for parallel Saul fan-out.
 
+## 2026-05-19 — Wave 5 Draft-Stage Quality Gate (Isabel-9)
+
+**Verdict:** APPROVE WITH CONDITIONS (0 blockers, 2 majors, 3 should-fixes, 2 considers). Both skills pass 9/10 hard quality bars — the single failure is the brownfield heading format: both Saul-12 and Saul-13 used `## Brownfield Playbook — S#:` instead of the canonical `## Brownfield Scenario (Scenario S#: ...)` pattern established in W3 and enforced through W4. Structural content is excellent: all 5 Yeselam decisions correctly baked in (Arc data services out of scope, S6/S8 codes, MI-first cited to ADR §5 without re-definition, balanced greenfield+brownfield weighting, `category: azure-hybrid`), ADR cross-referenced ≥5 locations each, both HARD GATE annotations correct with pre-mutation checklists and rollback paths, metadata tables 10/10 fields, CAF/WAF tables ≥4 rows each. No AVM module exists for `Microsoft.Kubernetes/connectedClusters` — arc-kubernetes correctly falls back to native blocks per AVM-first policy. All 4 Saul-reported advisories accepted or converted to major. Recommended: 2 surgical line-edits, then proceed to Scribe consolidation.
+
 ## 2026-07-14 — Wave 4 Draft-Stage Quality Gate (Isabel-8)
 
 **Verdict:** APPROVE WITH CONDITIONS (0 blockers, 1 major, 1 minor). All 3 skills pass 13/13 checklist. ADR passes 8/8. Major: hardcoded "Three" in copilot-instructions.md line 167 — one-word fix. Minor: Cosmos CAF Identity row lacks Primary marker. No structural, coherence, or plan-to-draft drift issues. Condition: close C5 before commit.
