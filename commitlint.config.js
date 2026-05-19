@@ -1,0 +1,30 @@
+// Commitlint config for lefthook commit-msg hook.
+// Self-contained (no `extends`) so it works without a package.json or
+// installed @commitlint/config-conventional package — npx fetches the
+// commitlint CLI on demand and applies these rules directly.
+module.exports = {
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'build',
+        'chore',
+        'ci',
+        'docs',
+        'feat',
+        'fix',
+        'perf',
+        'refactor',
+        'revert',
+        'style',
+        'test',
+      ],
+    ],
+    'type-case': [2, 'always', 'lower-case'],
+    'type-empty': [2, 'never'],
+    'subject-empty': [2, 'never'],
+    'subject-full-stop': [2, 'never', '.'],
+    'header-max-length': [2, 'always', 200],
+  },
+};

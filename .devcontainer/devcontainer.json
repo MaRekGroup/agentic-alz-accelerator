@@ -21,7 +21,7 @@
 		}
 	},
 
-	"postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y -qq graphviz && pip3 install --user -r requirements.txt && git submodule update --init --recursive && pip3 install --user -r mcp/azure-pricing-mcp/requirements.txt && cd mcp/drawio-mcp-server && deno cache src/index.ts",
+	"postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y -qq graphviz && pip3 install --user -r requirements.txt && git submodule update --init --recursive && pip3 install --user -r mcp/azure-pricing-mcp/requirements.txt && npx --yes lefthook install && cd mcp/drawio-mcp-server && deno cache src/index.ts",
 
 	"customizations": {
 		"vscode": {
