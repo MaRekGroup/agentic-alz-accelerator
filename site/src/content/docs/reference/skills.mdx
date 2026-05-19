@@ -1,0 +1,216 @@
+---
+title: Agent Skills
+description: SKILL.md entry points that agents load on demand to handle Azure services, governance, tooling, and assessment.
+---
+
+Skills are domain knowledge modules that agents invoke automatically during workflow execution. Each skill is a `SKILL.md` file in `.github/skills/` containing patterns, decision heuristics, IaC samples, and cross-references for a specific problem domain.
+
+## Skill Categories
+
+The skill catalog is organized into six categories:
+
+### Core Skills
+
+Foundational skills used across multiple workflow steps.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `caf-design-areas` | CAF design area alignment and mapping | Scribe, Oracle, Warden |
+| `security-baseline` | 6-rule security baseline enforcement | Warden, Forge, Challenger |
+| `cost-governance` | Budget alerts and cost controls | Oracle, Forge, Sentinel |
+| `profile-management` | Deployment profile handling | Envoy, Strategist |
+| `workflow-engine` | DAG orchestration and state machine | Conductor |
+
+### Azure & IaC Skills
+
+Infrastructure-as-Code patterns and Azure resource defaults.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-defaults` | Naming, tagging, AVM-first, WAF alignment | All agents |
+| `azure-bicep-patterns` | Bicep module patterns, AVM composition | Forge (Bicep), Strategist |
+| `terraform-patterns` | Terraform module patterns, AVM-TF | Forge (Terraform), Strategist |
+| `azure-diagnostics` | KQL queries, diagnostic settings | Sentinel, Chronicler |
+| `azure-rbac` | Role definitions and assignments | Warden, Forge |
+| `azure-compliance` | Policy mapping (CIS, NIST, PCI-DSS) | Warden, Sentinel, Challenger |
+| `azure-cost-optimization` | SKU right-sizing, reserved instances | Oracle, Sentinel |
+| `azure-quotas` | Service limits and quota management | Strategist, Envoy |
+| `iac-common` | Shared IaC patterns for both frameworks | Strategist, Forge |
+| `terraform-test` | Terraform testing patterns | Forge (Terraform) |
+| `terraform-search-import` | State import and resource discovery | Forge (Terraform), Assessor |
+
+### Tooling & Operations Skills
+
+Diagram generation, documentation, and operational tooling.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `session-resume` | Session state persistence and recovery | Conductor |
+| `python-diagrams` | Graphviz-based architecture diagrams | Artisan |
+| `drawio` | Draw.io XML diagram generation | Artisan |
+| `mermaid` | Mermaid diagram syntax | Artisan, Chronicler |
+| `azure-diagrams` | Diagram routing (delegates to engine) | Artisan |
+| `azure-resource-visualizer` | Resource topology visualization | Artisan, Assessor |
+| `azure-adr` | Architecture Decision Records | Oracle, Chronicler |
+| `github-operations` | PR, issue, and workflow management | Envoy, Conductor |
+| `docs-writer` | Documentation generation patterns | Chronicler |
+
+### Governance & Context Skills
+
+Agent operating constraints and context management.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `golden-principles` | Operating invariants for all agents | All agents |
+| `context-shredding` | Context compression techniques | All agents |
+| `azure-validate` | Deployment validation patterns | Envoy, Challenger |
+| `azure-governance-discovery` | Policy assignment discovery | Warden |
+| `context-optimizer` | Context window optimization | Conductor |
+| `count-registry` | Entity count management | All agents |
+| `workload-identity-federation` | OIDC federation patterns | Warden, Forge, Strategist, Envoy |
+
+### Assessment Skills (Brownfield)
+
+Brownfield environment discovery and assessment.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `brownfield-discovery` | Resource inventory via Resource Graph | Assessor |
+| `wara-assessment` | WAF-aligned assessment with APRL checks | Assessor, Oracle |
+| `assessment-report` | Assessment artifact generation | Assessor, Chronicler |
+
+### Microsoft Learn Skills — Azure Services
+
+The Azure service catalog covers Governance & Architecture, Security, Identity (W1), Networking, Compute & Containers (W2), Tenant Architecture (W3), Data Platform (W4), Hybrid (W5), Management & Operations, and Cost & Reliability.
+
+#### Identity (W1)
+
+The W1 Identity skills cover Entra ID surface areas commonly encountered in Landing Zone deployments.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `entra-app-registration` | App registration and service principals | Warden, Envoy |
+| `entra-conditional-access` | Conditional Access policy governance | Warden, Oracle, Sentinel, Challenger |
+| `entra-connect-hybrid-identity` | Hybrid identity synchronization | Warden, Oracle, Forge, Assessor |
+| `entra-identity-governance` | PIM, access reviews, entitlement | Warden, Oracle, Sentinel, Challenger |
+
+#### Compute & Containers (W2)
+
+The W2 Compute skills cover primary Azure compute tiers for enterprise Landing Zones.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-kubernetes-service` | AKS cluster architecture and operations | Oracle, Forge, Strategist, Assessor |
+| `azure-virtual-machines` | VM deployment and management patterns | Oracle, Forge, Strategist, Assessor |
+| `azure-container-apps` | Serverless container workloads | Oracle, Forge, Strategist |
+
+#### Tenant Architecture (W3)
+
+The W3 Tenant Architecture skills cover the foundational resource organization layer.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `management-group-architecture` | Management group hierarchy design | Warden, Oracle, Strategist, Assessor |
+| `subscription-vending` | Subscription provisioning patterns | Warden, Strategist, Envoy, Forge |
+
+#### Data Platform (W4)
+
+The W4 Data Platform skills cover Azure persistence layer for the data tier.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-sql-database` | SQL Database and Managed Instance | Oracle, Forge |
+| `azure-cosmos-db` | Globally distributed document tier | Oracle, Forge |
+| `azure-storage-accounts` | Blob/Queue/Table/Files platform | Oracle, Forge |
+
+#### Hybrid (W5)
+
+The W5 Hybrid skills extend governance reach beyond the Azure subscription boundary.
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-arc-servers` | Arc-enabled server governance | Oracle, Assessor, Warden, Forge |
+| `azure-arc-kubernetes` | Arc-enabled Kubernetes fleet | Oracle, Assessor, Warden, Forge |
+
+#### Governance & Architecture
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-policy` | Policy definitions and assignments | Warden, Sentinel, Challenger |
+| `azure-cloud-adoption-framework` | CAF guidance and patterns | Scribe, Oracle, Conductor |
+| `azure-well-architected` | WAF pillar assessment | Oracle, Challenger, Assessor |
+| `azure-architecture` | Reference architectures | Oracle, Artisan |
+| `azure-resource-manager` | ARM deployment patterns | Forge, Strategist, Envoy |
+| `azure-resource-graph` | Resource Graph queries | Assessor, Sentinel, Warden |
+
+#### Security
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-security` | Security best practices | Warden, Challenger, Sentinel |
+| `azure-defender-for-cloud` | Defender configuration | Warden, Sentinel, Mender |
+| `azure-sentinel` | Sentinel workspace and rules | Sentinel, Chronicler |
+| `azure-key-vault` | Key Vault patterns | Warden, Forge |
+
+#### Networking
+
+The Networking category covers core hub-spoke and edge services including virtual networks, firewalls, gateways, and private connectivity.
+
+| Skill | Purpose |
+|-------|---------|
+| `azure-virtual-network` | VNet design and peering |
+| `azure-networking` | Network topology patterns |
+| `azure-firewall` | Azure Firewall configuration |
+| `azure-firewall-manager` | Firewall policy management |
+| `azure-bastion` | Secure VM access |
+| `azure-dns` | DNS zones and resolution |
+| `azure-expressroute` | Private connectivity |
+| `azure-vpn-gateway` | Site-to-site VPN |
+| `azure-virtual-wan` | vWAN hub architecture |
+| `azure-virtual-network-manager` | Network governance |
+| `azure-private-link` | Private endpoints |
+| `azure-application-gateway` | Layer 7 load balancing |
+| `azure-web-application-firewall` | WAF policies |
+| `azure-ddos-protection` | DDoS mitigation |
+| `azure-nat-gateway` | Outbound connectivity |
+| `azure-network-watcher` | Network diagnostics |
+| `azure-front-door` | Global load balancing |
+| `azure-load-balancer` | Layer 4 load balancing |
+| `azure-route-server` | Route exchange |
+
+#### Management & Operations
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-monitor` | Monitoring and alerting | Sentinel, Chronicler |
+| `azure-automation` | Runbooks and DSC | Forge, Mender |
+| `azure-backup` | Backup policies | Forge, Oracle |
+| `azure-update-manager` | Patch management | Sentinel, Mender |
+| `azure-service-health` | Service health alerts | Sentinel |
+| `azure-advisor` | Recommendations | Oracle, Sentinel |
+| `azure-site-recovery` | DR orchestration | Forge, Oracle |
+
+#### Cost & Reliability
+
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `azure-cost-management` | Cost analysis and budgets | Oracle, Sentinel |
+| `azure-reliability` | Reliability patterns | Oracle, Challenger |
+| `azure-resiliency` | Resiliency design | Oracle, Challenger |
+
+## How Skills Are Loaded
+
+Agents auto-discover skills via the Copilot runtime when they encounter a domain that requires specialized knowledge. Users do not invoke skills directly — the responsible agent selects and loads the appropriate skill based on the current workflow step and problem context.
+
+The skill body follows a standard structure:
+
+1. **YAML frontmatter** — metadata including `name`, `description`, `category`, and `used_by`
+2. **Overview** — scope, CAF/WAF alignment, when to use vs. not use
+3. **Patterns & Guidance** — architecture patterns, decision heuristics, IaC samples
+4. **Brownfield Playbook** (service skills) — assessment and hardening steps
+5. **Anti-Patterns** — common mistakes to avoid
+6. **Cross-References** — related skills, ADRs, and Microsoft Learn links
+
+:::note[Canonical Source]
+The full agent→skill mapping table is maintained in [`.github/copilot-instructions.md`](https://github.com/MaRekGroup/agentic-alz-accelerator/blob/main/.github/copilot-instructions.md). For skill authoring guidance, see [`.github/skills/README.md`](https://github.com/MaRekGroup/agentic-alz-accelerator/blob/main/.github/skills/README.md).
+:::

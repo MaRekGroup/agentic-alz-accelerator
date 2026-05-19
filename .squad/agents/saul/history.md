@@ -42,3 +42,13 @@ Authored `.github/skills/azure-arc-kubernetes/SKILL.md` (447 lines, Wave 5, S8 B
 
 **Isabel-9 verdict (post-draft):** APPROVE WITH CONDITIONS — 2 majors (M1: arc-servers WAF missing Performance Efficiency row; M2: arc-kubernetes missing Security Baseline Alignment table in greenfield), 3 should-fixes, 2 considers. Surgical edits applied — all conditions closed. Catalog closed at 14/14.
 
+
+---
+## 2026-05-19 — PR B docs surface shipped as #77
+
+**Date:** 2026-05-19T20:00:00Z
+**Status:** COMPLETE
+**PR:** #77 (docs/pr-b-capability-surfacing)
+**Squad:** Linus, Saul, Tess, Isabel, Coordinator (Yeselam)
+
+PR B capability surfacing closed with 13-file surface documentation update — skills catalog, guardrails, changelog pointer, Python version alignment, cost-date illustration. MaRekGroup false-positive resolved (org is framework owner, not customer). All 6 hard gates pass. PR #77 open for review.
