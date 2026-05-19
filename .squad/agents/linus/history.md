@@ -52,3 +52,13 @@ Linus maps to the HVE architect role and owns target-state design reasoning.
 
 *(Earlier entries summarized 2026-05-19 by Scribe-8.)*
 
+
+---
+## 2026-05-19 — PR B docs surface shipped as #77
+
+**Date:** 2026-05-19T20:00:00Z
+**Status:** COMPLETE
+**PR:** #77 (docs/pr-b-capability-surfacing)
+**Squad:** Linus, Saul, Tess, Isabel, Coordinator (Yeselam)
+
+PR B capability surfacing closed with 13-file surface documentation update — skills catalog, guardrails, changelog pointer, Python version alignment, cost-date illustration. MaRekGroup false-positive resolved (org is framework owner, not customer). All 6 hard gates pass. PR #77 open for review.

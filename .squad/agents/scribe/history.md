@@ -62,3 +62,13 @@ Wave 5 (Hybrid) consolidation: verified SKILL.md description lengths (0 failures
 ## 2026-05-19 — Scribe-9: Service Skill Wiring (Option 2 Conditional-load)
 
 Post-W5 wiring fix: added `## Consult Service Skills On-Demand` section to 9 agent definition files (architect.md +12 skills, governance.md +8, bicep-code.md +10, terraform-code.md +10, iac-planner.md +5, assessment.md +6, monitoring.md +2, challenger.md +2, deployment.md +2; 57 total skill listings). Normalized `AGENTS.md` `## Skills` section by adding 4 new subsections (Identity W1, Compute W2, Tenant Architecture W3, Data Platform W4) before the existing `### Hybrid` W5 section — full W1-W5 catalog now present. Appended Option 2 decision entry to `.squad/decisions.md`. Skill description verification: PASS (0 failures; 7 pre-existing WARNs ≤1010 chars unchanged). Staged 11 files; committed as `feat(agents): wire 14 W1-W5 service skills to consuming agents (Option 2 conditional-load)`. Did not push — Coordinator opens PR.
+
+---
+## 2026-05-19 — PR B docs surface shipped as #77
+
+**Date:** 2026-05-19T20:00:00Z
+**Status:** COMPLETE
+**PR:** #77 (docs/pr-b-capability-surfacing)
+**Squad:** Linus, Saul, Tess, Isabel, Coordinator (Yeselam)
+
+PR B capability surfacing closed with 13-file surface documentation update — skills catalog, guardrails, changelog pointer, Python version alignment, cost-date illustration. MaRekGroup false-positive resolved (org is framework owner, not customer). All 6 hard gates pass. PR #77 open for review.

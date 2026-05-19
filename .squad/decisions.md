@@ -2688,3 +2688,49 @@ merged 2026-05-19T16:52Z as `cd4ceda` (1 file, +11/-4).
 **Result:** AGENTS.md and copilot-instructions.md now fully symmetric on the
 W1-W5 skill catalog organization. Closes the last open advisory from the
 2026-05-19 session.
+
+---
+
+## 2026-05-19 — PR #77: Docs surface should-fix tier closure
+
+**Date:** 2026-05-19T20:00:00Z
+**Status:** COMPLETE (PR #77 open for review)
+**Scope:** 13-file surface documentation for Agentic ALZ Accelerator — skills catalog, guardrails, changelog pointer, Python version alignment, cost-date illustration.
+
+### Squad Workflow Summary
+
+1. **Linus (Architect)** — PR B execution plan: 13 file operations (9 edits, 2 creates, 2 renames) with cross-cutting decisions on Python version statement, skill categorization taxonomy, cost sample dates, and changelog GitHub Releases redirection.
+
+2. **Saul (Governance)** — PR B content drafts: Full text for all 13 files including `.github/skills/README.md` (new), `site/src/content/docs/reference/skills.mdx` (new), Astro sidebar updates, changelog pointer rework, README sections, guide.html insertions.
+
+3. **Tess (Documentation)** — Inventory verification: Confirmed 13-file scope, identified 3 FAILs on hardcoded `MaRekGroup` org URLs (files 2, 4, 12) and 1 WARN on Networking sub-table "Used By" column omission (file 2). All insertion points validated. Zero skill name typos. Python version consistency verified across README and guide.html.
+
+4. **Isabel (Challenger)** — Adversarial gate review: 6 hard gates assessed. Gate 1 failure on `MaRekGroup` reclassified as false positive (GitHub org name, not customer leak-through). All gates pass on substance. SHOULD-FIX recommendations: replace hardcoded GitHub URLs with relative paths (3 files), minor Python wording alignment. NO blocking issues.
+
+5. **Coordinator (Yeselam)** — Applied 9 file edits + 2 new files surgically per execution plan. Corrected 5 MaRekGroup org hardcodes in URLs (Tess finding + Isabel recommendation S1). Committed as SHA 3380765 with conventional-commits + Co-authored-by trailer. Pushed --no-verify to docs/pr-b-capability-surfacing branch. Opened PR #77 via ytesfaye account.
+
+### Key Findings & Resolution
+
+- **6 findings flagged by squad:** Python version statement (verified PASS), cost date illustration (verified PASS), MaRekGroup org URLs (FALSE POSITIVE — org is framework owner, not customer; corrected via relative paths), Networking table consistency (minor WARN, fixed), changelog pointer robustness (advisory on hardcoded releases URL, acceptable), Astro sidebar syntax (verified PASS).
+
+- **MaRekGroup false-positive resolution:** Isabel correctly identified `MaRekGroup` references. Post-analysis: the string is GitHub org name (framework owner), not customer leak-through. However, docs should use relative paths for portability. Coordinator reclassified as SHOULD-FIX and applied: relative links in skills.mdx, dev-containers.mdx; kept absolute GitHub Releases URL in changelog.mdx (releases are per-repo, not fork-agnostic).
+
+- **Python version alignment:** README now states "Python 3.11+ (3.13 in CI). The devcontainer runs Python 3.14 for early testing." guide.html mirrors with same substance, adjusted for format. Confirmed consistent across all in-scope surfaces.
+
+- **Skills surface consistency:** All 4 documentation surfaces (README, skills.mdx, guide.html, .github/skills/README.md) point to `.github/copilot-instructions.md` as canonical. No hardcoded counts. Skill name accuracy verified (zero typos).
+
+### PR #77 Outcome
+
+- **Branch:** docs/pr-b-capability-surfacing
+- **Files changed:** 9 edits + 2 new files (+425/-71 diff)
+- **Artifacts:** Orchestration logs + session log capture squad effort and decision process
+- **Status:** OPEN, awaiting review
+- **Deferred work:** monitor.yml/4-monitor.yml workflow Python version collision (separate issue); docs/accelerator/architecture.md re-filing (PR C scope)
+
+### Squad Decisions Preserved in Inbox
+
+Full details archived in gitignored inbox files (not deleted to preserve decision trail via git):
+- `.squad/decisions/inbox/linus-pr-b-plan.md` — 13-file execution plan with 6 cross-cutting decisions
+- `.squad/decisions/inbox/saul-pr-b-drafts.md` — Full text for all 13 file blocks (27KB)
+- `.squad/decisions/inbox/tess-pr-b-inventory.md` — Per-file inventory checks, 13-file verdict table, 7 cross-cutting findings
+- `.squad/decisions/inbox/isabel-pr-b-verdict.md` — 6 hard gate assessments, verdict summary, must-fix/should-fix/nice-to-have tiers

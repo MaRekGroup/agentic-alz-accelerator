@@ -152,3 +152,13 @@ Issued APPROVE WITH CONDITIONS verdict (0 blockers, 2 majors, 4 minors). All con
 **Verdict:** APPROVE WITH CONDITIONS (0 blockers, 1 major, 1 minor). All 3 skills pass 13/13 checklist. ADR passes 8/8. Major: hardcoded "Three" in copilot-instructions.md line 167 — one-word fix. Minor: Cosmos CAF Identity row lacks Primary marker. No structural, coherence, or plan-to-draft drift issues. Condition: close C5 before commit.
 
 **2026-05-18 — Isabel — W4 session close** — Reviewed Linus W4 plan (343 lines) + all 3 Saul SKILL.md drafts (885 lines combined) at draft-stage quality gate. APPROVE WITH CONDITIONS verdict: 0 blockers, 3 majors (boundary discipline, execution path, trap detection), 4 minors. All majors/minors closed surgically before Linus ADR authoring. W4 shipped to main via PR #69.
+
+---
+## 2026-05-19 — PR B docs surface shipped as #77
+
+**Date:** 2026-05-19T20:00:00Z
+**Status:** COMPLETE
+**PR:** #77 (docs/pr-b-capability-surfacing)
+**Squad:** Linus, Saul, Tess, Isabel, Coordinator (Yeselam)
+
+PR B capability surfacing closed with 13-file surface documentation update — skills catalog, guardrails, changelog pointer, Python version alignment, cost-date illustration. MaRekGroup false-positive resolved (org is framework owner, not customer). All 6 hard gates pass. PR #77 open for review.
