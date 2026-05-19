@@ -13,7 +13,8 @@ Primary GitHub Actions deployment workflows with OIDC auth, environment approval
 | `2-platform-deploy.yml` | Manual | 4 platform subs | Sequential with approval gate per LZ, `start_from` for resume |
 | `3-app-deploy.yml` | Manual | Config-driven | Reads app LZs from `subscriptions.json`, dynamic matrix, parallel deployment |
 | `assess.yml` | Manual | Per subscription/RG | Brownfield WAF assessment: discover → WARA → generate reports (6 artifacts) |
-| `monitor.yml` | Cron + Manual | All 4 platform subs | Parallel compliance scan per subscription using PolicyInsights SDK v2+ |
+| `4-monitor.yml` | Cron (30 min / 1 h / daily 06:00 UTC) + Manual | All 10 subscriptions | Canonical Day-2 ops: `MonitoringAgent` + `RemediationAgent`; compliance + drift + auto-remediation (env gate) + Teams alerts + GH issue creation |
+| `monitor.yml` | Daily 04:00 UTC + Manual | 4 platform subs | Lightweight diagnostic: per-LZ parallel scan using PolicyInsights SDK v2+ directly; no agent dependencies |
 | `5-pr-validate.yml` | PR to `main` | Changed files | Lint, security, cost, tests, what-if preview posted as PR comment |
 | `deploy-docs.yml` | Push to `main` | GitHub Pages | Builds & deploys docs site when `site/**` changes |
 | `deploy-on-merge.yml` | Push to `main` | Changed LZs | Auto-deploy changed landing zones on merge |
@@ -31,7 +32,7 @@ Step 3  1-bootstrap.yml          →  Management groups + subscription placement
 Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
 Step 5  assign-role.yml          →  (if needed) Add RBAC roles for Sentinel/Defender
 Step 6  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
-Step 7  monitor.yml              →  Compliance scan across all 4 platform subscriptions
+Step 7  4-monitor.yml            →  Continuous Day-2 ops: compliance + drift + remediation + alerts
 Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR
 ```
 

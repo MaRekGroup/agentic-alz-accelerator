@@ -140,7 +140,7 @@ gh run watch --repo <your-org>/<your-repo>
 Run a compliance scan across all deployed subscriptions:
 
 ```bash
-gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=all-subscriptions
 ```
 
 ## What Gets Deployed

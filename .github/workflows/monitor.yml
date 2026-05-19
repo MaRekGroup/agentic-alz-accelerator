@@ -1,13 +1,15 @@
 # ============================================================================
-# Landing Zone Monitoring — Compliance Scan Across All Deployed Subscriptions
-# Scans Management, Connectivity, Identity, Security subscriptions for
-# policy compliance using Azure Policy Insights SDK.
+# Landing Zone Monitoring — Daily Policy Insights Diagnostic Scan
+# Lightweight per-LZ compliance scan using Azure Policy Insights SDK directly
+# (no MonitoringAgent dependency). Runs once daily at 04:00 UTC as a baseline
+# check; the canonical Day-2 ops workflow is 4-monitor.yml which adds drift
+# detection, auto-remediation, alerting, and app-LZ coverage.
 # ============================================================================
-name: "Monitor · Compliance Scan"
+name: "Monitor · Daily Policy Insights Scan"
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       scan_type:

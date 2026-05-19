@@ -2342,10 +2342,10 @@ resource budget <span class="str">'Microsoft.Consumption/budgets@2023-05-01'</sp
       <div class="code-block">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <span class="comment"># Run compliance scan across all 4 platform subscriptions</span>
-gh workflow run <span class="str">"monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scan_scope=all
+gh workflow run <span class="str">"4-monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scope=all-subscriptions
 
 <span class="comment"># Scan a single landing zone</span>
-gh workflow run <span class="str">"monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scan_scope=security
+gh workflow run <span class="str">"4-monitor.yml"</span> <span class="flag">-f</span> scan_type=compliance <span class="flag">-f</span> scope=platform-only
 
 <span class="comment"># View scan results</span>
 gh run view <span class="str">&lt;run-id&gt;</span> <span class="flag">--log</span> 2>/dev/null | grep <span class="str">"compliance_pct"</span></div>
@@ -2509,7 +2509,7 @@ Step 3  1-bootstrap.yml          →  Management groups + subscription placement
 Step 4  2-platform-deploy.yml    →  Management → Connectivity → Identity → Security
 Step 5  assign-role.yml          →  (if needed) Add RBAC roles for Sentinel/Defender
 Step 6  3-app-deploy.yml         →  App LZs in parallel (config-driven from subscriptions.json)
-Step 7  monitor.yml              →  Compliance scan across all 4 platform subscriptions
+Step 7  4-monitor.yml            →  Continuous Day-2 ops: compliance + drift + remediation + alerts
 Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</pre>
           <p style="font-size:11px;color:#aaa;margin:8px 0 0 0">All workflows support self-hosted runners via <code style="color:var(--ms-light-blue)">vars.RUNNER_LABEL</code> — defaults to <code style="color:var(--ms-light-blue)">ubuntu-latest</code> if not set.</p>
         </div>
@@ -2521,7 +2521,8 @@ Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
               <tr><td><strong>1-bootstrap.yml</strong></td><td>Manual (one-time)</td><td>Tenant-wide</td><td>Creates 11 management groups, moves 10 subs, registers 20 providers</td></tr>
               <tr><td><strong>2-platform-deploy.yml</strong></td><td>Manual</td><td>4 platform subs</td><td>Sequential with approval gate per LZ, <code>start_from</code> for resume</td></tr>
               <tr><td><strong>3-app-deploy.yml</strong></td><td>Manual</td><td>Config-driven</td><td>Reads app LZs from <code>subscriptions.json</code>, dynamic matrix, parallel deployment</td></tr>
-              <tr><td><strong>monitor.yml</strong></td><td>Cron + Manual</td><td>All 4 platform subs</td><td>Parallel compliance scan per subscription using PolicyInsights SDK v2+, per-LZ violation details</td></tr>
+              <tr><td><strong>4-monitor.yml</strong></td><td>Cron (30 min / 1 h / daily 06:00 UTC) + Manual</td><td>All 10 subscriptions</td><td>Canonical Day-2 ops: <code>MonitoringAgent</code> + <code>RemediationAgent</code>; compliance + drift + auto-remediation (env gate) + Teams alerts + GH issue creation</td></tr>
+              <tr><td><strong>monitor.yml</strong></td><td>Daily 04:00 UTC + Manual</td><td>4 platform subs</td><td>Lightweight diagnostic: per-LZ parallel scan using PolicyInsights SDK v2+ directly; no agent dependencies</td></tr>
               <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
               <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: resolve → validate → plan → deploy → verify; self-hosted runner via <code>runner_label</code> input</td></tr>
               <tr><td><strong>assign-role.yml</strong></td><td>Manual (utility)</td><td>Single sub</td><td>Assign/remove RBAC roles (e.g., Sentinel Contributor) to the OIDC service principal</td></tr>

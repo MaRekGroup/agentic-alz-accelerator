@@ -32,11 +32,11 @@ Critical and high severity violations trigger automatic remediation. Ensure your
 Trigger scans manually via GitHub Actions:
 
 ```bash
-# Run compliance scan across all platform subscriptions
-gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=all
+# Run compliance scan across all subscriptions (canonical Day-2 ops)
+gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=all-subscriptions
 
-# Scan a single landing zone
-gh workflow run "monitor.yml" -f scan_type=compliance -f scan_scope=security
+# Scan only the 4 platform subscriptions
+gh workflow run "4-monitor.yml" -f scan_type=compliance -f scope=platform-only
 
 # View scan results
 gh run view <run-id> --log 2>/dev/null | grep "compliance_pct"
