@@ -1,10 +1,10 @@
 # Now
 
-**Last activity:** 2026-05-19 — Wave 5 (Hybrid) **MERGED** via PR [#71](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/71) as `f736018`. Skills shipped: azure-arc-servers + azure-arc-kubernetes. Shared ADR: `docs/decisions/hybrid-onboarding-strategy.md`. Earlier same-day: PR [#70](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/70) (SKILL.md 1024-char hotfix).
-**Branch:** main (in sync with `github/main` at `f736018`); `wave5-hybrid-planning` force-deleted + remote pruned.
-**Status:** 🎯 **Squad IDLE — accelerator skill catalog COMPLETE at 14/14.** No active work.
-**Skill capacity:** 14 / 14 SHIPPED — catalog closed (W1=4 identity, W2=3 compute, W3=2 tenant, W4=3 data, W5=2 hybrid). Per Yeselam W5 Q1 decision, Arc data services explicitly out of scope.
-**Next focus:** Yeselam-initiated only. Likely candidates if Squad reactivates: decisions.md archive (eligible 2026-05-25 for 2026-05-18 entries), session-2026-05-19 retro, or new wave planning if scope reopens.
-**Agent history sizes (post Scribe-8 summarization):** Linus 4.8K, Saul 5.9K, Isabel 13.4K, Scribe 4.4K — all well under 15K threshold.
+**Last activity:** 2026-05-19 — Service skill wiring shipped via PR [#72](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/72) as `1864d4c` (12 files, +265/-1). Wired 14 W1-W5 service skills into 9 consuming agents via new `## Consult Service Skills On-Demand` sections (Option 2: conditional-load on-demand, validated by smoke-test of architect agent). Same day earlier: PR [#71](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/71) (W5 Hybrid skills), PR [#70](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/70) (SKILL.md 1024-char hotfix). **3 PRs merged in single day.**
+**Branch:** main (in sync with `github/main` at `1864d4c`); `wire-skills-to-agents` force-deleted + remote pruned.
+**Status:** 🎯 **Squad IDLE — accelerator skill catalog COMPLETE at 14/14 AND fully wired into consuming agents.** No active work.
+**Skill capacity:** 14 / 14 SHIPPED and WIRED (Oracle 12, Forge×2 10, Warden 8, Assessor 6, Strategist 5, Sentinel/Challenger/Envoy 2 each).
+**Next focus:** Yeselam-initiated only. Candidate follow-ups: (1) copilot-instructions.md normalization — move W1 Identity skills out of "Agent Governance" table into dedicated `#### Identity` subsection (mirror AGENTS.md); (2) decisions.md archive (eligible 2026-05-25 for 2026-05-18 entries); (3) session-2026-05-19 retro.
+**Agent history sizes (post Scribe-9 dispatch):** Linus 4.8K, Saul 5.9K, Isabel 13.4K, Scribe 5.3K — all well under 15K threshold.
 **Untracked / must-stay files:** `.squad-session-health.txt`, `.squad/skills/remote-rewind-with-lease/`, plus unrelated 6-line mod on `.squad/agents/reuben/history.md` — deliberately untouched.
-**Deferred:** None. All gates cleared.
+**Deferred:** copilot-instructions.md W1 normalization (advisory only, not blocking).

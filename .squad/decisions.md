@@ -2655,4 +2655,6 @@ not "skill router auto-invokes by description metadata".
 
 **Files modified:** 9 agent definition files + AGENTS.md + this entry.
 
-**PR:** PR-pending (Coordinator to substitute after PR open)
+**PR:** [#72](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/72) — merged 2026-05-19T16:46Z as `1864d4c` (squash merge, 12 files, +265/-1)
+
+**Follow-up advisory captured (NOT in PR #72):** Scribe-9 flagged that `.github/copilot-instructions.md` lists the 4 W1 Identity skills under "Agent Governance & Context Skills" rather than a dedicated `#### Identity` subsection. `AGENTS.md` now has a clean `### Identity` subsection (PR #72) — `copilot-instructions.md` could be normalized to match in a future pass. Not blocking; left for next session if reactivated.
