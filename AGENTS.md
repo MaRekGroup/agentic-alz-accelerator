@@ -215,6 +215,21 @@ Budget amounts are parameterized per environment. No hardcoded values.
 
 ---
 
+## Skills
+
+The full skill catalog and agent→skill mappings are maintained in `.github/copilot-instructions.md`. Wave 5 introduced the first **Hybrid** category — extending governance and observability beyond the Azure subscription boundary to on-premises servers and off-Azure Kubernetes clusters.
+
+### Hybrid
+
+The W5 Hybrid skills use `docs/decisions/hybrid-onboarding-strategy.md` (ADR) as the canonical Arc-vs-migrate decision boundary and MI-first credential default. Both skills extend the Step 0 Assessor discovery and Step 3.5 Warden policy reach to non-Azure resources using the same governance infrastructure established for native Azure.
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-arc-servers` | `.github/skills/azure-arc-servers/` | Oracle, Assessor, Warden, Forge |
+| `azure-arc-kubernetes` | `.github/skills/azure-arc-kubernetes/` | Oracle, Assessor, Warden, Forge |
+
+---
+
 ## Day-2 Operations (Unique to ALZ Accelerator)
 
 Beyond the APEX workflow (Steps 1–7), this accelerator adds continuous operations:

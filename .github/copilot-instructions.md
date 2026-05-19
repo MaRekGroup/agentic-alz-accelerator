@@ -172,6 +172,15 @@ The W4 data platform skills cover the Azure persistence layer for the data platf
 
 When the Oracle assesses an existing data estate, sequence: `data-tier-selection.md` (ADR — decide which service tier is appropriate) → per-skill brownfield playbook (assess + harden the chosen tier).
 
+#### Hybrid
+
+The W5 Hybrid skills extend the accelerator's governance, policy, and observability reach beyond the Azure subscription boundary to on-premises servers and off-Azure Kubernetes clusters. Use these together with `docs/decisions/hybrid-onboarding-strategy.md` (ADR), which locks the Arc-vs-migrate decision boundary and the MI-first credential default (Azure Automation Hybrid Runbook Worker) for all Arc onboarding operations.
+
+- **`azure-arc-servers`** — Hybrid estate governance for on-premises and multi-cloud VMs (S6). Covers Arc-enabled server onboarding at scale (MI-first via Azure Automation HRW), guest configuration / machine configuration policy, Arc extension management (AMA, MDE, Dependency Agent), Defender for Servers Plan 2, Update Manager, and Resource Graph inventory for hybrid estates. Brownfield playbook includes ⛔ HARD GATEs on credential scope (irrevocable SP scope) and MDE extension removal (irrevocable coverage gap).
+- **`azure-arc-kubernetes`** — Hybrid K8s fleet governance for off-Azure clusters (S8). Covers Arc K8s cluster connection, Flux v2 GitOps (cluster bootstrap and multi-cluster fleet delivery), Azure Policy constraint templates via OPA Gatekeeper, cluster extensions (Container Insights, Defender for Containers), and OIDC issuer for workload identity federation. Brownfield playbook includes ⛔ HARD GATEs on Arc agent helm install and OIDC issuer enablement (irrevocable).
+
+When the Assessor (Step 0) discovers a hybrid estate or the Oracle assesses a workload with off-Azure resources, sequence: `hybrid-onboarding-strategy.md` (ADR — Arc or migrate decision) → per-skill brownfield playbook (onboard and harden the chosen resource type).
+
 #### Management & Operations
 
 | Skill | Location | Used By |
