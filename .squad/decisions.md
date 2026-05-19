@@ -2589,4 +2589,33 @@ sys.exit(1 if fail else 0)
 - `AGENTS.md`: New `## Skills` section added with `### Hybrid` subsection (table: 2 rows, `Used By: Oracle, Assessor, Warden, Forge`)
 - `.github/copilot-instructions.md`: New `#### Hybrid` section added after `#### Data Platform`; prose-bullet format matching W4 Data Platform pattern; ADR cited in section intro
 
-**PR:** PR-pending (Coordinator to substitute after PR open)
+**PR:** [#71](https://github.com/MaRekGroup/agentic-alz-accelerator/pull/71) — merged 2026-05-19T15:38Z as `f736018` (squash merge, 11 files, +1036/-237)
+
+---
+
+## 2026-05-19 — Session close: W5 merged, accelerator catalog COMPLETE
+
+**Coordinator session-close, post-merge of PR #71.**
+
+- Main synced (`f736018`), feature branch force-deleted, github remote pruned
+- **Final catalog state: 14 / 14 skills shipped — catalog officially closed**
+- PR substitution applied (above) + identity/now.md updated to merged state
+- decisions.md size: 201K — entries from 2026-05-18 become archive-eligible on 2026-05-25 (next-session check)
+- All active agent history files under 15K threshold post Scribe-8 summarization — no follow-up summarization required
+- `.squad/agents/reuben/history.md` still has unrelated 6-line modification — unstaged, deliberately untouched (predates this session's W5 work)
+- Untracked must-stay files left intact: `.squad-session-health.txt`, `.squad/skills/remote-rewind-with-lease/`
+
+**Total W5 workflow:** Linus-7 plan (419s) → Linus-8 ADR (563s) → Saul-12 + Saul-13 parallel drafts (637s + 484s) → Isabel-9 verdict (486s) → Coordinator 5 surgical edits → Scribe-8 consolidation + 2× history summarization (811s) → PR #71 merged in <2 hours from W5 dispatch.
+
+**Skill catalog final tally:**
+
+| Wave | Skills | Theme |
+|---|---|---|
+| W1 | 4 | Identity (Entra app reg, conditional access, hybrid identity, identity governance) |
+| W2 | 3 | Compute (AKS, VMs, Container Apps) |
+| W3 | 2 | Tenant (management groups, subscription vending) |
+| W4 | 3 | Data Platform (SQL Database, Cosmos DB, Storage Accounts) |
+| W5 | 2 | Hybrid (Arc-enabled servers, Arc-enabled Kubernetes) |
+| **Total** | **14** | **Closed per Yeselam W5 Q1 decision** |
+
+**Next planning trigger:** Yeselam-initiated only. Squad is idle.
