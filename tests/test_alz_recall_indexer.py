@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 from alz_recall.indexer import (
-    _classify,
     _STEP7_CANONICAL,
+    _classify,
     ensure_db,
     ensure_fresh,
     reindex,
