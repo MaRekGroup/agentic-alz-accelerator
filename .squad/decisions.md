@@ -2532,3 +2532,61 @@ sys.exit(1 if fail else 0)
 **Lesson:** Hard format limits in tooling are discovered late if not in the validation loop. Future skill-authoring waves must include this check in the Scribe consolidation gate, before draft handoff to Isabel.
 
 ---
+
+## 2026-05-19 · Wave 5 — Linus-7 Open Questions resolved
+
+**Plan:** `.squad/decisions/inbox/linus-wave5-plan.md` (Linus-7, 350 lines, 9/9 PASS, 22.6KB, gitignored)
+**Scope confirmed:** `azure-arc-servers` + `azure-arc-kubernetes` (final 2 of 14)
+**Shared ADR:** YES → `docs/decisions/hybrid-onboarding-strategy.md` (Linus-8 to author next)
+
+**Yeselam's decisions on 5 open questions (Coordinator-recommended defaults all accepted):**
+
+1. **Catalog finality:** 14 = final. ADR explicitly lists Arc data services (SQL MI / PostgreSQL on Arc) as **out-of-scope** (potential future post-14 work). No W6 micro-wave planned.
+
+2. **Scenario codes:** Reuse existing **S6 (Hybrid Estate Governance)** for `azure-arc-servers` and **S8 (Brownfield K8s Fleet)** for `azure-arc-kubernetes`. No new S9/S10. Maintains W1–W4 taxonomy continuity.
+
+3. **Arc onboarding credential default:** **Managed Identity via Azure Automation Hybrid Runbook Worker (MI-first)**. Service principal only as fallback when MI is unavailable (e.g., older on-prem environments lacking Hybrid Worker reach). Aligns with non-negotiable security baseline rule #4 (Managed Identity preferred). The shared ADR must state this default explicitly so Saul does not invent independent solutions in each skill.
+
+4. **Brownfield vs. greenfield weighting in SKILL.md structure:** **Balanced** treatment (greenfield + brownfield equally weighted), NOT brownfield-primary. Rationale per Yeselam: *"the accelerator should work for new deployment and also in a brownfield scenario...should be an enhancement"* — applies to W5 the same as W1–W4. Even though Arc's strongest value is brownfield Step 0 hybrid discovery, the SKILL.md structure remains balanced.
+
+5. **AGENTS.md section placement:** Create a **new "Hybrid" section** in both `AGENTS.md` and `.github/copilot-instructions.md`. Do NOT place Arc skills under existing "Networking" (already 19 skills, surplus per gap analysis). Dedicated Hybrid section signals cloud↔on-prem boundary as first-class concern, matches CAF design-area framing.
+
+**These answers are authoritative** for: Linus-8 ADR authoring, Saul-arc-servers + Saul-arc-kubernetes drafting, Isabel quality gate review, and Scribe consolidation.
+
+---
+
+---
+
+## 2026-05-19 — Wave 5 Drafts Shipped — Hybrid
+
+**Branch:** `wave5-hybrid-planning`
+**Plan:** Linus-7 (350 lines, 9/9 self-grade PASS, plan-stage APPROVE WITH CONDITIONS → all conditions closed inline)
+**ADR:** `docs/decisions/hybrid-onboarding-strategy.md` (Linus-8, 129 lines, 9 sections — Arc-vs-migrate decision boundary, MI-first credential default, onboarding sequence model, WAF trade-off matrix, anti-patterns)
+**Skills:**
+- `.github/skills/azure-arc-servers/SKILL.md` (Saul-12, S6 Hybrid Estate Governance, ⛔ HARD GATEs on credential scope + MDE extension removal)
+- `.github/skills/azure-arc-kubernetes/SKILL.md` (Saul-13, S8 Brownfield K8s Fleet, ⛔ HARD GATEs on Arc agent helm install + OIDC issuer enablement)
+
+**Isabel-9 verdict:** APPROVE WITH CONDITIONS — 0 blockers, 2 majors, 3 should-fixes, 2 considers.
+
+**Surgical edits applied (all conditions closed, no agent re-spawn):**
+- M1 closed: `azure-arc-servers` WAF table missing Performance Efficiency row — row added
+- M2 closed: `azure-arc-kubernetes` greenfield section missing Security Baseline Alignment table — table added
+- SF-1 closed: `azure-arc-servers` brownfield HARD GATE Step 3 pre-condition checklist tightened
+- SF-2 closed: `azure-arc-kubernetes` Flux v2 kustomization example corrected
+- C2 promoted and applied: cross-skill sequencing sentence added to arc-servers brownfield intro (mirrors W2/W3/W4 inline sequencing pattern)
+
+**Yeselam Q1-Q5 decisions:**
+- Q1 (catalog finality): 14 = final; Arc data services out of scope (no future W6 micro-wave planned)
+- Q2 (scenario codes): S6 for azure-arc-servers, S8 for azure-arc-kubernetes (reuses existing taxonomy)
+- Q3 (onboarding credential): MI-first via Azure Automation HRW; SP only as fallback; stated explicitly in shared ADR
+- Q4 (brownfield vs greenfield weighting): Balanced — equal weight in SKILL.md structure per Yeselam directive
+- Q5 (AGENTS.md placement): New dedicated **Hybrid** section in both AGENTS.md and copilot-instructions.md (not added under Networking)
+
+**Capacity:** 14 / 14 skills shipped — **MILESTONE: catalog closed.**
+- W1 = 4 (identity), W2 = 3 (compute), W3 = 2 (tenant), W4 = 3 (data), W5 = 2 (hybrid)
+
+**Catalog updates (Scribe-8):**
+- `AGENTS.md`: New `## Skills` section added with `### Hybrid` subsection (table: 2 rows, `Used By: Oracle, Assessor, Warden, Forge`)
+- `.github/copilot-instructions.md`: New `#### Hybrid` section added after `#### Data Platform`; prose-bullet format matching W4 Data Platform pattern; ADR cited in section intro
+
+**PR:** PR-pending (Coordinator to substitute after PR open)
