@@ -21,7 +21,7 @@ current estate before the standard workflow begins.
 | **MCP Servers** | Azure Pricing, Azure Platform (consolidated), Draw.io |
 | **Validation Scripts** | Security baseline, cost governance, pre-commit hooks |
 | **CI/CD Pipelines** | GitHub Actions with OIDC, approval environments, self-hosted runner support |
-| **Bootstrap Checklist** | Excel workbook to gather settings from networking, security, identity teams |
+| **Bootstrap Checklist** | Inline checklist (root README + interactive HTML guide) covering networking, security, and identity inputs |
 | **TDD Generator** | As-built Technical Design Documents with Azure architecture diagrams |
 | **Documentation** | Architecture doc (Word), stakeholder deck (PowerPoint), interactive HTML guide |
 
@@ -174,15 +174,21 @@ Results include per-subscription compliance percentages and detailed violation l
 
 ### Bootstrap Settings Checklist
 
-Complete `docs/ALZ_Bootstrap_Settings_Checklist.xlsx` **before** running the bootstrap:
+Gather the following inputs **before** running the bootstrap. Coordinate with
+your networking, security, and identity teams to collect values in parallel.
+The full interactive checklist with tooltips lives in
+[`docs/guide.html`](docs/guide.html) under **Prerequisites → Bootstrap Settings
+Checklist**.
 
-| Tab | What It Gathers |
-|-----|-----------------|
-| **Bootstrap** | IaC choice, tenant ID, 10 subscription IDs, OIDC, GitHub environments, approval gates |
-| **Bicep** | Connectivity topology, Firewall SKU, IP addressing, policies, Defender plans, budgets |
-| **Terraform** | Same as Bicep + state backend config, Sovereign LZ |
+| Area | Required Inputs |
+|------|-----------------|
+| **Bootstrap** | IaC choice (Bicep/Terraform), tenant ID, 10 subscription IDs, OIDC app registration, GitHub environments, MG prefix, primary region, approval gate reviewers |
+| **Bicep** | Connectivity topology (hub-spoke/vWAN), Firewall SKU, DDoS plan, IP addressing (CIDRs), policy initiatives, Defender plans, budget amounts per env |
+| **Terraform** | Same as Bicep + state storage account, resource group, container name; Sovereign LZ option |
 
-Share the checklist with your networking, security, and identity teams to gather inputs in parallel.
+> The OIDC setup script (`scripts/setup-oidc.sh`) and
+> `environments/subscriptions.json` capture most of these values
+> programmatically once gathered.
 
 ## Quick Start
 
@@ -304,15 +310,17 @@ python scripts/validators/validate_cost_governance.py infra/
 │   ├── azure-pricing-mcp/     # APEX pricing submodule (18 tools)
 │   └── drawio-mcp-server/     # Diagram generation (Deno/TypeScript)
 ├── .github/
-│   ├── workflows/             # CI/CD (8 workflows)
+│   ├── workflows/             # CI/CD — primary deployment workflows + operational automation
 │   │   ├── 1-bootstrap.yml          # One-time MG hierarchy setup
 │   │   ├── 2-platform-deploy.yml    # Platform LZ deployments
 │   │   ├── 3-app-deploy.yml         # Application LZ deployments
-│   │   ├── assess.yml               # Brownfield WAF-aligned assessment
+│   │   ├── 4-monitor.yml            # Day-2 compliance + drift scanning (Sentinel)
 │   │   ├── 5-pr-validate.yml        # PR validation (lint, security, what-if)
-│   │   ├── monitor.yml              # Multi-subscription compliance scanning
+│   │   ├── assess.yml               # Brownfield WAF-aligned assessment
+│   │   ├── deploy-on-merge.yml      # Auto-deploy changed LZs on merge to main
 │   │   ├── reusable-deploy.yml      # Shared: resolve → validate → plan → deploy → verify
-│   │   └── assign-role.yml          # Utility: RBAC role assignments to SPN
+│   │   ├── assign-role.yml          # Utility: RBAC role assignments to SPN
+│   │   └── squad-*.yml              # Squad automation (heartbeat, triage, label sync)
 │   ├── agents/                # Agent definition files
 │   ├── skills/                # Skill SKILL.md entry points
 │   └── instructions/          # Per-filetype coding instructions
