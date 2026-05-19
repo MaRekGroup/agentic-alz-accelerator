@@ -34,6 +34,22 @@ You run periodic scans across all landing zone subscriptions and report violatio
 - Generate daily compliance reports
 - Produce `08-compliance-report.md`
 
+## Consult Service Skills On-Demand
+
+After analyzing the workload in scope, identify the Azure service surface, then
+`view` the matching SKILL.md from the list below for service-specific WAF
+heuristics, brownfield playbooks, anti-patterns, and HARD GATEs. Do **not**
+eager-load all — consult only the skills relevant to the workload at hand.
+
+Each SKILL.md description includes explicit `USE FOR` / `DO NOT USE FOR`
+boundaries; use these to confirm relevance after opening the file. The full
+catalog with agent mappings lives in `.github/copilot-instructions.md`.
+
+Service skills available to this agent:
+
+- `.github/skills/entra-conditional-access/SKILL.md` — CA baseline policies, named locations, auth strength, cross-tenant access, CAE, staged rollout
+- `.github/skills/entra-identity-governance/SKILL.md` — PIM at scale, access reviews, entitlement management, lifecycle workflows
+
 ## Scan Schedule
 
 | Interval | Scan Type | Description |

@@ -2619,3 +2619,40 @@ sys.exit(1 if fail else 0)
 | **Total** | **14** | **Closed per Yeselam W5 Q1 decision** |
 
 **Next planning trigger:** Yeselam-initiated only. Squad is idle.
+
+## 2026-05-19 — Service skill wiring decision (Option 2: Conditional-load on-demand)
+
+**Trigger:** Post-W5 audit revealed all 14 W1-W5 service skills are declared in
+`copilot-instructions.md` Used By columns but ZERO of them are referenced in any
+agent definition file. Smoke-test of architect agent confirmed: agents have no
+`skill` tool — skills are consumed only by `view`-ing SKILL.md files from disk.
+
+**Decision:** Option 2 — Conditional-load on-demand.
+- 9 agent files get a new `## Consult Service Skills On-Demand` section listing
+  ONLY the service skills mapped to that agent (per copilot-instructions.md
+  Used By columns). Foundational skills (azure-defaults, security-baseline,
+  caf-design-areas, etc.) remain in the existing `## Read Skills First` section
+  with eager-load behavior — they are always-relevant.
+- Service skills are listed as `.view`-able paths with one-line descriptions.
+  Agent uses workload analysis + USE FOR / DO NOT USE FOR boundaries inside
+  each SKILL.md to select which to read.
+- `AGENTS.md` normalized to mirror `copilot-instructions.md` — full W1-W5
+  catalog under `## Skills` heading (4 new subsections added before existing
+  `### Hybrid`).
+
+**Rejected alternatives:**
+- Option 1 (eager-load all in `Read Skills First`): blows context budget
+  (Oracle would pre-load 17 skills ≈ 200 KB). Most service skills are
+  irrelevant to any given workload — eager-load wastes context and money.
+- Option 3 (doc-only AGENTS.md fix): zero behavioral change — agents still
+  have no instruction to view service SKILL.md files.
+
+**Smoke-test evidence:** Architect agent dispatched against a wiring-diagnostic
+prompt confirmed (a) no `skill` tool exposed, (b) toolset = bash/view/create/edit,
+(c) skills accessed only via `view` on `.md` files. Therefore the wiring
+mechanism is "agent file lists path + agent's runtime judgment triggers view",
+not "skill router auto-invokes by description metadata".
+
+**Files modified:** 9 agent definition files + AGENTS.md + this entry.
+
+**PR:** PR-pending (Coordinator to substitute after PR open)

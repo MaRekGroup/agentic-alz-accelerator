@@ -217,7 +217,47 @@ Budget amounts are parameterized per environment. No hardcoded values.
 
 ## Skills
 
-The full skill catalog and agent→skill mappings are maintained in `.github/copilot-instructions.md`. Wave 5 introduced the first **Hybrid** category — extending governance and observability beyond the Azure subscription boundary to on-premises servers and off-Azure Kubernetes clusters.
+The full skill catalog and agent→skill mappings are maintained in `.github/copilot-instructions.md`. Waves 1–5 introduced service-specific skill categories covering Identity, Compute, Tenant Architecture, Data Platform, and Hybrid.
+
+### Identity
+
+The W1 Identity skills cover the 4 Entra ID surface areas most commonly encountered in Azure Landing Zone deployments: app registration and workload federation, Conditional Access policy governance, hybrid identity synchronization, and identity lifecycle governance (PIM, access reviews, entitlement management).
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `entra-app-registration` | `.github/skills/entra-app-registration/` | Warden, Envoy |
+| `entra-conditional-access` | `.github/skills/entra-conditional-access/` | Warden, Oracle, Sentinel, Challenger |
+| `entra-connect-hybrid-identity` | `.github/skills/entra-connect-hybrid-identity/` | Warden, Oracle, Forge, Assessor |
+| `entra-identity-governance` | `.github/skills/entra-identity-governance/` | Warden, Oracle, Sentinel, Challenger |
+
+### Compute
+
+The W2 Compute skills cover the 3 primary Azure compute tiers used in enterprise Landing Zones: AKS for container-native workloads, Virtual Machines for lift-and-shift and regulated estates, and Container Apps for serverless container workloads.
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-kubernetes-service` | `.github/skills/azure-kubernetes-service/` | Oracle, Forge, Strategist, Assessor |
+| `azure-virtual-machines` | `.github/skills/azure-virtual-machines/` | Oracle, Forge, Strategist, Assessor |
+| `azure-container-apps` | `.github/skills/azure-container-apps/` | Oracle, Forge, Strategist |
+
+### Tenant Architecture
+
+The W3 Tenant Architecture skills cover the foundational resource organization layer for Landing Zones. Use these together with `docs/decisions/billing-tenant-hierarchy.md` (ADR), which locks the management group hierarchy pattern and subscription vending threshold decisions.
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `management-group-architecture` | `.github/skills/management-group-architecture/` | Warden, Oracle, Strategist, Assessor |
+| `subscription-vending` | `.github/skills/subscription-vending/` | Warden, Strategist, Envoy, Forge |
+
+### Data Platform
+
+The W4 Data Platform skills cover the Azure persistence layer for the data platform tier. Use these together with `docs/decisions/data-tier-selection.md` (ADR), which locks the "Choose SQL when / Cosmos when / Storage when" decision boundary.
+
+| Skill | Location | Used By |
+|-------|----------|---------|
+| `azure-sql-database` | `.github/skills/azure-sql-database/` | Oracle, Forge |
+| `azure-cosmos-db` | `.github/skills/azure-cosmos-db/` | Oracle, Forge |
+| `azure-storage-accounts` | `.github/skills/azure-storage-accounts/` | Oracle, Forge |
 
 ### Hybrid
 

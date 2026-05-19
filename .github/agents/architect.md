@@ -57,6 +57,32 @@ Before doing any work, read these skills:
 4. `.github/skills/azure-cost-optimization/SKILL.md` — cost optimization guidance
 5. `.github/skills/security-baseline/SKILL.md` — 6 non-negotiable security rules
 
+## Consult Service Skills On-Demand
+
+After analyzing the workload in scope, identify the Azure service surface, then
+`view` the matching SKILL.md from the list below for service-specific WAF
+heuristics, brownfield playbooks, anti-patterns, and HARD GATEs. Do **not**
+eager-load all — consult only the skills relevant to the workload at hand.
+
+Each SKILL.md description includes explicit `USE FOR` / `DO NOT USE FOR`
+boundaries; use these to confirm relevance after opening the file. The full
+catalog with agent mappings lives in `.github/copilot-instructions.md`.
+
+Service skills available to this agent:
+
+- `.github/skills/entra-conditional-access/SKILL.md` — CA baseline policies, named locations, auth strength, cross-tenant access, CAE, staged rollout
+- `.github/skills/entra-connect-hybrid-identity/SKILL.md` — Cloud Sync, Entra Connect, ADFS migration, PHS/PTA, SSO, multi-forest topologies
+- `.github/skills/entra-identity-governance/SKILL.md` — PIM at scale, access reviews, entitlement management, lifecycle workflows
+- `.github/skills/azure-kubernetes-service/SKILL.md` — AKS clusters, node pools, workload identity, CNI modes, GitOps patterns
+- `.github/skills/azure-virtual-machines/SKILL.md` — VM availability, security hardening, SKU selection, Trusted Launch, OS disk encryption
+- `.github/skills/azure-container-apps/SKILL.md` — Container Apps Environment, KEDA autoscaling, Dapr, revision management, jobs
+- `.github/skills/management-group-architecture/SKILL.md` — MG hierarchy design, policy inheritance, subscription placement, MG move analysis
+- `.github/skills/azure-sql-database/SKILL.md` — SQL DB and MI topology, failover groups, Entra-only auth migration, TDE with CMK
+- `.github/skills/azure-cosmos-db/SKILL.md` — Multi-region writes, consistency tuning, partition strategy, RU provisioning, PITR backup
+- `.github/skills/azure-storage-accounts/SKILL.md` — Blob isolation, lifecycle tiering, immutability, shared-key disable, brownfield hardening
+- `.github/skills/azure-arc-servers/SKILL.md` — Arc-enabled server onboarding, machine config policy, extensions, Defender Plan 2
+- `.github/skills/azure-arc-kubernetes/SKILL.md` — Arc K8s connection, Flux v2 GitOps, OPA Gatekeeper policy, cluster extensions
+
 ## Prerequisites Check
 
 Validate `01-requirements.md` exists in `agent-output/{customer}/`.

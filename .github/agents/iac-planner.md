@@ -65,6 +65,25 @@ Before doing any work, read these skills:
    - Bicep → `.github/skills/azure-bicep-patterns/SKILL.md`
    - Terraform → `.github/skills/terraform-patterns/SKILL.md`
 
+## Consult Service Skills On-Demand
+
+After analyzing the workload in scope, identify the Azure service surface, then
+`view` the matching SKILL.md from the list below for service-specific WAF
+heuristics, brownfield playbooks, anti-patterns, and HARD GATEs. Do **not**
+eager-load all — consult only the skills relevant to the workload at hand.
+
+Each SKILL.md description includes explicit `USE FOR` / `DO NOT USE FOR`
+boundaries; use these to confirm relevance after opening the file. The full
+catalog with agent mappings lives in `.github/copilot-instructions.md`.
+
+Service skills available to this agent:
+
+- `.github/skills/azure-kubernetes-service/SKILL.md` — AKS clusters, node pools, workload identity, CNI modes, GitOps patterns
+- `.github/skills/azure-virtual-machines/SKILL.md` — VM availability, security hardening, SKU selection, Trusted Launch, OS disk encryption
+- `.github/skills/azure-container-apps/SKILL.md` — Container Apps Environment, KEDA autoscaling, Dapr, revision management, jobs
+- `.github/skills/management-group-architecture/SKILL.md` — MG hierarchy design, policy inheritance, subscription placement, MG move analysis
+- `.github/skills/subscription-vending/SKILL.md` — Automated subscription provisioning, guardrail injection, MG placement, lifecycle
+
 ## Prerequisites Check
 
 Validate these files exist in `agent-output/{customer}/`:
