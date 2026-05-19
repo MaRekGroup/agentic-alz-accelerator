@@ -2489,3 +2489,46 @@ Wave 2 drafts now meet APPROVE CLEAN bar:
 **Session context:** Yeselam stopping for today after Wave 4 ship. Next session will run Wave 5 closure (2 hybrid skills remaining). Identity/now.md updated with next-session focus.
 
 ---
+
+## 2026-05-19 · Hotfix · SKILL.md description hard limit discovered
+
+**Trigger:** Yeselam pasted Copilot CLI load error at session start:
+```
+✖ .github/skills/azure-cosmos-db/SKILL.md: Skill description must be at most 1024 characters
+✖ .github/skills/azure-sql-database/SKILL.md: Skill description must be at most 1024 characters
+✖ .github/skills/azure-storage-accounts/SKILL.md: Skill description must be at most 1024 characters
+✖ .github/skills/subscription-vending/SKILL.md: Skill description must be at most 1024 characters
+```
+
+**Root cause:** Copilot CLI enforces a **1024-character maximum** on the YAML frontmatter `description` field in SKILL.md files. Skills exceeding this fail to load silently (error only surfaces at session start). Saul's W3 (subscription-vending) and W4 (3 data-platform skills) descriptions were drafted in the 1290–1397 char range — too verbose for the YAML frontmatter, even though the `USE FOR / DO NOT USE FOR` routing structure itself is correct and desired.
+
+**Fix applied (this commit):**
+- Trimmed all 4 offending descriptions to 956–1010 parsed chars (target ≤1020 for safe buffer)
+- Preserved the `USE FOR / DO NOT USE FOR` routing structure (it's what makes skills discoverable)
+- Cut verbose enumerations: removed parenthetical re-explanations, contracted enumerated lists, dropped "future analytics-wave skill" → "future" type qualifiers
+- Full repo audit: 86 SKILL.md files total, 0 over limit post-fix, 2 in WARN band (1000–1023) for monitoring (azure-kubernetes-service at 1002, azure-sql-database at 1010)
+
+**Constraint propagated upstream:**
+- Saul charter (`.squad/agents/saul/charter.md`): Boundaries now states description MUST be ≤1024 chars; verbose content goes in body Overview, not frontmatter
+- Scribe charter (`.squad/agents/scribe/charter.md`): Responsibilities now require pre-staging description-length verification
+- W5 Saul spawn briefs must include this constraint
+- W5 Scribe consolidation must run the verification check before staging
+
+**Verification tool (use this in future Scribe runs):**
+```bash
+python3 -c "
+import yaml, glob, sys
+fail=0
+for p in sorted(glob.glob('.github/skills/*/SKILL.md')):
+    src=open(p).read()
+    if not src.startswith('---'): continue
+    d=yaml.safe_load(src.split('---',2)[1])
+    n=len(d.get('description',''))
+    if n>1024: print(f'FAIL {n} {p}'); fail+=1
+sys.exit(1 if fail else 0)
+"
+```
+
+**Lesson:** Hard format limits in tooling are discovered late if not in the validation loop. Future skill-authoring waves must include this check in the Scribe consolidation gate, before draft handoff to Isabel.
+
+---

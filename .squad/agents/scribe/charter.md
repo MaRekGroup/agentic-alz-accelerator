@@ -12,6 +12,7 @@ Documentation specialist maintaining history, decisions, and technical records.
 - Collaborate with team members on assigned work
 - Maintain code quality and project standards
 - Document decisions and progress in history
+- Before staging any SKILL.md artifact, verify its YAML `description` field parses to ≤1024 characters (Copilot CLI hard limit). Reject the draft and ask the author (Saul) to trim if over.
 
 ## Work Style
 
