@@ -24,6 +24,7 @@ current estate before the standard workflow begins.
 | **Bootstrap Checklist** | Inline checklist (root README + interactive HTML guide) covering networking, security, and identity inputs |
 | **TDD Generator** | As-built Technical Design Documents with Azure architecture diagrams |
 | **Documentation** | Architecture doc (Word), stakeholder deck (PowerPoint), interactive HTML guide |
+| **Squad Integration** | Copilot Squad AI team with persistent roster, work routing, sprint ceremonies, and issue automation |
 
 ## CAF Design Area Alignment
 
@@ -139,7 +140,7 @@ Primary GitHub Actions workflows for the deployment + Day-2 ops lifecycle:
 | `assign-role.yml` | Manual (utility) | Assign/remove RBAC roles on platform subscriptions |
 | `assess.yml` | Manual | Brownfield WAF-aligned assessment (discovery + WARA + reports) |
 
-The repo also ships operational automation workflows (`deploy-on-merge`, `squad-*`, `sync-squad-labels`, `cleanup-old-rg`, `generate-diagrams`, `deploy-docs`) not detailed here.
+The repo also ships operational automation workflows (`deploy-on-merge`, `cleanup-old-rg`, `generate-diagrams`, `deploy-docs`) and [Squad automation workflows](#github-automation-workflows) (`squad-triage`, `squad-issue-assign`, `squad-heartbeat`).
 
 ### Self-Hosted Runner Support
 
@@ -361,6 +362,15 @@ The repository enforces quality gates at commit, push, and CI via `lefthook.yml`
 │   ├── agents/                # Agent definition files
 │   ├── skills/                # Skill SKILL.md entry points
 │   └── instructions/          # Per-filetype coding instructions
+├── .squad/                    # Squad AI team state (roster, routing, decisions, skills)
+│   ├── team.md                      # Authoritative agent roster
+│   ├── routing.md                   # Work routing and handoff rules
+│   ├── ceremonies.md                # Design reviews and retrospectives
+│   ├── agents/                      # Per-agent charters and history
+│   ├── skills/                      # Squad-authored skill patterns
+│   ├── decisions/                   # Decision log and inbox drop-boxes
+│   ├── identity/                    # Current team focus (now.md)
+│   └── orchestration-log/           # Session orchestration history
 ├── pipelines/                 # Legacy / Azure DevOps pipelines
 ├── docs/                      # Security baseline, cost governance, workflow
 │   └── tdd/                   # Generated Technical Design Documents
@@ -371,6 +381,86 @@ The repository enforces quality gates at commit, push, and CI via `lefthook.yml`
 │   └── scripts/               # Utility scripts
 └── tests/                     # 197 tests across 13 test files
 ```
+
+## Squad — AI Team Collaboration
+
+The accelerator integrates [Copilot Squad](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-assigning-tasks-to-copilot#about-copilot-squad) for multi-agent team collaboration. Squad provides a persistent roster of AI agents — each mapped to an APEX workflow step — with structured routing, handoff protocols, sprint ceremonies, and issue-driven automation.
+
+### What Squad Does
+
+Squad wraps the APEX agent workflow with team-level coordination:
+
+- **Persistent roster** — agents retain charters, history, and decision context across sessions
+- **Work routing** — incoming requests are triaged and routed to the correct agent(s) via a decision tree
+- **Handoff protocols** — structured messages flow between agents with scope, artifacts, blockers, and next actions
+- **Sprint ceremonies** — design reviews before multi-agent work and retrospectives after failures
+- **Approval gate enforcement** — the Challenger agent reviews outputs at gates with adversarial depth scaled by complexity
+- **Issue automation** — GitHub workflows auto-triage `squad`-labeled issues and assign to the right agent
+
+### Agent Roster (Ocean's Eleven Casting)
+
+Each Squad agent maps to an APEX workflow step:
+
+| Squad Agent | Role | APEX Step | Codename |
+|-------------|------|-----------|----------|
+| Danny | Orchestrator | Workflow routing | Conductor |
+| Benedict | Scrum Master | Sprint planning | — |
+| Rusty | Requirements | Step 1 | Scribe |
+| Linus | Architect | Step 2 | Oracle |
+| Basher | Design | Step 3 | Artisan |
+| Saul | Governance | Step 3.5 | Warden |
+| Reuben | IaC Planner | Step 4 | Strategist |
+| Livingston | Bicep Code | Step 5b | Forge |
+| Yen | Terraform Code | Step 5t | Forge |
+| Frank | Deployment | Step 6 | Envoy |
+| Tess | Documentation | Step 7 | Chronicler |
+| Turk | Monitoring | Step 8 | Sentinel |
+| Virgil | Remediation | Step 9 | Mender |
+| Isabel | Challenger | Gates 1,2,4,5 | Challenger |
+| Terry | Assessment | Step 0 | Assessor |
+| Scribe | Session Logger | Background | — |
+| Ralph | Work Monitor | Background | — |
+
+### `.squad/` Directory Structure
+
+| Path | Purpose |
+|------|---------|
+| `team.md` | Authoritative roster with roles, charters, and status |
+| `routing.md` | Work routing decision tree, handoff rules, fan-out/merge patterns |
+| `ceremonies.md` | Design review and retrospective triggers and agendas |
+| `agents/{name}/` | Per-agent charter, history, and session context |
+| `skills/` | Squad-authored skill patterns (e.g., skill authoring, diagram generation) |
+| `decisions/` | Decision log with inbox drop-boxes for concurrent writes |
+| `identity/now.md` | Current team focus, status, and deferred items |
+| `orchestration-log/` | Session-level orchestration history |
+
+### GitHub Automation Workflows
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `squad-triage.yml` | `squad` label added | Auto-classify and route issues to agents |
+| `squad-issue-assign.yml` | `squad:{agent}` label | Assign ownership to the named agent |
+| `squad-heartbeat.yml` | Scheduled | Keep-alive monitoring and backlog motion |
+
+### How Squad and APEX Interact
+
+```
+User Request
+    │
+    ▼
+Danny (Orchestrator) ── classifies ──▶ Route to HVE step owner(s)
+    │                                       │
+    ├── Single step ──────────────────▶ Direct route (e.g., Rusty for requirements)
+    ├── Multi-step ───────────────────▶ Fan-out to parallel agents
+    ├── Major request ────────────────▶ Benedict + Danny for sprint framing
+    └── Approval gate ────────────────▶ Isabel for adversarial review
+                                            │
+                                     Gate pass/fail
+                                            │
+                                     Next APEX step
+```
+
+Squad agents produce the same artifacts as the APEX workflow agents — the roster adds coordination, history, and team governance on top of the core workflow.
 
 ## References
 
