@@ -156,7 +156,7 @@ class DiagramEngine:
             filename=outpath,
             show=False,
             direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8"},
+            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "0.8", "dpi": "200"},
         ):
             root = ManagementGroups(f"{mg_prefix}\n(Root)")
 
@@ -188,24 +188,24 @@ class DiagramEngine:
                 decom = ManagementGroups("Decommissioned")
                 decom_sub = Subscriptions("Decommissioned\nSubscription(s)")
 
-            root >> Edge(color="darkblue") >> [mgmt, conn, ident, sec]
-            root >> Edge(color="green") >> [corp, online]
-            root >> Edge(color="gray", style="dashed") >> [sandbox, decom]
+            root >> Edge(color="purple") >> [mgmt, conn, ident, sec]
+            root >> Edge(color="purple") >> [corp, online]
+            root >> Edge(color="purple", style="dashed") >> [sandbox, decom]
 
-            mgmt >> Edge(color="darkblue", style="dashed") >> mgmt_sub
+            mgmt >> Edge(color="purple", style="dashed") >> mgmt_sub
             mgmt >> Edge(color="purple", style="dotted") >> mgmt_policy
-            conn >> Edge(color="darkblue", style="dashed") >> conn_sub
+            conn >> Edge(color="purple", style="dashed") >> conn_sub
             conn >> Edge(color="purple", style="dotted") >> conn_policy
-            ident >> Edge(color="darkblue", style="dashed") >> ident_sub
+            ident >> Edge(color="purple", style="dashed") >> ident_sub
             ident >> Edge(color="purple", style="dotted") >> ident_policy
-            sec >> Edge(color="darkblue", style="dashed") >> sec_sub
+            sec >> Edge(color="purple", style="dashed") >> sec_sub
             sec >> Edge(color="purple", style="dotted") >> sec_policy
-            corp >> Edge(color="green", style="dashed") >> corp_sub
+            corp >> Edge(color="purple", style="dashed") >> corp_sub
             corp >> Edge(color="purple", style="dotted") >> corp_policy
-            online >> Edge(color="green", style="dashed") >> online_sub
+            online >> Edge(color="purple", style="dashed") >> online_sub
             online >> Edge(color="purple", style="dotted") >> online_policy
-            sandbox >> Edge(color="gray", style="dashed") >> sandbox_sub
-            decom >> Edge(color="gray", style="dashed") >> decom_sub
+            sandbox >> Edge(color="purple", style="dashed") >> sandbox_sub
+            decom >> Edge(color="purple", style="dashed") >> decom_sub
 
         return outpath + ".png"
 
@@ -222,8 +222,14 @@ class DiagramEngine:
             "Hub-Spoke Network Topology",
             filename=outpath,
             show=False,
-            direction="LR",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.0"},
+            direction="TB",
+            graph_attr={
+                "bgcolor": "white",
+                "pad": "0.5",
+                "ranksep": "0.8",
+                "nodesep": "0.4",
+                "dpi": "200",
+            },
         ):
             with Cluster("On-Premises"):
                 onprem = VirtualNetworkGateways("VPN / ER\nGateway")
@@ -236,7 +242,6 @@ class DiagramEngine:
                 with Cluster("AzureBastionSubnet\n10.0.3.0/24"):
                     bastion = Bastions("Bastion")
                 hub_rt = RouteTables("Hub UDR\n0.0.0.0/0 → FW")
-                hub_ddos = NetworkSecurityGroups("DDoS\nProtection")
 
             with Cluster("Spoke — Management — 10.1.0.0/16"):
                 mgmt_nsg = NetworkSecurityGroups("NSG")
@@ -259,14 +264,21 @@ class DiagramEngine:
             with Cluster("Private DNS Zones"):
                 dns = DNSZones("privatelink.*\n.database.cosmos\n.vaultcore.net")
 
-            # Connections
+            # On-prem to hub
             onprem >> Edge(label="S2S / ER", color="darkblue") >> hub_gw
-            hub_gw >> fw
-            fw >> Edge(label="VNet Peering", color="orange") >> law
-            fw >> Edge(label="VNet Peering", color="orange") >> dc
-            fw >> Edge(label="VNet Peering", color="green") >> app
-            app >> pe >> db
-            pe >> Edge(style="dashed", color="purple", label="DNS\nresolution") >> dns
+            hub_gw >> Edge(color="darkblue") >> fw
+
+            # Hub to spokes (peering)
+            fw >> Edge(label="Peering", color="orange") >> law
+            fw >> Edge(label="Peering", color="orange") >> dc
+            fw >> Edge(label="Peering", color="green") >> app
+
+            # App data flow
+            app >> Edge(color="steelblue") >> pe
+            pe >> Edge(color="steelblue") >> db
+
+            # DNS resolution
+            pe >> Edge(style="dashed", color="gray", label="DNS resolution") >> dns
 
         return outpath + ".png"
 
@@ -283,7 +295,13 @@ class DiagramEngine:
             filename=outpath,
             show=False,
             direction="TB",
-            graph_attr={"bgcolor": "white", "pad": "0.5", "ranksep": "1.0"},
+            graph_attr={
+                "bgcolor": "white",
+                "pad": "0.5",
+                "ranksep": "0.8",
+                "nodesep": "0.4",
+                "dpi": "200",
+            },
         ):
             with Cluster("Governance & Compliance"):
                 mg = ManagementGroups("Mgmt Groups")
@@ -309,15 +327,15 @@ class DiagramEngine:
 
             # Governance flow
             mg >> Edge(color="darkblue") >> policy
-            policy >> Edge(label="evaluate", color="purple") >> compliance_node
-            policy >> Edge(label="enforce", color="purple") >> defender
-            defender >> Edge(label="security alerts", color="red") >> sentinel_node
-            cost >> Edge(label="budget\nalerts", color="orange", style="dashed") >> ag
+            policy >> Edge(label="evaluate", color="steelblue") >> compliance_node
+            policy >> Edge(label="enforce", color="steelblue") >> defender
+            defender >> Edge(label="alerts", color="red", style="dashed") >> sentinel_node
+            cost >> Edge(label="budget alerts", color="orange", style="dashed") >> ag
 
             # Monitoring flow
-            mon >> law
-            law >> ai
-            law >> Edge(label="security logs", style="dashed", color="purple") >> sentinel_node
+            mon >> Edge(color="steelblue") >> law
+            law >> Edge(color="steelblue") >> ai
+            law >> Edge(label="security logs", style="dashed", color="red") >> sentinel_node
             law >> Edge(label="alert rules", color="orange") >> ag
 
             # Identity flow
@@ -326,7 +344,7 @@ class DiagramEngine:
             kv >> Edge(style="dashed", color="gray", label="RBAC") >> entra
 
             # Diagnostic settings
-            defender >> Edge(style="dashed", color="orange", label="diag\nsettings") >> law
+            defender >> Edge(style="dashed", color="orange", label="diagnostics") >> law
 
         return outpath + ".png"
 
@@ -337,8 +355,35 @@ class DiagramEngine:
         mg_prefix: str = "mrg",
         filename: str = "alz-architecture",
     ) -> str:
-        """Generate the comprehensive ALZ architecture overview."""
+        """Generate the comprehensive ALZ architecture overview.
+
+        Follows the Microsoft Enterprise-Scale reference architecture layout:
+        - Management group hierarchy as the structural backbone (LR flow)
+        - Subscriptions nested under their parent MGs
+        - Resources shown inside subscription clusters
+        - Network topology (peering) as cross-cutting connections
+        - All hierarchy edges purple, uniform weight
+        """
         outpath = str(self.output_dir / filename)
+        sub_icon = self._get_subscription_icon()
+        mg_icon = self._get_mg_icon()
+
+        def sub_lbl(name: str) -> str:
+            return (
+                f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR>'
+                f'<TD FIXEDSIZE="TRUE" WIDTH="16" HEIGHT="16">'
+                f'<IMG SRC="{sub_icon}" SCALE="TRUE"/></TD>'
+                f'<TD> <FONT POINT-SIZE="10">{name}</FONT></TD></TR></TABLE>>'
+            )
+
+        def mg_lbl(name: str) -> str:
+            return (
+                f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR>'
+                f'<TD FIXEDSIZE="TRUE" WIDTH="16" HEIGHT="16">'
+                f'<IMG SRC="{mg_icon}" SCALE="TRUE"/></TD>'
+                f'<TD> <FONT POINT-SIZE="12"><B>{name}</B></FONT></TD></TR></TABLE>>'
+            )
+
         with Diagram(
             f"{mg_prefix} — Azure Landing Zone Architecture",
             filename=outpath,
@@ -346,59 +391,191 @@ class DiagramEngine:
             direction="TB",
             graph_attr={
                 "bgcolor": "white",
-                "pad": "0.4",
-                "ranksep": "1.0",
-                "nodesep": "0.5",
+                "pad": "0.5",
+                "ranksep": "0.7",
+                "nodesep": "0.4",
+                "compound": "true",
+                "dpi": "200",
+            },
+            node_attr={
+                "fontsize": "9",
             },
         ):
-            root = ManagementGroups(f"{mg_prefix}\nRoot MG")
+            # ── Root Management Group ─────────────────────────────────
+            root = ManagementGroups(f"{mg_prefix}\n(Root MG)")
 
-            with Cluster("Platform Landing Zones", graph_attr={"style": "rounded", "bgcolor": "#e8f4fd"}):
-                with Cluster("Management"):
-                    law = LogAnalyticsWorkspaces("Log Analytics")
-                    auto = AutomationAccounts("Automation")
-                with Cluster("Connectivity"):
-                    hub = VirtualNetworks("Hub VNet\n10.0.0.0/16")
-                    bastion = Bastions("Bastion")
-                    pdns = DNSZones("Private DNS")
-                with Cluster("Identity"):
-                    dc = ActiveDirectory("Entra ID")
-                    pim = ManagedIdentities("Managed\nIdentities")
-                with Cluster("Security"):
-                    defender = MicrosoftDefenderForCloud("Defender")
+            # ── Platform MG ──────────────────────────────────────────
+            with Cluster(
+                f"{mg_prefix}-platform",
+                graph_attr={
+                    "style": "rounded",
+                    "bgcolor": "#e8f4fd",
+                    "penwidth": "2",
+                    "label": mg_lbl(f"{mg_prefix}-platform"),
+                    "labeljust": "l",
+                },
+            ):
+                with Cluster(
+                    "Management Sub",
+                    graph_attr={"label": sub_lbl("Management"), "labeljust": "l"},
+                ):
+                    law = LogAnalyticsWorkspaces("mrg-law")
+                    auto = AutomationAccounts("mrg-automation")
+
+                with Cluster(
+                    "Connectivity Sub",
+                    graph_attr={"label": sub_lbl("Connectivity"), "labeljust": "l"},
+                ):
+                    hub = VirtualNetworks("mrg-hub-vnet\n10.0.0.0/16")
+                    bastion = Bastions("mrg-bastion")
+                    pdns = DNSZones("Private DNS\n(9 zones)")
+
+                with Cluster(
+                    "Identity Sub",
+                    graph_attr={"label": sub_lbl("Identity"), "labeljust": "l"},
+                ):
+                    id_vnet = VirtualNetworks("mrg-identity-\nspoke-vnet\n10.1.0.0/24")
+
+                with Cluster(
+                    "Security Sub",
+                    graph_attr={"label": sub_lbl("Security"), "labeljust": "l"},
+                ):
                     sentinel_node = Sentinel("Sentinel")
+                    defender = MicrosoftDefenderForCloud("Defender\n(11 plans)")
+                    kv = KeyVaults("mrg-sec-kv")
 
-            with Cluster("Application Landing Zones", graph_attr={"style": "rounded", "bgcolor": "#e8fde8"}):
-                corp_spoke = VirtualNetworks("Corp Spoke\n10.3.0.0/16")
-                online_spoke = FrontDoors("Online\nEndpoints")
-                corp_nsg = NetworkSecurityGroups("NSG")
-                corp_app = ContainerApps("Workloads")
+            # ── Landing Zones MG ─────────────────────────────────────
+            with Cluster(
+                f"{mg_prefix}-landingzones",
+                graph_attr={
+                    "style": "rounded,dashed",
+                    "bgcolor": "#e8fde8",
+                    "penwidth": "2",
+                    "label": mg_lbl(f"{mg_prefix}-landingzones"),
+                    "labeljust": "l",
+                },
+            ):
+                with Cluster(
+                    "Corp",
+                    graph_attr={
+                        "style": "dashed",
+                        "label": sub_lbl("Corp"),
+                        "labeljust": "l",
+                    },
+                ):
+                    corp_spoke = VirtualNetworks("Corp Spoke\n(planned)")
 
-            with Cluster("Governance & Compliance", graph_attr={"style": "rounded", "bgcolor": "#fdf8e8"}):
-                policy = Policy("Azure Policy")
-                cost = CostManagement("Budgets")
-                kv = KeyVaults("Key Vault")
-                compliance_node = Compliance("Compliance")
+                with Cluster(
+                    "Online",
+                    graph_attr={
+                        "style": "dashed",
+                        "label": sub_lbl("Online"),
+                        "labeljust": "l",
+                    },
+                ):
+                    online_spoke = VirtualNetworks("Online Spoke\n(planned)")
 
-            # Root MG connects to both LZ groups
-            root >> Edge(color="darkblue", label="Platform") >> law
-            root >> Edge(color="darkblue") >> hub
-            root >> Edge(color="darkblue") >> dc
-            root >> Edge(color="darkblue") >> defender
-            root >> Edge(color="green", label="App LZs") >> corp_spoke
-            root >> Edge(color="green", style="dashed") >> online_spoke
+                with Cluster(
+                    "SAP",
+                    graph_attr={
+                        "style": "dashed",
+                        "label": sub_lbl("SAP"),
+                        "labeljust": "l",
+                    },
+                ):
+                    sap_spoke = VirtualNetworks("SAP Spoke\n(planned)")
 
-            # Hub peering to app spokes
-            hub >> Edge(color="steelblue", label="Peering") >> corp_spoke
+            # ── Sandbox & Decommissioned ─────────────────────────────
+            with Cluster(
+                "Sandbox / Decommissioned",
+                graph_attr={
+                    "style": "rounded,dotted",
+                    "bgcolor": "#f5f5f5",
+                    "penwidth": "1",
+                    "label": mg_lbl(f"{mg_prefix}-sandbox / {mg_prefix}-decommissioned"),
+                    "labeljust": "l",
+                },
+            ):
+                sandbox_sub = Subscriptions("Sandbox\nSubscription(s)")
 
-            # Monitoring flow
-            law >> Edge(style="dashed", color="orange") >> sentinel_node
+            # ── Hierarchy edges (all purple, terminate at cluster border) ──
+            # Platform edge targets hub (center of platform cluster)
+            root >> Edge(
+                color="purple", penwidth="2",
+                lhead=f"cluster_{mg_prefix}-platform",
+            ) >> hub
 
-            # Governance sits below - connected from platform
-            defender >> Edge(style="dashed", color="gray", label="Policy") >> policy
-            policy >> Edge(style="dashed", color="gray") >> compliance_node
+            # Landing zones edge
+            root >> Edge(
+                color="purple", penwidth="2",
+                lhead=f"cluster_{mg_prefix}-landingzones",
+            ) >> corp_spoke
+
+            # Sandbox edge
+            root >> Edge(
+                color="purple", penwidth="2",
+                lhead="cluster_Sandbox / Decommissioned",
+            ) >> sandbox_sub
+
+            # Invisible edges to balance layout:
+            # Pull root left toward leftmost Platform node to center it
+            root - Edge(style="invis") - kv
+            root - Edge(style="invis") - defender
+            # Keep sandbox next to landingzones
+            corp_spoke - Edge(style="invis") - sandbox_sub
 
         return outpath + ".png"
+
+    def _get_subscription_icon(self) -> str:
+        """Return the absolute path to a 32×32 subscription icon for cluster labels."""
+        return self._get_resized_icon("subscriptions.png", "sub-icon-sm.png")
+
+    def _get_mg_icon(self) -> str:
+        """Return the absolute path to a 32×32 management group icon for cluster labels."""
+        return self._get_resized_icon("management-groups.png", "mg-icon-sm.png")
+
+    def _get_resized_icon(self, source_name: str, cache_name: str) -> str:
+        """Resolve an Azure icon from the diagrams package, resize to 32×32, and cache it."""
+        small_icon = self.output_dir / cache_name
+        if not small_icon.exists():
+            import importlib.util
+
+            from PIL import Image
+
+            spec = importlib.util.find_spec("diagrams")
+            if spec and spec.origin:
+                pkg_root = Path(spec.origin).parent.parent
+            else:
+                pkg_root = Path(Subscriptions._icon_dir).parents[3]
+            original = pkg_root / "resources" / "azure" / "general" / source_name
+            img = Image.open(original)
+            img = img.resize((32, 32), Image.LANCZOS)
+            img.save(small_icon)
+        return str(small_icon.resolve())
+
+    def _get_resource_icon(self, icon_class: type, size: int = 128) -> str:
+        """Return the absolute path to a resized resource icon for smaller diagram nodes.
+
+        Resolves the icon from the diagrams package, resizes it, and caches
+        in the output directory.
+        """
+        cache_name = f"res-{icon_class.__name__.lower()}-{size}.png"
+        small_icon = self.output_dir / cache_name
+        if not small_icon.exists():
+            import importlib.util
+
+            from PIL import Image
+
+            spec = importlib.util.find_spec("diagrams")
+            if spec and spec.origin:
+                pkg_root = Path(spec.origin).parent.parent
+            else:
+                pkg_root = Path(icon_class._icon_dir).parents[3]
+            original = pkg_root / icon_class._icon_dir / icon_class._icon
+            img = Image.open(original)
+            img = img.resize((size, size), Image.LANCZOS)
+            img.save(small_icon)
+        return str(small_icon.resolve())
 
     # ── TDD Profile Diagrams (for Technical Design Documents) ─────────
 
