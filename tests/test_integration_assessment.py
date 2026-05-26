@@ -77,7 +77,7 @@ class TestEndToEndPipeline:
             outputs = reporter.generate_all(discovery, assessment, scope_label="sub-001")
 
             # All 12 report files created (6 base + 5 per-pillar + 1 Excel workbook)
-            assert len(outputs) == 12
+            assert len(outputs) == 13
             for name, path in outputs.items():
                 assert path.exists(), f"{name} not created"
 

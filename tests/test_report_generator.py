@@ -311,7 +311,7 @@ class TestADR:
 class TestGenerateAll:
     def test_creates_all_files(self, reporter, discovery, assessment):
         outputs = reporter.generate_all(discovery, assessment, scope_label="test-scope")
-        assert len(outputs) == 12  # 6 base + 5 pillar reports + 1 Excel workbook
+        assert len(outputs) == 13  # 6 base + 5 pillar reports + 1 Excel + 1 PowerPoint
         for key, path in outputs.items():
             assert path.exists(), f"{key} file not created: {path}"
 

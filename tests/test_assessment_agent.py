@@ -125,7 +125,7 @@ class TestRunAssessment:
         assert result["critical"] == 1
         assert result["high"] == 1
         assert "outputs" in result
-        assert len(result["outputs"]) == 12
+        assert len(result["outputs"]) == 13
         assert "excel_action_plan" in result["outputs"]
 
     @pytest.mark.asyncio
