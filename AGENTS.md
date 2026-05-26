@@ -275,8 +275,7 @@ The W5 Hybrid skills use `docs/decisions/hybrid-onboarding-strategy.md` (ADR) as
 Beyond the APEX workflow (Steps 1–7), this accelerator adds continuous operations:
 
 ### Step 8: Monitor (🔭 Sentinel)
-- Compliance scans every 30 minutes via Azure Policy
-- Drift detection every hour via Resource Graph change tracking
+- Full scan (compliance + drift + audit) once daily at 06:00 UTC
 - Security posture from Defender for Cloud secure score
 - Full audit daily at 6 AM
 - Alert thresholds: Critical → immediate, High → 15 min, Medium → daily report

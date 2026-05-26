@@ -104,7 +104,7 @@ For each proposition, create a table:
 - ❌ "Best-in-class" (subjective; no code)
 - ❌ "Fully automated" (misleading; humans approve at gates)
 - ✅ "Enforce 6 non-negotiable security rules at code generation" (specific, traceable, verifiable)
-- ✅ "Continuous compliance scans every 30 minutes with auto-remediation for critical violations" (specific, measurable, code-backed)
+- ✅ "Daily compliance scans at 06:00 UTC with auto-remediation for critical violations" (specific, measurable, code-backed)
 
 ## Review Checklist for Product Teams
 

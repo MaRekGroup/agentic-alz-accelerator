@@ -13,7 +13,7 @@ Primary GitHub Actions deployment workflows with OIDC auth, environment approval
 | `2-platform-deploy.yml` | Manual | 4 platform subs | Sequential with approval gate per LZ, `start_from` for resume |
 | `3-app-deploy.yml` | Manual | Config-driven | Reads app LZs from `subscriptions.json`, dynamic matrix, parallel deployment |
 | `assess.yml` | Manual | Per subscription/RG | Brownfield WAF assessment: discover → WARA → generate reports (6 artifacts) |
-| `4-monitor.yml` | Cron (30 min / 1 h / daily 06:00 UTC) + Manual | All 10 subscriptions | Canonical Day-2 ops: `MonitoringAgent` + `RemediationAgent`; compliance + drift + auto-remediation (env gate) + Teams alerts + GH issue creation |
+| `4-monitor.yml` | Cron (daily 06:00 UTC) + Manual | All 10 subscriptions | Canonical Day-2 ops: `MonitoringAgent` + `RemediationAgent`; full scan (compliance + drift + audit) + auto-remediation (env gate) + Teams alerts + GH issue creation |
 | `monitor.yml` | Daily 04:00 UTC + Manual | 4 platform subs | Lightweight diagnostic: per-LZ parallel scan using PolicyInsights SDK v2+ directly; no agent dependencies |
 | `5-pr-validate.yml` | PR to `main` | Changed files | Lint, security, cost, tests, what-if preview posted as PR comment |
 | `deploy-docs.yml` | Push to `main` | GitHub Pages | Builds & deploys docs site when `site/**` changes |

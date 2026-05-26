@@ -328,6 +328,6 @@ gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscr
 ## Day-2 Operations
 
 Beyond deployment (Steps 1–7), continuous operations run in Steps 8–9:
-- **Sentinel** scans compliance every 30 min, drift every hour, full audit daily at 6 AM
+- **Sentinel** runs a full scan (compliance + drift + audit) once daily at 06:00 UTC
 - **Mender** auto-remediates critical/high violations with snapshot/rollback
 - Alert thresholds: Critical → immediate, High → 15 min, Medium/Low → daily report

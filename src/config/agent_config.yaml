@@ -58,9 +58,7 @@ agents:
       - resource_graph
       - drift_detector
     schedule:
-      compliance_scan: "*/30 * * * *"   # Every 30 minutes
-      drift_detection: "0 * * * *"       # Every hour
-      full_audit: "0 6 * * *"            # Daily at 6 AM
+      full_scan: "0 6 * * *"             # Daily at 6 AM (compliance + drift + audit)
     alert_thresholds:
       critical_violations: 1   # Alert immediately
       high_violations: 5       # Alert within 15 minutes

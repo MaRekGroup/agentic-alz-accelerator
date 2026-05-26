@@ -77,10 +77,8 @@ WAF-aligned assessment of the current estate before the standard workflow begins
 - Output: `07-*.md` documentation suite
 
 ### Step 8: Monitor (🔭 Sentinel) [Continuous]
-- Compliance scans every 30 minutes
-- Drift detection every hour via Resource Graph
+- Full scan (compliance + drift + audit) once daily at 06:00 UTC
 - Security posture from Defender for Cloud
-- Full audit daily at 6 AM
 - Output: `08-compliance-report.md`
 
 ### Step 9: Remediate (🔧 Mender) [Event-Driven]
