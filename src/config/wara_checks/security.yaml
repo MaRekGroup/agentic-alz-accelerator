@@ -813,3 +813,114 @@ checks:
     mappings:
       waf_pillar: [security]
       caf_lifecycle: [govern, manage]
+
+  - id: SEC-032
+    title: "SQL servers with public network access enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers'
+      | where properties.publicNetworkAccess =~ 'Enabled'
+      | project id, name, resourceGroup, subscriptionId,
+                publicNetworkAccess=properties.publicNetworkAccess,
+                minimalTls=properties.minimalTlsVersion
+    match: any
+    recommendation: "Disable public network access on Azure SQL logical servers and use Private Link or approved network controls instead."
+    remediation_steps:
+      - "Disable public access: az sql server update --ids <server-id> --set publicNetworkAccess=Disabled"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/connectivity-settings"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+      resource_type: "Microsoft.Sql/servers"
+
+  - id: SEC-033
+    title: "Storage accounts with shared key access enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | extend allowSharedKeyAccess = iff(isnull(properties.allowSharedKeyAccess), true, tobool(properties.allowSharedKeyAccess))
+      | where allowSharedKeyAccess == true
+      | project id, name, resourceGroup, subscriptionId,
+                allowSharedKeyAccess,
+                defaultToOAuthAuthentication=properties.defaultToOAuthAuthentication
+    match: any
+    recommendation: "Disable shared key access on storage accounts and prefer Microsoft Entra authorization for data plane operations."
+    remediation_steps:
+      - "Disable shared key access: az storage account update --ids <account-id> --allow-shared-key-access false"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/shared-key-authorization-prevent"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+      resource_type: "Microsoft.Storage/storageAccounts"
+
+  - id: SEC-034
+    title: "Cosmos DB accounts with local authentication enabled"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.documentdb/databaseaccounts'
+      | extend disableLocalAuth = iff(isnull(properties.disableLocalAuth), false, tobool(properties.disableLocalAuth))
+      | where disableLocalAuth == false
+      | project id, name, resourceGroup, subscriptionId,
+                disableLocalAuth,
+                publicNetworkAccess=properties.publicNetworkAccess
+    match: any
+    recommendation: "Disable local authentication on Cosmos DB accounts and use Microsoft Entra-based authentication wherever supported."
+    remediation_steps:
+      - "Update the account to disable local auth after validating application support"
+    references:
+      - "https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+      resource_type: "Microsoft.DocumentDB/databaseAccounts"
+
+  - id: SEC-035
+    title: "AKS clusters without Azure AD integration"
+    pillar: security
+    caf_area: identity_access
+    alz_area: identity
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | extend aadManaged = tostring(properties.aadProfile.managed)
+      | where isnull(properties.aadProfile) or isempty(aadManaged)
+      | project id, name, resourceGroup, subscriptionId,
+                aadManaged,
+                enableRBAC=properties.enableRBAC
+    match: any
+    recommendation: "Integrate AKS with Microsoft Entra ID to centralize authentication and strengthen cluster access control."
+    remediation_steps:
+      - "Enable managed Microsoft Entra integration on supported AKS clusters or recreate legacy clusters with AAD enabled"
+    references:
+      - "https://learn.microsoft.com/azure/aks/enable-authentication-microsoft-entra-id"
+    mappings:
+      waf_pillar: [security]
+      caf_lifecycle: [govern, manage]
+      resource_type: "Microsoft.ContainerService/managedClusters"

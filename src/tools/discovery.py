@@ -55,6 +55,7 @@ class DiscoveryResult:
     network_topology: dict = field(default_factory=dict)
     logging_config: dict = field(default_factory=dict)
     security_posture: dict = field(default_factory=dict)
+    advisor_recommendations: list[dict] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -72,6 +73,7 @@ class DiscoveryResult:
             "network_topology": self.network_topology,
             "logging_config": self.logging_config,
             "security_posture": self.security_posture,
+            "advisor_recommendations": self.advisor_recommendations,
             "errors": self.errors,
         }
 
@@ -157,6 +159,7 @@ class DiscoveryCollector:
             ("network_topology", self._discover_network, mg_groups, subs),
             ("logging_config", self._discover_logging, mg_groups, subs),
             ("security_posture", self._discover_security, mg_groups, subs),
+            ("advisor_recommendations", self._discover_advisor, mg_groups, subs),
         ]
 
         for name, collector, *args in collectors:
@@ -172,11 +175,7 @@ class DiscoveryCollector:
         # Policy compliance requires per-subscription SDK calls.
         # Resolve subscription IDs from discovered subscriptions, or fall back
         # to explicit list / settings.
-        compliance_subs = [
-            s["subscriptionId"]
-            for s in result.subscriptions
-            if "subscriptionId" in s
-        ]
+        compliance_subs = [s["subscriptionId"] for s in result.subscriptions if "subscriptionId" in s]
         if not compliance_subs and subs:
             compliance_subs = subs
         if compliance_subs:
@@ -236,11 +235,7 @@ class DiscoveryCollector:
         subscriptions: list[str],
     ) -> dict:
         """Discover resource inventory grouped by type and location."""
-        by_type_query = (
-            "resources"
-            " | summarize resource_count=count() by type"
-            " | order by resource_count desc"
-        )
+        by_type_query = "resources | summarize resource_count=count() by type | order by resource_count desc"
         try:
             by_type = self._arg_query(
                 by_type_query,
@@ -251,11 +246,7 @@ class DiscoveryCollector:
             logger.warning("Resource discovery by_type query failed: %s", e)
             by_type = []
 
-        by_location_query = (
-            "resources"
-            " | summarize resource_count=count() by location"
-            " | order by resource_count desc"
-        )
+        by_location_query = "resources | summarize resource_count=count() by location | order by resource_count desc"
         try:
             by_location = self._arg_query(
                 by_location_query,
@@ -335,9 +326,7 @@ class DiscoveryCollector:
                     compliance[sub_id] = {
                         "total_resources": total,
                         "non_compliant_resources": non_compliant,
-                        "compliance_pct": round(
-                            (1 - non_compliant / max(total, 1)) * 100, 1
-                        ),
+                        "compliance_pct": round((1 - non_compliant / max(total, 1)) * 100, 1),
                     }
                 else:
                     compliance[sub_id] = {"error": "No compliance data"}
@@ -552,3 +541,28 @@ class DiscoveryCollector:
             "sentinel": sentinel,
             "storage_accounts": storage,
         }
+
+    async def _discover_advisor(
+        self,
+        management_groups: list[str] | None,
+        subscriptions: list[str],
+    ) -> list[dict]:
+        """Discover Azure Advisor recommendations via Resource Graph."""
+        query = """
+        advisorresources
+        | where type == 'microsoft.advisor/recommendations'
+        | project id, name, resourceGroup, subscriptionId,
+                  category=properties.category,
+                  impact=properties.impact,
+                  impactedField=properties.impactedField,
+                  impactedValue=properties.impactedValue,
+                  shortDescription=properties.shortDescription.solution,
+                  resourceType=tolower(properties.impactedField)
+        | order by category asc, impact desc
+        """
+        return self._arg_query(
+            query,
+            subscriptions=subscriptions,
+            management_groups=management_groups,
+            max_results=1000,
+        )

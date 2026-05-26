@@ -241,12 +241,21 @@ class WaraEngine:
         result = AssessmentResult(scope=discovery.scope)
         subs = subscriptions or [self.settings.azure.subscription_id]
 
+        # Build set of discovered resource types for smart filtering
+        discovered_types = self._extract_resource_types(discovery)
+
         # Initialize pillar scores
         for pillar in Pillar:
             result.pillar_scores[pillar.value] = PillarScore(pillar=pillar.value)
 
         for check in self.checks:
             result.checks_run += 1
+
+            # Smart filter: skip checks targeting resource types not in scope
+            if self._should_skip_check(check, discovered_types):
+                result.checks_passed += 1
+                continue
+
             try:
                 finding = await self._evaluate_check(check, discovery, subs)
                 if finding:
@@ -290,15 +299,13 @@ class WaraEngine:
         match_type = check.get("match", "any")
 
         if query_type == "resource_graph":
-            evidence = await self._run_resource_graph_check(
-                check["query"], subscriptions
-            )
+            evidence = await self._run_resource_graph_check(check["query"], subscriptions)
         elif query_type == "discovery_field":
-            evidence = self._run_discovery_field_check(
-                check["query"], discovery
-            )
+            evidence = self._run_discovery_field_check(check["query"], discovery)
         elif query_type == "policy":
             evidence = self._run_policy_check(check, discovery)
+        elif query_type == "advisor":
+            evidence = self._run_advisor_check(check, discovery)
         else:
             logger.warning(f"Unknown query_type: {query_type} for {check.get('id')}")
             return None
@@ -376,9 +383,7 @@ class WaraEngine:
         non_compliant = []
         for sub_id, state in compliance.items():
             if isinstance(state, dict) and state.get("non_compliant_resources", 0) > 0:
-                non_compliant.append(
-                    {"subscription_id": sub_id, **state}
-                )
+                non_compliant.append({"subscription_id": sub_id, **state})
         return non_compliant
 
     @staticmethod
@@ -406,6 +411,48 @@ class WaraEngine:
         elif severity == Severity.LOW:
             ps.low += 1
 
+    # ── Smart filtering ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _extract_resource_types(discovery: DiscoveryResult) -> set[str]:
+        """Extract discovered resource types from inventory for smart filtering."""
+        discovered: set[str] = set()
+        by_type = discovery.resources.get("by_type") if isinstance(discovery.resources, dict) else None
+        if isinstance(by_type, list):
+            for entry in by_type:
+                if isinstance(entry, dict) and "type" in entry:
+                    discovered.add(entry["type"].lower())
+        return discovered
+
+    @staticmethod
+    def _should_skip_check(check: dict, discovered_types: set[str]) -> bool:
+        """Return True if the check targets a resource type not in scope."""
+        resource_type = check.get("mappings", {}).get("resource_type", "")
+        if not resource_type:
+            return False  # No resource_type constraint — always run
+        return resource_type.lower() not in discovered_types
+
+    # ── Advisor data source ───────────────────────────────────────────────
+
+    @staticmethod
+    def _run_advisor_check(
+        check: dict,
+        discovery: DiscoveryResult,
+    ) -> list[dict]:
+        """Match Advisor recommendations against check criteria."""
+        advisor_recs = getattr(discovery, "advisor_recommendations", [])
+        if not advisor_recs:
+            return []
+        category = check.get("advisor_category", "").lower()
+        resource_type = check.get("mappings", {}).get("resource_type", "").lower()
+        matched = []
+        for rec in advisor_recs:
+            cat_match = not category or rec.get("category", "").lower() == category
+            rt_match = not resource_type or rec.get("resourceType", "").lower() == resource_type
+            if cat_match and rt_match:
+                matched.append(rec)
+        return matched
+
     # ── Custom evaluation functions ───────────────────────────────────────
 
     def check_caf_mg_hierarchy(
@@ -421,9 +468,6 @@ class WaraEngine:
 
         # CAF expects: platform, landing zones (or landingzones), sandbox, decommissioned
         expected_patterns = ["platform", "landingzone", "sandbox"]
-        matches = sum(
-            1 for pattern in expected_patterns
-            if any(pattern in name for name in mg_names)
-        )
+        matches = sum(1 for pattern in expected_patterns if any(pattern in name for name in mg_names))
         # If fewer than 2 of the 3 expected patterns exist, flag it
         return matches < 2

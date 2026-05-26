@@ -28,7 +28,10 @@ def discovery():
             {"name": "mgmt-sub", "subscriptionId": "sub-001", "state": "Enabled"},
             {"name": "conn-sub", "subscriptionId": "sub-002", "state": "Enabled"},
         ],
-        resources={"by_type": {"microsoft.storage/storageaccounts": 5, "microsoft.compute/virtualmachines": 3}, "total": 8},
+        resources={
+            "by_type": {"microsoft.storage/storageaccounts": 5, "microsoft.compute/virtualmachines": 3},
+            "total": 8,
+        },
         policy_assignments=[
             {"displayName": "Azure Security Benchmark", "policyType": "BuiltIn"},
             {"displayName": "Allowed Locations", "name": "allowed-locations"},
@@ -129,9 +132,7 @@ class TestHelpers:
 
     def test_extract_mg_name(self):
         assert _extract_mg_name("mrg") == "mrg"
-        assert _extract_mg_name(
-            "/providers/Microsoft.Management/managementGroups/mrg-platform"
-        ) == "mrg-platform"
+        assert _extract_mg_name("/providers/Microsoft.Management/managementGroups/mrg-platform") == "mrg-platform"
 
 
 class TestCurrentState:
@@ -185,9 +186,7 @@ class TestCurrentState:
         assert "Management Group" not in md
 
     def test_discovery_errors_shown(self, reporter):
-        d = DiscoveryResult(
-            scope="err", scope_type=DiscoveryScope.SUBSCRIPTION, errors=["API timeout"]
-        )
+        d = DiscoveryResult(scope="err", scope_type=DiscoveryScope.SUBSCRIPTION, errors=["API timeout"])
         md = reporter.render_current_state(d, "err")
         assert "## Discovery Errors" in md
         assert "API timeout" in md
@@ -294,9 +293,14 @@ class TestADR:
             checks_passed=5,
             findings=[
                 Finding(
-                    rule_id="COS-010", title="Minor cost", pillar="cost_optimization",
-                    caf_area="management", alz_area="logging", severity="low",
-                    confidence="low", recommendation="Consider cleanup",
+                    rule_id="COS-010",
+                    title="Minor cost",
+                    pillar="cost_optimization",
+                    caf_area="management",
+                    alz_area="logging",
+                    severity="low",
+                    confidence="low",
+                    recommendation="Consider cleanup",
                 ),
             ],
         )
@@ -307,7 +311,7 @@ class TestADR:
 class TestGenerateAll:
     def test_creates_all_files(self, reporter, discovery, assessment):
         outputs = reporter.generate_all(discovery, assessment, scope_label="test-scope")
-        assert len(outputs) == 11  # 6 base + 5 pillar reports
+        assert len(outputs) == 12  # 6 base + 5 pillar reports + 1 Excel workbook
         for key, path in outputs.items():
             assert path.exists(), f"{key} file not created: {path}"
 
@@ -329,6 +333,10 @@ class TestGenerateAll:
         assert len(pillar_keys) == 5
         for key in pillar_keys:
             assert "pillar-reports" in str(outputs[key])
+
+    def test_excel_action_plan_created(self, reporter, discovery, assessment):
+        outputs = reporter.generate_all(discovery, assessment, scope_label="test-scope")
+        assert outputs["excel_action_plan"].name == "wara-action-plan.xlsx"
 
 
 class TestPillarReport:

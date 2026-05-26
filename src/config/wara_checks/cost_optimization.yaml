@@ -587,3 +587,259 @@ checks:
     mappings:
       waf_pillar: [cost_optimization]
       caf_lifecycle: [manage]
+
+  - id: COS-022
+    title: "Stopped/deallocated virtual machines"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | where tostring(properties.extended.instanceView.powerState.code) =~ 'PowerState/deallocated'
+      | project id, name, resourceGroup, subscriptionId,
+                vmSize=properties.hardwareProfile.vmSize,
+                powerState=properties.extended.instanceView.powerState.displayStatus
+    match: any
+    recommendation: "Review deallocated virtual machines and delete or right-size them if they are no longer needed."
+    remediation_steps:
+      - "Delete unused VM resources or restart them only when required: az vm delete --ids <vm-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/states-billing"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Compute/virtualMachines"
+
+  - id: COS-023
+    title: "App Service Plans with zero apps"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.web/serverfarms'
+      | where toint(properties.numberOfSites) == 0
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.name,
+                numberOfSites=properties.numberOfSites
+    match: any
+    recommendation: "Delete or consolidate App Service Plans that do not host any apps to avoid unnecessary spend."
+    remediation_steps:
+      - "Review plan usage, then delete unused plans: az appservice plan delete --ids <plan-id>"
+    references:
+      - "https://learn.microsoft.com/azure/app-service/overview-hosting-plans"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Web/serverFarms"
+
+  - id: COS-024
+    title: "Premium SQL databases with low max size"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers/databases'
+      | where sku.tier =~ 'Premium'
+      | where tolong(properties.maxSizeBytes) <= 268435456000
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.name,
+                maxSizeBytes=properties.maxSizeBytes
+    match: any
+    recommendation: "Review Premium SQL databases with low configured size and consider Standard, serverless, or vCore options if utilization is low."
+    remediation_steps:
+      - "Assess database performance metrics and resize to a more cost-effective tier when appropriate"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/service-tiers-sql-database-vcore"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Sql/servers/databases"
+
+  - id: COS-025
+    title: "Storage accounts without lifecycle management policy"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.storage/storageaccounts/managementpolicies'
+          | extend storageAccountId = tostring(split(id, '/managementPolicies')[0])
+          | project storageAccountId
+        ) on $left.id == $right.storageAccountId
+      | where isnull(storageAccountId)
+      | project id, name, resourceGroup, subscriptionId,
+                kind,
+                accessTier=properties.accessTier
+    match: any
+    recommendation: "Configure lifecycle management policies to tier or delete stale blob data and reduce storage costs."
+    remediation_steps:
+      - "Create a management policy: az storage account management-policy create --account-name <name> --resource-group <rg>"
+    references:
+      - "https://learn.microsoft.com/azure/storage/blobs/lifecycle-management-overview"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [govern, manage]
+      resource_type: "Microsoft.Storage/storageAccounts"
+
+  - id: COS-026
+    title: "Standard SKU public IPs not associated with load balancers"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/publicipaddresses'
+      | where sku.name =~ 'Standard'
+      | extend associationId = tostring(properties.ipConfiguration.id)
+      | where isempty(associationId) or associationId !contains '/loadBalancers/'
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.name,
+                associationId
+    match: any
+    recommendation: "Remove or consolidate Standard public IPs that are not serving load-balanced workloads."
+    remediation_steps:
+      - "Review the public IP association and delete unused addresses: az network public-ip delete --ids <pip-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Network/publicIPAddresses"
+
+  - id: COS-027
+    title: "ExpressRoute circuits in non-provisioned state"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/expressroutecircuits'
+      | where not(tostring(properties.serviceProviderProvisioningState) =~ 'Provisioned')
+      | project id, name, resourceGroup, subscriptionId,
+                sku=sku.tier,
+                provisioningState=properties.serviceProviderProvisioningState
+    match: any
+    recommendation: "Review non-provisioned ExpressRoute circuits and remove stale deployments to avoid unnecessary charges."
+    remediation_steps:
+      - "Validate carrier onboarding status and delete unused circuits: az network express-route delete --ids <circuit-id>"
+    references:
+      - "https://learn.microsoft.com/azure/expressroute/expressroute-introduction"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Network/expressRouteCircuits"
+
+  - id: COS-028
+    title: "Idle network interfaces"
+    pillar: cost_optimization
+    caf_area: network
+    alz_area: networking
+    severity: low
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/networkinterfaces'
+      | where isnull(properties.virtualMachine.id)
+      | project id, name, resourceGroup, subscriptionId,
+                acceleratedNetworking=properties.enableAcceleratedNetworking,
+                privateIp=tostring(properties.ipConfigurations[0].properties.privateIPAddress)
+    match: any
+    recommendation: "Delete unused network interfaces that are no longer attached to virtual machines."
+    remediation_steps:
+      - "Delete idle NICs after dependency review: az network nic delete --ids <nic-id>"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Network/networkInterfaces"
+
+  - id: COS-029
+    title: "Oversized D-series and F-series virtual machines"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | extend vmSize = tostring(properties.hardwareProfile.vmSize)
+      | extend sizeLower = tolower(vmSize)
+      | extend coreHint = toint(extract('Standard_[A-Za-z]+([0-9]+)', 1, vmSize))
+      | where (sizeLower startswith 'standard_d' or sizeLower startswith 'standard_f')
+            and coreHint > 16
+      | project id, name, resourceGroup, subscriptionId,
+                vmSize,
+                coreHint
+    match: any
+    recommendation: "Review large D-series and F-series VMs and right-size them when workloads do not require more than 16 vCPUs."
+    remediation_steps:
+      - "Use Azure Monitor and Advisor utilization data before resizing oversized VMs"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/sizes/overview"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.Compute/virtualMachines"
+
+  - id: COS-030
+    title: "Log Analytics workspaces with retention over 365 days"
+    pillar: cost_optimization
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.operationalinsights/workspaces'
+      | where toint(properties.retentionInDays) > 365
+      | project id, name, resourceGroup, subscriptionId,
+                retentionInDays=properties.retentionInDays,
+                sku=properties.sku.name
+    match: any
+    recommendation: "Reduce Log Analytics retention where business and compliance requirements do not justify more than 365 days."
+    remediation_steps:
+      - "Adjust workspace retention: az monitor log-analytics workspace update --ids <workspace-id> --retention-time <days>"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure"
+    mappings:
+      waf_pillar: [cost_optimization]
+      caf_lifecycle: [manage]
+      resource_type: "Microsoft.OperationalInsights/workspaces"

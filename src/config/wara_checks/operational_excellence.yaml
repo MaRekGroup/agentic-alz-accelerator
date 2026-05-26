@@ -134,3 +134,446 @@ checks:
     mappings:
       waf_pillar: [security, operational_excellence]
       caf_lifecycle: [ready, adopt]
+
+  - id: OPE-007
+    title: "Virtual machines without diagnostic settings"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | extend resourceId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, resourceId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.insights/diagnosticsettings'
+          | extend targetId = tolower(tostring(properties.resourceId))
+          | project targetId
+        ) on $left.resourceId == $right.targetId
+      | where isempty(targetId)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Configure diagnostic settings on virtual machines to stream guest and platform telemetry to a monitoring destination."
+    remediation_steps:
+      - "Create VM diagnostic settings: az monitor diagnostic-settings create --resource {vm-id} --workspace {law-id}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/essentials/diagnostic-settings"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Compute/virtualMachines
+
+  - id: OPE-008
+    title: "Activity log alerts not configured"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.insights/activitylogalerts'
+      | project id, name, resourceGroup, subscriptionId
+    match: empty
+    recommendation: "Create activity log alerts for critical subscription and platform events."
+    remediation_steps:
+      - "Create alert rules: az monitor activity-log alert create --name {alert-name} --scopes /subscriptions/{subscription-id}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-activity-log"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Insights/activityLogAlerts
+
+  - id: OPE-009
+    title: "AKS clusters without Container Insights"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | extend containerInsightsEnabled = tostring(properties.addonProfiles.omsagent.enabled)
+      | where isempty(containerInsightsEnabled) or containerInsightsEnabled !~ 'true'
+      | project id, name, resourceGroup, subscriptionId,
+                containerInsightsEnabled = iff(isempty(containerInsightsEnabled), 'false', containerInsightsEnabled)
+    match: any
+    recommendation: "Enable Container Insights on AKS clusters to capture control plane, node, and container telemetry."
+    remediation_steps:
+      - "Enable monitoring: az aks enable-addons --addons monitoring --name {aks-name} --resource-group {rg}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/containers/container-insights-enable-aks"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.ContainerService/managedClusters
+
+  - id: OPE-010
+    title: "SQL servers without auditing enabled"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers'
+      | extend serverId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, serverId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.sql/servers/auditingsettings'
+          | extend auditingSettingId = tolower(id)
+          | extend serverId = substring(auditingSettingId, 0, indexof(auditingSettingId, '/auditingsettings/'))
+          | extend auditingState = tostring(properties.state)
+          | project serverId, auditingState
+        ) on serverId
+      | where isempty(auditingState) or auditingState !~ 'Enabled'
+      | project id, name, resourceGroup, subscriptionId,
+                auditingState = iff(isempty(auditingState), 'NotConfigured', auditingState)
+    match: any
+    recommendation: "Enable SQL auditing on every Azure SQL logical server to capture security and operational events."
+    remediation_steps:
+      - "Enable auditing: az sql server audit-policy update --state Enabled --name {server-name} --resource-group {rg}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/auditing-overview"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Sql/servers
+
+  - id: OPE-011
+    title: "Key Vaults without diagnostic logging"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | extend resourceId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, resourceId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.insights/diagnosticsettings'
+          | extend targetId = tolower(tostring(properties.resourceId))
+          | project targetId
+        ) on $left.resourceId == $right.targetId
+      | where isempty(targetId)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Configure Key Vault diagnostic settings to export audit and access logs to a centralized monitoring sink."
+    remediation_steps:
+      - "Create diagnostic settings: az monitor diagnostic-settings create --resource {vault-id} --workspace {law-id}"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/howto-logging"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.KeyVault/vaults
+
+  - id: OPE-012
+    title: "Network security groups without flow logs"
+    pillar: operational_excellence
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/networksecuritygroups'
+      | extend nsgId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, nsgId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.network/networkwatchers/flowlogs'
+          | extend nsgId = tolower(tostring(properties.targetResourceId))
+          | extend flowLogsEnabled = tostring(properties.enabled)
+          | project nsgId, flowLogsEnabled
+        ) on nsgId
+      | where isempty(flowLogsEnabled) or flowLogsEnabled !~ 'true'
+      | project id, name, resourceGroup, subscriptionId,
+                flowLogsEnabled = iff(isempty(flowLogsEnabled), 'false', flowLogsEnabled)
+    match: any
+    recommendation: "Enable NSG flow logs to improve traffic analysis, investigation, and troubleshooting coverage."
+    remediation_steps:
+      - "Create flow logs: az network watcher flow-log create --nsg {nsg-id} --enabled true"
+    references:
+      - "https://learn.microsoft.com/azure/network-watcher/nsg-flow-logging"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Network/networkSecurityGroups
+
+  - id: OPE-013
+    title: "Storage accounts without diagnostic logging"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | extend resourceId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, resourceId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.insights/diagnosticsettings'
+          | extend targetId = tolower(tostring(properties.resourceId))
+          | project targetId
+        ) on $left.resourceId == $right.targetId
+      | where isempty(targetId)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Configure storage account diagnostic settings to forward logs and metrics for operations and investigations."
+    remediation_steps:
+      - "Create diagnostic settings: az monitor diagnostic-settings create --resource {storage-id} --workspace {law-id}"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/monitor-storage"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Storage/storageAccounts
+
+  - id: OPE-014
+    title: "Azure Firewalls without diagnostic settings"
+    pillar: operational_excellence
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/azurefirewalls'
+      | extend resourceId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, resourceId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.insights/diagnosticsettings'
+          | extend targetId = tolower(tostring(properties.resourceId))
+          | project targetId
+        ) on $left.resourceId == $right.targetId
+      | where isempty(targetId)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable Azure Firewall diagnostic settings to capture rule, application, and network telemetry."
+    remediation_steps:
+      - "Create diagnostic settings: az monitor diagnostic-settings create --resource {firewall-id} --workspace {law-id}"
+    references:
+      - "https://learn.microsoft.com/azure/firewall/firewall-diagnostics"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Network/azureFirewalls
+
+  - id: OPE-015
+    title: "Critical infrastructure resources without locks"
+    pillar: operational_excellence
+    caf_area: governance
+    alz_area: policy
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ (
+          'microsoft.network/azurefirewalls',
+          'microsoft.keyvault/vaults',
+          'microsoft.operationalinsights/workspaces',
+          'microsoft.network/virtualnetworks'
+        )
+      | extend protectedResourceId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, type, protectedResourceId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.authorization/locks'
+          | extend lockId = tolower(id)
+          | extend lockScope = tolower(
+              iff(
+                isnotempty(tostring(properties.scope)),
+                tostring(properties.scope),
+                substring(lockId, 0, indexof(lockId, '/providers/microsoft.authorization/locks/'))
+              )
+            )
+          | project lockScope, lockLevel = tostring(properties.level)
+        ) on $left.protectedResourceId == $right.lockScope
+      | where isempty(lockLevel)
+      | project id, name, resourceGroup, subscriptionId, resourceType = type
+    match: any
+    recommendation: "Apply delete or read-only locks to critical shared infrastructure to reduce accidental change risk."
+    remediation_steps:
+      - "Create locks: az lock create --lock-type CanNotDelete --name {lock-name} --resource {resource-id}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-resource-manager/management/lock-resources"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Authorization/locks
+
+  - id: OPE-016
+    title: "Virtual machines without Update Manager assessment mode"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | extend windowsAssessmentMode = tostring(properties.osProfile.windowsConfiguration.patchSettings.assessmentMode)
+      | extend linuxAssessmentMode = tostring(properties.osProfile.linuxConfiguration.patchSettings.assessmentMode)
+      | extend patchAssessmentMode = iff(isempty(windowsAssessmentMode), linuxAssessmentMode, windowsAssessmentMode)
+      | where isempty(patchAssessmentMode) or patchAssessmentMode !~ 'AutomaticByPlatform'
+      | project id, name, resourceGroup, subscriptionId,
+                patchAssessmentMode = iff(isempty(patchAssessmentMode), 'NotConfigured', patchAssessmentMode)
+    match: any
+    recommendation: "Enable Azure Update Manager-compatible patch assessment on virtual machines for continuous update visibility."
+    remediation_steps:
+      - "Set assessment mode to AutomaticByPlatform on supported Windows and Linux VMs"
+    references:
+      - "https://learn.microsoft.com/azure/update-manager/manage-updates-for-vm"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Compute/virtualMachines
+
+  - id: OPE-017
+    title: "Subscriptions without Defender for Cloud enabled"
+    pillar: operational_excellence
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resourcecontainers
+      | where type =~ 'microsoft.resources/subscriptions'
+      | extend subscriptionResourceId = tolower(id)
+      | extend subscriptionId = tostring(split(id, '/')[2])
+      | project id, name, resourceGroup = '', subscriptionId, subscriptionResourceId
+      | join kind=leftouter (
+          securityresources
+          | where type =~ 'microsoft.security/pricings'
+          | where properties.pricingTier =~ 'Standard'
+          | summarize standardPlanCount = count() by subscriptionId
+          | extend subscriptionResourceId = tolower(strcat('/subscriptions/', subscriptionId))
+          | project subscriptionResourceId, standardPlanCount
+        ) on subscriptionResourceId
+      | where isnull(standardPlanCount) or standardPlanCount == 0
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable Defender for Cloud plans on each subscription to provide security posture management and protections."
+    remediation_steps:
+      - "Enable plans: az security pricing create --name VirtualMachines --tier Standard"
+    references:
+      - "https://learn.microsoft.com/azure/defender-for-cloud/enable-enhanced-security"
+    mappings:
+      waf_pillar: [operational_excellence, security]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Security/pricings
+
+  - id: OPE-018
+    title: "Action groups not configured"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.insights/actiongroups'
+      | project id, name, resourceGroup, subscriptionId
+    match: empty
+    recommendation: "Create action groups so platform alerts can notify operators and invoke automated response paths."
+    remediation_steps:
+      - "Create an action group: az monitor action-group create --name {group-name} --resource-group {rg}"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/alerts/action-groups"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Insights/actionGroups
+
+  - id: OPE-019
+    title: "App Services without health check enabled"
+    pillar: operational_excellence
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.web/sites'
+      | where kind !contains 'functionapp'
+      | extend healthCheckPath = tostring(properties.siteConfig.healthCheckPath)
+      | where isempty(healthCheckPath)
+      | project id, name, resourceGroup, subscriptionId,
+                healthCheckPath = 'NotConfigured'
+    match: any
+    recommendation: "Enable a health check path on App Services so the platform can detect unhealthy instances and recover faster."
+    remediation_steps:
+      - "Configure Health Check in App Service settings or via az webapp config set --generic-configurations"
+    references:
+      - "https://learn.microsoft.com/azure/app-service/monitor-instances-health-check"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.Web/sites
+
+  - id: OPE-020
+    title: "AKS clusters without Azure Policy addon"
+    pillar: operational_excellence
+    caf_area: governance
+    alz_area: policy
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | extend azurePolicyEnabled = tostring(properties.addonProfiles.azurepolicy.enabled)
+      | where isempty(azurePolicyEnabled) or azurePolicyEnabled !~ 'true'
+      | project id, name, resourceGroup, subscriptionId,
+                azurePolicyEnabled = iff(isempty(azurePolicyEnabled), 'false', azurePolicyEnabled)
+    match: any
+    recommendation: "Enable the Azure Policy addon on AKS clusters to enforce and audit cluster governance controls."
+    remediation_steps:
+      - "Enable addon: az aks enable-addons --addons azure-policy --name {aks-name} --resource-group {rg}"
+    references:
+      - "https://learn.microsoft.com/azure/aks/use-azure-policy"
+    mappings:
+      waf_pillar: [operational_excellence]
+      caf_lifecycle: [govern, manage]
+      resource_type: Microsoft.ContainerService/managedClusters
