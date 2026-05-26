@@ -137,7 +137,7 @@ GitHub Actions workflows under `.github/workflows/`. Primary deployment + Day-2 
 | `1-bootstrap.yml` | Manual | MG hierarchy creation, subscription moves, provider registration |
 | `2-platform-deploy.yml` | Manual | Sequential platform LZ deployment with approval gates |
 | `3-app-deploy.yml` | Manual + callable | Application LZ deployment from `subscriptions.json` |
-| `4-monitor.yml` | Schedule + manual | Canonical Day-2 ops: compliance (30 min), drift (hourly), full audit (daily 06:00 UTC) + auto-remediation + alerts (covers all platform + app subs) |
+| `4-monitor.yml` | Schedule + manual | Canonical Day-2 ops: full scan (compliance + drift + audit) daily at 06:00 UTC + auto-remediation + alerts (covers all platform + app subs) |
 | `monitor.yml` | Daily 04:00 UTC + manual | Lightweight Policy Insights diagnostic baseline scan (4 platform subs, no agent dependencies) |
 | `5-pr-validate.yml` | Pull request | Lint, security validator, cost validator, pytest |
 | `reusable-deploy.yml` | Callable | Validate → plan → deploy → verify pipeline |
@@ -206,9 +206,7 @@ with its own subscription secret.
 
 ```
 Schedule trigger (4-monitor.yml)
-  → [Sentinel] Compliance scan (Policy) every 30 min
-  → [Sentinel] Drift detection (Resource Graph) every hour
-  → [Sentinel] Full audit (Defender + Policy + Resource Graph) daily 06:00 UTC
+  → [Sentinel] Full scan (compliance + drift + audit) daily at 06:00 UTC
   → If violations found:
     → Critical/High → [Mender] Auto-remediate (snapshot → fix → verify)
     → Medium/Low → Report for human review

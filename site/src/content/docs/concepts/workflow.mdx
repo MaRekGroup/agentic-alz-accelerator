@@ -171,10 +171,9 @@ See the [Brownfield Assessment Guide](/agentic-alz-accelerator/guides/brownfield
 
 ### Step 8 — Monitoring (🔭 Sentinel)
 
-- Compliance scan every 30 minutes via Azure Policy + Resource Graph queries
-- Drift detection every hour via Resource Graph change tracking
+- Full scan (compliance + drift + audit) once daily at 06:00 UTC via Azure Policy + Resource Graph
 - Security posture assessment from Microsoft Defender for Cloud secure score
-- Full audit daily at 6 AM — generates `08-compliance-report.md`
+- Generates `08-compliance-report.md`
 - **Critical** violations → triggers Mender immediately
 - **High** violations → triggers Mender after 15-minute grace period
 - **Medium/Low** violations → included in daily report for human review

@@ -710,9 +710,7 @@ class TDDGenerator:
 
         self.doc.add_heading("8.1 Monitoring & Alerting", level=2)
         mon_rows = [
-            ["Compliance Scan", "Every 30 minutes", "4-monitor.yml"],
-            ["Drift Detection", "Every hour", "4-monitor.yml"],
-            ["Full Audit Report", "Daily 6 AM UTC", "4-monitor.yml"],
+            ["Full Scan", "Daily 06:00 UTC", "4-monitor.yml"],
             ["Cost Alerts", "Real-time", "Azure Cost Management"],
             ["Security Alerts", "Real-time", "Defender for Cloud → Sentinel"],
         ]
@@ -1322,9 +1320,7 @@ falls below 80%.
 
 | Scan Type | Frequency | Source |
 |-----------|-----------|--------|
-| Compliance Scan | Every 30 minutes | monitor.yml |
-| Drift Detection | Every hour | monitor.yml |
-| Full Audit Report | Daily 6 AM UTC | monitor.yml |
+| Full Scan | Daily 06:00 UTC | monitor.yml |
 | Cost Alerts | Real-time | Azure Cost Management |
 | Security Alerts | Real-time | Defender for Cloud → Sentinel |
 

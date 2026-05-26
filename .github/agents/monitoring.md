@@ -1,10 +1,10 @@
 ---
 name: monitoring
 description: >
-  Continuous compliance monitoring and drift detection agent. Runs periodic
-  scans across all landing zone subscriptions — compliance every 30 min,
-  drift every hour, full audit daily at 6 AM. Routes critical/high violations
-  to the Mender for auto-remediation. Produces 08-compliance-report.md.
+  Continuous compliance monitoring and drift detection agent. Runs a full
+  scan (compliance + drift + audit) once daily at 06:00 UTC across all
+  landing zone subscriptions. Routes critical/high violations to the Mender
+  for auto-remediation. Produces 08-compliance-report.md.
 model: Claude Opus 4.6
 argument-hint: >
   Ask for a compliance scan, drift check, security posture report, or
@@ -28,8 +28,7 @@ You run periodic scans across all landing zone subscriptions and report violatio
 
 ## Role
 
-- Run compliance scans every 30 minutes
-- Detect configuration drift every hour
+- Run a full scan (compliance + drift + audit) once daily at 06:00 UTC
 - Monitor security posture via Defender for Cloud
 - Generate daily compliance reports
 - Produce `08-compliance-report.md`
@@ -54,9 +53,7 @@ Service skills available to this agent:
 
 | Interval | Scan Type | Description |
 |----------|-----------|-------------|
-| Every 30 min | Compliance | Azure Policy compliance across all subscriptions |
-| Every hour | Drift | Compare current state vs desired baseline |
-| Daily 6 AM | Full audit | Comprehensive report combining all scan types |
+| Daily 06:00 UTC | Full scan | Compliance + drift detection + comprehensive audit report |
 
 ## Alert Thresholds
 

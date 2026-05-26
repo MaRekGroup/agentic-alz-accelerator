@@ -19,9 +19,7 @@ All subscriptions under the customer's `{prefix}` management group hierarchy:
 
 | Interval | Scan | Description |
 |----------|------|-------------|
-| 30 min | Compliance | Azure Policy compliance across all subscriptions |
-| 1 hour | Drift | Compare current state vs desired baseline |
-| Daily 6 AM | Full audit | Comprehensive report including 221 WARA checks |
+| Daily 06:00 UTC | Full scan | Compliance + drift detection + comprehensive audit (including WARA checks) |
 
 ## Security Baseline Check (Every Scan)
 

@@ -140,9 +140,7 @@
       "description": "Continuous compliance monitoring and drift detection",
       "continuous": true,
       "schedule": {
-        "compliance_scan": "*/30 * * * *",
-        "drift_detection": "0 * * * *",
-        "full_audit": "0 6 * * *"
+        "full_scan": "0 6 * * *"
       }
     },
     {

@@ -898,7 +898,7 @@
         <div class="card card-accent" style="border-top-color:#107C10">
           <div class="card-icon bg-green">🔭</div>
           <h3>Monitor</h3>
-          <p>Continuous compliance scans every 30 minutes, hourly drift detection via Resource Graph change tracking, and real-time security posture from Defender for Cloud.</p>
+          <p>Daily full scan (compliance + drift + audit) at 06:00 UTC, with real-time security posture from Defender for Cloud.</p>
         </div>
         <div class="card card-accent" style="border-top-color:#5C2D91">
           <div class="card-icon bg-purple">🔧</div>
@@ -1195,7 +1195,7 @@
               <td><strong>Monitor</strong></td>
               <td>🔭 Sentinel</td>
               <td><span class="badge badge-purple">8 ∞</span></td>
-              <td>Compliance scans (30 min), drift detection (1 hr), security posture, daily audit</td>
+              <td>Daily full scan (compliance + drift + audit) at 06:00 UTC, security posture</td>
               <td><code>08-compliance-report.md</code></td>
             </tr>
             <tr>
@@ -1466,8 +1466,8 @@ python -m src.agents.orchestrator <span class="flag">--mode</span> monitor</div>
               <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td><span class="badge badge-red">Yes</span></td><td>Model deployment name (e.g., gpt-4o)</td></tr>
               <tr><td><code>AZURE_SUBSCRIPTION_ID</code></td><td><span class="badge badge-red">Yes</span></td><td>Target subscription for LZ deployment</td></tr>
               <tr><td><code>IAC_FRAMEWORK</code></td><td><span class="badge badge-orange">Default: bicep</span></td><td>bicep or terraform</td></tr>
-              <tr><td><code>MONITOR_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Compliance scan interval (default: 30)</td></tr>
-              <tr><td><code>DRIFT_CHECK_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Drift detection interval (default: 60)</td></tr>
+              <tr><td><code>MONITOR_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Compliance scan interval (default: 1440 — once daily)</td></tr>
+              <tr><td><code>DRIFT_CHECK_INTERVAL_MINUTES</code></td><td><span class="badge badge-green">Optional</span></td><td>Drift detection interval (default: 1440 — once daily)</td></tr>
               <tr><td><code>AUTO_REMEDIATE</code></td><td><span class="badge badge-green">Optional</span></td><td>Auto-remediate violations (default: false)</td></tr>
               <tr><td><code>AZURE_MANAGEMENT_GROUP_PREFIX</code></td><td><span class="badge badge-green">Optional</span></td><td>Root management group prefix (default: mrg)</td></tr>
               <tr><td><code>TERRAFORM_STATE_STORAGE_ACCOUNT</code></td><td><span class="badge badge-green">TF only</span></td><td>Storage account for Terraform state</td></tr>
@@ -1918,13 +1918,12 @@ agents:
             <div class="step-detail">
               <div class="step-meta">
                 <span class="badge badge-purple">Continuous Loop</span>
-                <span class="badge badge-blue">Every 30 min</span>
+                <span class="badge badge-blue">Daily 06:00 UTC</span>
               </div>
               <ul>
-                <li>Compliance scan every 30 minutes via Azure Policy + Resource Graph MCP</li>
-                <li>Drift detection every hour via Resource Graph change tracking</li>
+                <li>Full scan (compliance + drift + audit) once daily at 06:00 UTC</li>
                 <li>Security posture from Defender for Cloud via Monitor MCP</li>
-                <li>Full audit daily at 6 AM — generates 08-compliance-report.md</li>
+                <li>Generates 08-compliance-report.md</li>
                 <li>Critical violations → Mender immediately</li>
                 <li>High violations → Mender after 15 min grace</li>
                 <li>Medium/Low → daily report for human review</li>
@@ -2304,10 +2303,7 @@ resource budget <span class="str">'Microsoft.Consumption/budgets@2023-05-01'</sp
         <table>
           <thead><tr><th>Check Type</th><th>Frequency</th><th>Source</th><th>On Violation</th></tr></thead>
           <tbody>
-            <tr><td>Compliance scan</td><td>Every 30 min</td><td>Azure Policy via Resource Graph MCP</td><td>Route to Mender by severity</td></tr>
-            <tr><td>Drift detection</td><td>Every hour</td><td>Resource Graph change tracking</td><td>Alert + Mender for critical</td></tr>
-            <tr><td>Security posture</td><td>Every 30 min</td><td>Defender for Cloud via Monitor MCP</td><td>Recommendations → Mender</td></tr>
-            <tr><td>Full audit</td><td>Daily 6 AM</td><td>All sources combined</td><td>08-compliance-report.md generated</td></tr>
+            <tr><td>Full scan</td><td>Daily 06:00 UTC</td><td>Azure Policy + Resource Graph + Defender for Cloud</td><td>Route to Mender by severity; 08-compliance-report.md generated</td></tr>
           </tbody>
         </table>
       </div>
@@ -2521,7 +2517,7 @@ Step 8  5-pr-validate.yml        →  Lint, security, cost, tests on every PR</p
               <tr><td><strong>1-bootstrap.yml</strong></td><td>Manual (one-time)</td><td>Tenant-wide</td><td>Creates 11 management groups, moves 10 subs, registers 20 providers</td></tr>
               <tr><td><strong>2-platform-deploy.yml</strong></td><td>Manual</td><td>4 platform subs</td><td>Sequential with approval gate per LZ, <code>start_from</code> for resume</td></tr>
               <tr><td><strong>3-app-deploy.yml</strong></td><td>Manual</td><td>Config-driven</td><td>Reads app LZs from <code>subscriptions.json</code>, dynamic matrix, parallel deployment</td></tr>
-              <tr><td><strong>4-monitor.yml</strong></td><td>Cron (30 min / 1 h / daily 06:00 UTC) + Manual</td><td>All 10 subscriptions</td><td>Canonical Day-2 ops: <code>MonitoringAgent</code> + <code>RemediationAgent</code>; compliance + drift + auto-remediation (env gate) + Teams alerts + GH issue creation</td></tr>
+              <tr><td><strong>4-monitor.yml</strong></td><td>Cron (daily 06:00 UTC) + Manual</td><td>All 10 subscriptions</td><td>Canonical Day-2 ops: <code>MonitoringAgent</code> + <code>RemediationAgent</code>; full scan (compliance + drift + audit) + auto-remediation (env gate) + Teams alerts + GH issue creation</td></tr>
               <tr><td><strong>monitor.yml</strong></td><td>Daily 04:00 UTC + Manual</td><td>4 platform subs</td><td>Lightweight diagnostic: per-LZ parallel scan using PolicyInsights SDK v2+ directly; no agent dependencies</td></tr>
               <tr><td><strong>5-pr-validate.yml</strong></td><td>PR to main</td><td>Changed files</td><td>Lint, security, cost, tests, what-if preview posted as PR comment</td></tr>
               <tr><td><strong>reusable-deploy.yml</strong></td><td>Called by 2 &amp; 3</td><td>Single sub</td><td>DRY: resolve → validate → plan → deploy → verify; self-hosted runner via <code>runner_label</code> input</td></tr>
@@ -2811,9 +2807,7 @@ gh workflow run <span class="str">"3 · Deploy Application Landing Zones"</span>
           <table>
             <thead><tr><th>Schedule</th><th>Scan Type</th><th>Scope</th></tr></thead>
             <tbody>
-              <tr><td>Every 30 minutes</td><td>Compliance scan (Azure Policy)</td><td>All 10 subscriptions</td></tr>
-              <tr><td>Every hour</td><td>Drift detection (Resource Graph)</td><td>All 10 subscriptions</td></tr>
-              <tr><td>Daily 6 AM UTC</td><td>Full audit report</td><td>All 10 subscriptions</td></tr>
+              <tr><td>Daily 06:00 UTC</td><td>Full scan (compliance + drift + audit)</td><td>All 10 subscriptions</td></tr>
             </tbody>
           </table>
         </div>

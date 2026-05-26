@@ -402,7 +402,7 @@ Valid profiles: `corp`, `online`, `sandbox`, `sap`
 ├── 1-bootstrap.yml         ← One-time: MG hierarchy + subscription placement + providers
 ├── 2-platform-deploy.yml   ← Sequential: Management → Connectivity → Identity → Security
 ├── 3-app-deploy.yml        ← Parallel: all 6 app LZs (or individual)
-├── 4-monitor.yml           ← Canonical Day-2 ops: compliance (30 min), drift (hourly), full audit (daily 06:00 UTC) + auto-remediation + alerts
+├── 4-monitor.yml           ← Canonical Day-2 ops: full scan (compliance + drift + audit) daily at 06:00 UTC + auto-remediation + alerts
 ├── monitor.yml             ← Daily 04:00 UTC: lightweight Policy Insights diagnostic scan (4 platform subs, no agent deps)
 ├── 5-pr-validate.yml       ← Automatic: lint, security, cost, tests, what-if on PRs
 └── reusable-deploy.yml     ← Shared: validate → plan → deploy → verify
@@ -485,9 +485,7 @@ The `4-monitor.yml` workflow runs on schedule (canonical Day-2 ops):
 
 | Schedule | Scan Type |
 |---|---|
-| Every 30 min | Compliance scan across all 10 subscriptions |
-| Every hour | Drift detection (compares to baseline) |
-| Daily 06:00 UTC | Full audit report |
+| Daily 06:00 UTC | Full scan (compliance + drift + audit) across all 10 subscriptions |
 
 Violations trigger Teams notifications and auto-remediation (with approval gate via `environment: remediation`).
 

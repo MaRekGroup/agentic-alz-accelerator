@@ -133,7 +133,7 @@ Primary GitHub Actions workflows for the deployment + Day-2 ops lifecycle:
 | `1-bootstrap.yml` | Manual (one-time) | MG hierarchy, subscription placement, provider registration |
 | `2-platform-deploy.yml` | Manual | 4 platform LZs (Mgmt → Conn → Ident → Sec) with cascade or targeted deploy |
 | `3-app-deploy.yml` | Manual | Config-driven app LZs from `subscriptions.json` (parallel) |
-| `4-monitor.yml` | Cron (30 min / 1 h / daily 06:00 UTC) + Manual | Canonical Day-2 ops: compliance scan, drift detection, auto-remediation (`environment: remediation` gate), Teams alerts, GH issue creation. Covers 4 platform + 6 app subscriptions via `MonitoringAgent` + `RemediationAgent`. |
+| `4-monitor.yml` | Cron (daily 06:00 UTC) + Manual | Canonical Day-2 ops: full scan (compliance + drift + audit), auto-remediation (`environment: remediation` gate), Teams alerts, GH issue creation. Covers 4 platform + 6 app subscriptions via `MonitoringAgent` + `RemediationAgent`. |
 | `monitor.yml` | Daily 04:00 UTC + Manual | Lightweight diagnostic: direct Azure Policy Insights SDK scan across 4 platform subscriptions in parallel. No agent dependencies — useful as a baseline check independent of the agent framework. |
 | `5-pr-validate.yml` | PR to main | Lint, security, cost, tests, what-if preview |
 | `reusable-deploy.yml` | Called by 2 & 3 | DRY: resolve → validate → plan → deploy → verify |

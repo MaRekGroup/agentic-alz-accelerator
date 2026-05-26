@@ -1,0 +1,75 @@
+📋 SCRIBE-11 SESSION HEALTH REPORT
+
+Date: 2026-05-18T19:10Z
+Branch: wave2-skills-planning
+Commit: c1396c095b2b30c8eb96aee4eb43fbacf8657680
+
+### FILES STAGED (5 expected) ✅
+
+1. .github/skills/azure-virtual-machines/SKILL.md
+   - M1 Operational Excellence WAF row added (5th row in WAF table)
+
+2. .github/skills/azure-container-apps/SKILL.md
+   - M2 inline cross-skill sequencing sentence added to brownfield intro
+
+3. .squad/decisions.md
+   - Wave 2 Drafts closure section appended (Isabel verdict + Copilot edits + outcome)
+   - Size: 187,859 bytes (closure section: ~40-50 lines)
+
+4. .squad/agents/isabel/history.md
+   - isabel-4's own append from quality-gate run, staged as-is
+
+5. .squad/agents/linus/history.md
+   - Summarized: 16,757 → 10,153 bytes (preserved 5 most recent entries, compressed historical)
+
+### FILES NOT STAGED (3 leftover, out of scope) ✅
+
+1. .squad/agents/reuben/history.md — modified but untracked (prior work)
+2. .squad-session-health.txt — untracked artifact (this file)
+3. .squad/skills/remote-rewind-with-lease/ — untracked from prior session
+
+### FILES DELETED (2 inbox files, gitignored) ✅
+
+1. .squad/decisions/inbox/isabel-wave2-drafts-verdict.md — deleted via rm -f
+2. .squad/decisions/inbox/copilot-wave2-drafts-closure-note.md — deleted via rm -f
+
+### LINUS HISTORY SUMMARIZATION
+
+Before: 16,757 bytes (crossed 15K threshold per convention)
+After: 10,153 bytes (1,087 bytes headroom to target)
+
+Method: Preserved 5 most recent entries verbatim, compressed 8 historical entries to 1-2 lines per entry with all decision file cross-references preserved.
+
+### WAVE 2 DRAFTS STATUS
+
+Isabel-4 Verdict: APPROVE WITH CONDITIONS → Surgical Majors Closure
+
+Majors closed:
+  ✅ M1 (VMs WAF Operational Excellence) — 5th WAF row added
+  ✅ M2 (ACA cross-skill sequencing) — narrative paragraph added
+
+Minors deferred (no action required per Isabel):
+  - m1: AKS line count within tolerance
+  - m2: VMs secondary WAF rows (acceptable pattern)
+  - m3: ADR anti-patterns table format (acceptable)
+
+Pre-Merge Checklist:
+  ✅ All 3 Wave 1 majors absent from W2
+  ✅ 15/15 hidden assumptions present
+  ✅ Composite VM→AKS→ACA brownfield story coherent
+  ✅ No boundary collisions
+  ✅ copilot-instructions.md registration correct
+  ✅ ADR unmodified (PASS verdict)
+  ✅ All 3 SKILL.md files pass compliance baseline
+
+### COMMIT DETAILS
+
+Message: docs(skills): Wave 2 drafts — Isabel majors closed, APPROVE CLEAN
+
+Status: Push not performed (per instructions)
+
+### DISPOSITION
+
+Ready for: Push to github remote → PR to github/main
+All inbox files merged and deleted.
+Session complete.
