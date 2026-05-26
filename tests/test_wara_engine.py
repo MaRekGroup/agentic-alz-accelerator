@@ -343,15 +343,11 @@ class TestWaraEngine:
             },
         )
         # Non-empty field
-        result = engine._run_discovery_field_check(
-            "logging_config.log_analytics_workspaces", discovery
-        )
+        result = engine._run_discovery_field_check("logging_config.log_analytics_workspaces", discovery)
         assert len(result) == 1
 
         # Empty field
-        result = engine._run_discovery_field_check(
-            "logging_config.automation_accounts", discovery
-        )
+        result = engine._run_discovery_field_check("logging_config.automation_accounts", discovery)
         assert len(result) == 0
 
     def test_check_caf_mg_hierarchy_compliant(self, engine):
@@ -361,9 +357,7 @@ class TestWaraEngine:
             {"name": "mrg-landingzones"},
             {"name": "mrg-sandbox"},
         ]
-        discovery = DiscoveryResult(
-            scope="mrg", scope_type=DiscoveryScope.MANAGEMENT_GROUP
-        )
+        discovery = DiscoveryResult(scope="mrg", scope_type=DiscoveryScope.MANAGEMENT_GROUP)
         assert engine.check_caf_mg_hierarchy(mgs, discovery) is False  # False = no finding
 
     def test_check_caf_mg_hierarchy_non_compliant(self, engine):
@@ -372,9 +366,7 @@ class TestWaraEngine:
             {"name": "corp-mg"},
             {"name": "prod-mg"},
         ]
-        discovery = DiscoveryResult(
-            scope="test", scope_type=DiscoveryScope.MANAGEMENT_GROUP
-        )
+        discovery = DiscoveryResult(scope="test", scope_type=DiscoveryScope.MANAGEMENT_GROUP)
         assert engine.check_caf_mg_hierarchy(mgs, discovery) is True  # True = finding
 
 
@@ -382,8 +374,14 @@ class TestApplyFindingToScores:
     def test_critical_deduction(self):
         scores = {"security": PillarScore(pillar="security")}
         finding = Finding(
-            rule_id="SEC-001", title="T", pillar="security", caf_area="security",
-            alz_area="security", severity="critical", confidence="high", recommendation="R",
+            rule_id="SEC-001",
+            title="T",
+            pillar="security",
+            caf_area="security",
+            alz_area="security",
+            severity="critical",
+            confidence="high",
+            recommendation="R",
         )
         WaraEngine._apply_finding_to_scores(finding, scores)
         assert scores["security"].score == 80.0
@@ -392,8 +390,14 @@ class TestApplyFindingToScores:
     def test_score_floor_zero(self):
         scores = {"security": PillarScore(pillar="security", score=10.0)}
         finding = Finding(
-            rule_id="SEC-001", title="T", pillar="security", caf_area="security",
-            alz_area="security", severity="critical", confidence="high", recommendation="R",
+            rule_id="SEC-001",
+            title="T",
+            pillar="security",
+            caf_area="security",
+            alz_area="security",
+            severity="critical",
+            confidence="high",
+            recommendation="R",
         )
         WaraEngine._apply_finding_to_scores(finding, scores)
         assert scores["security"].score == 0.0  # Floored at 0
@@ -401,8 +405,14 @@ class TestApplyFindingToScores:
     def test_unknown_pillar_ignored(self):
         scores = {"security": PillarScore(pillar="security")}
         finding = Finding(
-            rule_id="X-001", title="T", pillar="nonexistent", caf_area="x",
-            alz_area="x", severity="high", confidence="high", recommendation="R",
+            rule_id="X-001",
+            title="T",
+            pillar="nonexistent",
+            caf_area="x",
+            alz_area="x",
+            severity="high",
+            confidence="high",
+            recommendation="R",
         )
         WaraEngine._apply_finding_to_scores(finding, scores)
         assert scores["security"].score == 100.0  # Unchanged
@@ -484,3 +494,173 @@ checks:
                 assert "pillar" in check
                 assert "severity" in check
                 assert "query" in check
+
+
+class TestSmartFiltering:
+    """Tests for resource-type-based smart check filtering (WS-3)."""
+
+    def test_extract_resource_types(self, engine):
+        """Extracts lowercase resource types from discovery data."""
+        discovery = DiscoveryResult(
+            scope="test",
+            scope_type=DiscoveryScope.SUBSCRIPTION,
+            resources={
+                "by_type": [
+                    {"type": "Microsoft.Storage/storageAccounts", "resource_count": 5},
+                    {"type": "microsoft.compute/virtualmachines", "resource_count": 3},
+                ],
+            },
+        )
+        types = WaraEngine._extract_resource_types(discovery)
+        assert "microsoft.storage/storageaccounts" in types
+        assert "microsoft.compute/virtualmachines" in types
+        assert len(types) == 2
+
+    def test_extract_empty_resources(self, engine):
+        """Returns empty set when no resources discovered."""
+        discovery = DiscoveryResult(scope="test", scope_type=DiscoveryScope.SUBSCRIPTION, resources={})
+        assert WaraEngine._extract_resource_types(discovery) == set()
+
+    def test_should_skip_no_resource_type(self):
+        """Checks without resource_type constraint always run."""
+        check = {"id": "SEC-001", "mappings": {"waf_pillar": ["security"]}}
+        assert WaraEngine._should_skip_check(check, set()) is False
+
+    def test_should_skip_matching_type(self):
+        """Checks with matching resource_type are not skipped."""
+        check = {
+            "id": "SEC-001",
+            "mappings": {"resource_type": "Microsoft.Storage/storageAccounts"},
+        }
+        discovered = {"microsoft.storage/storageaccounts"}
+        assert WaraEngine._should_skip_check(check, discovered) is False
+
+    def test_should_skip_missing_type(self):
+        """Checks targeting absent resource types are skipped."""
+        check = {
+            "id": "SEC-001",
+            "mappings": {"resource_type": "Microsoft.Sql/servers"},
+        }
+        discovered = {"microsoft.storage/storageaccounts"}
+        assert WaraEngine._should_skip_check(check, discovered) is True
+
+    @pytest.mark.asyncio
+    async def test_assess_skips_irrelevant_checks(self, mock_credential, mock_settings, tmp_path):
+        """Smart filtering skips checks for resource types not in scope."""
+        content = """
+checks:
+  - id: SEC-FILTER-001
+    title: "Storage TLS"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: critical
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where type =~ 'microsoft.storage/storageaccounts'"
+    match: any
+    recommendation: Fix
+    mappings:
+      resource_type: "microsoft.storage/storageaccounts"
+  - id: SEC-FILTER-002
+    title: "SQL check"
+    pillar: security
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: "resources | where type =~ 'microsoft.sql/servers'"
+    match: any
+    recommendation: Fix
+    mappings:
+      resource_type: "microsoft.sql/servers"
+"""
+        f = tmp_path / "filter_checks.yaml"
+        f.write_text(content)
+        with patch("src.tools.wara_engine.AzureRGClient"):
+            engine = WaraEngine(mock_credential, mock_settings, checks_file=f)
+            engine._arg_client = MagicMock()
+            engine._arg_client.resources.return_value = _mock_arg_result([{"id": "sa-1"}])
+
+        discovery = DiscoveryResult(
+            scope="test",
+            scope_type=DiscoveryScope.SUBSCRIPTION,
+            resources={
+                "by_type": [
+                    {"type": "microsoft.storage/storageaccounts", "resource_count": 2},
+                ],
+            },
+        )
+        result = await engine.assess(discovery, subscriptions=["sub-1"])
+        # SQL check skipped (no SQL servers), storage check runs
+        assert result.checks_run == 2
+        assert result.checks_passed == 1  # SQL skipped = passed
+        assert len(result.findings) == 1
+        assert result.findings[0].rule_id == "SEC-FILTER-001"
+
+
+class TestAdvisorCheck:
+    """Tests for Advisor recommendation data source (WS-4)."""
+
+    def test_advisor_check_matches(self, engine):
+        """Advisor check matches recommendations by category and resource type."""
+        check = {
+            "id": "ADV-001",
+            "advisor_category": "HighAvailability",
+            "mappings": {"resource_type": "microsoft.compute/virtualmachines"},
+        }
+        discovery = DiscoveryResult(
+            scope="test",
+            scope_type=DiscoveryScope.SUBSCRIPTION,
+            advisor_recommendations=[
+                {
+                    "category": "HighAvailability",
+                    "impact": "High",
+                    "resourceType": "microsoft.compute/virtualmachines",
+                    "shortDescription": "Enable availability zones",
+                },
+                {
+                    "category": "Cost",
+                    "impact": "Medium",
+                    "resourceType": "microsoft.compute/disks",
+                    "shortDescription": "Right-size disks",
+                },
+            ],
+        )
+        result = WaraEngine._run_advisor_check(check, discovery)
+        assert len(result) == 1
+        assert result[0]["category"] == "HighAvailability"
+
+    def test_advisor_check_no_recommendations(self, engine):
+        """Advisor check returns empty when no recommendations exist."""
+        check = {"id": "ADV-001", "advisor_category": "Security", "mappings": {}}
+        discovery = DiscoveryResult(scope="test", scope_type=DiscoveryScope.SUBSCRIPTION)
+        assert WaraEngine._run_advisor_check(check, discovery) == []
+
+    def test_advisor_check_category_only(self, engine):
+        """Advisor check filters by category alone when no resource_type."""
+        check = {"id": "ADV-002", "advisor_category": "Cost", "mappings": {}}
+        discovery = DiscoveryResult(
+            scope="test",
+            scope_type=DiscoveryScope.SUBSCRIPTION,
+            advisor_recommendations=[
+                {"category": "Cost", "impact": "Low", "resourceType": "x", "shortDescription": "s"},
+                {"category": "Security", "impact": "High", "resourceType": "y", "shortDescription": "s"},
+            ],
+        )
+        result = WaraEngine._run_advisor_check(check, discovery)
+        assert len(result) == 1
+
+    def test_discovery_result_has_advisor_field(self):
+        """DiscoveryResult includes advisor_recommendations in to_dict()."""
+        dr = DiscoveryResult(
+            scope="test",
+            scope_type=DiscoveryScope.SUBSCRIPTION,
+            advisor_recommendations=[{"category": "Cost"}],
+        )
+        d = dr.to_dict()
+        assert "advisor_recommendations" in d
+        assert len(d["advisor_recommendations"]) == 1

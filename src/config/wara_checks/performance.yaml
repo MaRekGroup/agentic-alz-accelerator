@@ -26,3 +26,415 @@ checks:
     mappings:
       waf_pillar: [performance, reliability]
       caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Storage/storageAccounts"
+
+  - id: PER-002
+    title: "App Service Plans on Free or Shared tier"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.web/serverfarms'
+      | where sku.tier in~ ('Free', 'Shared')
+      | project id, name, resourceGroup, subscriptionId, tier=sku.tier
+    match: any
+    recommendation: "Move production or performance-sensitive App Service Plans to Standard, Premium, or Isolated tiers."
+    remediation_steps:
+      - "Review workload demand and upgrade Free or Shared plans to a dedicated tier"
+    references:
+      - "https://learn.microsoft.com/azure/app-service/overview-hosting-plans"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Web/serverFarms"
+
+  - id: PER-003
+    title: "SQL Databases on Basic tier"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers/databases'
+      | where name !~ 'master'
+      | extend serviceTier = coalesce(tostring(sku.tier), tostring(properties.currentSku.tier), tostring(properties.currentServiceObjectiveName))
+      | where serviceTier =~ 'Basic'
+      | project id, name, resourceGroup, subscriptionId, serviceTier
+    match: any
+    recommendation: "Evaluate upgrading Basic SQL databases to Standard, General Purpose, or Business Critical tiers for sustained performance needs."
+    remediation_steps:
+      - "Assess DTU or vCore consumption and move Basic databases to an appropriate performance tier"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/service-tiers-dtu"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Sql/servers/databases"
+
+  - id: PER-004
+    title: "VMs without accelerated networking"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | mv-expand nic = properties.networkProfile.networkInterfaces
+      | project id, name, resourceGroup, subscriptionId, vmSize=tostring(properties.hardwareProfile.vmSize), nicId=tolower(tostring(nic.id))
+      | join kind=inner (
+          resources
+          | where type =~ 'microsoft.network/networkinterfaces'
+          | where properties.enableAcceleratedNetworking != true
+          | project nicId=tolower(id), nicName=name
+        ) on nicId
+      | project id, name, resourceGroup, subscriptionId, vmSize, nicName
+    match: any
+    recommendation: "Enable accelerated networking on supported VM sizes to reduce latency and CPU overhead for network traffic."
+    remediation_steps:
+      - "Confirm VM size support, stop the VM if needed, and enable accelerated networking on attached NICs"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Compute/virtualMachines"
+
+  - id: PER-005
+    title: "AKS clusters without cluster autoscaler"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | mv-expand agentPool = properties.agentPoolProfiles
+      | summarize autoscalingPools=countif(tobool(agentPool.enableAutoScaling) == true) by id, name, resourceGroup, subscriptionId
+      | where autoscalingPools == 0
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Enable AKS cluster autoscaler so node capacity can respond automatically to workload demand."
+    remediation_steps:
+      - "Turn on autoscaling for at least one system and one user node pool with appropriate min and max counts"
+    references:
+      - "https://learn.microsoft.com/azure/aks/cluster-autoscaler"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.ContainerService/managedClusters"
+
+  - id: PER-006
+    title: "App Service Plans without autoscale rules"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.web/serverfarms'
+      | extend skuTier = tostring(sku.tier)
+      | where skuTier !in~ ('Free', 'Shared')
+      | project id, name, resourceGroup, subscriptionId, skuTier, planId=tolower(id)
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.insights/autoscalesettings'
+          | where tostring(properties.targetResourceUri) contains 'Microsoft.Web/serverfarms'
+          | project autoscaleTargetId=tolower(tostring(properties.targetResourceUri)), autoscaleEnabled=tostring(properties.enabled)
+        ) on $left.planId == $right.autoscaleTargetId
+      | where isempty(autoscaleTargetId) or coalesce(tolower(autoscaleEnabled), 'false') != 'true'
+      | project id, name, resourceGroup, subscriptionId, skuTier
+    match: any
+    recommendation: "Configure Azure Monitor autoscale rules for dedicated App Service Plans that need elastic scale."
+    remediation_steps:
+      - "Create autoscale settings targeting each dedicated plan and define CPU, memory, or schedule-based rules"
+    references:
+      - "https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-get-started"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Web/serverFarms"
+
+  - id: PER-007
+    title: "Redis Cache on Basic tier"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.cache/redis'
+      | extend skuName = coalesce(tostring(sku.name), tostring(properties.sku.name))
+      | where skuName =~ 'Basic'
+      | project id, name, resourceGroup, subscriptionId, skuName
+    match: any
+    recommendation: "Use Standard or Premium Azure Cache for Redis tiers for better availability, scale, and performance."
+    remediation_steps:
+      - "Review cache hit ratio and throughput, then upgrade Basic caches to Standard or Premium"
+    references:
+      - "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-overview"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Cache/Redis"
+
+  - id: PER-008
+    title: "Cosmos DB without autoscale throughput"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type in~ ('microsoft.documentdb/databaseaccounts/sqldatabases', 'microsoft.documentdb/databaseaccounts/sqldatabases/containers')
+      | extend autoscaleMax = tostring(properties.resource.autoscaleSettings.maxThroughput)
+      | extend accountName = split(id, '/')[8]
+      | where isempty(autoscaleMax)
+      | summarize by accountName, resourceGroup, subscriptionId
+      | project id=strcat('/subscriptions/', subscriptionId, '/resourceGroups/', resourceGroup, '/providers/Microsoft.DocumentDB/databaseAccounts/', accountName), name=accountName, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Review Cosmos DB workloads with variable demand and consider autoscale throughput where manual RU provisioning creates headroom or throttling issues."
+    remediation_steps:
+      - "Identify bursty databases or containers and migrate eligible workloads to autoscale throughput"
+    references:
+      - "https://learn.microsoft.com/azure/cosmos-db/provision-throughput-autoscale"
+    mappings:
+      waf_pillar: [performance, cost]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.DocumentDB/databaseAccounts"
+
+  - id: PER-009
+    title: "VMs using Standard HDD disks"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/disks'
+      | where sku.name =~ 'Standard_LRS'
+      | extend managedById = tolower(tostring(managedBy))
+      | where isnotempty(managedById)
+      | project diskName=name, diskSku=tostring(sku.name), managedById
+      | join kind=inner (
+          resources
+          | where type =~ 'microsoft.compute/virtualmachines'
+          | project id, name, resourceGroup, subscriptionId, vmJoinId=tolower(id)
+        ) on $left.managedById == $right.vmJoinId
+      | project id, name, resourceGroup, subscriptionId, diskName, diskSku
+    match: any
+    recommendation: "Use Premium SSD or Ultra disks for latency-sensitive VM workloads instead of Standard HDD managed disks."
+    remediation_steps:
+      - "Review attached OS and data disks, then migrate performance-sensitive volumes to Premium SSD or Ultra"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/disks-types"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Compute/disks"
+
+  - id: PER-010
+    title: "Application Gateways on v1 SKU"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/applicationgateways'
+      | extend tier = coalesce(tostring(sku.tier), tostring(properties.sku.tier))
+      | extend skuName = coalesce(tostring(sku.name), tostring(properties.sku.name))
+      | where tier in~ ('Standard', 'WAF') or skuName in~ ('Standard_Small', 'Standard_Medium', 'Standard_Large', 'WAF_Medium', 'WAF_Large')
+      | project id, name, resourceGroup, subscriptionId, tier, skuName
+    match: any
+    recommendation: "Migrate Application Gateway v1 deployments to v2 for autoscaling, zone redundancy, and improved performance."
+    remediation_steps:
+      - "Plan a migration to Standard_v2 or WAF_v2 and validate listener, backend, and WAF policy compatibility"
+    references:
+      - "https://learn.microsoft.com/azure/application-gateway/overview-v2"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/applicationGateways"
+
+  - id: PER-011
+    title: "SQL Databases without read scale-out"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers/databases'
+      | where name !~ 'master'
+      | extend serviceTier = coalesce(tostring(sku.tier), tostring(properties.currentSku.tier), tostring(properties.currentServiceObjectiveName))
+      | extend readScale = tostring(properties.readScale)
+      | where serviceTier in~ ('Premium', 'BusinessCritical', 'Business Critical')
+      | where isempty(readScale) or readScale !~ 'Enabled'
+      | project id, name, resourceGroup, subscriptionId, serviceTier, readScale
+    match: any
+    recommendation: "Enable read scale-out for eligible Premium or Business Critical SQL databases that serve read-heavy workloads."
+    remediation_steps:
+      - "Review read workload patterns and enable read scale-out where application connection strings can target read-only replicas"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/read-scale-out"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Sql/servers/databases"
+
+  - id: PER-012
+    title: "Production VMs using burstable B-series"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | extend vmSize = tostring(properties.hardwareProfile.vmSize)
+      | extend environment = coalesce(tostring(tags.Environment), tostring(tags.environment), tostring(tags.Env), tostring(tags.env))
+      | where tolower(vmSize) startswith 'standard_b'
+      | where tolower(environment) in ('prod', 'production')
+      | project id, name, resourceGroup, subscriptionId, vmSize, environment
+    match: any
+    recommendation: "Avoid B-series burstable VMs for steady-state production workloads that require predictable CPU performance."
+    remediation_steps:
+      - "Review CPU credit consumption and move production workloads to D-series, E-series, or other non-burstable SKUs as needed"
+    references:
+      - "https://learn.microsoft.com/azure/virtual-machines/sizes-b-series-burstable"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Compute/virtualMachines"
+
+  - id: PER-013
+    title: "AKS node pools without autoscaling"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | mv-expand agentPool = properties.agentPoolProfiles
+      | where tobool(agentPool.enableAutoScaling) != true
+      | project id, name, resourceGroup, subscriptionId, nodePool=tostring(agentPool.name), nodeCount=tostring(agentPool.count)
+    match: any
+    recommendation: "Enable autoscaling on AKS node pools so cluster capacity can adjust to pod demand without manual intervention."
+    remediation_steps:
+      - "Configure min and max counts for each fixed-size node pool and validate cluster autoscaler settings"
+    references:
+      - "https://learn.microsoft.com/azure/aks/cluster-autoscaler"
+    mappings:
+      waf_pillar: [performance]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.ContainerService/managedClusters"
+
+  - id: PER-014
+    title: "Virtual Networks without ExpressRoute or VPN gateway"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: low
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/virtualnetworks'
+      | extend vnetJoinId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, vnetJoinId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.network/virtualnetworkgateways'
+          | where tostring(properties.gatewayType) in~ ('Vpn', 'ExpressRoute')
+          | mv-expand ipConfig = properties.ipConfigurations
+          | extend subnetId = tostring(ipConfig.properties.subnet.id)
+          | extend connectedVnetId = tolower(split(subnetId, '/subnets/')[0])
+          | project connectedVnetId
+        ) on $left.vnetJoinId == $right.connectedVnetId
+      | where isempty(connectedVnetId)
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Review whether virtual networks hosting business-critical workloads require ExpressRoute or VPN connectivity for predictable hybrid network performance."
+    remediation_steps:
+      - "Identify VNets with hybrid connectivity needs and deploy or attach an appropriate VPN or ExpressRoute gateway design"
+    references:
+      - "https://learn.microsoft.com/azure/architecture/reference-architectures/hybrid-networking/"
+    mappings:
+      waf_pillar: [performance, reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/virtualNetworkGateways"
+
+  - id: PER-015
+    title: "Storage accounts without private endpoints"
+    pillar: performance
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | project id, name, resourceGroup, subscriptionId, storageId=tolower(id)
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.network/privateendpoints'
+          | mv-expand connection = properties.privateLinkServiceConnections
+          | project connectedResourceId=tolower(tostring(connection.properties.privateLinkServiceId))
+        ) on $left.storageId == $right.connectedResourceId
+      | summarize privateEndpointCount=countif(isnotempty(connectedResourceId)) by id, name, resourceGroup, subscriptionId
+      | where privateEndpointCount == 0
+      | project id, name, resourceGroup, subscriptionId
+    match: any
+    recommendation: "Use private endpoints for storage accounts that serve latency-sensitive or security-sensitive workloads to reduce public path dependency."
+    remediation_steps:
+      - "Create private endpoints for required storage services and update DNS and client routing to use private connectivity"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-private-endpoints"
+    mappings:
+      waf_pillar: [performance, security]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Storage/storageAccounts"

@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.tools.discovery import DiscoveryResult
+from src.tools.excel_reporter import ExcelReporter
 from src.tools.wara_engine import AssessmentResult, Finding
 
 logger = logging.getLogger(__name__)
@@ -129,6 +130,15 @@ class ReportGenerator:
                 self.render_pillar_report(assessment, pillar_key, label),
             )
 
+        # Excel action plan
+        try:
+            excel_reporter = ExcelReporter(report_dir)
+            outputs["excel_action_plan"] = excel_reporter.generate(discovery, assessment, scope_label=label)
+        except ImportError:
+            logger.warning("openpyxl not installed — skipping Excel report")
+        except Exception as e:
+            logger.warning("Excel report generation failed: %s", e)
+
         logger.info("Generated %d report artifacts in %s", len(outputs), report_dir)
         return outputs
 
@@ -196,9 +206,7 @@ class ReportGenerator:
                             reverse=True,
                         ):
                             count = item.get("resource_count", item.get("count", 0))
-                            lines.append(
-                                f"| `{item.get('type', 'unknown')}` | {count} |"
-                            )
+                            lines.append(f"| `{item.get('type', 'unknown')}` | {count} |")
                     elif isinstance(by_type, dict):
                         for rtype, count in sorted(
                             by_type.items(),
@@ -208,9 +216,7 @@ class ReportGenerator:
                             lines.append(f"| `{rtype}` | {count} |")
                     lines.append("")
                 if "total_count" in discovery.resources:
-                    lines.append(
-                        f"**Total resources**: {discovery.resources['total_count']}"
-                    )
+                    lines.append(f"**Total resources**: {discovery.resources['total_count']}")
                     lines.append("")
                 elif "total" in discovery.resources:
                     lines.append(f"**Total resources**: {discovery.resources['total']}")
@@ -269,13 +275,9 @@ class ReportGenerator:
             lines += ["## Logging & Monitoring", ""]
             lc = discovery.logging_config
             if "log_analytics_workspaces" in lc:
-                lines.append(
-                    f"**Log Analytics Workspaces**: {len(lc['log_analytics_workspaces'])}"
-                )
+                lines.append(f"**Log Analytics Workspaces**: {len(lc['log_analytics_workspaces'])}")
             if "diagnostic_settings" in lc:
-                lines.append(
-                    f"**Diagnostic Settings**: {len(lc['diagnostic_settings'])}"
-                )
+                lines.append(f"**Diagnostic Settings**: {len(lc['diagnostic_settings'])}")
             lines.append("")
 
         # Security Posture
@@ -361,9 +363,7 @@ class ReportGenerator:
                             lines.append(f"{i}. {step}")
                         lines.append("")
                     if f.evidence:
-                        lines.append(
-                            f"*{len(f.evidence)} resource(s) affected*"
-                        )
+                        lines.append(f"*{len(f.evidence)} resource(s) affected*")
                         lines.append("")
 
         # Target state description
@@ -412,9 +412,7 @@ class ReportGenerator:
         for pillar_key, pillar_name in _PILLAR_NAMES.items():
             ps = assessment.pillar_scores.get(pillar_key)
             if ps:
-                lines.append(
-                    f"| {pillar_name} | {ps.score:.1f} | {ps.critical} | {ps.high} | {ps.medium} | {ps.low} |"
-                )
+                lines.append(f"| {pillar_name} | {ps.score:.1f} | {ps.critical} | {ps.high} | {ps.medium} | {ps.low} |")
             else:
                 lines.append(f"| {pillar_name} | — | — | — | — | — |")
         lines.append("")
@@ -500,9 +498,7 @@ class ReportGenerator:
             lines.append("  subgraph NET[Network]")
             for vnet in discovery.network_topology["vnets"]:
                 name = vnet.get("name", "vnet")
-                addr = ", ".join(
-                    vnet.get("addressPrefixes", vnet.get("address_space", []))
-                )
+                addr = ", ".join(vnet.get("addressPrefixes", vnet.get("address_space", [])))
                 node_id = _mermaid_id(name)
                 lines.append(f"    {node_id}[{name}<br/>{addr}]")
             lines.append("  end")
@@ -524,9 +520,7 @@ class ReportGenerator:
     def render_adr(self, assessment: AssessmentResult, label: str) -> str:
         """Render an Architecture Decision Record for assessment findings."""
         date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        critical_high = [
-            f for f in assessment.findings if f.severity in ("critical", "high")
-        ]
+        critical_high = [f for f in assessment.findings if f.severity in ("critical", "high")]
 
         lines = [
             f"# ADR — Assessment Findings for {label}",
@@ -539,8 +533,7 @@ class ReportGenerator:
             "",
             f"A WARA/CAF assessment was performed on `{assessment.scope}` "
             f"scoring **{assessment.overall_score:.1f}/100** overall.",
-            f"The assessment identified **{len(assessment.findings)}** findings "
-            f"across {assessment.checks_run} checks.",
+            f"The assessment identified **{len(assessment.findings)}** findings across {assessment.checks_run} checks.",
             "",
         ]
 
@@ -674,9 +667,7 @@ class ReportGenerator:
             for i, f in enumerate(pillar_findings, 1):
                 badge = _SEVERITY_BADGE.get(f.severity, f.severity)
                 res_count = len(f.evidence) if f.evidence else 0
-                lines.append(
-                    f"| {i} | `{f.rule_id}` | {badge} | {f.title} | {f.confidence} | {res_count} |"
-                )
+                lines.append(f"| {i} | `{f.rule_id}` | {badge} | {f.title} | {f.confidence} | {res_count} |")
             lines.append("")
 
             # Detailed findings
@@ -749,9 +740,7 @@ class ReportGenerator:
                 # Estimate effort based on remediation steps count
                 steps = len(f.remediation_steps) if f.remediation_steps else 0
                 effort = "Low" if steps <= 1 else ("Medium" if steps <= 3 else "High")
-                impact = "Critical" if f.severity == "critical" else (
-                    "High" if f.severity == "high" else "Medium"
-                )
+                impact = "Critical" if f.severity == "critical" else ("High" if f.severity == "high" else "Medium")
                 lines.append(f"| {i} | `{f.rule_id}` | {f.title} | {effort} | {impact} |")
             lines.append("")
 

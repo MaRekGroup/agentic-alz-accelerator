@@ -1,0 +1,112 @@
+name: "Sync · APRL Check Catalog"
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Monday 6 AM UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  sync-aprl:
+    name: Sync APRL Catalog
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install PyYAML
+        run: |
+          set -euo pipefail
+          python -m pip install pyyaml
+
+      - name: Sync APRL catalog
+        run: |
+          set -euo pipefail
+          python scripts/sync_aprl.py --output src/config/wara_checks/_aprl_synced.yaml
+
+      - name: Check for APRL catalog changes
+        id: changes
+        run: |
+          set -euo pipefail
+          if git diff --exit-code src/config/wara_checks/_aprl_synced.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No APRL catalog changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "APRL catalog changes detected."
+          fi
+
+      - name: Collect APRL stats
+        if: steps.changes.outputs.changed == 'true'
+        id: stats
+        run: |
+          set -euo pipefail
+          {
+            echo "summary<<EOF"
+            python scripts/sync_aprl.py --stats --output src/config/wara_checks/_aprl_synced.yaml
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push APRL sync branch
+        if: steps.changes.outputs.changed == 'true'
+        id: branch
+        run: |
+          set -euo pipefail
+          BRANCH="chore/sync-aprl-$(date -u +%F)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add src/config/wara_checks/_aprl_synced.yaml
+          git commit -m "chore: sync APRL checks"
+          git push --force-with-lease --set-upstream origin "$BRANCH"
+
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Create APRL sync pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [[ -n "$EXISTING_PR" ]]; then
+            echo "Pull request already exists: #$EXISTING_PR"
+            exit 0
+          fi
+
+          PR_BODY_FILE=".github/.sync-aprl-pr-body.md"
+          cat > "$PR_BODY_FILE" <<EOF
+          ## APRL catalog sync
+
+          This PR updates \`src/config/wara_checks/_aprl_synced.yaml\` with the latest APRL recommendations.
+
+          ### Sync statistics
+
+          \`\`\`text
+          ${{ steps.stats.outputs.summary }}
+          \`\`\`
+
+          - Source workflow: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+
+          gh pr create \
+            --title "chore: sync APRL checks" \
+            --body-file "$PR_BODY_FILE" \
+            --base main \
+            --head "$BRANCH"
+
+          rm -f "$PR_BODY_FILE"

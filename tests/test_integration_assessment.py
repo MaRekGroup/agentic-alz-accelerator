@@ -76,8 +76,8 @@ class TestEndToEndPipeline:
             reporter = ReportGenerator(output_dir=mock_settings.assess.output_dir)
             outputs = reporter.generate_all(discovery, assessment, scope_label="sub-001")
 
-            # All 11 report files created (6 base + 5 per-pillar)
-            assert len(outputs) == 11
+            # All 12 report files created (6 base + 5 per-pillar + 1 Excel workbook)
+            assert len(outputs) == 12
             for name, path in outputs.items():
                 assert path.exists(), f"{name} not created"
 
@@ -183,8 +183,15 @@ class TestCheckCatalogIntegrity:
     def test_all_checks_have_required_fields(self, mock_credential, mock_settings):
         """Every check in wara_checks.yaml has all required fields."""
         required_fields = {
-            "id", "title", "pillar", "caf_area", "alz_area",
-            "severity", "scope", "query_type", "recommendation",
+            "id",
+            "title",
+            "pillar",
+            "caf_area",
+            "alz_area",
+            "severity",
+            "scope",
+            "query_type",
+            "recommendation",
         }
         with patch("src.tools.wara_engine.AzureRGClient"):
             engine = WaraEngine(mock_credential, mock_settings)
@@ -202,6 +209,7 @@ class TestCheckCatalogIntegrity:
     def test_check_id_format(self, mock_credential, mock_settings):
         """Check IDs follow pillar-NNN or APRL-pillar-hex format."""
         import re
+
         valid_pattern = re.compile(r"^(SEC|REL|OPE|COS|PER)-\d{3}$|^APRL-(SEC|REL|OPE|COS|PER)-[0-9A-F]{8}$")
         with patch("src.tools.wara_engine.AzureRGClient"):
             engine = WaraEngine(mock_credential, mock_settings)
@@ -221,19 +229,20 @@ class TestCheckCatalogIntegrity:
     def test_pillars_valid(self, mock_credential, mock_settings):
         """All checks use valid pillar names."""
         valid_pillars = {
-            "security", "reliability", "cost_optimization",
-            "operational_excellence", "performance",
+            "security",
+            "reliability",
+            "cost_optimization",
+            "operational_excellence",
+            "performance",
         }
         with patch("src.tools.wara_engine.AzureRGClient"):
             engine = WaraEngine(mock_credential, mock_settings)
             for check in engine.checks:
-                assert check["pillar"] in valid_pillars, (
-                    f"Check {check['id']} has invalid pillar: {check['pillar']}"
-                )
+                assert check["pillar"] in valid_pillars, f"Check {check['id']} has invalid pillar: {check['pillar']}"
 
     def test_query_types_valid(self, mock_credential, mock_settings):
         """All checks use valid query types."""
-        valid_types = {"resource_graph", "discovery_field", "custom"}
+        valid_types = {"resource_graph", "discovery_field", "custom", "policy", "advisor"}
         with patch("src.tools.wara_engine.AzureRGClient"):
             engine = WaraEngine(mock_credential, mock_settings)
             for check in engine.checks:

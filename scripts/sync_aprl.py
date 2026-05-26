@@ -16,6 +16,7 @@ import json
 import logging
 import textwrap
 import urllib.request
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -201,6 +202,72 @@ def sync_aprl(url: str = APRL_FEED_URL) -> list[dict[str, Any]]:
     return checks
 
 
+def load_existing_checks(output: Path) -> list[dict[str, Any]]:
+    """Load existing checks from the synced YAML file if it exists."""
+    if not output.exists():
+        return []
+
+    with output.open(encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+
+    if not isinstance(data, dict):
+        return []
+
+    checks = data.get("checks", [])
+    if not isinstance(checks, list):
+        return []
+    return checks
+
+
+def build_stats_summary(checks: list[dict[str, Any]]) -> str:
+    """Build a human-readable summary of synced checks."""
+    pillar_counts = Counter(check["pillar"] for check in checks)
+    severity_counts = Counter(check["severity"] for check in checks)
+    confidence_counts = Counter(check["confidence"] for check in checks)
+
+    lines = [
+        "",
+        f"{'=' * 50}",
+        "APRL Sync Summary",
+        f"{'=' * 50}",
+        f"Total checks: {len(checks)}",
+        "",
+        "By pillar:",
+    ]
+    lines.extend(f"  {pillar}: {count}" for pillar, count in pillar_counts.most_common())
+    lines.extend(["", "By severity:"])
+    lines.extend(f"  {severity}: {count}" for severity, count in severity_counts.most_common())
+    lines.extend(["", "By confidence:"])
+    lines.extend(f"  {confidence}: {count}" for confidence, count in confidence_counts.most_common())
+    return "\n".join(lines)
+
+
+def build_diff_summary(existing_checks: list[dict[str, Any]], new_checks: list[dict[str, Any]]) -> str:
+    """Build a diff summary between existing and newly synced checks."""
+    existing_by_id = {check["id"]: check for check in existing_checks if check.get("id")}
+    new_by_id = {check["id"]: check for check in new_checks if check.get("id")}
+
+    existing_ids = set(existing_by_id)
+    new_ids = set(new_by_id)
+
+    added = sorted(new_ids - existing_ids)
+    removed = sorted(existing_ids - new_ids)
+    updated = sorted(
+        check_id for check_id in (existing_ids & new_ids) if existing_by_id[check_id] != new_by_id[check_id]
+    )
+
+    lines = [
+        "",
+        f"{'=' * 50}",
+        "APRL Diff Summary",
+        f"{'=' * 50}",
+        f"New: {len(added)}",
+        f"Removed: {len(removed)}",
+        f"Updated: {len(updated)}",
+    ]
+    return "\n".join(lines)
+
+
 def write_yaml(checks: list[dict[str, Any]], output: Path) -> None:
     """Write checks to YAML file in our catalog format."""
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -225,11 +292,11 @@ def write_yaml(checks: list[dict[str, Any]], output: Path) -> None:
         def increase_indent(self, flow=False, indentless=False):
             return yaml.Dumper.increase_indent(self, flow, False)
 
-    with open(output, "w") as f:
-        f.write(header)
+    with output.open("w", encoding="utf-8") as handle:
+        handle.write(header)
         yaml.dump(
             content,
-            f,
+            handle,
             Dumper=IndentedDumper,
             default_flow_style=False,
             sort_keys=False,
@@ -263,37 +330,29 @@ def main() -> None:
         action="store_true",
         help="Print statistics only",
     )
+    parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="Print diff summary against the existing output file",
+    )
     args = parser.parse_args()
 
+    existing_checks = load_existing_checks(args.output) if args.diff else []
     checks = sync_aprl(url=args.url)
 
     if args.stats or args.dry_run:
-        from collections import Counter
-
-        pillar_counts = Counter(c["pillar"] for c in checks)
-        severity_counts = Counter(c["severity"] for c in checks)
-        confidence_counts = Counter(c["confidence"] for c in checks)
-
-        print(f"\n{'='*50}")
-        print("APRL Sync Summary")
-        print(f"{'='*50}")
-        print(f"Total checks: {len(checks)}")
-        print("\nBy pillar:")
-        for p, cnt in pillar_counts.most_common():
-            print(f"  {p}: {cnt}")
-        print("\nBy severity:")
-        for s, cnt in severity_counts.most_common():
-            print(f"  {s}: {cnt}")
-        print("\nBy confidence:")
-        for c, cnt in confidence_counts.most_common():
-            print(f"  {c}: {cnt}")
+        print(build_stats_summary(checks))
+        if args.diff:
+            print(build_diff_summary(existing_checks, checks))
 
         if args.dry_run:
             print(f"\nDry run — would write to: {args.output}")
-            # Print first 2 checks as sample
             print("\nSample checks (first 2):")
             print(yaml.dump({"checks": checks[:2]}, default_flow_style=False, sort_keys=False))
         return
+
+    if args.diff:
+        print(build_diff_summary(existing_checks, checks))
 
     write_yaml(checks, args.output)
     print(f"✓ Synced {len(checks)} APRL checks to {args.output}")

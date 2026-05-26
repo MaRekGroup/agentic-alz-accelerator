@@ -26,6 +26,7 @@ checks:
     mappings:
       waf_pillar: [reliability]
       caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Compute/virtualMachines"
 
   - id: REL-002
     title: "Single-instance resources without redundancy"
@@ -55,3 +56,523 @@ checks:
     mappings:
       waf_pillar: [reliability]
       caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.OperationalInsights/workspaces,Microsoft.Automation/automationAccounts,Microsoft.KeyVault/vaults"
+
+  - id: REL-003
+    title: "VMs without backup enabled"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.compute/virtualmachines'
+      | extend vmId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, location, vmId
+      | join kind=leftouter (
+          recoveryservicesresources
+          | where type =~ 'microsoft.recoveryservices/vaults/backupFabrics/protectionContainers/protectedItems'
+          | extend protectedResourceId = tolower(coalesce(
+              tostring(properties.sourceResourceId),
+              tostring(properties.dataSourceInfo.resourceID),
+              tostring(properties.dataSourceInfo.datasourceId)
+            ))
+          | where isnotempty(protectedResourceId)
+          | summarize by protectedResourceId
+        ) on $left.vmId == $right.protectedResourceId
+      | where isempty(protectedResourceId)
+      | project id, name, resourceGroup, subscriptionId, location
+    match: any
+    recommendation: "Enable Azure Backup for production virtual machines to improve recovery readiness."
+    remediation_steps:
+      - "Create or select a Recovery Services vault in the target region"
+      - "Configure backup protection for each VM and validate restore points are created"
+    references:
+      - "https://learn.microsoft.com/azure/backup/backup-overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Compute/virtualMachines"
+
+  - id: REL-004
+    title: "SQL databases without geo-replication"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/servers/databases'
+      | where name !~ 'master'
+      | extend databaseId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, location, databaseId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.sql/servers/failovergroups'
+          | mv-expand failoverDatabaseId = properties.databases
+          | extend failoverDatabaseId = tolower(tostring(failoverDatabaseId))
+          | summarize by failoverDatabaseId
+        ) on $left.databaseId == $right.failoverDatabaseId
+      | where isempty(failoverDatabaseId)
+      | project id, name, resourceGroup, subscriptionId, location
+    match: any
+    recommendation: "Use failover groups or active geo-replication for mission-critical Azure SQL databases."
+    remediation_steps:
+      - "Create a secondary SQL server in a paired or alternate region"
+      - "Configure a failover group and test planned failover behavior"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/database/failover-group-sql-db?view=azuresql"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Sql/servers/databases"
+
+  - id: REL-005
+    title: "App Services not using zone redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.web/serverfarms'
+      | extend skuTier = tostring(sku.tier)
+      | extend zoneRedundant = tobool(properties.zoneRedundant)
+      | where tolower(skuTier) contains 'premium' or tolower(skuTier) contains 'isolated'
+      | where zoneRedundant == false
+      | project id, name, resourceGroup, subscriptionId, location, sku=skuTier
+    match: any
+    recommendation: "Enable zone redundancy for supported App Service plans hosting production workloads."
+    remediation_steps:
+      - "Review App Service plan SKU and regional support for zone redundancy"
+      - "Enable zone redundancy on eligible Premium or Isolated plans"
+    references:
+      - "https://learn.microsoft.com/azure/app-service/configure-zone-redundancy"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Web/serverFarms"
+
+  - id: REL-006
+    title: "AKS clusters without availability zones"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerservice/managedclusters'
+      | mv-expand agentPool = properties.agentPoolProfiles
+      | extend agentPoolName = tostring(agentPool.name), agentPoolMode = tostring(agentPool.mode)
+      | where isnull(agentPool.availabilityZones) or array_length(agentPool.availabilityZones) == 0
+      | project id, name, resourceGroup, subscriptionId, location, agentPool=agentPoolName, mode=agentPoolMode
+    match: any
+    recommendation: "Deploy AKS system and user node pools across availability zones for higher availability."
+    remediation_steps:
+      - "Create zonal node pools in supported regions"
+      - "Migrate workloads from non-zonal pools and remove single-zone dependencies"
+    references:
+      - "https://learn.microsoft.com/azure/aks/availability-zones-overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.ContainerService/managedClusters"
+
+  - id: REL-007
+    title: "Storage accounts without geo-redundant replication"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.storage/storageaccounts'
+      | where sku.name in~ ('Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'Premium_ZRS')
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.name)
+    match: any
+    recommendation: "Use GRS, RA-GRS, GZRS, or RA-GZRS for storage accounts that require regional disaster recovery."
+    remediation_steps:
+      - "Review workload recovery objectives and select an appropriate geo-redundant SKU"
+      - "Update the storage account replication setting during a planned maintenance window"
+    references:
+      - "https://learn.microsoft.com/azure/storage/common/storage-redundancy"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Storage/storageAccounts"
+
+  - id: REL-008
+    title: "VPN gateways in single-instance config"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/virtualnetworkgateways'
+      | where properties.gatewayType =~ 'Vpn'
+      | extend skuName = tostring(coalesce(sku.name, properties.sku.name))
+      | extend skuTier = tostring(coalesce(sku.tier, properties.sku.tier))
+      | where skuName !contains 'AZ' and skuTier !contains 'AZ'
+      | project id, name, resourceGroup, subscriptionId, location, sku=iff(isnotempty(skuName), skuName, skuTier)
+    match: any
+    recommendation: "Use AZ-capable VPN gateway SKUs to improve resiliency for hybrid connectivity."
+    remediation_steps:
+      - "Evaluate VPN gateway SKU compatibility with zone-redundant deployment"
+      - "Redeploy the gateway using an AZ SKU and validate tunnel failover behavior"
+    references:
+      - "https://learn.microsoft.com/azure/vpn-gateway/about-zone-redundant-vnet-gateways"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/virtualNetworkGateways"
+
+  - id: REL-009
+    title: "Application Gateways without zone redundancy"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/applicationgateways'
+      | where isnull(zones) or array_length(zones) < 2
+      | project id, name, resourceGroup, subscriptionId, location, zones
+    match: any
+    recommendation: "Deploy Application Gateway v2 across multiple availability zones where supported."
+    remediation_steps:
+      - "Plan a migration to a zone-redundant Application Gateway v2 deployment"
+      - "Validate frontend, probe, and backend resiliency after the cutover"
+    references:
+      - "https://learn.microsoft.com/azure/reliability/reliability-application-gateway-v2"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/applicationGateways"
+
+  - id: REL-010
+    title: "Load Balancers using Basic SKU"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/loadbalancers'
+      | where sku.name =~ 'Basic'
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.name)
+    match: any
+    recommendation: "Use Standard Load Balancer for production workloads to obtain zone resilience and an SLA."
+    remediation_steps:
+      - "Create a Standard Load Balancer with equivalent frontend and backend configuration"
+      - "Migrate traffic and retire the Basic SKU resource after validation"
+    references:
+      - "https://learn.microsoft.com/azure/load-balancer/skus"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/loadBalancers"
+
+  - id: REL-011
+    title: "Cosmos DB without multi-region"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.documentdb/databaseaccounts'
+      | where array_length(properties.locations) < 2
+      | project id, name, resourceGroup, subscriptionId, location, regionCount=array_length(properties.locations)
+    match: any
+    recommendation: "Configure Azure Cosmos DB accounts with at least two regions for higher availability and failover readiness."
+    remediation_steps:
+      - "Add a secondary region to the Cosmos DB account"
+      - "Review automatic failover and consistency settings after replication is enabled"
+    references:
+      - "https://learn.microsoft.com/azure/cosmos-db/distribute-data-globally"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.DocumentDB/databaseAccounts"
+
+  - id: REL-012
+    title: "Key Vaults without soft-delete"
+    pillar: reliability
+    caf_area: security
+    alz_area: security
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.keyvault/vaults'
+      | where isnull(properties.enableSoftDelete) or tobool(properties.enableSoftDelete) == false
+      | project id, name, resourceGroup, subscriptionId, location, enableSoftDelete=tostring(properties.enableSoftDelete)
+    match: any
+    recommendation: "Enable soft delete on Key Vaults to recover accidentally deleted vaults, keys, and secrets."
+    remediation_steps:
+      - "Enable soft delete on the vault"
+      - "Review purge protection requirements for high criticality workloads"
+    references:
+      - "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.KeyVault/vaults"
+
+  - id: REL-013
+    title: "Recovery Services vaults without cross-region restore"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.recoveryservices/vaults'
+      | where properties.redundancySettings.standardTierStorageRedundancy =~ 'GeoRedundant'
+      | where properties.redundancySettings.crossRegionRestore !~ 'Enabled'
+      | project id, name, resourceGroup, subscriptionId, location, redundancy=tostring(properties.redundancySettings.standardTierStorageRedundancy)
+    match: any
+    recommendation: "Enable cross-region restore on geo-redundant Recovery Services vaults used for disaster recovery scenarios."
+    remediation_steps:
+      - "Enable cross-region restore on each GRS vault"
+      - "Validate restore workflows in the paired region"
+    references:
+      - "https://learn.microsoft.com/azure/backup/backup-create-recovery-services-vault#set-cross-region-restore"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.RecoveryServices/vaults"
+
+  - id: REL-014
+    title: "Event Hubs without zone redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.eventhub/namespaces'
+      | where isnull(properties.zoneRedundant) or tobool(properties.zoneRedundant) == false
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.tier)
+    match: any
+    recommendation: "Enable zone redundancy on Event Hubs namespaces in supported regions for higher availability."
+    remediation_steps:
+      - "Review namespace SKU and regional support for availability zones"
+      - "Redeploy or update namespaces to enable zone redundancy where supported"
+    references:
+      - "https://learn.microsoft.com/azure/event-hubs/event-hubs-geo-dr?tabs=portal#availability-zones"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.EventHub/namespaces"
+
+  - id: REL-015
+    title: "Service Bus without premium tier"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.servicebus/namespaces'
+      | where sku.tier !~ 'Premium'
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.tier)
+    match: any
+    recommendation: "Use Premium Service Bus for business-critical messaging workloads that require isolation and zone support."
+    remediation_steps:
+      - "Create a Premium namespace and migrate queues, topics, and subscriptions"
+      - "Validate client failover and throughput before decommissioning the old namespace"
+    references:
+      - "https://learn.microsoft.com/azure/service-bus-messaging/service-bus-premium-messaging"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.ServiceBus/namespaces"
+
+  - id: REL-016
+    title: "Redis Cache without zone redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: medium
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.cache/redis'
+      | where isnull(zones) or array_length(zones) <= 1
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.name)
+    match: any
+    recommendation: "Use zone-redundant Azure Cache for Redis tiers for production workloads that require higher availability."
+    remediation_steps:
+      - "Review cache tier eligibility for zone redundancy"
+      - "Redeploy the cache in a zone-redundant configuration and update clients during cutover"
+    references:
+      - "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-how-to-zone-redundancy"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Cache/Redis"
+
+  - id: REL-017
+    title: "SQL Managed Instances without zone redundancy"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.sql/managedinstances'
+      | where isnull(properties.zoneRedundant) or tobool(properties.zoneRedundant) == false
+      | project id, name, resourceGroup, subscriptionId, location, serviceTier=tostring(sku.tier)
+    match: any
+    recommendation: "Enable zone redundancy for business-critical SQL Managed Instances where supported."
+    remediation_steps:
+      - "Review service tier and regional support for zone redundancy"
+      - "Enable zone redundancy during a planned maintenance window and validate failover behavior"
+    references:
+      - "https://learn.microsoft.com/azure/azure-sql/managed-instance/high-availability-sla-local-zone-redundancy?view=azuresql-mi#zone-redundant-availability"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Sql/managedInstances"
+
+  - id: REL-018
+    title: "Front Door without health probes"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.cdn/profiles'
+      | where sku.name in~ ('Standard_AzureFrontDoor', 'Premium_AzureFrontDoor')
+      | extend profileId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, location, sku=tostring(sku.name), profileId
+      | join kind=leftouter (
+          cdnresources
+          | where type =~ 'microsoft.cdn/profiles/origingroups'
+          | extend profileId = tolower(strcat_array(array_slice(split(id, '/'), 0, 8), '/'))
+          | extend hasHealthProbe = isnotempty(tostring(properties.healthProbeSettings))
+          | summarize originGroupCount = count(), healthProbeCount = countif(hasHealthProbe) by profileId
+        ) on profileId
+      | where toint(coalesce(originGroupCount, 0)) == 0 or toint(coalesce(healthProbeCount, 0)) == 0
+      | project id, name, resourceGroup, subscriptionId, location, sku, originGroupCount=toint(coalesce(originGroupCount, 0)), healthProbeCount=toint(coalesce(healthProbeCount, 0))
+    match: any
+    recommendation: "Configure health probes for Azure Front Door origin groups so traffic can fail away from unhealthy backends."
+    remediation_steps:
+      - "Create or update origin groups with health probe settings"
+      - "Validate probe path responses and failover behavior during testing"
+    references:
+      - "https://learn.microsoft.com/azure/frontdoor/health-probes"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Cdn/profiles"
+
+  - id: REL-019
+    title: "Container Registries without geo-replication"
+    pillar: reliability
+    caf_area: management
+    alz_area: logging
+    severity: medium
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.containerregistry/registries'
+      | where sku.name =~ 'Premium'
+      | extend registryId = tolower(id)
+      | project id, name, resourceGroup, subscriptionId, location, registryId
+      | join kind=leftouter (
+          resources
+          | where type =~ 'microsoft.containerregistry/registries/replications'
+          | extend registryId = tolower(strcat_array(array_slice(split(id, '/'), 0, -3), '/'))
+          | summarize replicationCount = count() by registryId
+        ) on registryId
+      | where toint(coalesce(replicationCount, 0)) == 0
+      | project id, name, resourceGroup, subscriptionId, location, replicationCount=toint(coalesce(replicationCount, 0))
+    match: any
+    recommendation: "Use geo-replication on Premium Azure Container Registry instances that serve multi-region applications."
+    remediation_steps:
+      - "Add at least one registry replication in a secondary region"
+      - "Update deployment pipelines to pull from the nearest replica when possible"
+    references:
+      - "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices#geo-replicate-multi-region-deployments"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.ContainerRegistry/registries"
+
+  - id: REL-020
+    title: "Azure Firewall without availability zones"
+    pillar: reliability
+    caf_area: network
+    alz_area: networking
+    severity: high
+    confidence: high
+    scope: subscription
+    query_type: resource_graph
+    query: |
+      resources
+      | where type =~ 'microsoft.network/azurefirewalls'
+      | where isnull(zones) or array_length(zones) == 0
+      | project id, name, resourceGroup, subscriptionId, location, zones
+    match: any
+    recommendation: "Deploy Azure Firewall with availability zones in supported regions for improved resiliency."
+    remediation_steps:
+      - "Plan a redeployment of Azure Firewall with zonal or zone-redundant placement"
+      - "Validate routing, public IP, and forced tunneling behavior after migration"
+    references:
+      - "https://learn.microsoft.com/azure/architecture/framework/services/networking/azure-firewall"
+    mappings:
+      waf_pillar: [reliability]
+      caf_lifecycle: [ready, adopt]
+      resource_type: "Microsoft.Network/azureFirewalls"

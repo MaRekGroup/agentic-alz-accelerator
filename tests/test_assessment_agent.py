@@ -51,14 +51,24 @@ def assessment():
         overall_score=85.0,
         findings=[
             Finding(
-                rule_id="SEC-001", title="TLS issue", pillar="security",
-                caf_area="security", alz_area="security", severity="critical",
-                confidence="high", recommendation="Fix TLS",
+                rule_id="SEC-001",
+                title="TLS issue",
+                pillar="security",
+                caf_area="security",
+                alz_area="security",
+                severity="critical",
+                confidence="high",
+                recommendation="Fix TLS",
             ),
             Finding(
-                rule_id="OPE-001", title="No logs", pillar="operational_excellence",
-                caf_area="management", alz_area="logging", severity="high",
-                confidence="high", recommendation="Enable logs",
+                rule_id="OPE-001",
+                title="No logs",
+                pillar="operational_excellence",
+                caf_area="management",
+                alz_area="logging",
+                severity="high",
+                confidence="high",
+                recommendation="Enable logs",
             ),
         ],
         pillar_scores={
@@ -93,9 +103,7 @@ class TestAssessmentAgentInit:
 
 class TestRunAssessment:
     @pytest.mark.asyncio
-    async def test_full_pipeline(
-        self, mock_kernel, mock_credential, mock_settings, discovery, assessment, tmp_path
-    ):
+    async def test_full_pipeline(self, mock_kernel, mock_credential, mock_settings, discovery, assessment, tmp_path):
         with (
             patch("src.agents.assessment_agent.DiscoveryCollector") as mock_dc_cls,
             patch("src.agents.assessment_agent.WaraEngine") as mock_we_cls,
@@ -117,12 +125,11 @@ class TestRunAssessment:
         assert result["critical"] == 1
         assert result["high"] == 1
         assert "outputs" in result
-        assert len(result["outputs"]) == 11
+        assert len(result["outputs"]) == 12
+        assert "excel_action_plan" in result["outputs"]
 
     @pytest.mark.asyncio
-    async def test_uses_settings_defaults(
-        self, mock_kernel, mock_credential, mock_settings, discovery, assessment
-    ):
+    async def test_uses_settings_defaults(self, mock_kernel, mock_credential, mock_settings, discovery, assessment):
         """Uses settings.assess.scope when no scope arg provided."""
         with (
             patch("src.agents.assessment_agent.DiscoveryCollector") as mock_dc_cls,
@@ -143,13 +150,9 @@ class TestRunAssessment:
         assert result["scope_type"] == "subscription"
 
     @pytest.mark.asyncio
-    async def test_fallback_subscription(
-        self, mock_kernel, mock_credential, mock_settings, assessment
-    ):
+    async def test_fallback_subscription(self, mock_kernel, mock_credential, mock_settings, assessment):
         """Falls back to settings.azure.subscription_id when no subs discovered."""
-        empty_discovery = DiscoveryResult(
-            scope="empty", scope_type=DiscoveryScope.SUBSCRIPTION
-        )
+        empty_discovery = DiscoveryResult(scope="empty", scope_type=DiscoveryScope.SUBSCRIPTION)
         with (
             patch("src.agents.assessment_agent.DiscoveryCollector") as mock_dc_cls,
             patch("src.agents.assessment_agent.WaraEngine") as mock_we_cls,
@@ -171,9 +174,7 @@ class TestRunAssessment:
 
 class TestRunDiscoveryOnly:
     @pytest.mark.asyncio
-    async def test_returns_discovery_dict(
-        self, mock_kernel, mock_credential, mock_settings, discovery
-    ):
+    async def test_returns_discovery_dict(self, mock_kernel, mock_credential, mock_settings, discovery):
         with (
             patch("src.agents.assessment_agent.DiscoveryCollector") as mock_dc_cls,
             patch("src.agents.assessment_agent.WaraEngine"),
