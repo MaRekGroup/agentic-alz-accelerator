@@ -18,6 +18,7 @@ from pathlib import Path
 
 from src.tools.discovery import DiscoveryResult
 from src.tools.excel_reporter import ExcelReporter
+from src.tools.pptx_reporter import PptxReporter
 from src.tools.wara_engine import AssessmentResult, Finding
 
 logger = logging.getLogger(__name__)
@@ -138,6 +139,15 @@ class ReportGenerator:
             logger.warning("openpyxl not installed — skipping Excel report")
         except Exception as e:
             logger.warning("Excel report generation failed: %s", e)
+
+        # PowerPoint executive summary
+        try:
+            pptx_reporter = PptxReporter(report_dir)
+            outputs["pptx_executive_summary"] = pptx_reporter.generate(discovery, assessment, scope_label=label)
+        except ImportError:
+            logger.warning("python-pptx not installed — skipping PowerPoint report")
+        except Exception as e:
+            logger.warning("PowerPoint report generation failed: %s", e)
 
         logger.info("Generated %d report artifacts in %s", len(outputs), report_dir)
         return outputs
