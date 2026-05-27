@@ -34,7 +34,14 @@ def sample_assessment():
         severity="high",
         confidence="high",
         recommendation="Fix TLS",
+        evidence=[
+            {
+                "id": "/subscriptions/test-sub/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+                "type": "microsoft.compute/virtualmachines",
+            }
+        ],
         remediation_steps=["Step 1"],
+        references=["https://learn.microsoft.com/example"],
     )
     result = AssessmentResult(scope="test-sub")
     result.findings = [finding]
@@ -63,14 +70,80 @@ def test_generate_creates_xlsx_file(reporter, sample_discovery, sample_assessmen
     assert output_path.suffix == ".xlsx"
 
 
-def test_executive_summary_sheet_exists(reporter, sample_discovery, sample_assessment):
+def test_dashboard_sheet_exists(reporter, sample_discovery, sample_assessment):
     output_path = reporter.generate(sample_discovery, sample_assessment, scope_label="test-sub")
 
     workbook = load_workbook(output_path)
-    sheet = workbook["Executive Summary"]
+    sheet = workbook["Dashboard"]
 
-    assert "Executive Summary" in workbook.sheetnames
-    assert sheet["A1"].value == "WARA Assessment — test-sub"
+    assert workbook.sheetnames[0] == "Dashboard"
+    assert sheet["A1"].value == "WARA Assessment Dashboard — test-sub"
+
+
+def test_dashboard_sheet_has_charts(reporter, sample_discovery, sample_assessment):
+    output_path = reporter.generate(sample_discovery, sample_assessment, scope_label="test-sub")
+
+    workbook = load_workbook(output_path)
+    sheet = workbook["Dashboard"]
+
+    assert len(sheet._charts) == 2
+
+
+def test_recommendations_sheet_grouped(reporter, sample_discovery, sample_assessment):
+    sample_assessment.findings = [
+        Finding(
+            rule_id="SEC-001",
+            title="TLS check",
+            pillar="security",
+            caf_area="security",
+            alz_area="security",
+            severity="high",
+            confidence="high",
+            recommendation="Fix TLS",
+            evidence=[{"id": "vm1", "type": "microsoft.compute/virtualmachines"}],
+            references=["https://learn.microsoft.com/tls"],
+            remediation_steps=["Step 1"],
+        ),
+        Finding(
+            rule_id="SEC-001",
+            title="TLS check",
+            pillar="security",
+            caf_area="security",
+            alz_area="security",
+            severity="high",
+            confidence="high",
+            recommendation="Fix TLS",
+            evidence=[{"id": "vm2", "type": "microsoft.compute/virtualmachines"}],
+            references=["https://learn.microsoft.com/tls"],
+            remediation_steps=["Step 2"],
+        ),
+        Finding(
+            rule_id="REL-001",
+            title="Backup check",
+            pillar="reliability",
+            caf_area="management",
+            alz_area="backup",
+            severity="medium",
+            confidence="medium",
+            recommendation="Enable backups",
+            evidence=[{"id": "sa1", "type": "microsoft.storage/storageaccounts"}],
+            references=["https://learn.microsoft.com/backup"],
+            remediation_steps=["Step A"],
+        ),
+    ]
+
+    output_path = reporter.generate(sample_discovery, sample_assessment, scope_label="test-sub")
+
+    workbook = load_workbook(output_path)
+    sheet = workbook["Recommendations"]
+    rows = [
+        [sheet[f"A{row}"].value, sheet[f"D{row}"].value, sheet[f"G{row}"].value]
+        for row in range(2, sheet.max_row + 1)
+    ]
+
+    assert len(rows) == 2
+    assert rows[0] == ["high", 2, "SEC-001"]
+    assert rows[1] == ["medium", 1, "REL-001"]
 
 
 def test_findings_detail_has_all_findings(reporter, sample_discovery, sample_assessment):
@@ -104,6 +177,23 @@ def test_resource_inventory_populated(reporter, sample_discovery, sample_assessm
 
     assert "microsoft.compute/virtualmachines" in resource_types
     assert "microsoft.storage/storageaccounts" in resource_types
+
+
+def test_pillar_scores_sheet(reporter, sample_discovery, sample_assessment):
+    output_path = reporter.generate(sample_discovery, sample_assessment, scope_label="test-sub")
+
+    workbook = load_workbook(output_path)
+    sheet = workbook["Pillar Scores"]
+    pillar_rows = [sheet[f"A{row}"].value for row in range(2, 7)]
+
+    assert pillar_rows == [
+        "Security",
+        "Reliability",
+        "Cost Optimization",
+        "Operational Excellence",
+        "Performance Efficiency",
+    ]
+    assert sheet["A7"].value == "Average / Total"
 
 
 def test_remediation_roadmap_sorted_by_severity(reporter, sample_discovery, sample_assessment):
@@ -152,6 +242,22 @@ def test_remediation_roadmap_sorted_by_severity(reporter, sample_discovery, samp
     assert severities == ["critical", "high", "low"]
 
 
+def test_summary_statistics_sheet(reporter, sample_discovery, sample_assessment):
+    output_path = reporter.generate(sample_discovery, sample_assessment, scope_label="test-sub")
+
+    workbook = load_workbook(output_path)
+    sheet = workbook["Summary Statistics"]
+    stats = {sheet[f"A{row}"].value: sheet[f"B{row}"].value for row in range(2, sheet.max_row + 1)}
+
+    assert stats["Scope"] == "test-sub"
+    assert stats["Scope Type"] == DiscoveryScope.SUBSCRIPTION.value
+    assert stats["Total Resources"] == 7
+    assert stats["Total Findings"] == 1
+    assert stats["Checks Run"] == 10
+    assert stats["Checks Passed"] == 9
+    assert stats["Overall Score"] == 90
+
+
 def test_empty_assessment_still_generates(reporter, sample_discovery):
     assessment = AssessmentResult(scope="test-sub")
     output_path = reporter.generate(sample_discovery, assessment, scope_label="test-sub")
@@ -160,8 +266,11 @@ def test_empty_assessment_still_generates(reporter, sample_discovery):
 
     assert output_path.exists()
     assert workbook.sheetnames == [
-        "Executive Summary",
+        "Dashboard",
+        "Recommendations",
         "Findings Detail",
         "Resource Inventory",
+        "Pillar Scores",
         "Remediation Roadmap",
+        "Summary Statistics",
     ]

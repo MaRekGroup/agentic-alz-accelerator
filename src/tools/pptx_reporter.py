@@ -3,13 +3,14 @@ PowerPoint Reporter — generates executive summary slide decks from WARA assess
 
 Produces a branded PowerPoint presentation compatible with Microsoft WARA output:
 - Title slide with scope and date
-- Executive summary with overall score and pillar breakdown
-- Per-pillar slides with score gauge, finding counts, and top findings
-- Remediation roadmap slide with priority-ordered actions
-- Appendix slide with resource inventory summary
+- Assessment overview with methodology and execution summary
+- Executive summary with overall score and severity breakdown
+- Health dashboard, workload summary, and per-pillar findings
+- Impact, remediation, and inventory appendix slides
 """
 
 import logging
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -55,9 +56,11 @@ _SEVERITY_COLORS = {
 }
 
 _BRAND_BLUE = RGBColor(0x00, 0x78, 0xD4) if RGBColor else None
-_BRAND_DARK = RGBColor(0x24, 0x29, 0x2E) if RGBColor else None
+_BRAND_DARK = RGBColor(0x24, 0x24, 0x24) if RGBColor else None
 _WHITE = RGBColor(0xFF, 0xFF, 0xFF) if RGBColor else None
 _LIGHT_GRAY = RGBColor(0xF2, 0xF2, 0xF2) if RGBColor else None
+_TEXT_GRAY = RGBColor(0x99, 0x99, 0x99) if RGBColor else None
+
 
 
 def _score_color(score: float) -> "RGBColor":
@@ -100,10 +103,16 @@ class PptxReporter:
         prs.slide_width = Inches(13.333)
         prs.slide_height = Inches(7.5)
 
-        self._add_title_slide(prs, label)
+        self._add_title_slide(prs, label, assessment)
+        self._add_assessment_overview(prs, label, assessment)
         self._add_executive_summary(prs, discovery, assessment)
+        self._add_health_dashboard(prs, discovery, assessment)
+        self._add_workload_summary(prs, discovery)
         for pillar_key in _PILLAR_ORDER:
             self._add_pillar_slide(prs, assessment, pillar_key)
+        self._add_impact_slides(prs, assessment.findings, "Critical & High Impact Findings")
+        self._add_impact_slides(prs, assessment.findings, "Medium Impact Findings")
+        self._add_impact_slides(prs, assessment.findings, "Low Impact Findings")
         self._add_remediation_slide(prs, assessment)
         self._add_inventory_slide(prs, discovery)
 
@@ -112,34 +121,63 @@ class PptxReporter:
         logger.info("Generated PowerPoint executive summary: %s", output_path)
         return output_path
 
-    def _add_title_slide(self, prs: "Presentation", label: str) -> None:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank layout
+    def _add_title_slide(self, prs: "Presentation", label: str, assessment: AssessmentResult) -> None:
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
         self._fill_background(slide, _BRAND_BLUE)
 
-        title_box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(11), Inches(1.5))
+        title_box = slide.shapes.add_textbox(Inches(1), Inches(1.7), Inches(11), Inches(1.4))
         tf = title_box.text_frame
         tf.word_wrap = True
-        p = tf.paragraphs[0]
-        p.text = "Well-Architected Reliability Assessment"
-        p.font.size = Pt(36)
-        p.font.bold = True
-        p.font.color.rgb = _WHITE
-        p.alignment = PP_ALIGN.LEFT
+        title = tf.paragraphs[0]
+        title.text = "Well-Architected Reliability Assessment"
+        title.font.size = Pt(30)
+        title.font.bold = True
+        title.font.color.rgb = _WHITE
+        title.alignment = PP_ALIGN.LEFT
 
-        subtitle_box = slide.shapes.add_textbox(Inches(1), Inches(3.8), Inches(11), Inches(1))
-        tf2 = subtitle_box.text_frame
-        tf2.word_wrap = True
-        p2 = tf2.paragraphs[0]
-        p2.text = f"Scope: {label}"
-        p2.font.size = Pt(20)
-        p2.font.color.rgb = _WHITE
-        p2.alignment = PP_ALIGN.LEFT
+        subtitle = tf.add_paragraph()
+        subtitle.text = "Agentic ALZ Accelerator — Automated Assessment"
+        subtitle.font.size = Pt(20)
+        subtitle.font.color.rgb = _WHITE
+        subtitle.alignment = PP_ALIGN.LEFT
+        subtitle.space_before = Pt(8)
 
-        p3 = tf2.add_paragraph()
-        p3.text = f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
-        p3.font.size = Pt(16)
-        p3.font.color.rgb = _WHITE
-        p3.alignment = PP_ALIGN.LEFT
+        scope_box = slide.shapes.add_textbox(Inches(1), Inches(4.1), Inches(11), Inches(1.3))
+        stf = scope_box.text_frame
+        stf.word_wrap = True
+        scope = stf.paragraphs[0]
+        scope.text = f"Scope: {label}"
+        scope.font.size = Pt(20)
+        scope.font.color.rgb = _WHITE
+        scope.alignment = PP_ALIGN.LEFT
+
+        generated = stf.add_paragraph()
+        generated.text = f"Generated: {self._format_timestamp(assessment.assessed_at)}"
+        generated.font.size = Pt(16)
+        generated.font.color.rgb = _WHITE
+        generated.alignment = PP_ALIGN.LEFT
+
+    def _add_assessment_overview(self, prs: "Presentation", label: str, assessment: AssessmentResult) -> None:
+        slide = self._create_data_slide(prs, "Assessment Overview")
+        overview_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.5), Inches(11.6), Inches(4.8))
+        tf = overview_box.text_frame
+        tf.word_wrap = True
+        bullets = [
+            f"Scope: {label}",
+            f"Assessment Date: {self._format_timestamp(assessment.assessed_at)}",
+            "Methodology: Well-Architected Framework — 5 Pillar Assessment",
+            "WAF Pillars: Security, Reliability, Cost Optimization, Operational Excellence, Performance Efficiency",
+            f"Checks Executed: {assessment.checks_run}",
+            f"Checks Passed: {assessment.checks_passed}",
+        ]
+        for index, bullet in enumerate(bullets):
+            paragraph = tf.paragraphs[0] if index == 0 else tf.add_paragraph()
+            paragraph.text = bullet
+            paragraph.level = 0
+            paragraph.font.size = Pt(18)
+            paragraph.font.color.rgb = _BRAND_DARK
+            paragraph.space_after = Pt(12)
+            paragraph.bullet = True
 
     def _add_executive_summary(
         self,
@@ -147,132 +185,219 @@ class PptxReporter:
         discovery: DiscoveryResult,
         assessment: AssessmentResult,
     ) -> None:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])
-        self._add_slide_title(slide, "Executive Summary")
+        slide = self._create_data_slide(prs, "Executive Summary")
+        counts = self._severity_counts(assessment.findings)
 
-        score_box = slide.shapes.add_textbox(Inches(1), Inches(1.5), Inches(3), Inches(2))
+        score_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.5), Inches(4), Inches(2.4))
         tf = score_box.text_frame
         tf.word_wrap = True
-        p = tf.paragraphs[0]
-        p.text = "Overall Score"
-        p.font.size = Pt(16)
-        p.font.bold = True
-        p.font.color.rgb = _BRAND_DARK
+        label = tf.paragraphs[0]
+        label.text = "Overall Score"
+        label.font.size = Pt(16)
+        label.font.bold = True
+        label.font.color.rgb = _BRAND_DARK
 
-        p2 = tf.add_paragraph()
-        p2.text = f"{assessment.overall_score:.0f}/100"
-        p2.font.size = Pt(48)
-        p2.font.bold = True
-        p2.font.color.rgb = _score_color(assessment.overall_score)
+        score = tf.add_paragraph()
+        score.text = f"{assessment.overall_score:.0f}/100"
+        score.font.size = Pt(44)
+        score.font.bold = True
+        score.font.color.rgb = _score_color(assessment.overall_score)
 
-        stats_box = slide.shapes.add_textbox(Inches(1), Inches(3.8), Inches(3), Inches(2.5))
+        severity = tf.add_paragraph()
+        severity.text = (
+            f"🔴 {counts['critical']} Critical | 🟠 {counts['high']} High | "
+            f"🟡 {counts['medium']} Medium | 🔵 {counts['low']} Low"
+        )
+        severity.font.size = Pt(12)
+        severity.font.color.rgb = _BRAND_DARK
+        severity.space_before = Pt(4)
+
+        stats_box = slide.shapes.add_textbox(Inches(0.8), Inches(4), Inches(3.8), Inches(1.8))
         stf = stats_box.text_frame
         stf.word_wrap = True
-        resource_total = self._resource_total(discovery)
-        stats = [
-            f"Resources: {resource_total}",
-            f"Checks Run: {assessment.checks_run}",
-            f"Checks Passed: {assessment.checks_passed}",
-            f"Findings: {len(assessment.findings)}",
+        for index, stat in enumerate(self._summary_stats(discovery, assessment)):
+            paragraph = stf.paragraphs[0] if index == 0 else stf.add_paragraph()
+            paragraph.text = stat
+            paragraph.font.size = Pt(14)
+            paragraph.font.color.rgb = _BRAND_DARK
+            paragraph.space_after = Pt(4)
+
+        self._add_pillar_score_table(slide, assessment, left=Inches(5.1), top=Inches(1.5))
+
+    def _add_health_dashboard(
+        self,
+        prs: "Presentation",
+        discovery: DiscoveryResult,
+        assessment: AssessmentResult,
+    ) -> None:
+        slide = self._create_data_slide(prs, "Health & Risk Dashboard")
+        counts = self._severity_counts(assessment.findings)
+        metrics = [
+            ("Total Findings", str(len(assessment.findings)), _BRAND_DARK, 30),
+            ("Total Resources", str(self._resource_total(discovery)), _BRAND_DARK, 30),
+            ("Critical", str(counts["critical"]), _SEVERITY_COLORS["critical"], 24),
+            ("High", str(counts["high"]), _SEVERITY_COLORS["high"], 24),
+            ("Medium", str(counts["medium"]), _SEVERITY_COLORS["medium"], 24),
+            ("Low", str(counts["low"]), _SEVERITY_COLORS["low"], 24),
         ]
-        for i, stat in enumerate(stats):
-            para = stf.paragraphs[0] if i == 0 else stf.add_paragraph()
-            para.text = stat
-            para.font.size = Pt(14)
-            para.font.color.rgb = _BRAND_DARK
-            para.space_after = Pt(4)
 
-        self._add_pillar_score_table(slide, assessment, left=Inches(5), top=Inches(1.5))
+        for index, (label, value, color, size) in enumerate(metrics):
+            top = Inches(1.4 + index * 0.8)
+            self._add_metric_box(slide, label, value, Inches(0.8), top, Inches(3.4), color, size)
 
-    def _add_pillar_slide(self, prs: "Presentation", assessment: AssessmentResult, pillar_key: str) -> None:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])
-        pillar_name = _PILLAR_NAMES.get(pillar_key, pillar_key)
-        self._add_slide_title(slide, f"Pillar: {pillar_name}")
-
-        ps = assessment.pillar_scores.get(pillar_key)
-        score = ps.score if ps else 100.0
-        findings_count = ps.findings_count if ps else 0
-
-        score_box = slide.shapes.add_textbox(Inches(1), Inches(1.5), Inches(3), Inches(2))
-        tf = score_box.text_frame
-        tf.word_wrap = True
-        p = tf.paragraphs[0]
-        p.text = f"{score:.0f}/100"
-        p.font.size = Pt(48)
-        p.font.bold = True
-        p.font.color.rgb = _score_color(score)
-
-        counts_box = slide.shapes.add_textbox(Inches(1), Inches(3.5), Inches(3), Inches(2))
-        ctf = counts_box.text_frame
-        ctf.word_wrap = True
-        if ps:
-            counts = [
-                f"Critical: {ps.critical}",
-                f"High: {ps.high}",
-                f"Medium: {ps.medium}",
-                f"Low: {ps.low}",
-                f"Total: {findings_count}",
-            ]
-        else:
-            counts = ["No findings"]
-        for i, c in enumerate(counts):
-            para = ctf.paragraphs[0] if i == 0 else ctf.add_paragraph()
-            para.text = c
-            para.font.size = Pt(14)
-            para.font.color.rgb = _BRAND_DARK
-
-        pillar_findings = [f for f in assessment.findings if f.pillar == pillar_key]
-        top_findings = sorted(
-            pillar_findings,
-            key=lambda f: _SEVERITY_ORDER.get(f.severity, 99),
-        )[:5]
-
-        if top_findings:
-            self._add_findings_table(slide, top_findings, left=Inches(5), top=Inches(1.5))
-
-    def _add_remediation_slide(self, prs: "Presentation", assessment: AssessmentResult) -> None:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])
-        self._add_slide_title(slide, "Remediation Roadmap")
-
-        sorted_findings = sorted(
-            assessment.findings,
-            key=lambda f: (_SEVERITY_ORDER.get(f.severity, 99), f.rule_id),
-        )
-        top = sorted_findings[:10]
-
-        if not top:
-            info_box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(10), Inches(1))
-            info_box.text_frame.paragraphs[0].text = "No findings — all checks passed."
-            info_box.text_frame.paragraphs[0].font.size = Pt(18)
-            return
-
-        rows = len(top) + 1
-        cols = 5
-        table_shape = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+        impacted = self._top_impacted_services(assessment.findings)
+        table_shape = slide.shapes.add_table(7, 3, Inches(4.6), Inches(1.5), Inches(7.8), Inches(3.6))
         table = table_shape.table
-
-        headers = ["Priority", "Rule ID", "Severity", "Title", "Recommendation"]
-        for ci, h in enumerate(headers):
-            cell = table.cell(0, ci)
-            cell.text = h
+        headers = ["Resource Type", "Finding Count", "Top Severity"]
+        for column, header in enumerate(headers):
+            cell = table.cell(0, column)
+            cell.text = header
             self._style_header_cell(cell)
 
-        for ri, finding in enumerate(top, start=1):
-            table.cell(ri, 0).text = str(ri)
-            table.cell(ri, 1).text = finding.rule_id
-            table.cell(ri, 2).text = finding.severity.capitalize()
-            table.cell(ri, 3).text = finding.title
-            table.cell(ri, 4).text = finding.recommendation
-            sev_color = _SEVERITY_COLORS.get(finding.severity)
-            if sev_color:
-                table.cell(ri, 2).fill.solid()
-                table.cell(ri, 2).fill.fore_color.rgb = sev_color
-                for paragraph in table.cell(ri, 2).text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        run.font.color.rgb = _WHITE
-            for ci in range(cols):
-                for paragraph in table.cell(ri, ci).text_frame.paragraphs:
-                    paragraph.font.size = Pt(10)
+        for row in range(1, 7):
+            if row <= len(impacted):
+                resource_type, count, severity = impacted[row - 1]
+                values = [resource_type, str(count), severity.capitalize()]
+            else:
+                values = ["—", "0", "—"]
+            for column, value in enumerate(values):
+                cell = table.cell(row, column)
+                cell.text = value
+                self._style_body_cell(cell, 11)
+            severity_key = values[2].lower()
+            if severity_key in _SEVERITY_COLORS:
+                self._style_severity_cell(table.cell(row, 2), severity_key)
+
+        table.columns[0].width = Inches(4.8)
+        table.columns[1].width = Inches(1.4)
+        table.columns[2].width = Inches(1.6)
+
+        label_box = slide.shapes.add_textbox(Inches(4.6), Inches(1.1), Inches(4), Inches(0.3))
+        label = label_box.text_frame.paragraphs[0]
+        label.text = "Top Impacted Services"
+        label.font.size = Pt(16)
+        label.font.bold = True
+        label.font.color.rgb = _BRAND_DARK
+
+    def _add_workload_summary(self, prs: "Presentation", discovery: DiscoveryResult) -> None:
+        slide = self._create_data_slide(prs, "Resource Inventory Summary")
+        resource_rows = self._resource_rows(discovery)[:15]
+        if resource_rows:
+            self._add_resource_table(slide, resource_rows, Inches(0.8), Inches(1.5), Inches(8.5))
+        else:
+            self._add_message_box(slide, "No resources discovered.", Inches(1), Inches(2), Inches(10))
+
+        total_box = slide.shapes.add_textbox(Inches(0.8), Inches(6.35), Inches(4), Inches(0.4))
+        paragraph = total_box.text_frame.paragraphs[0]
+        paragraph.text = f"Total resources: {self._resource_total(discovery)}"
+        paragraph.font.size = Pt(14)
+        paragraph.font.bold = True
+        paragraph.font.color.rgb = _BRAND_DARK
+
+    def _add_pillar_slide(self, prs: "Presentation", assessment: AssessmentResult, pillar_key: str) -> None:
+        slide = self._create_data_slide(prs, f"Pillar: {_PILLAR_NAMES.get(pillar_key, pillar_key)}")
+        pillar_score = assessment.pillar_scores.get(pillar_key)
+        score = pillar_score.score if pillar_score else 100.0
+
+        score_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.5), Inches(3.4), Inches(1.2))
+        tf = score_box.text_frame
+        tf.word_wrap = True
+        score_paragraph = tf.paragraphs[0]
+        score_paragraph.text = f"{score:.0f}/100"
+        score_paragraph.font.size = Pt(44)
+        score_paragraph.font.bold = True
+        score_paragraph.font.color.rgb = _score_color(score)
+
+        counts_box = slide.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(3.4), Inches(2.1))
+        ctf = counts_box.text_frame
+        ctf.word_wrap = True
+        counts = self._pillar_counts(pillar_score)
+        for index, count in enumerate(counts):
+            paragraph = ctf.paragraphs[0] if index == 0 else ctf.add_paragraph()
+            paragraph.text = count
+            paragraph.font.size = Pt(14)
+            paragraph.font.color.rgb = _BRAND_DARK
+            paragraph.space_after = Pt(3)
+
+        pillar_findings = [finding for finding in assessment.findings if finding.pillar == pillar_key]
+        top_findings = sorted(pillar_findings, key=lambda finding: _SEVERITY_ORDER.get(finding.severity, 99))[:5]
+        if top_findings:
+            self._add_findings_table(slide, top_findings, left=Inches(4.6), top=Inches(1.5))
+        else:
+            self._add_message_box(slide, "No findings for this pillar.", Inches(4.9), Inches(2.2), Inches(6.5))
+
+    def _add_impact_slides(
+        self,
+        prs: "Presentation",
+        findings: list[Finding],
+        title: str,
+        max_rows: int = 10,
+    ) -> int:
+        severities = self._impact_severities(title)
+        filtered = [finding for finding in findings if finding.severity in severities]
+        chunks = [filtered[index : index + max_rows] for index in range(0, len(filtered), max_rows)] or [[]]
+
+        for index, chunk in enumerate(chunks, start=1):
+            slide_title = title if len(chunks) == 1 else f"{title} ({index}/{len(chunks)})"
+            slide = self._create_data_slide(prs, slide_title)
+            if not chunk:
+                self._add_message_box(slide, "No findings.", Inches(1), Inches(2), Inches(10))
+                continue
+
+            table_shape = slide.shapes.add_table(len(chunk) + 1, 5, Inches(0.4), Inches(1.4), Inches(12.4), Inches(5.3))
+            table = table_shape.table
+            headers = ["#", "Rule ID", "Severity", "Title", "Recommendation"]
+            for column, header in enumerate(headers):
+                cell = table.cell(0, column)
+                cell.text = header
+                self._style_header_cell(cell)
+
+            for row, finding in enumerate(chunk, start=1):
+                values = [
+                    str(row + ((index - 1) * max_rows)),
+                    finding.rule_id,
+                    finding.severity.capitalize(),
+                    finding.title,
+                    finding.recommendation,
+                ]
+                for column, value in enumerate(values):
+                    cell = table.cell(row, column)
+                    cell.text = value
+                    self._style_body_cell(cell, 10)
+                self._style_severity_cell(table.cell(row, 2), finding.severity)
+
+            table.columns[0].width = Inches(0.6)
+            table.columns[1].width = Inches(1.3)
+            table.columns[2].width = Inches(1.2)
+            table.columns[3].width = Inches(3.3)
+            table.columns[4].width = Inches(6)
+        return len(chunks)
+
+    def _add_remediation_slide(self, prs: "Presentation", assessment: AssessmentResult) -> None:
+        slide = self._create_data_slide(prs, "Remediation Roadmap")
+        top_findings = sorted(
+            assessment.findings,
+            key=lambda finding: (_SEVERITY_ORDER.get(finding.severity, 99), finding.rule_id),
+        )[:10]
+        if not top_findings:
+            self._add_message_box(slide, "No findings — all checks passed.", Inches(1), Inches(2), Inches(10))
+            return
+
+        table_shape = slide.shapes.add_table(len(top_findings) + 1, 5, Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+        table = table_shape.table
+        headers = ["Priority", "Rule ID", "Severity", "Title", "Recommendation"]
+        for column, header in enumerate(headers):
+            cell = table.cell(0, column)
+            cell.text = header
+            self._style_header_cell(cell)
+
+        for row, finding in enumerate(top_findings, start=1):
+            values = [str(row), finding.rule_id, finding.severity.capitalize(), finding.title, finding.recommendation]
+            for column, value in enumerate(values):
+                cell = table.cell(row, column)
+                cell.text = value
+                self._style_body_cell(cell, 10)
+            self._style_severity_cell(table.cell(row, 2), finding.severity)
 
         table.columns[0].width = Inches(0.8)
         table.columns[1].width = Inches(1.2)
@@ -281,134 +406,151 @@ class PptxReporter:
         table.columns[4].width = Inches(4.8)
 
     def _add_inventory_slide(self, prs: "Presentation", discovery: DiscoveryResult) -> None:
+        slide = self._create_data_slide(prs, "Appendix: Full Resource Inventory")
+        resource_rows = self._resource_rows(discovery)[:15]
+        if resource_rows:
+            self._add_resource_table(slide, resource_rows, Inches(1), Inches(1.5), Inches(8))
+        else:
+            self._add_message_box(slide, "No resources discovered.", Inches(1), Inches(2), Inches(10))
+
+    def _create_data_slide(self, prs: "Presentation", title: str):
         slide = prs.slides.add_slide(prs.slide_layouts[6])
-        self._add_slide_title(slide, "Resource Inventory")
+        self._fill_background(slide, _WHITE)
+        self._add_slide_title(slide, title)
+        self._add_footer(slide)
+        return slide
 
-        resource_rows = self._resource_rows(discovery)
-        top_resources = resource_rows[:15]
-
-        if not top_resources:
-            info_box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(10), Inches(1))
-            info_box.text_frame.paragraphs[0].text = "No resources discovered."
-            info_box.text_frame.paragraphs[0].font.size = Pt(18)
-            return
-
-        rows = len(top_resources) + 1
-        table_shape = slide.shapes.add_table(rows, 2, Inches(1), Inches(1.5), Inches(8), Inches(0.4 * rows))
+    def _add_pillar_score_table(self, slide, assessment: AssessmentResult, left: "Emu", top: "Emu") -> None:
+        table_shape = slide.shapes.add_table(len(_PILLAR_ORDER) + 1, 4, left, top, Inches(7.5), Inches(2.4))
         table = table_shape.table
-
-        for ci, h in enumerate(["Resource Type", "Count"]):
-            cell = table.cell(0, ci)
-            cell.text = h
+        headers = ["Pillar", "Score", "Findings", "Critical"]
+        for column, header in enumerate(headers):
+            cell = table.cell(0, column)
+            cell.text = header
             self._style_header_cell(cell)
 
-        for ri, (rtype, count) in enumerate(top_resources, start=1):
-            table.cell(ri, 0).text = rtype
-            table.cell(ri, 1).text = str(count)
-            for ci in range(2):
-                for paragraph in table.cell(ri, ci).text_frame.paragraphs:
-                    paragraph.font.size = Pt(11)
-
-        table.columns[0].width = Inches(6)
-        table.columns[1].width = Inches(2)
-
-    def _add_pillar_score_table(
-        self,
-        slide,
-        assessment: AssessmentResult,
-        left: "Emu",
-        top: "Emu",
-    ) -> None:
-        rows = len(_PILLAR_ORDER) + 1
-        cols = 4
-        table_shape = slide.shapes.add_table(rows, cols, left, top, Inches(7.5), Inches(0.4 * rows))
-        table = table_shape.table
-
-        for ci, h in enumerate(["Pillar", "Score", "Findings", "Critical"]):
-            cell = table.cell(0, ci)
-            cell.text = h
-            self._style_header_cell(cell)
-
-        for ri, pillar_key in enumerate(_PILLAR_ORDER, start=1):
-            ps = assessment.pillar_scores.get(pillar_key)
-            score = ps.score if ps else 100.0
-            findings = ps.findings_count if ps else 0
-            critical = ps.critical if ps else 0
-
-            table.cell(ri, 0).text = _PILLAR_NAMES[pillar_key]
-            table.cell(ri, 1).text = f"{score:.0f}"
-            table.cell(ri, 2).text = str(findings)
-            table.cell(ri, 3).text = str(critical)
-
-            score_cell = table.cell(ri, 1)
+        for row, pillar_key in enumerate(_PILLAR_ORDER, start=1):
+            pillar_score = assessment.pillar_scores.get(pillar_key)
+            score = pillar_score.score if pillar_score else 100.0
+            findings = pillar_score.findings_count if pillar_score else 0
+            critical = pillar_score.critical if pillar_score else 0
+            values = [_PILLAR_NAMES[pillar_key], f"{score:.0f}", str(findings), str(critical)]
+            for column, value in enumerate(values):
+                cell = table.cell(row, column)
+                cell.text = value
+                self._style_body_cell(cell, 12)
+            score_cell = table.cell(row, 1)
             score_cell.fill.solid()
             score_cell.fill.fore_color.rgb = _score_color(score)
             for paragraph in score_cell.text_frame.paragraphs:
-                for run in paragraph.runs:
-                    run.font.color.rgb = _WHITE
-                    run.font.bold = True
-
-            for ci in range(cols):
-                for paragraph in table.cell(ri, ci).text_frame.paragraphs:
-                    paragraph.font.size = Pt(12)
+                paragraph.font.bold = True
+                paragraph.font.color.rgb = _WHITE
 
         table.columns[0].width = Inches(3)
         table.columns[1].width = Inches(1.5)
         table.columns[2].width = Inches(1.5)
         table.columns[3].width = Inches(1.5)
 
-    def _add_findings_table(
-        self,
-        slide,
-        findings: list[Finding],
-        left: "Emu",
-        top: "Emu",
-    ) -> None:
-        rows = len(findings) + 1
-        cols = 3
-        table_shape = slide.shapes.add_table(rows, cols, left, top, Inches(7.5), Inches(0.4 * rows))
+    def _add_findings_table(self, slide, findings: list[Finding], left: "Emu", top: "Emu") -> None:
+        table_shape = slide.shapes.add_table(len(findings) + 1, 3, left, top, Inches(7.6), Inches(2.6))
         table = table_shape.table
-
-        for ci, h in enumerate(["Severity", "Rule ID", "Title"]):
-            cell = table.cell(0, ci)
-            cell.text = h
+        headers = ["Severity", "Rule ID", "Title"]
+        for column, header in enumerate(headers):
+            cell = table.cell(0, column)
+            cell.text = header
             self._style_header_cell(cell)
 
-        for ri, finding in enumerate(findings, start=1):
-            table.cell(ri, 0).text = finding.severity.capitalize()
-            table.cell(ri, 1).text = finding.rule_id
-            table.cell(ri, 2).text = finding.title
-
-            sev_color = _SEVERITY_COLORS.get(finding.severity)
-            if sev_color:
-                table.cell(ri, 0).fill.solid()
-                table.cell(ri, 0).fill.fore_color.rgb = sev_color
-                for paragraph in table.cell(ri, 0).text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        run.font.color.rgb = _WHITE
-
-            for ci in range(cols):
-                for paragraph in table.cell(ri, ci).text_frame.paragraphs:
-                    paragraph.font.size = Pt(11)
+        for row, finding in enumerate(findings, start=1):
+            values = [finding.severity.capitalize(), finding.rule_id, finding.title]
+            for column, value in enumerate(values):
+                cell = table.cell(row, column)
+                cell.text = value
+                self._style_body_cell(cell, 11)
+            self._style_severity_cell(table.cell(row, 0), finding.severity)
 
         table.columns[0].width = Inches(1.2)
         table.columns[1].width = Inches(1.5)
-        table.columns[2].width = Inches(4.8)
+        table.columns[2].width = Inches(4.9)
+
+    def _add_resource_table(
+        self,
+        slide,
+        resource_rows: list[tuple[str, int]],
+        left: "Emu",
+        top: "Emu",
+        width: "Emu",
+    ) -> None:
+        table_height = Inches(0.3 * (len(resource_rows) + 1))
+        table_shape = slide.shapes.add_table(len(resource_rows) + 1, 2, left, top, width, table_height)
+        table = table_shape.table
+        for column, header in enumerate(["Resource Type", "Count"]):
+            cell = table.cell(0, column)
+            cell.text = header
+            self._style_header_cell(cell)
+
+        for row, (resource_type, count) in enumerate(resource_rows, start=1):
+            for column, value in enumerate([resource_type, str(count)]):
+                cell = table.cell(row, column)
+                cell.text = value
+                self._style_body_cell(cell, 11)
+
+        table.columns[0].width = Inches(6)
+        table.columns[1].width = Inches(2)
+
+    def _add_metric_box(
+        self,
+        slide,
+        label: str,
+        value: str,
+        left: "Emu",
+        top: "Emu",
+        width: "Emu",
+        color: "RGBColor",
+        value_size: int,
+    ) -> None:
+        box = slide.shapes.add_textbox(left, top, width, Inches(0.7))
+        tf = box.text_frame
+        tf.word_wrap = True
+        title = tf.paragraphs[0]
+        title.text = label
+        title.font.size = Pt(12)
+        title.font.color.rgb = _BRAND_DARK
+
+        metric = tf.add_paragraph()
+        metric.text = value
+        metric.font.size = Pt(value_size)
+        metric.font.bold = True
+        metric.font.color.rgb = color
+        metric.space_before = Pt(2)
+
+    def _add_message_box(self, slide, text: str, left: "Emu", top: "Emu", width: "Emu") -> None:
+        message_box = slide.shapes.add_textbox(left, top, width, Inches(1))
+        paragraph = message_box.text_frame.paragraphs[0]
+        paragraph.text = text
+        paragraph.font.size = Pt(18)
+        paragraph.font.color.rgb = _BRAND_DARK
 
     def _add_slide_title(self, slide, text: str) -> None:
         title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
-        tf = title_box.text_frame
-        p = tf.paragraphs[0]
-        p.text = text
-        p.font.size = Pt(28)
-        p.font.bold = True
-        p.font.color.rgb = _BRAND_DARK
-        p.alignment = PP_ALIGN.LEFT
+        paragraph = title_box.text_frame.paragraphs[0]
+        paragraph.text = text
+        paragraph.font.size = Pt(28)
+        paragraph.font.bold = True
+        paragraph.font.color.rgb = _BRAND_DARK
+        paragraph.alignment = PP_ALIGN.LEFT
+
+    def _add_footer(self, slide) -> None:
+        footer_box = slide.shapes.add_textbox(Inches(9.5), Inches(7.0), Inches(3.2), Inches(0.25))
+        paragraph = footer_box.text_frame.paragraphs[0]
+        paragraph.text = "AUTOMATICALLY GENERATED — Please Review"
+        paragraph.font.name = "Segoe UI"
+        paragraph.font.size = Pt(8)
+        paragraph.font.color.rgb = _TEXT_GRAY
+        paragraph.alignment = PP_ALIGN.RIGHT
 
     @staticmethod
     def _fill_background(slide, color: "RGBColor") -> None:
-        background = slide.background
-        fill = background.fill
+        fill = slide.background.fill
         fill.solid()
         fill.fore_color.rgb = color
 
@@ -423,22 +565,122 @@ class PptxReporter:
             paragraph.alignment = PP_ALIGN.LEFT
 
     @staticmethod
+    def _style_body_cell(cell, font_size: int) -> None:
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = _WHITE
+        for paragraph in cell.text_frame.paragraphs:
+            paragraph.font.size = Pt(font_size)
+            paragraph.font.color.rgb = _BRAND_DARK
+            paragraph.alignment = PP_ALIGN.LEFT
+
+    @staticmethod
+    def _style_severity_cell(cell, severity: str) -> None:
+        color = _SEVERITY_COLORS.get(severity)
+        if color is None:
+            return
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = color
+        for paragraph in cell.text_frame.paragraphs:
+            paragraph.font.color.rgb = _WHITE
+            paragraph.font.bold = True
+
+    @staticmethod
+    def _summary_stats(discovery: DiscoveryResult, assessment: AssessmentResult) -> list[str]:
+        return [
+            f"Resources: {PptxReporter._resource_total(discovery)}",
+            f"Checks Run: {assessment.checks_run}",
+            f"Checks Passed: {assessment.checks_passed}",
+            f"Findings: {len(assessment.findings)}",
+        ]
+
+    @staticmethod
+    def _severity_counts(findings: list[Finding]) -> Counter[str]:
+        counts: Counter[str] = Counter(dict.fromkeys(_SEVERITY_ORDER, 0))
+        counts.update(finding.severity for finding in findings)
+        return counts
+
+    @staticmethod
+    def _pillar_counts(pillar_score) -> list[str]:
+        if not pillar_score or pillar_score.findings_count == 0:
+            return ["No findings"]
+        return [
+            f"Critical: {pillar_score.critical}",
+            f"High: {pillar_score.high}",
+            f"Medium: {pillar_score.medium}",
+            f"Low: {pillar_score.low}",
+            f"Total: {pillar_score.findings_count}",
+        ]
+
+    @staticmethod
+    def _impact_severities(title: str) -> set[str]:
+        if title == "Critical & High Impact Findings":
+            return {"critical", "high"}
+        if title == "Medium Impact Findings":
+            return {"medium"}
+        return {"low"}
+
+    @staticmethod
+    def _finding_groups(finding: Finding) -> list[str]:
+        groups: dict[str, str] = {}
+        for evidence in finding.evidence:
+            if not isinstance(evidence, dict):
+                continue
+            resource_type = evidence.get("resource_type") or evidence.get("resourceType") or evidence.get("type")
+            if isinstance(resource_type, str) and resource_type:
+                groups.setdefault(resource_type.lower(), resource_type)
+        if groups:
+            return list(groups.values())
+        pillar_name = _PILLAR_NAMES.get(finding.pillar, finding.pillar.replace("_", " ").title())
+        return [pillar_name]
+
+    @staticmethod
+    def _top_impacted_services(findings: list[Finding]) -> list[tuple[str, int, str]]:
+        counts: Counter[str] = Counter()
+        top_severity: dict[str, str] = {}
+        display_names: dict[str, str] = {}
+        for finding in findings:
+            for group in PptxReporter._finding_groups(finding):
+                key = group.lower()
+                counts[key] += 1
+                display_names.setdefault(key, group)
+                current = top_severity.get(key)
+                if current is None or _SEVERITY_ORDER.get(finding.severity, 99) < _SEVERITY_ORDER.get(current, 99):
+                    top_severity[key] = finding.severity
+        rows = [
+            (display_names[key], count, top_severity.get(key, "low"))
+            for key, count in counts.items()
+        ]
+        rows.sort(key=lambda row: (-row[1], _SEVERITY_ORDER.get(row[2], 99), row[0]))
+        return rows[:6]
+
+    @staticmethod
+    def _format_timestamp(raw_value: str) -> str:
+        if not raw_value:
+            return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        try:
+            dt = datetime.fromisoformat(raw_value.replace("Z", "+00:00"))
+        except ValueError:
+            return raw_value
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    @staticmethod
     def _resource_rows(discovery: DiscoveryResult) -> list[tuple[str, int]]:
         by_type = discovery.resources.get("by_type", {}) if isinstance(discovery.resources, dict) else {}
         if isinstance(by_type, dict):
-            rows = list(by_type.items())
+            rows = [(resource_type, int(count)) for resource_type, count in by_type.items()]
         else:
             rows = [
-                (
-                    item.get("type", "unknown"),
-                    int(item.get("resource_count", item.get("count", 0))),
-                )
+                (item.get("type", "unknown"), int(item.get("resource_count", item.get("count", 0))))
                 for item in by_type
+                if isinstance(item, dict)
             ]
-        return sorted(rows, key=lambda r: r[1], reverse=True)
+        return sorted(rows, key=lambda row: row[1], reverse=True)
 
     @staticmethod
     def _resource_total(discovery: DiscoveryResult) -> int:
         if not isinstance(discovery.resources, dict):
             return 0
-        return int(discovery.resources.get("total_count", discovery.resources.get("total", 0)))
+        total = discovery.resources.get("total_count", discovery.resources.get("total"))
+        if total is not None:
+            return int(total)
+        return sum(count for _, count in PptxReporter._resource_rows(discovery))
