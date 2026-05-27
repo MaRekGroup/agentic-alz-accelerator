@@ -1,6 +1,6 @@
 # Reliability — Detailed Assessment Report
 
-> **Scope**: `mrg` | **Assessed**: 2026-05-26T19:33:36.636068+00:00
+> **Scope**: `mrg` | **Assessed**: 2026-05-27T15:52:34.398940+00:00
 
 ---
 
