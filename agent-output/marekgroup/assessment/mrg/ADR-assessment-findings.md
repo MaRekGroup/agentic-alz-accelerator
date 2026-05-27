@@ -1,6 +1,6 @@
 # ADR — Assessment Findings for mrg
 
-**Date**: 2026-05-26
+**Date**: 2026-05-27
 **Status**: Proposed
 **Deciders**: Platform team
 

@@ -1,6 +1,6 @@
 {
   "scope": "mrg",
-  "assessed_at": "2026-05-26T19:33:36.636068+00:00",
+  "assessed_at": "2026-05-27T15:52:34.398940+00:00",
   "overall_score": 42.2,
   "checks_run": 280,
   "checks_passed": 236,
@@ -245,8 +245,8 @@
           "id": "/subscriptions/a2343e21-1c22-42a2-b13a-aeea0d0d7c35/resourceGroups/mrg-conn-hub-scus-rg/providers/Microsoft.Network/publicIPAddresses/mrg-bastion-pip",
           "tags": {
             "Environment": "prod",
-            "CostCenter": "platform",
             "Owner": "platform-team",
+            "CostCenter": "platform",
             "ManagedBy": "agentic-alz-accelerator",
             "Project": "platform-connectivity"
           },
@@ -515,8 +515,8 @@
           "name": "McapsGovernance",
           "subscriptionId": "27f84456-9d87-4d58-8c73-4350c450220e",
           "tags": {
-            "Contact": "https://aka.ms/mcapsazuresupport",
             "CreatedByPolicy": "MCAPS Governance Team",
+            "Contact": "https://aka.ms/mcapsazuresupport",
             "Action": "Do Not Delete"
           }
         },
@@ -1041,8 +1041,8 @@
           "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourcegroups/mrg-identity-scus-rg/providers/microsoft.network/virtualnetworks/mrg-identity-spoke-vnet",
           "tags": {
             "Environment": "prod",
-            "CostCenter": "platform",
             "Owner": "platform-team",
+            "CostCenter": "platform",
             "Project": "platform-identity",
             "ManagedBy": "agentic-alz-accelerator"
           },
@@ -2096,8 +2096,8 @@
           "id": "/subscriptions/27f84456-9d87-4d58-8c73-4350c450220e/resourceGroups/mrg-identity-scus-rg/providers/Microsoft.Network/networkSecurityGroups/mrg-identity-dc-nsg",
           "tags": {
             "Environment": "prod",
-            "Owner": "platform-team",
             "CostCenter": "platform",
+            "Owner": "platform-team",
             "Project": "platform-identity",
             "ManagedBy": "agentic-alz-accelerator"
           },
