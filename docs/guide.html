@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Agentic ALZ Accelerator — Interactive Guide</title>
+<title>Agentic Azure Enterprise Landing Zone Accelerator — Interactive Guide</title>
 <style>
   :root {
     --ms-blue: #0078D4;
-    --ms-dark: #0B1A33;
+    --ms-dark: #0F1B2D;
     --ms-navy: #1B2A4A;
     --ms-light-blue: #50E6FF;
     --ms-cyan: #00BCF2;
@@ -16,12 +16,13 @@
     --ms-yellow: #FFB900;
     --ms-purple: #5C2D91;
     --ms-red: #A4262C;
-    --bg: #F3F5F9;
+    --bg: #F5F7FA;
     --card: #FFFFFF;
     --border: #E1E6EF;
     --text: #1B2A4A;
     --muted: #5C6B7A;
     --sidebar-w: 260px;
+    --ms-gradient: linear-gradient(135deg, #0F1B2D 0%, #1B3A5C 60%, #1a4a7a 100%);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -178,7 +179,7 @@
 
   /* ── Hero ── */
   .hero {
-    background: linear-gradient(135deg, var(--ms-dark) 0%, var(--ms-navy) 60%, #1a3a6b 100%);
+    background: var(--ms-gradient);
     border-radius: 16px;
     padding: 40px 44px;
     color: #fff;
@@ -480,7 +481,7 @@
 
   /* ── Architecture diagram ── */
   .arch-diagram {
-    background: var(--ms-dark);
+    background: var(--ms-gradient);
     border-radius: 12px;
     padding: 28px;
     color: #fff;
@@ -784,8 +785,8 @@
 <aside class="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <div class="icon">🏗️</div>
-      <span>ALZ<br/>Accelerator</span>
+      <div class="icon">⚡</div>
+      <span>Azure Enterprise<br/>LZ Accelerator</span>
     </div>
     <div class="sidebar-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
   </div>
@@ -849,7 +850,7 @@
   </nav>
 
   <div class="sidebar-footer">
-    APEX-Aligned · CAF-Compliant · v2.1
+    APEX-Aligned · CAF-Compliant · Enterprise Edition
   </div>
 </aside>
 
@@ -857,12 +858,12 @@
 <div class="main">
   <div class="topbar">
     <div class="topbar-breadcrumb">
-      Agentic ALZ Accelerator &rsaquo; <span id="breadcrumb">Overview</span>
+      Agentic Azure Enterprise Landing Zone Accelerator &rsaquo; <span id="breadcrumb">Overview</span>
     </div>
     <div class="topbar-pills">
       <span class="pill pill-green">✓ APEX-Aligned</span>
       <span class="pill pill-blue">CAF 8/8 Areas</span>
-      <span class="pill pill-orange">v2.1</span>
+      <span class="pill pill-orange">Enterprise</span>
     </div>
   </div>
 
@@ -871,7 +872,7 @@
     <!-- ═══ OVERVIEW ═══ -->
     <div id="section-overview" class="section active">
       <div class="hero">
-        <div class="hero-tag">🏗️ Agentic Azure Landing Zone Accelerator</div>
+        <div class="hero-tag">⚡ Agentic Azure Enterprise Landing Zone Accelerator</div>
         <h1>AI-Powered Enterprise Landing Zone Lifecycle</h1>
         <p>A multi-agent workflow that transforms Azure Landing Zone requirements into deployed, governed, and continuously monitored infrastructure — aligned with the Cloud Adoption Framework and APEX agentic infrastructure patterns.</p>
         <div class="hero-tagline">AI Orchestrates · Humans Decide · Azure Executes</div>
@@ -939,7 +940,7 @@
         </div>
         <div class="card">
           <h3>🔍 Greenfield &amp; Brownfield</h3>
-          <p>Supports both new (greenfield) and existing (brownfield) environments. Brownfield scenarios start with a WAF-aligned assessment (Step 0) that discovers existing resources, evaluates reliability across 28 checks, and generates a gap analysis before the standard workflow begins.</p>
+          <p>Supports both new (greenfield) and existing (brownfield) environments. Brownfield scenarios start with a WAF-aligned assessment (Step 0) that discovers existing resources, evaluates reliability across 221 checks, and generates a gap analysis before the standard workflow begins.</p>
         </div>
       </div>
     </div>
@@ -975,8 +976,8 @@
         <div class="arch-layer">
           <div class="arch-layer-label">🤖 Agent Layer</div>
           <div class="arch-layer-items">
-            <div class="arch-chip">� Assessor</div>
-            <div class="arch-chip">�📜 Scribe</div>
+            <div class="arch-chip">🔍 Assessor</div>
+            <div class="arch-chip">📜 Scribe</div>
             <div class="arch-chip">🏛️ Oracle</div>
             <div class="arch-chip">🎨 Artisan</div>
             <div class="arch-chip">🛡️ Warden</div>
@@ -1368,7 +1369,7 @@
         <div class="code-block">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <span class="comment"># Clone the repository</span>
-git clone https://github.com/your-org/agentic-alz-accelerator.git
+git clone https://github.com/MaRekGroup/agentic-alz-accelerator.git
 cd agentic-alz-accelerator
 
 <span class="comment"># Create virtual environment</span>
@@ -1616,7 +1617,7 @@ agents:
               </div>
               <ul>
                 <li>Discovers all existing resources via Azure Resource Graph — compute, networking, storage, identity, policies</li>
-                <li>Runs WAF Reliability Assessment with 28-check catalog (availability zones, redundancy, backup, DR, monitoring, scaling)</li>
+                <li>Runs WAF Reliability Assessment with 221-check APRL-synced catalog (availability zones, redundancy, backup, DR, monitoring, scaling)</li>
                 <li>Scores each resource against Well-Architected best practices (pass/fail/not-applicable)</li>
                 <li>Generates 6 artifacts: current-state architecture, target-state with migration roadmap, WAF assessment report (MD + JSON), architecture diagram (Mermaid), and ADR</li>
                 <li>Gap analysis feeds into Step 1 requirements — Scribe uses assessment findings to pre-populate known gaps</li>
@@ -2359,7 +2360,7 @@ gh run view <span class="str">&lt;run-id&gt;</span> <span class="flag">--log</sp
         <p>Multi-LZ estate tracking with per-subscription compliance monitoring.</p>
       </div>
 
-      <div class="card" style="margin-bottom:18px;padding:20px;background:linear-gradient(135deg,#0B1A33 0%,#1B2A4A 100%);color:#fff">
+      <div class="card" style="margin-bottom:18px;padding:20px;background:var(--ms-gradient);color:#fff">
         <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Platform Landing Zone Deployment Order</h3>
         <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
 Management ──▶ Connectivity ──▶ Identity ──▶ Security
@@ -2494,7 +2495,7 @@ asyncio.run(main())
 
       <!-- ── Pipeline Overview ── -->
       <div id="pipe-overview" class="tab-panel active">
-        <div class="card" style="margin-bottom:18px;padding:20px;background:linear-gradient(135deg,#0B1A33 0%,#1B2A4A 100%);color:#fff">
+        <div class="card" style="margin-bottom:18px;padding:20px;background:var(--ms-gradient);color:#fff">
           <h3 style="color:var(--ms-light-blue);margin-bottom:12px">Full Deployment Sequence</h3>
           <pre style="font-size:12px;color:#ddd;line-height:1.7;margin:0">
 Step 0  Gather bootstrap inputs (see Prerequisites → Bootstrap Settings Checklist)
@@ -2866,7 +2867,7 @@ gh workflow run <span class="str">"4 · Landing Zone Monitoring"</span> \
         <div class="card" style="margin:14px 0;padding:16px;background:linear-gradient(90deg,#F3E5F5,#FFF9FE);border-left:4px solid var(--ms-purple)">
           <h4 style="margin-bottom:8px;color:var(--ms-purple)">Assessment Pipeline</h4>
           <pre style="font-size:12px;line-height:1.6;margin:0;color:var(--text)">
-Discover (Resource Graph)  →  Assess (28 WARA checks)  →  Generate Reports (6 artifacts)
+Discover (Resource Graph)  →  Assess (221 WARA checks)  →  Generate Reports (6 artifacts)
      ↓                              ↓                              ↓
   Resources, networking,      Pass/Fail/N-A per check,      Current-state architecture,
   identity, policies          reliability score              target-state + roadmap,
@@ -2969,6 +2970,7 @@ const SECTION_LABELS = {
   caf: 'CAF Design Areas',
   agents: 'Agent Roster',
   tools: 'Agent Tools',
+  skills: 'Agent Skills',
   prereqs: 'Prerequisites',
   install: 'Installation',
   config: 'Configuration',
@@ -2977,6 +2979,7 @@ const SECTION_LABELS = {
   cost: 'Cost Governance',
   profiles: 'Landing Zone Profiles',
   monitor: 'Monitoring',
+  estate: 'Estate Status',
   remediate: 'Remediation',
   cicd: 'CI/CD Pipelines',
 };
