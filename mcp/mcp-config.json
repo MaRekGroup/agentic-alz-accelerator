@@ -79,21 +79,31 @@
       "command": "deno",
       "args": ["run", "--allow-net", "--allow-read", "--allow-env", "mcp/drawio-mcp-server/src/index.ts"],
       "used_by_agents": ["design"]
+    },
+    "microsoft-learn": {
+      "name": "Microsoft Learn MCP Server",
+      "description": "Azure documentation lookup from Microsoft Learn. Provides contextual Azure service documentation, best practices, and architecture guidance with a configurable token budget.",
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp?maxTokenBudget=4000",
+      "tools": [
+        {"name": "microsoft_docs_fetch", "description": "Fetch Azure documentation from Microsoft Learn by topic or URL"}
+      ],
+      "used_by_agents": ["requirements", "assessment", "architect", "design", "governance", "iac-planner", "bicep-code", "terraform-code", "deploy", "documentation", "monitor", "remediate", "challenger"]
     }
   },
   "agent_tool_mapping": {
-    "requirements": [],
-    "assessment": ["azure-platform"],
-    "architect": ["azure-pricing"],
-    "design": ["drawio"],
-    "governance": ["azure-platform"],
-    "iac-planner": ["azure-pricing"],
-    "bicep-code": ["azure-platform"],
-    "terraform-code": ["azure-platform"],
-    "deploy": ["azure-platform"],
-    "documentation": ["azure-pricing", "azure-platform"],
-    "monitor": ["azure-platform"],
-    "remediate": ["azure-platform"],
-    "challenger": ["azure-platform"]
+    "requirements": ["microsoft-learn"],
+    "assessment": ["azure-platform", "microsoft-learn"],
+    "architect": ["azure-pricing", "microsoft-learn"],
+    "design": ["drawio", "microsoft-learn"],
+    "governance": ["azure-platform", "microsoft-learn"],
+    "iac-planner": ["azure-pricing", "microsoft-learn"],
+    "bicep-code": ["azure-platform", "microsoft-learn"],
+    "terraform-code": ["azure-platform", "microsoft-learn"],
+    "deploy": ["azure-platform", "microsoft-learn"],
+    "documentation": ["azure-pricing", "azure-platform", "microsoft-learn"],
+    "monitor": ["azure-platform", "microsoft-learn"],
+    "remediate": ["azure-platform", "microsoft-learn"],
+    "challenger": ["azure-platform", "microsoft-learn"]
   }
 }

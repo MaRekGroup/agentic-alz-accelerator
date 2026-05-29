@@ -197,6 +197,20 @@ Budget amounts are parameterized per environment. No hardcoded values.
 
 ---
 
+## Documentation Citation (Non-Negotiable)
+
+Every agent recommendation **must** be validated against Microsoft Learn documentation:
+
+| Rule | Enforcement |
+|------|-------------|
+| Use `microsoft-learn` MCP (`microsoft_docs_fetch`) for lookups | All agents — code gen, architecture, governance, monitoring |
+| Include `📖 References` section with Learn URLs | All output artifacts (assessments, plans, docs) |
+| Never contradict official Azure documentation | Code review + Challenger gates |
+| Flag unverifiable recommendations as `⚠️ Unverified` | Self-attestation by producing agent |
+| Cite Microsoft-recommended approach first when alternatives exist | Architecture and planning artifacts |
+
+---
+
 ## Artifact Naming Convention
 
 | Step | Prefix | Example |

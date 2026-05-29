@@ -266,6 +266,15 @@ Follow CAF naming conventions. Required tags on all resource groups:
 - IaC framework: Bicep or Terraform (configurable via `IAC_FRAMEWORK`)
 - Management group prefix: `mrg` (configurable via `AZURE_MANAGEMENT_GROUP_PREFIX`)
 
+### Documentation-Backed Recommendations (Non-Negotiable)
+Every architecture recommendation, service configuration, or best-practice assertion **must**
+be validated against Microsoft Learn documentation. Agents must:
+1. Use the `microsoft-learn` MCP server (`microsoft_docs_fetch` tool) to look up relevant docs
+2. Include a `📖 References` section in output artifacts with Learn URLs (e.g., `https://learn.microsoft.com/azure/...`)
+3. Never recommend configurations that contradict official Azure documentation
+4. When multiple approaches exist, cite the Microsoft-recommended approach first
+5. Flag any recommendation that cannot be validated against current docs as `⚠️ Unverified`
+
 ## Key Files
 
 | File/Dir | Purpose |
@@ -307,10 +316,11 @@ gh workflow run assess.yml -f scope=/subscriptions/<sub-id> -f scope_type=subscr
 
 ## MCP Servers
 
-3 MCP servers configured in `mcp/mcp-config.json`:
+4 MCP servers configured in `mcp/mcp-config.json`:
 1. **azure-pricing** — Cost estimation and pricing lookups
 2. **azure-platform** — Consolidated 27-tool Azure platform server
 3. **drawio** — Architecture diagram generation
+4. **microsoft-learn** — Azure documentation lookup (all agents must use for citation validation)
 
 ## CAF Design Areas → IaC Module Mapping
 
