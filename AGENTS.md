@@ -209,6 +209,20 @@ Every agent recommendation **must** be validated against Microsoft Learn documen
 | Flag unverifiable recommendations as `⚠️ Unverified` | Self-attestation by producing agent |
 | Cite Microsoft-recommended approach first when alternatives exist | Architecture and planning artifacts |
 
+### Sub-Agent Documentation Access
+
+MCP tools are session-scoped — spawned sub-agents do NOT inherit MCP tool access. Two patterns ensure live documentation lookup:
+
+1. **Parent pre-fetch**: The orchestrating agent (Conductor, Oracle, etc.) calls `microsoft_docs_search`/`microsoft_docs_fetch` via MCP, then passes results into the sub-agent's prompt as context.
+2. **Bash helper**: Any agent can query Learn docs directly via HTTP:
+   ```bash
+   scripts/fetch-learn-docs.sh search "Azure Firewall best practices"
+   scripts/fetch-learn-docs.sh fetch "https://learn.microsoft.com/azure/firewall/overview"
+   scripts/fetch-learn-docs.sh code "deploy Azure Firewall" bicep
+   ```
+
+Agents **must** use one of these patterns rather than citing URLs from training data alone.
+
 ---
 
 ## Artifact Naming Convention

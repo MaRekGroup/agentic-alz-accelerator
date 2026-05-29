@@ -275,6 +275,17 @@ be validated against Microsoft Learn documentation. Agents must:
 4. When multiple approaches exist, cite the Microsoft-recommended approach first
 5. Flag any recommendation that cannot be validated against current docs as `⚠️ Unverified`
 
+**Sub-agent documentation access** (MCP tools are session-scoped, not inherited by spawned agents):
+- **Parent pre-fetch pattern**: The orchestrating agent calls `microsoft_docs_search` before delegating,
+  then includes the results in the sub-agent's prompt context
+- **Bash fallback**: Any agent can query docs via `scripts/fetch-learn-docs.sh`:
+  ```bash
+  scripts/fetch-learn-docs.sh search "Azure Firewall premium features"
+  scripts/fetch-learn-docs.sh fetch "https://learn.microsoft.com/azure/firewall/overview"
+  scripts/fetch-learn-docs.sh code "deploy Azure Firewall" bicep
+  ```
+- Both approaches ensure citations are from **live documentation**, not training data
+
 ## Key Files
 
 | File/Dir | Purpose |
