@@ -1,0 +1,77 @@
+{
+  "title": "Contoso ALZ Hub-Spoke Network Topology",
+  "canvas": { "width": 1600, "height": 1000 },
+  "zones": [
+    { "id": "mg-root", "label": "Contoso (Tenant Root)", "kind": "tenant" },
+    { "id": "mg-platform", "label": "Platform", "kind": "mg", "tier": "platform", "parent": "mg-root" },
+    { "id": "mg-landing-zones", "label": "Landing Zones", "kind": "mg", "tier": "landing-zone", "parent": "mg-root" },
+    { "id": "mg-corp", "label": "Corp", "kind": "mg", "tier": "landing-zone", "parent": "mg-landing-zones" },
+    { "id": "mg-online", "label": "Online", "kind": "mg", "tier": "landing-zone", "parent": "mg-landing-zones" },
+    { "id": "sub-connectivity", "label": "sub-connectivity-001", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-management", "label": "sub-management-001", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-identity", "label": "sub-identity-001", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-workload-prod", "label": "sub-workload-prod-001", "kind": "subscription", "parent": "mg-corp", "region": "southcentralus" },
+    { "id": "rg-hub-networking", "label": "rg-hub-networking-scus", "kind": "rg", "parent": "sub-connectivity" },
+    { "id": "rg-spoke-networking", "label": "rg-spoke-networking-scus", "kind": "rg", "parent": "sub-workload-prod" },
+    { "id": "vnet-hub", "label": "vnet-hub-scus", "kind": "vnet", "parent": "rg-hub-networking", "cidr": "10.0.0.0/16" },
+    { "id": "snet-firewall", "label": "AzureFirewallSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.1.0/24" },
+    { "id": "snet-gateway", "label": "GatewaySubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.2.0/24" },
+    { "id": "snet-bastion", "label": "AzureBastionSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.3.0/24" },
+    { "id": "vnet-spoke-prod", "label": "vnet-spoke-prod-scus", "kind": "vnet", "parent": "rg-spoke-networking", "cidr": "10.1.0.0/16" },
+    { "id": "snet-workload", "label": "snet-workload", "kind": "subnet", "parent": "vnet-spoke-prod", "cidr": "10.1.1.0/24" },
+    { "id": "snet-data", "label": "snet-data", "kind": "subnet", "parent": "vnet-spoke-prod", "cidr": "10.1.2.0/24" },
+    { "id": "snet-pe", "label": "snet-private-endpoints", "kind": "subnet", "parent": "vnet-spoke-prod", "cidr": "10.1.3.0/24" },
+    { "id": "onprem", "label": "On-Premises Datacenter", "kind": "onprem" },
+    { "id": "external", "label": "Internet", "kind": "external" }
+  ],
+  "nodes": [
+    { "id": "fw", "name": "Azure Firewall", "azureResourceType": "Microsoft.Network/azureFirewalls", "category": "networking", "zone": "snet-firewall" },
+    { "id": "vpngw", "name": "VPN Gateway", "azureResourceType": "Microsoft.Network/virtualNetworkGateways", "category": "networking", "zone": "snet-gateway" },
+    { "id": "bastion", "name": "Azure Bastion", "azureResourceType": "Microsoft.Network/bastionHosts", "category": "networking", "zone": "snet-bastion" },
+    { "id": "log-analytics", "name": "Log Analytics", "azureResourceType": "Microsoft.OperationalInsights/workspaces", "category": "monitoring", "zone": "sub-management" },
+    { "id": "defender", "name": "Defender for Cloud", "azureResourceType": "Microsoft.Security/pricings", "category": "security", "zone": "sub-management" },
+    { "id": "sentinel", "name": "Microsoft Sentinel", "azureResourceType": "Microsoft.SecurityInsights/alertRules", "category": "security", "zone": "sub-management" },
+    { "id": "keyvault", "name": "Key Vault", "azureResourceType": "Microsoft.KeyVault/vaults", "category": "security", "zone": "sub-workload-prod" },
+    { "id": "app-svc", "name": "App Service", "azureResourceType": "Microsoft.Web/sites", "category": "compute", "zone": "snet-workload" },
+    { "id": "sql", "name": "SQL Managed Instance", "azureResourceType": "Microsoft.Sql/managedInstances", "category": "data", "zone": "snet-data" },
+    { "id": "storage", "name": "Storage Account", "azureResourceType": "Microsoft.Storage/storageAccounts", "category": "storage", "zone": "snet-pe" }
+  ],
+  "edges": [
+    { "id": "e1", "from": "external", "to": "fw", "type": "network-flow", "step": 1, "label": "Inbound traffic", "routing": "orthogonal", "style": "solid" },
+    { "id": "e2", "from": "fw", "to": "app-svc", "type": "network-flow", "step": 2, "label": "DNAT to workload", "routing": "orthogonal", "style": "solid" },
+    { "id": "e3", "from": "app-svc", "to": "sql", "type": "private-endpoint", "step": 3, "label": "Private link", "routing": "orthogonal", "style": "dashed" },
+    { "id": "e4", "from": "app-svc", "to": "storage", "type": "private-endpoint", "step": 4, "label": "Private link", "routing": "orthogonal", "style": "dashed" },
+    { "id": "e5", "from": "vnet-hub", "to": "vnet-spoke-prod", "type": "peering", "label": "Hub↔Spoke peering", "routing": "orthogonal", "style": "solid", "bidirectional": true },
+    { "id": "e6", "from": "onprem", "to": "vpngw", "type": "vpn", "label": "S2S VPN tunnel", "routing": "curve", "style": "dashed" },
+    { "id": "e7", "from": "log-analytics", "to": "fw", "type": "monitoring-flow", "label": "Diagnostics", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e8", "from": "log-analytics", "to": "app-svc", "type": "monitoring-flow", "label": "Diagnostics", "routing": "orthogonal", "style": "dotted" }
+  ],
+  "crossCutting": [
+    "Entra ID",
+    "Azure Policy",
+    "Defender for Cloud",
+    "Microsoft Sentinel",
+    "Cost Management"
+  ],
+  "foundation": [
+    "Hub VNet (10.0.0.0/16)",
+    "Azure Firewall",
+    "VPN Gateway",
+    "Azure Bastion",
+    "Private DNS Zones"
+  ],
+  "workflow": [
+    { "step": 1, "description": "Internet traffic enters through Azure Firewall in the hub VNet", "services": ["fw"] },
+    { "step": 2, "description": "Firewall DNATs allowed traffic to workload subnet in spoke", "services": ["fw", "app-svc"] },
+    { "step": 3, "description": "App Service connects to SQL MI via private endpoint", "services": ["app-svc", "sql"] },
+    { "step": 4, "description": "App Service accesses storage via private endpoint", "services": ["app-svc", "storage"] },
+    { "step": 5, "description": "On-premises connectivity via S2S VPN through gateway subnet", "services": ["vpngw"] },
+    { "step": 6, "description": "All resources send diagnostics to Log Analytics in management subscription", "services": ["log-analytics"] }
+  ],
+  "metadata": {
+    "generatedBy": "artisan",
+    "model": "claude-sonnet-4.6",
+    "timestamp": "2026-06-23T21:30:00.000Z",
+    "sourceArtifact": "02-architecture-assessment.md"
+  }
+}
