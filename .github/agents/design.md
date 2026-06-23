@@ -132,21 +132,42 @@ engine.generate_alz_architecture(filename='03-design-estate-overview')
 
 #### Draw.io Diagrams (Detailed, editable)
 
-Use the Draw.io MCP server to generate `.drawio` files:
+**Two-phase generation**: First produce a zone-based JSON intermediate conforming to
+`.github/skills/drawio/alz-diagram-schema.json`, then render to Draw.io via the MCP server.
+
+**Phase A — Generate JSON schema output:**
+1. Read the schema: `.github/skills/drawio/alz-diagram-schema.json`
+2. Read the few-shot example: `.github/skills/drawio/examples/hub-spoke-topology.json`
+3. Produce a JSON file for each diagram:
+   - `agent-output/{customer}/diagrams/03-design-management-group-hierarchy.json`
+   - `agent-output/{customer}/diagrams/03-design-hub-spoke-network-topology.json`
+   - `agent-output/{customer}/diagrams/03-design-security-governance-monitoring.json`
+   - `agent-output/{customer}/diagrams/03-design-estate-overview.json`
+
+**Phase B — Render to Draw.io:**
+Use the Draw.io MCP server to generate `.drawio` files from the JSON:
 - `agent-output/{customer}/diagrams/03-design-management-group-hierarchy.drawio`
 - `agent-output/{customer}/diagrams/03-design-hub-spoke-network-topology.drawio`
 - `agent-output/{customer}/diagrams/03-design-security-governance-monitoring.drawio`
 - `agent-output/{customer}/diagrams/03-design-estate-overview.drawio`
 
+Apply these rendering rules when converting JSON → Draw.io:
+- Zones → swimlane containers (collapsible, color-coded by tier)
+- Nodes → rounded rectangles with Azure icons
+- Edges → orthogonal connectors with numbered step badges
+- CrossCutting → horizontal strip at top
+- Foundation → horizontal strip at bottom
+
 #### Diagram Requirements
 
 All diagrams MUST include:
 - Management group hierarchy (Root → Platform/Landing Zones/Sandbox)
-- CIDR ranges on all VNets and subnets
+- CIDR ranges on all VNets and subnets (use zone `cidr` field)
 - NSG and route table associations
 - Firewall/Bastion/Gateway placement
 - Subscription placement under management groups
 - Color coding: Platform (blue), Landing Zones (green), Shared (orange)
+- Numbered workflow steps showing traffic/data flow
 
 **Checkpoint**: `alz-recall checkpoint {customer} 3 phase_2_diagrams --json`
 
@@ -217,6 +238,7 @@ summary instead of omitting the section.
 
 | File | Location |
 |------|----------|
+| JSON Schema Intermediates | `agent-output/{customer}/diagrams/03-design-*.json` |
 | PNG Diagrams | `agent-output/{customer}/diagrams/03-design-*.png` |
 | Draw.io Diagrams | `agent-output/{customer}/diagrams/03-design-*.drawio` |
 | Markdown Diagrams (optional) | `agent-output/{customer}/diagrams/03-design-*.md` |

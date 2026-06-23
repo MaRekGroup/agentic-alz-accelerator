@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ALZ Architecture Diagram Schema",
+  "description": "Zone-based JSON schema for Azure Landing Zone architecture diagrams. Inspired by the Blueprint pattern from azure-architecture-diagram-builder. Zones nest hierarchically to represent the ALZ topology: Tenant > Management Group > Subscription > Resource Group > VNet > Subnet.",
+  "type": "object",
+  "required": ["title", "canvas", "zones", "nodes", "edges"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Diagram title (e.g., 'Contoso ALZ Hub-Spoke Topology')"
+    },
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "default": 1600 },
+        "height": { "type": "integer", "default": 1000 }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "description": "Hierarchical containers representing the ALZ topology. Zones nest via the 'parent' field.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "kind"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique zone identifier (e.g., 'mg-platform', 'sub-connectivity', 'vnet-hub')" },
+          "label": { "type": "string", "description": "Display label" },
+          "kind": {
+            "type": "string",
+            "enum": ["tenant", "mg", "subscription", "rg", "vnet", "subnet", "onprem", "external"],
+            "description": "Zone type mapping to ALZ hierarchy level"
+          },
+          "tier": {
+            "type": "string",
+            "enum": ["platform", "landing-zone", "sandbox", "decommissioned"],
+            "description": "ALZ management group tier classification"
+          },
+          "parent": {
+            "type": "string",
+            "description": "ID of the parent zone (enables unlimited nesting)"
+          },
+          "cidr": {
+            "type": "string",
+            "description": "CIDR range for VNet/subnet zones (e.g., '10.0.0.0/16')"
+          },
+          "region": {
+            "type": "string",
+            "description": "Azure region (e.g., 'southcentralus')"
+          },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "width": { "type": "number" },
+          "height": { "type": "number" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Azure resources placed within zones.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "category", "zone"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique node identifier" },
+          "name": { "type": "string", "description": "Display name (e.g., 'Azure Firewall')" },
+          "azureResourceType": {
+            "type": "string",
+            "description": "ARM resource type (e.g., 'Microsoft.Network/azureFirewalls')"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["compute", "networking", "security", "identity", "management", "storage", "data", "integration", "ai", "monitoring"],
+            "description": "Azure service category for color coding"
+          },
+          "zone": { "type": "string", "description": "ID of the zone this node belongs to" },
+          "icon": { "type": "string", "description": "Azure icon identifier or SVG path" },
+          "x": { "type": "number" },
+          "y": { "type": "number" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Connections between nodes representing network flows, policy assignments, peerings, etc.",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "to", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "string", "description": "Source node or zone ID" },
+          "to": { "type": "string", "description": "Target node or zone ID" },
+          "type": {
+            "type": "string",
+            "enum": ["network-flow", "peering", "private-endpoint", "policy-assignment", "identity-flow", "monitoring-flow", "data-flow", "expressroute", "vpn"],
+            "description": "Connection semantic type"
+          },
+          "step": { "type": "integer", "description": "Numbered badge for workflow sequence" },
+          "label": { "type": "string", "description": "Edge label (max 24 chars)" },
+          "routing": {
+            "type": "string",
+            "enum": ["orthogonal", "curve", "straight"],
+            "default": "orthogonal"
+          },
+          "style": {
+            "type": "string",
+            "enum": ["solid", "dashed", "dotted"],
+            "default": "solid"
+          },
+          "bidirectional": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "crossCutting": {
+      "type": "array",
+      "description": "Platform services that span the entire estate (rendered as a horizontal strip). These are management-group-level shared services.",
+      "items": { "type": "string" },
+      "examples": [["Entra ID", "Azure Policy", "Defender for Cloud", "Microsoft Sentinel", "Key Vault", "Cost Management"]]
+    },
+    "foundation": {
+      "type": "array",
+      "description": "Connectivity foundation services (rendered as a bottom strip). These represent the hub/connectivity subscription resources.",
+      "items": { "type": "string" },
+      "examples": [["Hub VNet", "Azure Firewall", "ExpressRoute Gateway", "VPN Gateway", "Azure Bastion", "Private DNS Zones"]]
+    },
+    "workflow": {
+      "type": "array",
+      "description": "Numbered step descriptions explaining data/traffic flow through the architecture.",
+      "items": {
+        "type": "object",
+        "required": ["step", "description"],
+        "properties": {
+          "step": { "type": "integer" },
+          "description": { "type": "string" },
+          "services": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Node IDs involved in this step"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Generation metadata for traceability.",
+      "properties": {
+        "generatedBy": { "type": "string", "description": "Agent that produced this (e.g., 'artisan')" },
+        "model": { "type": "string", "description": "AI model used" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "sourceArtifact": { "type": "string", "description": "Input artifact path (e.g., '02-architecture-assessment.md')" }
+      }
+    }
+  }
+}
