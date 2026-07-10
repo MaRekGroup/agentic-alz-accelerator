@@ -116,47 +116,45 @@ filenames:
 
 If an inline markdown diagram is required, name it `03-design-<topic>.md`.
 
-#### Python Diagrams (Quick PNG generation)
+#### Rendering (PNG + Draw.io) — use the persisted renderer
 
-```bash
-cd /workspaces/agentic-alz-accelerator
-python -c "
-from src.tools.python_diagram_generator import DiagramEngine
-engine = DiagramEngine(output_dir='agent-output/{customer}/diagrams')
-engine.generate_mg_hierarchy(filename='03-design-management-group-hierarchy')
-engine.generate_hub_spoke(filename='03-design-hub-spoke-network-topology')
-engine.generate_security_governance(filename='03-design-security-governance-monitoring')
-engine.generate_alz_architecture(filename='03-design-estate-overview')
-"
-```
+**Do NOT hand-render diagrams or write ad-hoc rendering code.** All Step 3 diagrams
+are produced by the persisted, data-driven renderer
+`scripts/diagrams/render_alz_diagram.py`, which consumes a zone-based JSON spec and
+emits a matching **PNG and `.drawio`** that share one authoritative Azure icon
+registry (`ICON_MAP`). This guarantees correct, identical icons in both outputs
+(e.g., Defender for Cloud ≠ Key Vault, Automation ≠ Logic Apps, Internet uses the
+internet icon — not the Azure Monitor gauge) and ensures the `.drawio` is never
+iconless.
 
-#### Draw.io Diagrams (Detailed, editable)
-
-**Two-phase generation**: First produce a zone-based JSON intermediate conforming to
-`.github/skills/drawio/alz-diagram-schema.json`, then render to Draw.io via the MCP server.
-
-**Phase A — Generate JSON schema output:**
+**Phase A — Generate the zone-based JSON spec (one per diagram):**
 1. Read the schema: `.github/skills/drawio/alz-diagram-schema.json`
 2. Read the few-shot example: `.github/skills/drawio/examples/hub-spoke-topology.json`
-3. Produce a JSON file for each diagram:
+3. Produce a JSON file for each diagram (populate every node's `azureResourceType`
+   so the renderer selects the correct icon):
    - `agent-output/{customer}/diagrams/03-design-management-group-hierarchy.json`
    - `agent-output/{customer}/diagrams/03-design-hub-spoke-network-topology.json`
    - `agent-output/{customer}/diagrams/03-design-security-governance-monitoring.json`
    - `agent-output/{customer}/diagrams/03-design-estate-overview.json`
 
-**Phase B — Render to Draw.io:**
-Use the Draw.io MCP server to generate `.drawio` files from the JSON:
-- `agent-output/{customer}/diagrams/03-design-management-group-hierarchy.drawio`
-- `agent-output/{customer}/diagrams/03-design-hub-spoke-network-topology.drawio`
-- `agent-output/{customer}/diagrams/03-design-security-governance-monitoring.drawio`
-- `agent-output/{customer}/diagrams/03-design-estate-overview.drawio`
+**Phase B — Render both PNG and Draw.io with one command:**
 
-Apply these rendering rules when converting JSON → Draw.io:
-- Zones → swimlane containers (collapsible, color-coded by tier)
-- Nodes → rounded rectangles with Azure icons
-- Edges → orthogonal connectors with numbered step badges
-- CrossCutting → horizontal strip at top
-- Foundation → horizontal strip at bottom
+```bash
+cd /workspaces/agentic-alz-accelerator
+python scripts/diagrams/render_alz_diagram.py \
+  agent-output/{customer}/diagrams/03-design-*.json
+```
+
+This writes `03-design-*.png` and `03-design-*.drawio` next to each JSON spec, both
+laid out by a single Graphviz pass so they are visually consistent. Zones become
+nested color-coded containers, nodes render with the Azure icon mapped from their
+`azureResourceType` (caption below the icon), external/on-prem zones become
+internet/datacenter actors, and edges are routed to avoid overlapping icons with
+numbered step badges.
+
+> If a node's `azureResourceType` is missing from `ICON_MAP`, the renderer falls back
+> by `category`. Prefer adding the exact resource type to `ICON_MAP` in
+> `scripts/diagrams/render_alz_diagram.py` (via PR) over accepting a generic icon.
 
 #### Diagram Requirements
 

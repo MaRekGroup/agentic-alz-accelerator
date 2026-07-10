@@ -1,0 +1,80 @@
+{
+  "title": "Marek Group ALZ Hub-Spoke Network Topology",
+  "canvas": { "width": 1600, "height": 1100 },
+  "zones": [
+    { "id": "tenant-root", "label": "Marek Group (Tenant Root)", "kind": "tenant" },
+    { "id": "mg-platform", "label": "Platform", "kind": "mg", "tier": "platform", "parent": "tenant-root" },
+    { "id": "mg-landingzones", "label": "Landing Zones", "kind": "mg", "tier": "landing-zone", "parent": "tenant-root" },
+    { "id": "mg-corp", "label": "Corp", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "mg-online", "label": "Online", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "sub-connectivity", "label": "Connectivity Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-identity", "label": "Identity Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-management", "label": "Management Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "rg-hub", "label": "mrg-conn-hub-scus-rg", "kind": "rg", "parent": "sub-connectivity" },
+    { "id": "rg-gateways", "label": "mrg-conn-gateways-scus-rg", "kind": "rg", "parent": "sub-connectivity" },
+    { "id": "rg-dns", "label": "mrg-conn-dns-scus-rg", "kind": "rg", "parent": "sub-connectivity" },
+    { "id": "rg-identity", "label": "mrg-identity-scus-rg", "kind": "rg", "parent": "sub-identity" },
+    { "id": "vnet-hub", "label": "mrg-hub-vnet", "kind": "vnet", "parent": "rg-hub", "cidr": "10.0.0.0/16", "region": "southcentralus" },
+    { "id": "snet-firewall", "label": "AzureFirewallSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.1.0/24" },
+    { "id": "snet-bastion", "label": "AzureBastionSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.2.0/24" },
+    { "id": "snet-gateway", "label": "GatewaySubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.3.0/24" },
+    { "id": "snet-hub-mgmt", "label": "snet-management", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.4.0/24" },
+    { "id": "vnet-identity", "label": "mrg-identity-spoke-vnet", "kind": "vnet", "parent": "rg-identity", "cidr": "10.1.0.0/24", "region": "southcentralus" },
+    { "id": "snet-dc", "label": "DomainControllers", "kind": "subnet", "parent": "vnet-identity", "cidr": "10.1.0.0/26" },
+    { "id": "snet-idty-svc", "label": "IdentityServices", "kind": "subnet", "parent": "vnet-identity", "cidr": "10.1.0.64/26" },
+    { "id": "vnet-spoke-corp", "label": "vnet-spoke-corp (future)", "kind": "vnet", "parent": "mg-corp", "cidr": "10.2.0.0/16" },
+    { "id": "vnet-spoke-online", "label": "vnet-spoke-online (future)", "kind": "vnet", "parent": "mg-online", "cidr": "10.3.0.0/16" },
+    { "id": "onprem", "label": "On-Premises Datacenter", "kind": "onprem" },
+    { "id": "external", "label": "Internet", "kind": "external" }
+  ],
+  "nodes": [
+    { "id": "fw", "name": "Azure Firewall\n(disabled)", "azureResourceType": "Microsoft.Network/azureFirewalls", "category": "networking", "zone": "snet-firewall" },
+    { "id": "bastion", "name": "mrg-bastion", "azureResourceType": "Microsoft.Network/bastionHosts", "category": "networking", "zone": "snet-bastion" },
+    { "id": "vpngw", "name": "VPN Gateway\n(planned)", "azureResourceType": "Microsoft.Network/virtualNetworkGateways", "category": "networking", "zone": "snet-gateway" },
+    { "id": "private-dns", "name": "Private DNS Zones (9)", "azureResourceType": "Microsoft.Network/privateDnsZones", "category": "networking", "zone": "rg-dns" },
+    { "id": "nsg-hub", "name": "NSGs (15 total)", "azureResourceType": "Microsoft.Network/networkSecurityGroups", "category": "security", "zone": "vnet-hub" },
+    { "id": "log-analytics", "name": "mrg-law", "azureResourceType": "Microsoft.OperationalInsights/workspaces", "category": "monitoring", "zone": "sub-management" },
+    { "id": "vm-runner", "name": "vm-github-runner-01", "azureResourceType": "Microsoft.Compute/virtualMachines", "category": "compute", "zone": "snet-hub-mgmt" }
+  ],
+  "edges": [
+    { "id": "e1", "from": "external", "to": "fw", "type": "network-flow", "step": 1, "label": "Inbound traffic", "routing": "orthogonal", "style": "solid" },
+    { "id": "e2", "from": "fw", "to": "vnet-identity", "type": "network-flow", "step": 2, "label": "Filtered east-west", "routing": "orthogonal", "style": "solid" },
+    { "id": "e3", "from": "vnet-hub", "to": "vnet-identity", "type": "peering", "label": "Hub↔Identity peering", "routing": "orthogonal", "style": "solid", "bidirectional": true },
+    { "id": "e4", "from": "vnet-hub", "to": "vnet-spoke-corp", "type": "peering", "label": "Hub↔Corp (planned)", "routing": "orthogonal", "style": "dashed", "bidirectional": true },
+    { "id": "e5", "from": "vnet-hub", "to": "vnet-spoke-online", "type": "peering", "label": "Hub↔Online (planned)", "routing": "orthogonal", "style": "dashed", "bidirectional": true },
+    { "id": "e6", "from": "onprem", "to": "vpngw", "type": "vpn", "label": "S2S VPN (planned)", "routing": "curve", "style": "dashed" },
+    { "id": "e7", "from": "log-analytics", "to": "fw", "type": "monitoring-flow", "label": "Diagnostics", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e8", "from": "log-analytics", "to": "bastion", "type": "monitoring-flow", "label": "Diagnostics", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e9", "from": "private-dns", "to": "vnet-hub", "type": "network-flow", "step": 3, "label": "DNS resolution", "routing": "orthogonal", "style": "solid" },
+    { "id": "e10", "from": "private-dns", "to": "vnet-identity", "type": "network-flow", "label": "DNS link", "routing": "orthogonal", "style": "solid" },
+    { "id": "e11", "from": "bastion", "to": "vm-runner", "type": "network-flow", "step": 4, "label": "Secure mgmt access", "routing": "orthogonal", "style": "solid" }
+  ],
+  "crossCutting": [
+    "Entra ID",
+    "Azure Policy",
+    "Defender for Cloud",
+    "Microsoft Sentinel",
+    "Cost Management"
+  ],
+  "foundation": [
+    "Hub VNet (10.0.0.0/16)",
+    "Azure Firewall (disabled)",
+    "VPN Gateway (planned)",
+    "Azure Bastion",
+    "Private DNS Zones (9)"
+  ],
+  "workflow": [
+    { "step": 1, "description": "Internet traffic enters via Azure Firewall in hub VNet (currently disabled)", "services": ["fw"] },
+    { "step": 2, "description": "Firewall filters east-west traffic between hub and spoke VNets", "services": ["fw", "vnet-identity"] },
+    { "step": 3, "description": "Private DNS zones resolve private endpoints across all linked VNets", "services": ["private-dns"] },
+    { "step": 4, "description": "Azure Bastion provides secure RDP/SSH to management VMs without public IPs", "services": ["bastion", "vm-runner"] },
+    { "step": 5, "description": "Hub↔Identity spoke peering enables domain controller connectivity", "services": ["vnet-hub", "vnet-identity"] },
+    { "step": 6, "description": "All network resources emit diagnostics to centralized Log Analytics", "services": ["log-analytics"] }
+  ],
+  "metadata": {
+    "generatedBy": "artisan",
+    "model": "claude-sonnet-4-20250514",
+    "timestamp": "2026-07-10T14:41:00.000Z",
+    "sourceArtifact": "agent-output/marekgroup/00-estate-state.json"
+  }
+}

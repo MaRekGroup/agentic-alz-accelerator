@@ -1,0 +1,91 @@
+{
+  "title": "Marek Group ALZ Full Estate Overview",
+  "canvas": { "width": 1800, "height": 1200 },
+  "zones": [
+    { "id": "tenant-root", "label": "Marek Group (Tenant Root)", "kind": "tenant" },
+    { "id": "mg-mrg", "label": "mrg", "kind": "mg", "tier": "platform", "parent": "tenant-root" },
+    { "id": "mg-platform", "label": "Platform", "kind": "mg", "tier": "platform", "parent": "mg-mrg" },
+    { "id": "mg-landingzones", "label": "Landing Zones", "kind": "mg", "tier": "landing-zone", "parent": "mg-mrg" },
+    { "id": "mg-sandbox", "label": "Sandbox", "kind": "mg", "tier": "sandbox", "parent": "mg-mrg" },
+    { "id": "mg-decommissioned", "label": "Decommissioned", "kind": "mg", "tier": "decommissioned", "parent": "mg-mrg" },
+    { "id": "mg-platform-management", "label": "Management", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-connectivity", "label": "Connectivity", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-identity", "label": "Identity", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-security", "label": "Security", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-lz-corp", "label": "Corp", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "mg-lz-online", "label": "Online", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "mg-lz-sap", "label": "SAP", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "sub-mgmt", "label": "Management Sub", "kind": "subscription", "parent": "mg-platform-management", "region": "southcentralus" },
+    { "id": "sub-conn", "label": "Connectivity Sub", "kind": "subscription", "parent": "mg-platform-connectivity", "region": "southcentralus" },
+    { "id": "sub-idty", "label": "Identity Sub", "kind": "subscription", "parent": "mg-platform-identity", "region": "southcentralus" },
+    { "id": "sub-sec", "label": "Security Sub", "kind": "subscription", "parent": "mg-platform-security", "region": "southcentralus" },
+    { "id": "rg-mgmt", "label": "mrg-management-scus-rg", "kind": "rg", "parent": "sub-mgmt" },
+    { "id": "rg-hub", "label": "mrg-conn-hub-scus-rg", "kind": "rg", "parent": "sub-conn" },
+    { "id": "rg-dns", "label": "mrg-conn-dns-scus-rg", "kind": "rg", "parent": "sub-conn" },
+    { "id": "rg-identity", "label": "mrg-identity-scus-rg", "kind": "rg", "parent": "sub-idty" },
+    { "id": "rg-soc", "label": "mrg-sec-soc-scus-rg", "kind": "rg", "parent": "sub-sec" },
+    { "id": "rg-governance", "label": "mrg-sec-governance-scus-rg", "kind": "rg", "parent": "sub-sec" },
+    { "id": "vnet-hub", "label": "mrg-hub-vnet", "kind": "vnet", "parent": "rg-hub", "cidr": "10.0.0.0/16", "region": "southcentralus" },
+    { "id": "snet-fw", "label": "AzureFirewallSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.1.0/24" },
+    { "id": "snet-bastion", "label": "AzureBastionSubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.2.0/24" },
+    { "id": "snet-gw", "label": "GatewaySubnet", "kind": "subnet", "parent": "vnet-hub", "cidr": "10.0.3.0/24" },
+    { "id": "vnet-identity", "label": "mrg-identity-spoke-vnet", "kind": "vnet", "parent": "rg-identity", "cidr": "10.1.0.0/24", "region": "southcentralus" },
+    { "id": "onprem", "label": "On-Premises Datacenter", "kind": "onprem" },
+    { "id": "external", "label": "Internet", "kind": "external" }
+  ],
+  "nodes": [
+    { "id": "law", "name": "mrg-law", "azureResourceType": "Microsoft.OperationalInsights/workspaces", "category": "monitoring", "zone": "rg-mgmt" },
+    { "id": "automation", "name": "mrg-automation", "azureResourceType": "Microsoft.Automation/automationAccounts", "category": "management", "zone": "rg-mgmt" },
+    { "id": "fw", "name": "Azure Firewall (disabled)", "azureResourceType": "Microsoft.Network/azureFirewalls", "category": "networking", "zone": "snet-fw" },
+    { "id": "bastion", "name": "mrg-bastion", "azureResourceType": "Microsoft.Network/bastionHosts", "category": "networking", "zone": "snet-bastion" },
+    { "id": "vpngw", "name": "VPN Gateway (planned)", "azureResourceType": "Microsoft.Network/virtualNetworkGateways", "category": "networking", "zone": "snet-gw" },
+    { "id": "private-dns", "name": "Private DNS (9 zones)", "azureResourceType": "Microsoft.Network/privateDnsZones", "category": "networking", "zone": "rg-dns" },
+    { "id": "managed-ids", "name": "Managed Identities (3)", "azureResourceType": "Microsoft.ManagedIdentity/userAssignedIdentities", "category": "identity", "zone": "rg-identity" },
+    { "id": "sentinel", "name": "Microsoft Sentinel", "azureResourceType": "Microsoft.SecurityInsights/alertRules", "category": "security", "zone": "rg-soc" },
+    { "id": "defender", "name": "Defender for Cloud (11)", "azureResourceType": "Microsoft.Security/pricings", "category": "security", "zone": "rg-soc" },
+    { "id": "kv", "name": "mrg-sec-kv", "azureResourceType": "Microsoft.KeyVault/vaults", "category": "security", "zone": "rg-governance" },
+    { "id": "policy", "name": "Azure Policy (13)", "azureResourceType": "Microsoft.Authorization/policyAssignments", "category": "management", "zone": "mg-mrg" },
+    { "id": "entra-id", "name": "Entra ID + OIDC", "azureResourceType": "Microsoft.AzureActiveDirectory", "category": "identity", "zone": "tenant-root" },
+    { "id": "vm-runner", "name": "vm-github-runner-01", "azureResourceType": "Microsoft.Compute/virtualMachines", "category": "compute", "zone": "vnet-hub" }
+  ],
+  "edges": [
+    { "id": "e1", "from": "external", "to": "fw", "type": "network-flow", "step": 1, "label": "Inbound", "routing": "orthogonal", "style": "solid" },
+    { "id": "e2", "from": "vnet-hub", "to": "vnet-identity", "type": "peering", "label": "Hub↔Identity", "routing": "orthogonal", "style": "solid", "bidirectional": true },
+    { "id": "e3", "from": "onprem", "to": "vpngw", "type": "vpn", "label": "S2S VPN (planned)", "routing": "curve", "style": "dashed" },
+    { "id": "e4", "from": "entra-id", "to": "managed-ids", "type": "identity-flow", "step": 2, "label": "OIDC", "routing": "orthogonal", "style": "dashed" },
+    { "id": "e5", "from": "policy", "to": "mg-platform", "type": "policy-assignment", "step": 3, "label": "Policy cascade", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e6", "from": "policy", "to": "mg-landingzones", "type": "policy-assignment", "label": "Policy cascade", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e7", "from": "defender", "to": "law", "type": "monitoring-flow", "step": 4, "label": "Alerts", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e8", "from": "sentinel", "to": "law", "type": "monitoring-flow", "label": "SIEM ingestion", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e9", "from": "bastion", "to": "vm-runner", "type": "network-flow", "step": 5, "label": "Secure mgmt", "routing": "orthogonal", "style": "solid" },
+    { "id": "e10", "from": "private-dns", "to": "vnet-hub", "type": "network-flow", "label": "DNS link", "routing": "orthogonal", "style": "solid" }
+  ],
+  "crossCutting": [
+    "Entra ID + OIDC",
+    "Azure Policy (13 assignments)",
+    "Defender for Cloud (11 plans)",
+    "Microsoft Sentinel",
+    "Cost Management + Budgets"
+  ],
+  "foundation": [
+    "Hub VNet (10.0.0.0/16)",
+    "Azure Firewall (disabled)",
+    "VPN Gateway (planned)",
+    "Azure Bastion",
+    "Private DNS Zones (9)",
+    "Log Analytics (mrg-law)"
+  ],
+  "workflow": [
+    { "step": 1, "description": "External traffic ingresses through Azure Firewall in hub VNet", "services": ["fw"] },
+    { "step": 2, "description": "Entra ID provides OIDC-based workload identity to managed identities", "services": ["entra-id", "managed-ids"] },
+    { "step": 3, "description": "Azure Policy cascades governance controls from mrg root to all MGs", "services": ["policy"] },
+    { "step": 4, "description": "Defender for Cloud and Sentinel send alerts/logs to centralized LAW", "services": ["defender", "sentinel", "law"] },
+    { "step": 5, "description": "Azure Bastion provides secure management plane to hub VMs", "services": ["bastion", "vm-runner"] }
+  ],
+  "metadata": {
+    "generatedBy": "artisan",
+    "model": "claude-sonnet-4-20250514",
+    "timestamp": "2026-07-10T14:41:00.000Z",
+    "sourceArtifact": "agent-output/marekgroup/00-estate-state.json"
+  }
+}
