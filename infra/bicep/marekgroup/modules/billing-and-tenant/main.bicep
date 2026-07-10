@@ -1,7 +1,10 @@
 // CAF Design Area: Billing & Tenant
 // Management group hierarchy and subscription organization
 
-targetScope = 'managementGroup'
+// Microsoft.Management/managementGroups resources are tenant-scoped, so this
+// module must target the tenant scope (BCP135). Deploy with:
+//   az deployment tenant create --location <region> --template-file main.bicep
+targetScope = 'tenant'
 
 @description('Top-level management group prefix')
 param prefix string
