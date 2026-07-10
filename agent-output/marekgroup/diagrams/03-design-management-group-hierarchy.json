@@ -1,0 +1,61 @@
+{
+  "title": "Marek Group ALZ Management Group Hierarchy",
+  "canvas": { "width": 1400, "height": 900 },
+  "zones": [
+    { "id": "tenant-root", "label": "Tenant Root Group", "kind": "tenant" },
+    { "id": "mg-mrg", "label": "mrg", "kind": "mg", "tier": "platform", "parent": "tenant-root" },
+    { "id": "mg-platform", "label": "Platform", "kind": "mg", "tier": "platform", "parent": "mg-mrg" },
+    { "id": "mg-landingzones", "label": "Landing Zones", "kind": "mg", "tier": "landing-zone", "parent": "mg-mrg" },
+    { "id": "mg-sandbox", "label": "Sandbox", "kind": "mg", "tier": "sandbox", "parent": "mg-mrg" },
+    { "id": "mg-decommissioned", "label": "Decommissioned", "kind": "mg", "tier": "decommissioned", "parent": "mg-mrg" },
+    { "id": "mg-platform-management", "label": "Management", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-connectivity", "label": "Connectivity", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-identity", "label": "Identity", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-platform-security", "label": "Security", "kind": "mg", "tier": "platform", "parent": "mg-platform" },
+    { "id": "mg-landingzones-corp", "label": "Corp", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "mg-landingzones-online", "label": "Online", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "mg-landingzones-sap", "label": "SAP", "kind": "mg", "tier": "landing-zone", "parent": "mg-landingzones" },
+    { "id": "sub-mgmt", "label": "ME-MngEnv-ytesfaye-1\n(Management)", "kind": "subscription", "parent": "mg-platform-management", "region": "southcentralus" },
+    { "id": "sub-conn", "label": "ME-MngEnv-ytesfaye-2\n(Connectivity)", "kind": "subscription", "parent": "mg-platform-connectivity", "region": "southcentralus" },
+    { "id": "sub-idty", "label": "ME-MngEnv-ytesfaye-3\n(Identity)", "kind": "subscription", "parent": "mg-platform-identity", "region": "southcentralus" },
+    { "id": "sub-sec", "label": "ME-MngEnv-ytesfaye-4\n(Security)", "kind": "subscription", "parent": "mg-platform-security", "region": "southcentralus" }
+  ],
+  "nodes": [
+    { "id": "law", "name": "mrg-law\n(Log Analytics)", "azureResourceType": "Microsoft.OperationalInsights/workspaces", "category": "monitoring", "zone": "sub-mgmt" },
+    { "id": "automation", "name": "mrg-automation", "azureResourceType": "Microsoft.Automation/automationAccounts", "category": "management", "zone": "sub-mgmt" },
+    { "id": "hub-vnet", "name": "mrg-hub-vnet", "azureResourceType": "Microsoft.Network/virtualNetworks", "category": "networking", "zone": "sub-conn" },
+    { "id": "bastion", "name": "mrg-bastion", "azureResourceType": "Microsoft.Network/bastionHosts", "category": "networking", "zone": "sub-conn" },
+    { "id": "private-dns", "name": "Private DNS (9 zones)", "azureResourceType": "Microsoft.Network/privateDnsZones", "category": "networking", "zone": "sub-conn" },
+    { "id": "identity-spoke", "name": "mrg-identity-spoke-vnet\n10.1.0.0/24", "azureResourceType": "Microsoft.Network/virtualNetworks", "category": "networking", "zone": "sub-idty" },
+    { "id": "managed-id", "name": "Managed Identities (3)", "azureResourceType": "Microsoft.ManagedIdentity/userAssignedIdentities", "category": "identity", "zone": "sub-idty" },
+    { "id": "sentinel", "name": "Microsoft Sentinel", "azureResourceType": "Microsoft.SecurityInsights/alertRules", "category": "security", "zone": "sub-sec" },
+    { "id": "defender", "name": "Defender for Cloud\n(11 plans)", "azureResourceType": "Microsoft.Security/pricings", "category": "security", "zone": "sub-sec" },
+    { "id": "kv", "name": "mrg-sec-kv", "azureResourceType": "Microsoft.KeyVault/vaults", "category": "security", "zone": "sub-sec" }
+  ],
+  "edges": [
+    { "id": "e-policy-root", "from": "mg-mrg", "to": "mg-platform", "type": "policy-assignment", "label": "CAF baseline policies", "style": "dotted" },
+    { "id": "e-policy-lz", "from": "mg-mrg", "to": "mg-landingzones", "type": "policy-assignment", "label": "CAF baseline policies", "style": "dotted" },
+    { "id": "e-mon-law", "from": "law", "to": "mg-mrg", "type": "monitoring-flow", "label": "Diagnostics sink", "style": "dotted" },
+    { "id": "e-idty-peer", "from": "identity-spoke", "to": "hub-vnet", "type": "peering", "label": "Hub↔Identity peering", "bidirectional": true }
+  ],
+  "crossCutting": [
+    "Entra ID",
+    "Azure Policy",
+    "Defender for Cloud",
+    "Microsoft Sentinel",
+    "Cost Management"
+  ],
+  "foundation": [],
+  "workflow": [
+    { "step": 1, "description": "Policies assigned at mrg root MG cascade to all children", "services": ["mg-mrg"] },
+    { "step": 2, "description": "Platform subscriptions placed under respective MGs for scoped governance", "services": ["sub-mgmt", "sub-conn", "sub-idty", "sub-sec"] },
+    { "step": 3, "description": "Landing zone MGs (Corp/Online/SAP) await application subscription placement", "services": ["mg-landingzones-corp", "mg-landingzones-online", "mg-landingzones-sap"] },
+    { "step": 4, "description": "All resources emit diagnostics to centralized Log Analytics in Management sub", "services": ["law"] }
+  ],
+  "metadata": {
+    "generatedBy": "artisan",
+    "model": "claude-sonnet-4-20250514",
+    "timestamp": "2026-07-10T14:41:00.000Z",
+    "sourceArtifact": "agent-output/marekgroup/00-estate-state.json"
+  }
+}

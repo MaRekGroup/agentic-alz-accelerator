@@ -33,28 +33,39 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
       - name: Install Python dependencies
-        run: pip install diagrams graphviz
+        run: pip install diagrams typer
 
       - name: Generate diagrams
         run: |
-          python -c "
+          set -euo pipefail
+          DIAG_DIR="agent-output/${{ inputs.customer }}/diagrams"
+          shopt -s nullglob
+          specs=("$DIAG_DIR"/03-design-*.json)
+          if [ ${#specs[@]} -gt 0 ]; then
+            echo "Rendering ${#specs[@]} zone-based spec(s) with render_alz_diagram.py"
+            python scripts/diagrams/render_alz_diagram.py "${specs[@]}"
+          else
+            echo "No 03-design-*.json specs found; falling back to the generic generator"
+            python -c "
           from src.tools.python_diagram_generator import generate_all_diagrams
           paths = generate_all_diagrams(
-              output_dir='agent-output/${{ inputs.customer }}/diagrams',
+              output_dir='$DIAG_DIR',
               mg_prefix='${{ inputs.mg_prefix }}',
           )
           for p in paths:
               print(f'Generated: {p}')
           "
+          fi
 
       - name: Commit updated diagrams
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add agent-output/${{ inputs.customer }}/diagrams/*.png
+          git add agent-output/${{ inputs.customer }}/diagrams/*.drawio 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No diagram changes to commit."
           else
-            git commit -m "docs(diagrams): regenerate architecture PNGs [skip ci]"
+            git commit -m "docs(diagrams): regenerate architecture diagrams [skip ci]"
             git push
           fi

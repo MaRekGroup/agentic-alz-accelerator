@@ -1,0 +1,72 @@
+{
+  "title": "Marek Group ALZ Security, Governance & Monitoring Architecture",
+  "canvas": { "width": 1600, "height": 1100 },
+  "zones": [
+    { "id": "tenant-root", "label": "Marek Group (Tenant Root)", "kind": "tenant" },
+    { "id": "mg-mrg", "label": "mrg", "kind": "mg", "tier": "platform", "parent": "tenant-root" },
+    { "id": "mg-platform", "label": "Platform", "kind": "mg", "tier": "platform", "parent": "mg-mrg" },
+    { "id": "mg-landingzones", "label": "Landing Zones", "kind": "mg", "tier": "landing-zone", "parent": "mg-mrg" },
+    { "id": "sub-management", "label": "Management Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-security", "label": "Security Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "sub-identity", "label": "Identity Subscription", "kind": "subscription", "parent": "mg-platform", "region": "southcentralus" },
+    { "id": "rg-mgmt", "label": "mrg-management-scus-rg", "kind": "rg", "parent": "sub-management" },
+    { "id": "rg-soc", "label": "mrg-sec-soc-scus-rg", "kind": "rg", "parent": "sub-security" },
+    { "id": "rg-posture", "label": "mrg-sec-posture-scus-rg", "kind": "rg", "parent": "sub-security" },
+    { "id": "rg-sec-auto", "label": "mrg-sec-automation-scus-rg", "kind": "rg", "parent": "sub-security" },
+    { "id": "rg-governance", "label": "mrg-sec-governance-scus-rg", "kind": "rg", "parent": "sub-security" },
+    { "id": "rg-identity", "label": "mrg-identity-scus-rg", "kind": "rg", "parent": "sub-identity" }
+  ],
+  "nodes": [
+    { "id": "law", "name": "mrg-law\n(Log Analytics Workspace)", "azureResourceType": "Microsoft.OperationalInsights/workspaces", "category": "monitoring", "zone": "rg-mgmt" },
+    { "id": "automation", "name": "mrg-automation", "azureResourceType": "Microsoft.Automation/automationAccounts", "category": "management", "zone": "rg-mgmt" },
+    { "id": "action-groups", "name": "Action Groups (5)", "azureResourceType": "Microsoft.Insights/actionGroups", "category": "monitoring", "zone": "rg-mgmt" },
+    { "id": "sentinel", "name": "Microsoft Sentinel", "azureResourceType": "Microsoft.SecurityInsights/alertRules", "category": "security", "zone": "rg-soc" },
+    { "id": "defender", "name": "Defender for Cloud\n(11 plans)", "azureResourceType": "Microsoft.Security/pricings", "category": "security", "zone": "rg-posture" },
+    { "id": "soar", "name": "SOAR Playbooks (4)\n(Logic Apps)", "azureResourceType": "Microsoft.Logic/workflows", "category": "security", "zone": "rg-sec-auto" },
+    { "id": "kv", "name": "mrg-sec-kv\n(Key Vault)", "azureResourceType": "Microsoft.KeyVault/vaults", "category": "security", "zone": "rg-governance" },
+    { "id": "policy", "name": "Azure Policy\n(13 assignments)", "azureResourceType": "Microsoft.Authorization/policyAssignments", "category": "management", "zone": "mg-mrg" },
+    { "id": "entra-id", "name": "Entra ID", "azureResourceType": "Microsoft.AzureActiveDirectory", "category": "identity", "zone": "tenant-root" },
+    { "id": "managed-ids", "name": "Managed Identities (3)", "azureResourceType": "Microsoft.ManagedIdentity/userAssignedIdentities", "category": "identity", "zone": "rg-identity" },
+    { "id": "budgets", "name": "Budget Resources\n(per subscription)", "azureResourceType": "Microsoft.Consumption/budgets", "category": "management", "zone": "mg-mrg" }
+  ],
+  "edges": [
+    { "id": "e1", "from": "entra-id", "to": "managed-ids", "type": "identity-flow", "step": 1, "label": "OIDC federation", "routing": "orthogonal", "style": "dashed" },
+    { "id": "e2", "from": "policy", "to": "mg-platform", "type": "policy-assignment", "step": 2, "label": "Policy cascade", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e3", "from": "policy", "to": "mg-landingzones", "type": "policy-assignment", "label": "Policy cascade", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e4", "from": "defender", "to": "law", "type": "monitoring-flow", "step": 3, "label": "Security alerts", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e5", "from": "sentinel", "to": "law", "type": "monitoring-flow", "step": 4, "label": "SIEM data ingestion", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e6", "from": "sentinel", "to": "soar", "type": "data-flow", "step": 5, "label": "Auto-response trigger", "routing": "orthogonal", "style": "solid" },
+    { "id": "e7", "from": "law", "to": "action-groups", "type": "monitoring-flow", "step": 6, "label": "Alert notifications", "routing": "orthogonal", "style": "solid" },
+    { "id": "e8", "from": "automation", "to": "law", "type": "monitoring-flow", "label": "Runbook logs", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e9", "from": "budgets", "to": "action-groups", "type": "monitoring-flow", "label": "Cost alerts", "routing": "orthogonal", "style": "dotted" },
+    { "id": "e10", "from": "kv", "to": "managed-ids", "type": "identity-flow", "label": "RBAC access", "routing": "orthogonal", "style": "dashed" }
+  ],
+  "crossCutting": [
+    "Entra ID",
+    "Azure Policy (13 assignments)",
+    "Defender for Cloud (11 plans)",
+    "Microsoft Sentinel",
+    "Cost Management + Budgets"
+  ],
+  "foundation": [
+    "Log Analytics Workspace (mrg-law)",
+    "Automation Account (mrg-automation)",
+    "Key Vault (mrg-sec-kv)",
+    "Action Groups (5)",
+    "SOAR Playbooks (4)"
+  ],
+  "workflow": [
+    { "step": 1, "description": "Entra ID issues tokens via OIDC to managed identities for workload authentication", "services": ["entra-id", "managed-ids"] },
+    { "step": 2, "description": "Azure Policy assignments cascade from mrg root to all children MGs", "services": ["policy"] },
+    { "step": 3, "description": "Defender for Cloud sends security alerts to Log Analytics Workspace", "services": ["defender", "law"] },
+    { "step": 4, "description": "Sentinel ingests logs from LAW for SIEM correlation and threat detection", "services": ["sentinel", "law"] },
+    { "step": 5, "description": "Sentinel triggers SOAR playbooks for automated incident response", "services": ["sentinel", "soar"] },
+    { "step": 6, "description": "Log Analytics alerts route through Action Groups for notifications", "services": ["law", "action-groups"] }
+  ],
+  "metadata": {
+    "generatedBy": "artisan",
+    "model": "claude-sonnet-4-20250514",
+    "timestamp": "2026-07-10T14:41:00.000Z",
+    "sourceArtifact": "agent-output/marekgroup/assessment/mrg/assessment-report.json"
+  }
+}
