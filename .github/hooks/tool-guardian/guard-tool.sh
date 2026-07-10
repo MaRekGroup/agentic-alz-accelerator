@@ -10,9 +10,10 @@
 #   TOOL_GUARD_LOG_DIR   - Directory for guard logs (default: logs/copilot/tool-guardian)
 #   TOOL_GUARD_ALLOWLIST - Comma-separated patterns to skip (default: unset)
 
-set -euo pipefail
+set -uo pipefail
 
 if [[ "${SKIP_TOOL_GUARD:-}" == "true" ]]; then
+  echo '{"continue": true}'
   exit 0
 fi
 
@@ -22,7 +23,7 @@ MODE="${GUARD_MODE:-block}"
 LOG_DIR="${TOOL_GUARD_LOG_DIR:-logs/copilot/tool-guardian}"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-mkdir -p "$LOG_DIR"
+mkdir -p "$LOG_DIR" 2>/dev/null || true
 LOG_FILE="$LOG_DIR/guard.log"
 
 # Extract tool name and input text
@@ -87,16 +88,17 @@ is_allowlisted() {
 
 if [[ ${#ALLOWLIST[@]} -gt 0 ]] && is_allowlisted "$COMBINED"; then
   printf '{"timestamp":"%s","event":"guard_skipped","reason":"allowlisted","tool":"%s"}\n' \
-    "$TIMESTAMP" "$TOOL_NAME" >> "$LOG_FILE"
+    "$TIMESTAMP" "$TOOL_NAME" >> "$LOG_FILE" 2>/dev/null || true
+  echo '{"continue": true}'
   exit 0
 fi
 
 # Threat patterns: "CATEGORY:::SEVERITY:::REGEX:::SUGGESTION"
 PATTERNS=(
   # Destructive file operations
-  "destructive_file_ops:::critical:::rm -rf /:::Use targeted 'rm' on specific paths instead of root"
+  "destructive_file_ops:::critical:::rm -rf /[[:space:]]*$|rm -rf /$:::Use targeted 'rm' on specific paths instead of root"
   "destructive_file_ops:::critical:::rm -rf ~:::Use targeted 'rm' on specific paths instead of home directory"
-  "destructive_file_ops:::critical:::rm -rf \.:::Use targeted 'rm' on specific files instead of current directory"
+  "destructive_file_ops:::critical:::rm -rf \.[[:space:]]*$|rm -rf \.$:::Use targeted 'rm' on specific files instead of current directory"
   "destructive_file_ops:::critical:::(rm|del|unlink).*\.env:::Use 'mv' to back up .env files before removing"
   "destructive_file_ops:::critical:::(rm|del|unlink).*\.git[^i]:::Never delete .git directory — use 'git' commands"
 
@@ -181,18 +183,20 @@ if [[ $THREAT_COUNT -gt 0 ]]; then
   echo ""
 
   printf '{"timestamp":"%s","event":"threats_detected","mode":"%s","tool":"%s","threat_count":%d,"threats":%s}\n' \
-    "$TIMESTAMP" "$MODE" "$(json_escape "$TOOL_NAME")" "$THREAT_COUNT" "$FINDINGS_JSON" >> "$LOG_FILE"
+    "$TIMESTAMP" "$MODE" "$(json_escape "$TOOL_NAME")" "$THREAT_COUNT" "$FINDINGS_JSON" >> "$LOG_FILE" 2>/dev/null || true
 
   if [[ "$MODE" == "block" ]]; then
-    echo "🚫 Operation blocked: resolve the threats above or adjust TOOL_GUARD_ALLOWLIST."
-    echo "   Set GUARD_MODE=warn to log without blocking."
-    exit 1
+    REASON="BLOCKED: $THREAT_COUNT threat(s) detected — $(printf '%s' "${THREATS[0]}" | cut -f3)"
+    echo "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"$(json_escape "$REASON")\"}}"
+    exit 0
   else
-    echo "⚠️  Threats logged in warn mode. Set GUARD_MODE=block to prevent dangerous operations."
+    echo "⚠️  Threats logged in warn mode. Set GUARD_MODE=block to prevent dangerous operations." >&2
+    echo '{"continue": true}'
   fi
 else
   printf '{"timestamp":"%s","event":"guard_passed","mode":"%s","tool":"%s"}\n' \
-    "$TIMESTAMP" "$MODE" "$(json_escape "$TOOL_NAME")" >> "$LOG_FILE"
+    "$TIMESTAMP" "$MODE" "$(json_escape "$TOOL_NAME")" >> "$LOG_FILE" 2>/dev/null || true
+  echo '{"continue": true}'
 fi
 
 exit 0
