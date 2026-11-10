@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "drawio": {
+      "type": "local",
+      "command": "deno",
+      "args": [
+        "run",
+        "--allow-net",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env",
+        "/workspaces/agentic-alz-accelerator/mcp/drawio-mcp-server/src/index.ts"
+      ],
+      "tools": ["*"]
+    },
+    "terraform": {
+      "type": "local",
+      "command": "terraform-mcp-server",
+      "args": [
+        "stdio",
+        "--toolsets",
+        "registry"
+      ],
+      "env": {},
+      "tools": ["*"]
+    }
+  }
+}
